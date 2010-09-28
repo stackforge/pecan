@@ -23,10 +23,11 @@ def override_template(template):
 
 
 class Pecan(object):
-    def __init__(self, root, renderers=renderers, default_renderer='genshi'):
+    def __init__(self, root, renderers=renderers, default_renderer='genshi', hooks=[]):
         self.root             = root
         self.renderers        = renderers
         self.default_renderer = default_renderer
+        self.hooks            = hooks
         self.translate        = string.maketrans(
             string.punctuation, 
             '_' * len(string.punctuation)
@@ -109,29 +110,43 @@ class Pecan(object):
             response.status = 404
             return response(environ, start_response)
         
-        # get the result from the controller
-        result = controller(**dict(state.request.str_params))
+        # handle "before" hooks
+        for hook in self.hooks:
+            hook.before(state)
         
-        # pull the template out based upon content type
-        template = controller.pecan.get('content_types', {}).get(content_type)
+        # get the result from the controller, properly handling wrap hooks
+        try:
+            result = controller(**dict(state.request.str_params))
+                
+            # pull the template out based upon content type
+            template = controller.pecan.get('content_types', {}).get(content_type)
         
-        # handle template overrides
-        template = getattr(request, 'override_template', template)
+            # handle template overrides
+            template = getattr(request, 'override_template', template)
         
-        if template:
-            renderer = self.renderers[self.default_renderer]
-            if template == 'json':
-                renderer = self.renderers['json']
-            elif len(self.renderers) > 1 and ':' in template:
-                renderer = self.renderers.get(template.split(':')[0], self.renderers.values()[0])
-                template = template.split(':')[1]
-            result = renderer.render(template, result)
-            content_type = renderer.content_type
+            if template:
+                renderer = self.renderers[self.default_renderer]
+                if template == 'json':
+                    renderer = self.renderers['json']
+                elif len(self.renderers) > 1 and ':' in template:
+                    renderer = self.renderers.get(template.split(':')[0], self.renderers.values()[0])
+                    template = template.split(':')[1]
+                result = renderer.render(template, result)
+                content_type = renderer.content_type
         
-        response = Response(result)
-        if content_type:
-            response.content_type = content_type
-        
-        del state.request
-        
-        return response(environ, start_response)
+            response = Response(result)
+            if content_type:
+                response.content_type = content_type
+        except Exception, e:
+            # handle "error" hooks
+            for hook in self.hooks:
+                hook.on_error(state, e)
+            raise
+        else:
+            # handle "after" hooks
+            for hook in self.hooks:
+                hook.after(state)
+            
+            return response(environ, start_response)
+        finally:
+            del state.request
