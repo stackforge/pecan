@@ -12,7 +12,7 @@ setup(
     keywords             = '',
     author               = 'Jonathan LaCour',
     author_email         = 'jonathan@cleverdevil.org',
-    url                  = 'http://code.google.com/p/pecan',
+    url                  = 'http://sf.net/p/pecan',
     license              = 'BSD',
     packages             = find_packages(exclude=['ez_setup', 'examples', 'tests']),
     include_package_data = True,
