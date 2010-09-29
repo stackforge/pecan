@@ -1,6 +1,7 @@
 from templating import renderers
 from webob      import Request, Response, exc
 from threading  import local
+from routing    import lookup_controller
 
 import string
 
@@ -45,59 +46,12 @@ class Pecan(object):
             'xhtml' : 'text/html',
             'json'  : 'application/json'
         }.get(format, 'text/html')
-        
-    def route(self, node, path):
-
-        curpath      = ""
-        nodeconf     = {}
-        object_trail = [['root', self.root, nodeconf, curpath]]
-        
-        names     = [x for x in path.strip('/').split('/') if x] + ['index']
-        iternames = names[:]
-        while iternames:
-            name     = iternames[0]
-            objname  = name.translate(self.translate)            
-            nodeconf = {}
-            subnode  = getattr(node, objname, None)
-            name     = iternames.pop(0)
-            node     = subnode
-            curpath  = "/".join((curpath, name))            
-            object_trail.append([name, node, nodeconf, curpath])
-        
-        # try successive objects (reverse order)
-        num_candidates = len(object_trail) - 1
-        for i in range(num_candidates, -1, -1):
-            name, candidate, nodeconf, curpath = object_trail[i]
-            if candidate is None:
-                continue
-            
-            # try a "_route" method on the current leaf.
-            if hasattr(candidate, "_route"):
-                processed_path = object_trail[i][-1]
-                unprocessed_path = object_trail[-1][-1].replace(processed_path, '')
-                return candidate._route(unprocessed_path)
-            
-            # try a "_lookup" method on the current leaf.
-            if hasattr(candidate, "_lookup"):
-                lookup = candidate._lookup(object_trail[i+1][0])
-                processed_path = object_trail[i+1][-1]
-                unprocessed_path = object_trail[-2][-1].replace(processed_path, '')
-                return self.route(lookup, unprocessed_path)
-            
-            # try a "_default" method on the current leaf.
-            if hasattr(candidate, "_default"):
-                defhandler = candidate._default
-                if getattr(defhandler, 'exposed', False):
-                    object_trail.insert(i+1, ["_default", defhandler, {}, curpath])
-                    return defhandler
-                        
-            # try the current leaf.
-            if getattr(candidate, 'exposed', False):
-                return candidate
-        
-        # we didn't find anything
-        return None
     
+    def route(self, node, path):
+        path = path.split('/')[1:]
+        node, remainder = lookup_controller(node, path)        
+        return node
+        
     def __call__(self, environ, start_response):
         # create the request object
         state.request = Request(environ)

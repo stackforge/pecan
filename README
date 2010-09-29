@@ -3,14 +3,6 @@ much much smaller, with many fewer dependancies.
 
 TODO
 ====
-
- * Change to alternate routing code lifted from Rick Copeland's
-   clutch:
-   
-       http://code.google.com/p/pyclutch/source/browse/trunk/clutch/controller_lookup.py
-   
-   This gives me support for _lookup controllers, which I don't
-   currently have.
  
  * Switch "hooks" over to Context Managers.
  

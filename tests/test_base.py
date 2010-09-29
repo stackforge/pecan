@@ -78,8 +78,9 @@ class TestBase(object):
             def index(self):
                 return '/'
             
-            def _lookup(self, someID):
-                return LookupController(someID)
+            @expose()
+            def _lookup(self, someID, *remainder):
+                return LookupController(someID), remainder
         
         app = TestApp(Pecan(RootController()))
         response = app.get('/')
@@ -93,9 +94,7 @@ class TestBase(object):
         response = app.get('/100/name')
         assert response.status_int == 200
         assert response.body == '/100/name'
-    
             
-
 
 class TestEngines(object):
     
