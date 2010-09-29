@@ -19,7 +19,6 @@ setup(
     zip_safe             = True,
     install_requires=[
       "WebOb >= 0.9.8", 
-      "simplejson >= 2.0.9",
       "simplegeneric >= 0.7",
       "Genshi >= 0.6",
       "Kajiki >= 0.2.2",

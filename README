@@ -6,7 +6,4 @@ TODO
  
  * Switch "hooks" over to Context Managers.
  
- * Remove requirement for simplejson, since we should be using
-   Python's built-in JSON.
- 
  * JSONify dates as isoformat strings by default.

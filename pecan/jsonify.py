@@ -1,4 +1,8 @@
-from simplejson      import JSONEncoder, dumps
+try:
+    from json import JSONEncoder, dumps
+except ImportError:
+    from simplejson      import JSONEncoder, dumps
+
 from datetime        import datetime, date
 from decimal         import Decimal
 from webob.multidict import MultiDict
@@ -28,7 +32,7 @@ class BaseEncoder(JSONEncoder):
         if hasattr(obj, '__json__') and callable(obj.__json__):
             return obj.__json__()
         elif isinstance(obj, (date, datetime)):
-            return str(obj)
+            return obj.isoformat()
         elif isinstance(obj, Decimal):
             return float(obj)
         elif self.is_saobject(obj):
