@@ -5,7 +5,7 @@ class PecanHook(object):
     def after(self, state):
         pass
     
-    def on_error(self, state):
+    def on_error(self, state, e):
         pass
 
 
@@ -31,9 +31,8 @@ class TransactionHook(PecanHook):
             state.request.transactional = False
             self.start_ro()
     
-    def on_error(self, state):
+    def on_error(self, state, e):
         state.request.error = True
-        self.rollback()
     
     def after(self, state):
         if state.request.transactional:

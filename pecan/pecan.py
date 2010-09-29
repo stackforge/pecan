@@ -108,10 +108,9 @@ class Pecan(object):
                 hook.on_error(state, e)
             raise
         else:
+            return response(environ, start_response)
+        finally:
             # handle "after" hooks
             for hook in self.hooks:
                 hook.after(state)
-            
-            return response(environ, start_response)
-        finally:
             del state.request
