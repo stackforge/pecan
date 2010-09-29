@@ -1,5 +1,26 @@
-renderers = {}
+__all__ = ['renderers']
 
+_renderers = {}
+
+class RendererFactory(object):
+    def create(self, name, template_path):
+        if name == 'genshi':
+            return GenshiRenderer(template_path)
+        elif name == 'kajiki':
+            return KajikiRenderer(template_path)
+        elif name == 'mako':
+            return MakoRenderer(template_path)
+        elif name == 'json':
+            return JsonRenderer(template_path)
+        
+    def get(self, name, template_path):
+        key = name+template_path
+        if key not in _renderers:
+            _renderers[key] = self.create(name, template_path)
+        return _renderers[key]
+
+renderers = RendererFactory()
+            
 
 #
 # JSON rendering engine
@@ -8,75 +29,64 @@ renderers = {}
 class JsonRenderer(object):
     content_type = 'application/json'
     
+    def __init__(self, path):
+        pass
+    
     def render(self, template_path, namespace):
         from jsonify import encode
-        return encode(namespace)
-
-renderers['json'] = JsonRenderer()
+        result = encode(namespace)
+        print '*' * 80
+        print result
+        print type(result)
+        print '*' * 80
+        return result
 
 
 #
 # Genshi rendering engine
 # 
 
-try:
-    from genshi.template import TemplateLoader
+class GenshiRenderer(object):
+    content_type = 'text/html'
+
+    def __init__(self, path):
+        from genshi.template import TemplateLoader
+        self.loader = TemplateLoader([path], auto_reload=True)
     
-    class GenshiRenderer(object):
-        content_type = 'text/html'
-    
-        def __init__(self):
-            self.loader = TemplateLoader(['templates'], auto_reload=True)
-                                
-        def render(self, template_path, namespace):
-            tmpl = self.loader.load(template_path)
-            stream = tmpl.generate(**namespace)
-            return stream.render('html')
-except ImportError:
-    pass
-else:
-    renderers['genshi'] = GenshiRenderer()
+    def render(self, template_path, namespace):
+        tmpl = self.loader.load(template_path)
+        stream = tmpl.generate(**namespace)
+        return stream.render('html')
 
 
 #
 # Mako rendering engine
 #
 
-try:
-    from mako.lookup import TemplateLookup
-    class MakoRenderer(object):
-        content_type = 'text/html'
+class MakoRenderer(object):
+    content_type = 'text/html'
+
+    def __init__(self, path):
+        from mako.lookup import TemplateLookup
+        self.loader = TemplateLookup(directories=[path])
     
-        def __init__(self):
-            self.loader = TemplateLookup(directories=['templates'])
-    
-        def render(self, template_path, namespace):
-            tmpl = self.loader.get_template(template_path)
-            return tmpl.render(**namespace)
-except ImportError:
-    pass
-else:
-    renderers['mako'] = MakoRenderer()
-    
+    def render(self, template_path, namespace):
+        tmpl = self.loader.get_template(template_path)
+        return tmpl.render(**namespace)
+
 
 #
 # Kajiki rendering engine
-# 
+#
 
-try:
-    from kajiki.loader import FileLoader
+class KajikiRenderer(object):
+    content_type = 'text/html'
 
-    class KajikiRenderer(object):
-        content_type = 'text/html'
+    def __init__(self, path):
+        from kajiki.loader import FileLoader
+        self.loader = FileLoader(path, reload=True)
 
-        def __init__(self):
-            self.loader = FileLoader('templates', reload=True)
-
-        def render(self, template_path, namespace):
-            Template = self.loader.import_(template_path)
-            stream = Template(namespace)
-            return stream.render()
-except ImportError:
-    pass
-else:
-    renderers['kajiki'] = KajikiRenderer()
+    def render(self, template_path, namespace):
+        Template = self.loader.import_(template_path)
+        stream = Template(namespace)
+        return stream.render()

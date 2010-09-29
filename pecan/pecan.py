@@ -23,11 +23,17 @@ def override_template(template):
 
 
 class Pecan(object):
-    def __init__(self, root, renderers=renderers, default_renderer='genshi', hooks=[]):
+    def __init__(self, root, 
+                 renderers        = renderers, 
+                 default_renderer = 'genshi', 
+                 template_path    = 'templates', 
+                 hooks            = []):
+        
         self.root             = root
         self.renderers        = renderers
         self.default_renderer = default_renderer
         self.hooks            = hooks
+        self.template_path    = template_path
         self.translate        = string.maketrans(
             string.punctuation, 
             '_' * len(string.punctuation)
@@ -98,10 +104,11 @@ class Pecan(object):
         
         # lookup the controller
         path = state.request.path
-        content_type = 'text/html'
+        content_type = None
         if '.' in path.split('/')[-1]:
             path, format = path.split('.')
-            content_type = self.get_content_type(format)
+            override_content_type = True
+            content_type = self.get_content_type(format)      
         controller = self.route(self.root, path)
         
         # if we didn't find a controller, issue a 404
@@ -110,6 +117,10 @@ class Pecan(object):
             response.status = 404
             return response(environ, start_response)
         
+        # determine content type
+        if content_type is None:
+            content_type = controller.pecan.get('content_type', 'text/html')
+        
         # handle "before" hooks
         for hook in self.hooks:
             hook.before(state)
@@ -117,7 +128,7 @@ class Pecan(object):
         # get the result from the controller, properly handling wrap hooks
         try:
             result = controller(**dict(state.request.str_params))
-                
+                        
             # pull the template out based upon content type
             template = controller.pecan.get('content_types', {}).get(content_type)
         
@@ -125,11 +136,11 @@ class Pecan(object):
             template = getattr(request, 'override_template', template)
         
             if template:
-                renderer = self.renderers[self.default_renderer]
+                renderer = self.renderers.get(self.default_renderer, self.template_path)
                 if template == 'json':
-                    renderer = self.renderers['json']
-                elif len(self.renderers) > 1 and ':' in template:
-                    renderer = self.renderers.get(template.split(':')[0], self.renderers.values()[0])
+                    renderer = self.renderers.get('json', self.template_path)
+                elif ':' in template:
+                    renderer = self.renderers.get(template.split(':')[0], self.template_path)
                     template = template.split(':')[1]
                 result = renderer.render(template, result)
                 content_type = renderer.content_type

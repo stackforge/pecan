@@ -23,7 +23,9 @@ setup(
       "simplegeneric >= 0.7",
       "Genshi >= 0.6",
       "Kajiki >= 0.2.2",
-      "Mako >= 0.3"
+      "Mako >= 0.3",
+      "py >= 1.3.4",
+      "WebTest >= 1.2.2"
     ],
     entry_points = """
     # -*- Entry points: -*-
