@@ -71,6 +71,11 @@ class Pecan(object):
             response.status = 404
             return response(environ, start_response)
         
+        # handle security
+        if controller.pecan.get('secured', False):
+            if not controller.pecan['check_permissions']():
+                raise exc.HTTPUnauthorized
+        
         # determine content type
         if content_type is None:
             content_type = controller.pecan.get('content_type', 'text/html')

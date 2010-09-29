@@ -24,7 +24,8 @@ setup(
       "Kajiki >= 0.2.2",
       "Mako >= 0.3",
       "py >= 1.3.4",
-      "WebTest >= 1.2.2"
+      "WebTest >= 1.2.2",
+      "Paste >= 1.7.5.1"
     ],
     entry_points = """
     # -*- Entry points: -*-
