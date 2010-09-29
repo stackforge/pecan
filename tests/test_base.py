@@ -14,15 +14,90 @@ class TestBase(object):
         assert response.status_int == 200
         assert response.body == 'Hello, World!'
         
-        app = TestApp(Pecan(RootController()))
         response = app.get('/index')
         assert response.status_int == 200
         assert response.body == 'Hello, World!'
         
-        app = TestApp(Pecan(RootController()))
         response = app.get('/index.html')
         assert response.status_int == 200
         assert response.body == 'Hello, World!'
+    
+    def test_object_dispatch(self):
+        class SubSubController(object):
+            @expose()
+            def index(self):
+                return '/sub/sub'
+            
+            @expose()
+            def deeper(self):
+                return '/sub/sub/deeper'
+        
+        class SubController(object):
+            @expose()
+            def index(self):
+                return '/sub'
+                
+            @expose()
+            def deeper(self):
+                return '/sub/deeper'
+                
+            sub = SubSubController()
+        
+        class RootController(object):
+            @expose()
+            def index(self):
+                return '/'
+            
+            @expose()
+            def deeper(self):
+                return '/deeper'
+            
+            sub = SubController()
+        
+        app = TestApp(Pecan(RootController()))
+        for path in ('/', '/deeper', '/sub', '/sub/deeper', '/sub/sub', '/sub/sub/deeper'):
+            response = app.get(path)
+            assert response.status_int == 200
+            assert response.body == path
+    
+    def test_lookup(self):
+        class LookupController(object):
+            def __init__(self, someID):
+                self.someID = someID
+            
+            @expose()
+            def index(self):
+                return '/%s' % self.someID
+            
+            @expose()
+            def name(self):
+                return '/%s/name' % self.someID
+        
+        class RootController(object):
+            @expose()
+            def index(self):
+                return '/'
+            
+            def _lookup(self, someID):
+                return LookupController(someID)
+        
+        app = TestApp(Pecan(RootController()))
+        response = app.get('/')
+        assert response.status_int == 200
+        assert response.body == '/'
+        
+        response = app.get('/100')
+        assert response.status_int == 200
+        assert response.body == '/100'
+        
+        response = app.get('/100/name')
+        assert response.status_int == 200
+        assert response.body == '/100/name'
+    
+            
+
+
+class TestEngines(object):
     
     def test_genshi(self):
         class RootController(object):
