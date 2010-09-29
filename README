@@ -5,5 +5,3 @@ TODO
 ====
  
  * Switch "hooks" over to Context Managers.
- 
- * JSONify dates as isoformat strings by default.
