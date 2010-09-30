@@ -1,9 +1,13 @@
+README
 setup.cfg
 setup.py
 pecan/__init__.py
 pecan/decorators.py
+pecan/hooks.py
 pecan/jsonify.py
 pecan/pecan.py
+pecan/routing.py
+pecan/secure.py
 pecan/templating.py
 pecan.egg-info/PKG-INFO
 pecan.egg-info/SOURCES.txt
@@ -12,3 +16,4 @@ pecan.egg-info/entry_points.txt
 pecan.egg-info/requires.txt
 pecan.egg-info/top_level.txt
 pecan.egg-info/zip-safe
+tests/templates/__init__.py

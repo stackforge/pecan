@@ -1,7 +1,7 @@
 try:
     from json import JSONEncoder, dumps
 except ImportError:
-    from simplejson      import JSONEncoder, dumps
+    from simplejson import JSONEncoder, dumps
 
 from datetime        import datetime, date
 from decimal         import Decimal

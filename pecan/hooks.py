@@ -1,4 +1,39 @@
+from inspect import getmembers, ismethod
+from routing import iscontroller
+
+
+__all__ = ['PecanHook', 'TransactionHook', 'HookController']
+
+
+def walk_controller(root_class, controller, hooks):
+    if hasattr(controller, '_lookup'):
+        # TODO: what about this?
+        pass
+        
+    if not isinstance(controller, (int, dict)):
+        for name, value in controller.__dict__.iteritems():
+            if name == 'controller': continue
+            if name.startswith('__') and name.endswith('__'): continue
+            
+            if iscontroller(value):
+                for hook in hooks:
+                    value.pecan.setdefault('hooks', []).append(hook)
+            elif hasattr(value, '__class__'):
+                if name.startswith('__') and name.endswith('__'): continue
+                walk_controller(root_class, value, hooks)
+
+
+class HookController(object):
+    __hooks__ = []
+    
+    class __metaclass__(type):
+        def __init__(cls, name, bases, dict_):
+            walk_controller(cls, cls, dict_['__hooks__'])
+
+
 class PecanHook(object):
+    priority = 100
+    
     def before(self, state):
         pass
     

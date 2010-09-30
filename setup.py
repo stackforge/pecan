@@ -1,7 +1,17 @@
-from setuptools import setup, find_packages
-import sys, os
+from setuptools import setup, Command, find_packages
+import sys, os, py
 
 version = '0.1'
+
+class PyTest(Command):
+    user_options = []
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def run(self):
+        import py
+        py.cmdline.pytest(py.std.sys.argv[2:])
 
 setup(
     name                 = 'pecan',
@@ -17,6 +27,7 @@ setup(
     packages             = find_packages(exclude=['ez_setup', 'examples', 'tests']),
     include_package_data = True,
     zip_safe             = True,
+    cmdclass             = {'test': PyTest},
     install_requires=[
       "WebOb >= 0.9.8", 
       "simplegeneric >= 0.7",

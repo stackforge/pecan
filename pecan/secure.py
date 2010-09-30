@@ -1,4 +1,3 @@
-from webob.exc import HTTPUnauthorized
 from inspect import getmembers, ismethod
 
 from routing import iscontroller

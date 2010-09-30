@@ -1,7 +1,7 @@
 from pecan import expose, make_app
 from pecan.secure import secure, unlocked, SecureController
 from webob import exc
-from webtest import TestApp
+from webtest import TestApp, AppError
 from py.test import raises
 
 class TestSecure(object):
@@ -50,11 +50,11 @@ class TestSecure(object):
         assert response.status_int == 200
         assert response.body == 'Sure thing'
         
-        with raises(exc.HTTPUnauthorized):
-            response = app.get('/locked')
+        response = app.get('/locked', expect_errors=True)
+        assert response.status_int == 401
         
-        with raises(exc.HTTPUnauthorized):
-            response = app.get('/secret')
+        response = app.get('/secret', expect_errors=True)
+        assert response.status_int == 401
         
         response = app.get('/secret/allowed')
         assert response.status_int == 200

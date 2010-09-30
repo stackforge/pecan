@@ -1,4 +1,4 @@
-from pecan import Pecan, expose
+from pecan import Pecan, expose, request, response
 from webtest import TestApp
 
 class TestBase(object):
@@ -10,17 +10,17 @@ class TestBase(object):
                 return 'Hello, World!'
         
         app = TestApp(Pecan(RootController()))
-        response = app.get('/')
-        assert response.status_int == 200
-        assert response.body == 'Hello, World!'
+        r = app.get('/')
+        assert r.status_int == 200
+        assert r.body == 'Hello, World!'
         
-        response = app.get('/index')
-        assert response.status_int == 200
-        assert response.body == 'Hello, World!'
+        r = app.get('/index')
+        assert r.status_int == 200
+        assert r.body == 'Hello, World!'
         
-        response = app.get('/index.html')
-        assert response.status_int == 200
-        assert response.body == 'Hello, World!'
+        r = app.get('/index.html')
+        assert r.status_int == 200
+        assert r.body == 'Hello, World!'
     
     def test_object_dispatch(self):
         class SubSubController(object):
@@ -56,9 +56,9 @@ class TestBase(object):
         
         app = TestApp(Pecan(RootController()))
         for path in ('/', '/deeper', '/sub', '/sub/deeper', '/sub/sub', '/sub/sub/deeper'):
-            response = app.get(path)
-            assert response.status_int == 200
-            assert response.body == path
+            r = app.get(path)
+            assert r.status_int == 200
+            assert r.body == path
     
     def test_lookup(self):
         class LookupController(object):
@@ -83,17 +83,17 @@ class TestBase(object):
                 return LookupController(someID), remainder
         
         app = TestApp(Pecan(RootController()))
-        response = app.get('/')
-        assert response.status_int == 200
-        assert response.body == '/'
+        r = app.get('/')
+        assert r.status_int == 200
+        assert r.body == '/'
         
-        response = app.get('/100')
-        assert response.status_int == 200
-        assert response.body == '/100'
+        r = app.get('/100')
+        assert r.status_int == 200
+        assert r.body == '/100'
         
-        response = app.get('/100/name')
-        assert response.status_int == 200
-        assert response.body == '/100/name'
+        r = app.get('/100/name')
+        assert r.status_int == 200
+        assert r.body == '/100/name'
             
 
 class TestEngines(object):
@@ -105,14 +105,14 @@ class TestEngines(object):
                 return dict(name=name)
         
         app = TestApp(Pecan(RootController(), template_path='tests/templates'))
-        response = app.get('/')
-        assert response.status_int == 200
-        assert "<h1>Hello, Jonathan!</h1>" in response.body
+        r = app.get('/')
+        assert r.status_int == 200
+        assert "<h1>Hello, Jonathan!</h1>" in r.body
         
         app = TestApp(Pecan(RootController(), template_path='tests/templates'))
-        response = app.get('/index.html?name=World')
-        assert response.status_int == 200
-        assert "<h1>Hello, World!</h1>" in response.body
+        r = app.get('/index.html?name=World')
+        assert r.status_int == 200
+        assert "<h1>Hello, World!</h1>" in r.body
     
     def test_kajiki(self):
         class RootController(object):
@@ -121,14 +121,14 @@ class TestEngines(object):
                 return dict(name=name)
         
         app = TestApp(Pecan(RootController(), template_path='tests/templates'))
-        response = app.get('/')
-        assert response.status_int == 200
-        assert "<h1>Hello, Jonathan!</h1>" in response.body
+        r = app.get('/')
+        assert r.status_int == 200
+        assert "<h1>Hello, Jonathan!</h1>" in r.body
         
         app = TestApp(Pecan(RootController(), template_path='tests/templates'))
-        response = app.get('/index.html?name=World')
-        assert response.status_int == 200
-        assert "<h1>Hello, World!</h1>" in response.body
+        r = app.get('/index.html?name=World')
+        assert r.status_int == 200
+        assert "<h1>Hello, World!</h1>" in r.body
     
     def test_mako(self):
         class RootController(object):
@@ -137,14 +137,14 @@ class TestEngines(object):
                 return dict(name=name)
         
         app = TestApp(Pecan(RootController(), template_path='tests/templates'))
-        response = app.get('/')
-        assert response.status_int == 200
-        assert "<h1>Hello, Jonathan!</h1>" in response.body
+        r = app.get('/')
+        assert r.status_int == 200
+        assert "<h1>Hello, Jonathan!</h1>" in r.body
         
         app = TestApp(Pecan(RootController(), template_path='tests/templates'))
-        response = app.get('/index.html?name=World')
-        assert response.status_int == 200
-        assert "<h1>Hello, World!</h1>" in response.body
+        r = app.get('/index.html?name=World')
+        assert r.status_int == 200
+        assert "<h1>Hello, World!</h1>" in r.body
     
     def test_json(self):
         from simplejson import loads
@@ -157,7 +157,7 @@ class TestEngines(object):
                 return expected_result
         
         app = TestApp(Pecan(RootController()))
-        response = app.get('/')
-        assert response.status_int == 200
-        result = dict(loads(response.body))
+        r = app.get('/')
+        assert r.status_int == 200
+        result = dict(loads(r.body))
         assert result == expected_result
