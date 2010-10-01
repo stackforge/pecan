@@ -3,6 +3,9 @@ import sys, os, py
 
 version = '0.1'
 
+#
+# integration with py.test for `python setup.py test`
+#
 class PyTest(Command):
     user_options = []
     def initialize_options(self):
@@ -12,6 +15,7 @@ class PyTest(Command):
     def run(self):
         import py
         py.cmdline.pytest(py.std.sys.argv[2:])
+
 
 setup(
     name                 = 'pecan',
@@ -36,9 +40,11 @@ setup(
       "Mako >= 0.3",
       "py >= 1.3.4",
       "WebTest >= 1.2.2",
-      "Paste >= 1.7.5.1"
+      "Paste >= 1.7.5.1",
+      "PasteScript >= 1.7.3"
     ],
     entry_points = """
-    # -*- Entry points: -*-
+    [paste.paster_create_template]
+    pecan-base = templates:NewProjectTemplate
     """,
 )

@@ -16,4 +16,5 @@ pecan.egg-info/entry_points.txt
 pecan.egg-info/requires.txt
 pecan.egg-info/top_level.txt
 pecan.egg-info/zip-safe
+templates/__init__.py
 tests/templates/__init__.py

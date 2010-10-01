@@ -1,3 +1,4 @@
 
-    # -*- Entry points: -*-
+    [paste.paster_create_template]
+    pecan-base = templates:NewProjectTemplate
     

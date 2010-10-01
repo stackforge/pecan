@@ -1,0 +1,16 @@
+from pecan import make_app
+from ${egg}.controllers.root import RootController
+
+if __name__ == '__main__':
+    app = make_app(
+        RootController(), 
+        static_root='public',
+        template_path='${egg}/templates'
+    )
+
+    print 'Serving on http://0.0.0.0:8080'    
+    from paste import httpserver
+    try:
+        httpserver.serve(app, host='0.0.0.0', port=8080)
+    except KeyboardInterrupt:
+        print '^C'

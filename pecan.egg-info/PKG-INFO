@@ -2,7 +2,7 @@ Metadata-Version: 1.0
 Name: pecan
 Version: 0.1dev
 Summary: A WSGI object-dispatching web framework, in the spirit of TurboGears, only much much smaller, with many fewer dependancies.
-Home-page: http://sf.net/p/pecan
+Home-page: http://github.com/cleverdevil/pecan
 Author: Jonathan LaCour
 Author-email: jonathan@cleverdevil.org
 License: BSD

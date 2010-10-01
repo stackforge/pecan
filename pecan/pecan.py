@@ -134,9 +134,12 @@ class Pecan(object):
             # if this is an HTTP Exception, set it as the response
             if isinstance(e, exc.HTTPException):
                 state.response = e
-            
+
             # handle "error" hooks
             self.handle_hooks('on_error', state, e)
+            
+            if not isinstance(e, exc.HTTPException):
+                raise
         finally:
             # handle "after" hooks
             self.handle_hooks('after', state)
