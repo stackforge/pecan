@@ -41,6 +41,7 @@ setup(
       "py >= 1.3.4",
       "WebTest >= 1.2.2",
       "Paste >= 1.7.5.1",
+      "simplejson >= 2.1.1",
       "PasteScript >= 1.7.3"
     ],
     entry_points = """

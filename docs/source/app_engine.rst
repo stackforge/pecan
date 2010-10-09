@@ -67,10 +67,11 @@ all the incoming requests including static files for our Pecan application. This
     if './lib' not in sys.path:
         sys.path.append('./lib')
 
-    from pecan import Pecan, expose, request, response
+    from pecan import Pecan, expose
 
 
     class RootController(object):
+
         @expose('kajiki:index.html')
         def index(self):
             return dict(name="Joe Wu Zap")
@@ -122,5 +123,27 @@ That is all you need to get this project started!
 .. note::
     When grabing the source of the dependencies we mention, make sure you are actually grabing the module itself 
     and not adding the top directory source (where setup.py lives)
+
+Layout
+---------
+This is how your layout (only showing directories) should look like::
+
+    GAE_Project
+    |____app.yaml
+    |____lib
+    | |____kajiki
+    | | |____tests
+    | |   |____data
+    | |____paste
+    | | |____auth
+    | | |____cowbell
+    | | |____debug
+    | | |____evalexception
+    | | | |____media
+    | | |____exceptions
+    | | |____util
+    | |____pecan
+    |____templates
+
 
 
