@@ -108,3 +108,19 @@ and create it and add this html file to it and name it index.html::
 
     </html>
 
+lib
+-----
+The ``lib`` directory should contain the source for all the dependencies we need. For our example, it should
+contain 3 libraries:
+
+ * kajiki
+ * paste 
+ * pecan 
+
+That is all you need to get this project started!
+
+.. note::
+    When grabing the source of the dependencies we mention, make sure you are actually grabing the module itself 
+    and not adding the top directory source (where setup.py lives)
+
+
