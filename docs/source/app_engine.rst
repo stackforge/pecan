@@ -35,6 +35,8 @@ From this point forward, we will assume you are getting Kajiki, to avoid describ
 
 Creating the project
 ============================
+Create a directory called ``pecan_gae`` and ``cd`` into it so we can start adding files. We go step by 
+step into what needs to go there to get everything running properly.
 
 app.yaml
 ------------
@@ -128,7 +130,7 @@ Layout
 ---------
 This is how your layout (only showing directories) should look like::
 
-    GAE_Project
+    pecan_gae
     |____app.yaml
     |____lib
     | |____kajiki
@@ -146,4 +148,17 @@ This is how your layout (only showing directories) should look like::
     |____templates
 
 
+Trying it out
+=========================
+Now everything should be ready to start serving, so go ahead and run the development server::
 
+    $ ./dev_appserver.py pecan_gae 
+    INFO     2010-10-10 12:44:29,476 dev_appserver_main.py:431] Running application pecan-gae on port 8080: http://localhost:8080
+    
+
+If you go to your browser and hit ``localhost:8080`` you should see something like this::
+
+        Hello, Joe Wu Zap!
+
+This is the most basic example for App Engine, you can start adding more controllers to handle a bigger 
+application and connect everything together. 

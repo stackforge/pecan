@@ -3,13 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Pecan's documentation!
-=================================
+Pecan's documentation
+=========================
+
+A WSGI object-dispatching web framework, in the spirit of TurboGears, only 
+much much smaller, with many fewer dependencies.
+
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
+
+   app_engine.rst
 
 Indices and tables
 ==================
