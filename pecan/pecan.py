@@ -4,6 +4,12 @@ from routing    import lookup_controller
 from webob      import Request, Response, exc
 from threading  import local
 from itertools  import chain
+from formencode import Invalid
+
+try:
+    from json import loads
+except ImportError:
+    from simplejson import loads
 
 
 state = local()
@@ -74,13 +80,19 @@ class Pecan(object):
         for hook in state.hooks:
             getattr(hook, hook_type)(*args)
     
-    def get_validated_params(self, all_params, argspec):
+    def get_params(self, all_params, argspec):
         valid_params = dict()
         for param_name, param_value in all_params.iteritems():
             if param_name in argspec.args:
                 valid_params[param_name] = param_value
         return valid_params
     
+    def validate(self, schema, params=None, json=False):
+        to_validate = params
+        if json:
+            to_validate = loads(request.body)
+        return schema.to_python(to_validate)
+        
     def handle_request(self):
         # lookup the controller, respecting content-type as requested
         # by the file extension on the URI
@@ -104,11 +116,26 @@ class Pecan(object):
         # handle "before" hooks
         self.handle_hooks('before', state)
     
-        # get the result from the controller, properly handling wrap hooks
-        params = self.get_validated_params(
+        # fetch and validate any parameters
+        params = self.get_params(
             dict(state.request.str_params), 
             controller.pecan['argspec']
         )
+        if 'schema' in controller.pecan:
+            try:
+                params = self.validate(
+                    controller.pecan['schema'], 
+                    json   = controller.pecan['validate_json'],
+                    params = params
+                )
+            except Invalid, e:
+                request.validation_error = e
+                if controller.pecan['error_handler'] is not None:
+                    state.validation_error = e
+                    redirect(controller.pecan['error_handler'])
+            if controller.pecan['validate_json']: params = dict(data=params)
+        
+        # get the result from the controller
         result = controller(**params)
         
         # pull the template out based upon content type and handle overrides
@@ -141,6 +168,11 @@ class Pecan(object):
         state.request = Request(environ)
         state.response = Response()
         state.hooks = []
+        
+        # handle validation errors from redirects
+        if hasattr(state, 'validation_error'):
+            state.request.validation_error = state.validation_error
+            del state.validation_error
         
         # handle the request
         try:

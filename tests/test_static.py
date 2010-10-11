@@ -16,6 +16,6 @@ class TestStatic(object):
         assert response.body == 'Hello, World!'
         
         # get a static resource
-        response = app.get('/test.txt')
+        response = app.get('/text.txt')
         assert response.status_int == 200
-        assert response.body == open('tests/static/test.txt', 'rb').read()
+        assert response.body == open('tests/static/text.txt', 'rb').read()
