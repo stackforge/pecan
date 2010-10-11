@@ -28,6 +28,10 @@ def override_template(template):
     request.override_template = template
 
 
+def redirect(location):
+    raise exc.HTTPFound(location=location)
+
+
 class Pecan(object):
     def __init__(self, root, 
                  renderers        = renderers, 
@@ -70,6 +74,13 @@ class Pecan(object):
         for hook in state.hooks:
             getattr(hook, hook_type)(*args)
     
+    def get_validated_params(self, all_params, argspec):
+        valid_params = dict()
+        for param_name, param_value in all_params.iteritems():
+            if param_name in argspec.args:
+                valid_params[param_name] = param_value
+        return valid_params
+    
     def handle_request(self):
         # lookup the controller, respecting content-type as requested
         # by the file extension on the URI
@@ -94,8 +105,12 @@ class Pecan(object):
         self.handle_hooks('before', state)
     
         # get the result from the controller, properly handling wrap hooks
-        result = controller(**dict(state.request.str_params))
-                    
+        params = self.get_validated_params(
+            dict(state.request.str_params), 
+            controller.pecan['argspec']
+        )
+        result = controller(**params)
+        
         # pull the template out based upon content type and handle overrides
         template = controller.pecan.get('content_types', {}).get(content_type)
         template = getattr(request, 'override_template', template)

@@ -17,10 +17,34 @@ class PyTest(Command):
         py.cmdline.pytest(py.std.sys.argv[2:])
 
 
+#
+# determine requirements
+#
+requirements = [
+  "WebOb >= 0.9.8", 
+  "simplegeneric >= 0.7",
+  "Genshi >= 0.6",
+  "Kajiki >= 0.2.2",
+  "Mako >= 0.3",
+  "py >= 1.3.4",
+  "WebTest >= 1.2.2",
+  "Paste >= 1.7.5.1",
+  "PasteScript >= 1.7.3"
+]
+
+try:
+    import json
+except:
+    requirements.append("simplejson >= 2.1.1")
+
+
+#
+# call setup
+#
 setup(
     name                 = 'pecan',
     version              = version,
-    description          = "A WSGI object-dispatching web framework, in the spirit of TurboGears, only much much smaller, with many fewer dependancies.",
+    description          = "A WSGI object-dispatching web framework, in the spirit of TurboGears, only much much smaller, with many fewer dependencies.",
     long_description     = None,
     classifiers          = [],
     keywords             = '',
@@ -32,19 +56,8 @@ setup(
     include_package_data = True,
     zip_safe             = True,
     cmdclass             = {'test': PyTest},
-    install_requires=[
-      "WebOb >= 0.9.8", 
-      "simplegeneric >= 0.7",
-      "Genshi >= 0.6",
-      "Kajiki >= 0.2.2",
-      "Mako >= 0.3",
-      "py >= 1.3.4",
-      "WebTest >= 1.2.2",
-      "Paste >= 1.7.5.1",
-      "simplejson >= 2.1.1",
-      "PasteScript >= 1.7.3"
-    ],
-    entry_points = """
+    install_requires     = requirements,
+    entry_points         = """
     [paste.paster_create_template]
     pecan-base = templates:NewProjectTemplate
     """,

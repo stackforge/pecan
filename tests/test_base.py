@@ -1,4 +1,4 @@
-from pecan import Pecan, expose, request, response
+from pecan import Pecan, expose, request, response, redirect
 from webtest import TestApp
 
 class TestBase(object):
@@ -161,3 +161,35 @@ class TestEngines(object):
         assert r.status_int == 200
         result = dict(loads(r.body))
         assert result == expected_result
+    
+    def test_controller_parameters(self):
+        class RootController(object):
+            @expose('json')
+            def index(self, argument=None):
+                assert argument == 'value'
+        
+        # arguments should get passed appropriately
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/?argument=value')
+        assert r.status_int == 200
+        
+        # extra arguments get stripped off
+        r = app.get('/?argument=value&extra=not')
+        assert r.status_int == 200
+    
+    def test_redirect(self):
+        class RootController(object):
+            @expose()
+            def index(self):
+                redirect('/testing')
+            
+            @expose()
+            def testing(self):
+                return 'it worked!'
+        
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/')
+        assert r.status_int == 302
+        r = r.follow()
+        assert r.status_int == 200
+        assert r.body == 'it worked!'

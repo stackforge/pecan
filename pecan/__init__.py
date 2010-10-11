@@ -1,7 +1,7 @@
 from paste.urlparser import StaticURLParser
 from paste.cascade import Cascade
 
-from pecan import Pecan, request, response, override_template
+from pecan import Pecan, request, response, override_template, redirect
 from decorators import expose
 
 __all__ = [

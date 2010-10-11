@@ -35,10 +35,6 @@ class JsonRenderer(object):
     def render(self, template_path, namespace):
         from jsonify import encode
         result = encode(namespace)
-        print '*' * 80
-        print result
-        print type(result)
-        print '*' * 80
         return result
 
 
