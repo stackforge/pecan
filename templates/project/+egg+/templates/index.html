@@ -1,8 +1,44 @@
-<html>
+<html py:extends="layout.html">
   <head>
-    <title>Hello, ${name}</title>
+    <title py:block="title">Welcome to Pecan!</title>
   </head>
-  <body>
-    <h1>Hello, ${name}!</h1>
+  <body py:block="body">
+    <header>
+      <h1>Welcome to Pecan</h1>
+    </header>
+    <p>This is the default Pecan project, which includes:</p>
+    
+    <ul>
+      <li>The ability to serve static files.</li>
+      <li>Templating using the <a href="http://kajiki.pythonisito.com/">Kajiki template engine</a>.</li>
+      <li>Built-in error management using <a href="http://pypi.python.org/pypi/WebError">WebError</a>.</li>
+    </ul>
+    
+    <p>
+      Note that most functionality is enabled/disabled in your <code>start.py</code>,
+      which can be edited to suit your needs, and to add additional WSGI middleware.
+    </p>
+    
+    <p>
+      To get an idea of how to develop applications with Pecan, 
+      here is a simple form:
+    </p>
+    
+    <form method="POST" action="/handle_form" class="${'invalid' if errors else ''}">
+      <table>
+        <tr>
+          <td><label for="name">What is your name</label></td>
+          <td><input name="name" value="${name}" class="${'invalid' if error_for('name') else ''}" /></td>
+          <td py:if="errors">${error_for('name')}</td>
+        </tr>
+        <tr>
+          <td><label for="age">How old are you?</label></td>
+          <td><input name="age" value="${age}" class="${'invalid' if error_for('age') else ''}" /></td>
+          <td py:if="errors">${error_for('age')}</td>
+        </tr>
+      </table>
+      
+      <input type="submit" />
+    </form>
   </body>
 </html>

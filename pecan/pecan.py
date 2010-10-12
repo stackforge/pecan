@@ -5,6 +5,7 @@ from webob      import Request, Response, exc
 from threading  import local
 from itertools  import chain
 from formencode import Invalid
+from paste.recursive import ForwardRequestException
 
 try:
     from json import loads
@@ -19,6 +20,8 @@ def proxy(key):
     class ObjectProxy(object):
         def __getattr__(self, attr):
             obj = getattr(state, key)
+            if attr == 'validation_error':
+                return getattr(obj, attr, None)
             return getattr(obj, attr)
         def __setattr__(self, attr, value):
             obj = getattr(state, key)
@@ -36,6 +39,10 @@ def override_template(template):
 
 def redirect(location):
     raise exc.HTTPFound(location=location)
+
+def error_for(field):
+    if request.validation_error is None: return ''
+    return request.validation_error.error_dict.get(field, '')
 
 
 class Pecan(object):
@@ -122,6 +129,7 @@ class Pecan(object):
             controller.pecan['argspec']
         )
         if 'schema' in controller.pecan:
+            request.validation_error = None
             try:
                 params = self.validate(
                     controller.pecan['schema'], 
@@ -131,8 +139,7 @@ class Pecan(object):
             except Invalid, e:
                 request.validation_error = e
                 if controller.pecan['error_handler'] is not None:
-                    state.validation_error = e
-                    redirect(controller.pecan['error_handler'])
+                    raise ForwardRequestException(controller.pecan['error_handler'])
             if controller.pecan['validate_json']: params = dict(data=params)
         
         # get the result from the controller
@@ -147,7 +154,10 @@ class Pecan(object):
             renderer = self.renderers.get(self.default_renderer, self.template_path)
             if template == 'json':
                 renderer = self.renderers.get('json', self.template_path)
-            elif ':' in template:
+            else:
+                result['error_for'] = error_for
+                
+            if ':' in template:
                 renderer = self.renderers.get(template.split(':')[0], self.template_path)
                 template = template.split(':')[1]
             result = renderer.render(template, result)
@@ -168,12 +178,7 @@ class Pecan(object):
         state.request = Request(environ)
         state.response = Response()
         state.hooks = []
-        
-        # handle validation errors from redirects
-        if hasattr(state, 'validation_error'):
-            state.request.validation_error = state.validation_error
-            del state.validation_error
-        
+                
         # handle the request
         try:
             self.handle_request()

@@ -1,4 +1,4 @@
-from pecan import Pecan, expose, request, response
+from pecan import make_app, expose, request, response
 from webtest import TestApp
 
 from formencode import validators, Schema
@@ -45,7 +45,7 @@ class TestValidation(object):
                 return 'Success!'
 
         # test form submissions
-        app = TestApp(Pecan(RootController()))
+        app = TestApp(make_app(RootController()))
         r = app.post('/', dict(
             first_name='Jonathan',
             last_name='LaCour',
@@ -85,6 +85,11 @@ class TestValidation(object):
             ]
         
         class RootController(object):
+            @expose()
+            def errors(self, *args, **kwargs):
+                assert request.validation_error is not None
+                return 'There was an error!'
+            
             @expose(schema=RegistrationSchema())
             def index(self, first_name, 
                             last_name, 
@@ -116,15 +121,10 @@ class TestValidation(object):
             def json_with_handler(self, data):
                 assert request.validation_error is not None
                 return 'Success!'
-            
-            @expose()
-            def errors(self, *args, **kwargs):
-                assert request.validation_error is not None
-                return 'There was an error!'
                 
 
         # test without error handler
-        app = TestApp(Pecan(RootController()))
+        app = TestApp(make_app(RootController()))
         r = app.post('/', dict(
             first_name='Jonathan',
             last_name='LaCour',
@@ -138,7 +138,7 @@ class TestValidation(object):
         assert r.body == 'Success!'
         
         # test with error handler
-        app = TestApp(Pecan(RootController()))
+        app = TestApp(make_app(RootController()))
         r = app.post('/with_handler', dict(
             first_name='Jonathan',
             last_name='LaCour',
@@ -148,8 +148,6 @@ class TestValidation(object):
             password_confirm='654321',
             age='31'
         ))
-        assert r.status_int == 302
-        r = r.follow()
         assert r.status_int == 200
         assert r.body == 'There was an error!'
         
@@ -176,7 +174,5 @@ class TestValidation(object):
             password_confirm='654321',
             age='31'
         )), [('content-type', 'application/json')])
-        assert r.status_int == 302
-        r = r.follow()
         assert r.status_int == 200
         assert r.body == 'There was an error!'

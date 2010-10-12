@@ -21,7 +21,8 @@ class PyTest(Command):
 # determine requirements
 #
 requirements = [
-  "WebOb >= 0.9.8", 
+  "WebOb >= 1.0.0", 
+  "WebCore >= 1.0.0",
   "simplegeneric >= 0.7",
   "Genshi >= 0.6",
   "Kajiki >= 0.2.2",

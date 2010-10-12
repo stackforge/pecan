@@ -5,7 +5,8 @@ if __name__ == '__main__':
     app = make_app(
         RootController(), 
         static_root='public',
-        template_path='${egg}/templates'
+        template_path='${egg}/templates',
+        debug=True
     )
 
     print 'Serving on http://0.0.0.0:8080'    
