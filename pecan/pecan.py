@@ -48,7 +48,7 @@ def error_for(field):
 class Pecan(object):
     def __init__(self, root, 
                  renderers        = renderers, 
-                 default_renderer = 'genshi', 
+                 default_renderer = 'kajiki', 
                  template_path    = 'templates', 
                  hooks            = []):
         
