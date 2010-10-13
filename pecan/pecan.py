@@ -37,7 +37,9 @@ def override_template(template):
     request.override_template = template
 
 
-def redirect(location):
+def redirect(location, internal=False):
+    if internal:
+        raise ForwardRequestException(location)
     raise exc.HTTPFound(location=location)
 
 def error_for(field):
@@ -139,7 +141,7 @@ class Pecan(object):
             except Invalid, e:
                 request.validation_error = e
                 if controller.pecan['error_handler'] is not None:
-                    raise ForwardRequestException(controller.pecan['error_handler'])
+                    redirect(controller.pecan['error_handler'], internal=True)
             if controller.pecan['validate_json']: params = dict(data=params)
         
         # get the result from the controller
