@@ -59,6 +59,7 @@ class Pecan(object):
         self.default_renderer = default_renderer
         self.hooks            = hooks
         self.template_path    = template_path
+        state.app             = self
     
     def get_content_type(self, format):
         return {
@@ -188,9 +189,10 @@ class Pecan(object):
             # if this is an HTTP Exception, set it as the response
             if isinstance(e, exc.HTTPException):
                 state.response = e
-
-            # handle "error" hooks
-            self.handle_hooks('on_error', state, e)
+            
+            # if this is not an internal redirect, run error hooks
+            if not isinstance(e, ForwardRequestException):
+                self.handle_hooks('on_error', state, e)
             
             if not isinstance(e, exc.HTTPException):
                 raise

@@ -35,13 +35,13 @@ class PecanHook(object):
     priority = 100
     
     def before(self, state):
-        pass
+        return
     
     def after(self, state):
-        pass
+        return
     
     def on_error(self, state, e):
-        pass
+        return
 
 
 class TransactionHook(PecanHook):
