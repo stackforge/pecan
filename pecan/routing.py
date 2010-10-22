@@ -50,7 +50,11 @@ def find_object(obj, remainder, notfound_handlers):
         lookup = getattr(obj, '_lookup', None)
         if iscontroller(lookup):
             notfound_handlers.append(('_lookup', lookup, remainder))
-
+        
+        route = getattr(obj, '_route', None)
+        if iscontroller(route):
+            return route(remainder)
+        
         if not remainder: raise exc.HTTPNotFound
         next, remainder = remainder[0], remainder[1:]
         obj = getattr(obj, next, None)
