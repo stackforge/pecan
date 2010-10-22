@@ -71,7 +71,7 @@ class Pecan(object):
     def route(self, node, path):
         path = path.split('/')[1:]
         node, remainder = lookup_controller(node, path)        
-        return node
+        return node, remainder
     
     def handle_security(self, controller):
         if controller.pecan.get('secured', False):
@@ -90,11 +90,20 @@ class Pecan(object):
         for hook in state.hooks:
             getattr(hook, hook_type)(*args)
     
-    def get_params(self, all_params, argspec):
+    def get_params(self, all_params, remainder, argspec):
         valid_params = dict()
+        
+        # handle params that are POST or GET variables first
         for param_name, param_value in all_params.iteritems():
             if param_name in argspec.args:
                 valid_params[param_name] = param_value
+        
+        # handle positional arguments
+        for i, value in enumerate(remainder):
+            if len(argspec.args) > (i+1):
+                if valid_params.get(argspec.args[i+1]) is None:
+                    valid_params[argspec.args[i+1]] = value
+        
         return valid_params
     
     def validate(self, schema, params=None, json=False):
@@ -111,7 +120,7 @@ class Pecan(object):
         if '.' in path.split('/')[-1]:
             path, format = path.split('.')
             content_type = self.get_content_type(format)      
-        controller = self.route(self.root, path)
+        controller, remainder = self.route(self.root, path)
     
         # determine content type
         if content_type is None:
@@ -129,6 +138,7 @@ class Pecan(object):
         # fetch and validate any parameters
         params = self.get_params(
             dict(state.request.str_params), 
+            remainder,
             controller.pecan['argspec']
         )
         if 'schema' in controller.pecan:

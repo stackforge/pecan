@@ -1,5 +1,7 @@
 from pecan import Pecan, expose, request, response, redirect
 from webtest import TestApp
+from formencode import Schema, validators
+
 
 class TestBase(object):
     
@@ -193,3 +195,45 @@ class TestEngines(object):
         r = r.follow()
         assert r.status_int == 200
         assert r.body == 'it worked!'
+    
+    def test_uri_to_parameter_mapping(self):
+        class RootController(object):
+            @expose()
+            def test(self, one, two):
+                assert one == '1'
+                assert two == '2'
+                return 'it worked'
+                
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/test/1/2')
+        assert r.status_int == 200
+        assert r.body == 'it worked'
+    
+    def test_uri_to_parameter_mapping_with_validation(self):
+        class TestSchema(Schema):
+            one = validators.Int(not_empty=True)
+            two = validators.Int(not_empty=True)
+        
+        class RootController(object):
+            @expose(schema=TestSchema())
+            def test(self, one, two):
+                assert request.validation_error is None
+                assert one == 1
+                assert two == 2
+                return 'it worked'
+            
+            @expose(schema=TestSchema())
+            def fail(self, one, two):
+                assert request.validation_error is not None
+                assert one == 'one'
+                assert two == 'two'
+                return 'it failed'
+                
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/test/1/2')
+        assert r.status_int == 200
+        assert r.body == 'it worked'
+        
+        r = app.get('/fail/one/two')
+        assert r.status_int == 200
+        assert r.body == 'it failed'
