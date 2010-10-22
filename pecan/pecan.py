@@ -92,6 +92,7 @@ class Pecan(object):
     
     def get_params(self, all_params, remainder, argspec):
         valid_params = dict()
+        positional_params = []
         
         # handle params that are POST or GET variables first
         for param_name, param_value in all_params.iteritems():
@@ -99,12 +100,20 @@ class Pecan(object):
                 valid_params[param_name] = param_value
         
         # handle positional arguments
+        used = set()
         for i, value in enumerate(remainder):
             if len(argspec.args) > (i+1):
                 if valid_params.get(argspec.args[i+1]) is None:
+                    used.add(i)
                     valid_params[argspec.args[i+1]] = value
         
-        return valid_params
+        # handle unconsumed positional arguments
+        if len(used) < len(remainder) and argspec.varargs is not None:
+            for i, value in enumerate(remainder):
+                if i not in used:
+                    positional_params.append(value)
+        
+        return valid_params, positional_params
     
     def validate(self, schema, params=None, json=False):
         to_validate = params
@@ -136,7 +145,7 @@ class Pecan(object):
         self.handle_hooks('before', state)
     
         # fetch and validate any parameters
-        params = self.get_params(
+        params, positional_params = self.get_params(
             dict(state.request.str_params), 
             remainder,
             controller.pecan['argspec']
@@ -156,7 +165,7 @@ class Pecan(object):
             if controller.pecan['validate_json']: params = dict(data=params)
         
         # get the result from the controller
-        result = controller(**params)
+        result = controller(*positional_params, **params)
         
         # pull the template out based upon content type and handle overrides
         template = controller.pecan.get('content_types', {}).get(content_type)

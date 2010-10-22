@@ -237,3 +237,19 @@ class TestEngines(object):
         r = app.get('/fail/one/two')
         assert r.status_int == 200
         assert r.body == 'it failed'
+    
+    def test_uri_to_parameter_mapping_with_varargs(self):
+        class RootController(object):
+            @expose()
+            def test(self, *args):
+                assert len(args) == 4
+                assert args[0] == '1'
+                assert args[1] == '2'
+                assert args[2] == '3'
+                assert args[3] == '4'
+                return 'it worked'
+        
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/test/1/2/3/4')
+        assert r.status_int == 200
+        assert r.body == 'it worked'
