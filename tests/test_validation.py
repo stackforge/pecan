@@ -87,26 +87,7 @@ class TestValidation(object):
             ]
         
 
-        class SubSubRootController(object):
-            @expose('json')
-            def index(self):
-                redirect('/sub/deeper/not_empty', internal=True)
-
-            @expose('json')
-            def not_empty(self, data):
-                return data
-
-
-        class SubRootController(object):
-            @expose('json')
-            def index(self):
-                return '/sub'
-                
-            deeper = SubSubRootController()
-
         class RootController(object):
-
-            sub = SubRootController()
 
             @expose()
             def errors(self, *args, **kwargs):
@@ -145,12 +126,6 @@ class TestValidation(object):
                 assert request.validation_error is not None
                 return 'Success!'
                 
-        # post some JSON to a sub controller and fail 
-        app = TestApp(make_app(RootController()))
-        resp = app.post('/sub/deeper', dumps({'name':'foobar'}))
-        assert resp.body != {}
-
-
 
         # test without error handler
         app = TestApp(make_app(RootController()))
