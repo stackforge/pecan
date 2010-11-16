@@ -1,11 +1,12 @@
-from templating import renderers
-from routing    import lookup_controller
+from templating         import renderers
+from routing            import lookup_controller
 
-from webob      import Request, Response, exc
-from threading  import local
-from itertools  import chain
-from formencode import Invalid
-from paste.recursive import ForwardRequestException
+from webob              import Request, Response, exc
+from threading          import local
+from itertools          import chain
+from formencode         import Invalid
+from paste.recursive    import ForwardRequestException
+
 
 try:
     from json import loads
@@ -29,8 +30,9 @@ def proxy(key):
     return ObjectProxy()
 
 
-request  = proxy('request')
-response = proxy('response')
+request     = proxy('request')
+context     = proxy('request.context')
+response    = proxy('response')
 
 
 def override_template(template):
@@ -41,6 +43,7 @@ def redirect(location, internal=False):
     if internal:
         raise ForwardRequestException(location)
     raise exc.HTTPFound(location=location)
+
 
 def error_for(field):
     if request.validation_error is None: return ''
@@ -203,6 +206,9 @@ class Pecan(object):
                 
         # handle the request
         try:
+            # add context to the request 
+            state.request.context = {}
+
             self.handle_request()
         except Exception, e:
             # if this is an HTTP Exception, set it as the response
