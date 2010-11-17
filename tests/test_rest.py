@@ -82,3 +82,13 @@ class TestRestController(object):
         r = app.get('/things')
         assert r.status_int == 200
         assert len(loads(r.body)['items']) == 4
+        
+        # test _method parameter
+        r = app.get('/things/3?_method=DELETE')
+        assert r.status_int == 200
+        assert r.body == dumps('DELETED')
+        
+        # make sure it works
+        r = app.get('/things')
+        assert r.status_int == 200
+        assert len(loads(r.body)['items']) == 3

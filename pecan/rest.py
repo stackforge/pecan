@@ -5,20 +5,21 @@ from pecan import request
 class RestController(object):
     # TODO: implement the following:
     #   - get, new, edit, post_delete, get_delete
-    #   - implement the "_method" parameter
     #   - see: http://turbogears.org/2.1/docs/modules/tgcontroller.html
     
     @expose()
     def _route(self, args):
-        if request.method == 'GET':
+        method = request.GET.get('_method', request.method)
+        
+        if method == 'GET':
             if len(args):
                 return self.get_one, args
             return self.get_all, []
-        elif request.method == 'POST':
+        elif method == 'POST':
             return self.post, []
-        elif request.method == 'PUT' and len(args):
+        elif method == 'PUT' and len(args):
             return self.put, args
-        elif request.method == 'DELETE' and len(args):
+        elif method == 'DELETE' and len(args):
             return self.delete, args
     
     @expose()
