@@ -5,6 +5,7 @@ from pecan import request
 class RestController(object):
     # TODO: implement the following:
     #   - get, new, edit, post_delete, get_delete
+    #   - implement the "_method" parameter
     #   - see: http://turbogears.org/2.1/docs/modules/tgcontroller.html
     
     @expose()

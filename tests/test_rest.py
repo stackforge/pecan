@@ -18,7 +18,7 @@ class TestRestController(object):
 
             @expose('json')
             def get_all(self):
-                return self.data
+                return dict(items=self.data)
                 
             @expose('json')
             def post(self, value):
@@ -45,7 +45,7 @@ class TestRestController(object):
         # test get_all
         r = app.get('/things')
         assert r.status_int == 200
-        assert r.body == dumps(ThingsController.data)
+        assert r.body == dumps(dict(items=ThingsController.data))
         
         # test get_one
         for i, value in enumerate(ThingsController.data):
@@ -81,4 +81,4 @@ class TestRestController(object):
         # make sure it works
         r = app.get('/things')
         assert r.status_int == 200
-        assert len(loads(r.body)) == 4
+        assert len(loads(r.body)['items']) == 4

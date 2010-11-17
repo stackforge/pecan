@@ -6,6 +6,7 @@ pecan/decorators.py
 pecan/hooks.py
 pecan/jsonify.py
 pecan/pecan.py
+pecan/rest.py
 pecan/routing.py
 pecan/secure.py
 pecan/templating.py

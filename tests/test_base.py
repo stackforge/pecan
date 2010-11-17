@@ -169,6 +169,7 @@ class TestEngines(object):
             @expose('json')
             def index(self, argument=None):
                 assert argument == 'value'
+                return dict()
         
         # arguments should get passed appropriately
         app = TestApp(Pecan(RootController()))

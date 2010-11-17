@@ -34,8 +34,7 @@ class JsonRenderer(object):
     
     def render(self, template_path, namespace):
         from jsonify import encode
-        result = encode(namespace)
-        return result
+        return encode(namespace)
 
 
 #
