@@ -5,11 +5,21 @@ def _cfg(f):
     return f.pecan
 
 
+def when_for(controller):
+    def when(method):
+        def decorate(f):
+            controller.pecan['generic_handlers'][method.upper()] = f
+            return f
+        return decorate
+    return when
+
+
 def expose(template      = None, 
            content_type  = 'text/html', 
            schema        = None, 
            json_schema   = None, 
-           error_handler = None):
+           error_handler = None,
+           generic       = False):
     
     if template == 'json': content_type = 'application/json'
     def decorate(f):
@@ -22,6 +32,12 @@ def expose(template      = None,
         cfg.setdefault('template', []).append(template)
         cfg.setdefault('content_types', {})[content_type] = template
         
+        # handle generic controllers
+        if generic:
+            cfg['generic'] = True
+            cfg['generic_handlers'] = dict(DEFAULT=f)
+            f.when = when_for(f)
+            
         # store the arguments for this controller method
         cfg['argspec'] = getargspec(f)
         

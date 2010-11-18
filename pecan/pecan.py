@@ -93,9 +93,12 @@ class Pecan(object):
         for hook in state.hooks:
             getattr(hook, hook_type)(*args)
     
-    def get_params(self, all_params, remainder, argspec):
+    def get_params(self, all_params, remainder, argspec, im_self):
         valid_params = dict()
         positional_params = []
+        
+        if im_self is not None:
+            positional_params.append(im_self)
         
         # handle params that are POST or GET variables first
         for param_name, param_value in all_params.iteritems():
@@ -133,6 +136,13 @@ class Pecan(object):
             path, format = path.split('.')
             content_type = self.get_content_type(format)      
         controller, remainder = self.route(self.root, path)
+        
+        # handle generic controllers
+        im_self = None
+        if controller.pecan.get('generic'):
+            im_self = controller.im_self
+            handlers = controller.pecan['generic_handlers']
+            controller = handlers.get(request.method, handlers['DEFAULT'])
     
         # determine content type
         if content_type is None:
@@ -151,7 +161,8 @@ class Pecan(object):
         params, positional_params = self.get_params(
             dict(state.request.str_params), 
             remainder,
-            controller.pecan['argspec']
+            controller.pecan['argspec'],
+            im_self
         )
         if 'schema' in controller.pecan:
             request.validation_error = None
