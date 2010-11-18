@@ -8,6 +8,7 @@ def _cfg(f):
 def when_for(controller):
     def when(method):
         def decorate(f):
+            _cfg(f)['generic_handler'] = True
             controller.pecan['generic_handlers'][method.upper()] = f
             return f
         return decorate

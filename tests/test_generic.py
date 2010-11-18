@@ -26,7 +26,9 @@ class TestGeneric(object):
         assert r.status_int == 200
         assert r.body == 'GET'
         
-        app = TestApp(Pecan(RootController()))
         r = app.post('/')
         assert r.status_int == 200
         assert r.body == dumps(dict(result='POST'))
+        
+        r = app.get('/do_get', status=404)
+        assert r.status_int == 404

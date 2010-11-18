@@ -137,6 +137,9 @@ class Pecan(object):
             content_type = self.get_content_type(format)      
         controller, remainder = self.route(self.root, path)
         
+        if controller.pecan.get('generic_handler'):
+            raise exc.HTTPNotFound
+        
         # handle generic controllers
         im_self = None
         if controller.pecan.get('generic'):
