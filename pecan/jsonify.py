@@ -3,7 +3,8 @@ try:
 except ImportError:
     from simplejson import JSONEncoder
 
-from datetime        import datetime
+from datetime        import datetime, date
+from decimal         import Decimal
 from webob.multidict import MultiDict
 from simplegeneric   import generic
 
@@ -27,9 +28,9 @@ class GenericJSON(JSONEncoder):
     def default(self, obj):
         if hasattr(obj, '__json__') and callable(obj.__json__):
             return obj.__json__()
-        elif isinstance(obj, (datetime.date, datetime.datetime)):
+        elif isinstance(obj, (date, datetime)):
             return str(obj)
-        elif isinstance(obj, decimal.Decimal):
+        elif isinstance(obj, Decimal):
             return float(obj)
         elif is_saobject(obj):
             props = {}
