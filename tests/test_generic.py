@@ -11,13 +11,11 @@ class TestGeneric(object):
             def index(self):
                 pass
             
-            @index.when(method='POST')
-            @expose('json')
+            @index.when(method='POST', template='json')
             def do_post(self):
                 return dict(result='POST')
             
             @index.when(method='GET')
-            @expose()
             def do_get(self):
                 return 'GET'
         

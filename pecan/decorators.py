@@ -6,8 +6,9 @@ def _cfg(f):
 
 
 def when_for(controller):
-    def when(method):
+    def when(method=None, **kw):
         def decorate(f):
+            expose(**kw)(f)
             _cfg(f)['generic_handler'] = True
             controller.pecan['generic_handlers'][method.upper()] = f
             return f
