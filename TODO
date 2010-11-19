@@ -1,0 +1,32 @@
+TODO for Release 0.1
+====================
+* Documentation
+  - introduction
+  - quick start tutorial
+  - routing documentation
+    . object dispatch basics
+    . lookup and default
+    . RESTController
+    . generic controllers
+  - hooks
+  - jsonify
+  - SecureController
+  - validation and error handling
+  - template languages
+
+* Configuration
+  - we've decided to use Python as the configuration language
+  - configuration exists as a python package:
+  
+      config/
+         __init__.py
+         production.py
+         development.py
+         testing.py
+  
+  - in start.py you pass the name of the configuration module
+  - this gets attached as pecan.config
+  - define some standard configuration options
+    . host, port, number of threads, etc.
+
+* Updated template project, which shows off more features, including config
