@@ -3,10 +3,11 @@ try:
 except ImportError:
     from simplejson import JSONEncoder
 
-from datetime        import datetime, date
-from decimal         import Decimal
-from webob.multidict import MultiDict
-from simplegeneric   import generic
+from datetime               import datetime, date
+from decimal                import Decimal
+from webob.multidict        import MultiDict
+from sqlalchemy.engine.base import ResultProxy, RowProxy
+from simplegeneric          import generic
 
 #
 # exceptions
@@ -64,12 +65,4 @@ _instance = GenericFunctionJSON()
 def encode(obj):
     if isinstance(obj, basestring):
         return _instance.encode(obj)
-    try:
-        value = obj['test']
-    except TypeError:
-        if not hasattr(obj, '__json__') and not is_saobject(obj):
-            raise JsonEncodeError('Your Encoded object must be dict-like.')
-    except:
-        pass
-    """Return a JSON string representation of a Python object."""
     return _instance.encode(obj)
