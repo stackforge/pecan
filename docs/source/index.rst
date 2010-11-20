@@ -15,7 +15,22 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   quick_start.rst 
+   routing.rst 
+   configuration.rst 
+   templates.rst 
+   hooks.rst 
+   jsonify.rst 
+   secure_controller.rst 
+   validation_n_errors.rst
    app_engine.rst
+
+
+Introduction
+============
+This section will introduce Pecan as a framework.
+
+
 
 Indices and tables
 ==================
