@@ -76,3 +76,12 @@ This is how the structure of your new project should look like::
     6 directories, 9 files
 
 
+Running the application
+-----------------------
+The one file we are interested here is ``start.py``, if you just run it with
+Python it will bring up the development server and serve the app::
+
+    python start.py 
+    Serving on http://0.0.0.0:8080
+    serving on 0.0.0.0:8080 view at http://127.0.0.1:8080
+    
