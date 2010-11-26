@@ -15,7 +15,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   installtion.rst
+   installation.rst
    routing.rst 
    configuration.rst 
    templates.rst 

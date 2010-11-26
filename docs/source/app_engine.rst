@@ -19,16 +19,16 @@ Pecan has a few dependencies and one of them is already supported by App Engine 
 so no need to grab that. Just so you are aware, this is the list of things that you absolutely need 
 to grab:
 
- *  simplegeneric >= 0.7
- *  Paste >= 1.7.5.1
+ *  simplegeneric == 0.7
+ *  Paste == 1.7.5.1
 
 These are optional, depending on the templating engine you want to use. However, depending on your choice,
 you might want to check the engine's dependencies as well. The only engine from this list that doesn't require 
 a dependency is Kajiki.
 
- *  Genshi >= 0.6
- *  Kajiki >= 0.2.2
- *  Mako >= 0.3
+ *  Genshi == 0.6
+ *  Kajiki == 0.3.1
+ *  Mako == 0.3
  
 From this point forward, we will assume you are getting Kajiki, to avoid describing third party dependencies.
 
