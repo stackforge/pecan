@@ -76,6 +76,8 @@ This is how the structure of your new project should look like::
     6 directories, 9 files
 
 
+.. _running_application:
+
 Running the application
 -----------------------
 The one file we are interested here is ``start.py``, if you just run it with
@@ -85,3 +87,22 @@ Python it will bring up the development server and serve the app::
     Serving on http://0.0.0.0:8080
     serving on 0.0.0.0:8080 view at http://127.0.0.1:8080
     
+To get up and running in no time the template helps a lot! 
+
+A few things have been layed out for you, let's review them one by one:
+
+*  **public**: All your public static files like CSS and Javascript are placed
+  here. If you have some images (this example app doesn't) it would make sense
+  to get them here as well.
+
+
+Inside the project name you chose you have a couple of directories, and for the
+most part, it will contain your models, controllers and templates:
+
+*  **controllers**: The container directory for your controller files. 
+*  **templates**: All your templates would go in here. 
+
+Note how there is no **model** directory. Since we haven't defined any
+database for the app the template doesn't supply you one. In case you need it
+later you could create a ``models.py`` file or a ``model`` directory.
+
