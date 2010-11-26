@@ -28,7 +28,23 @@ Contents:
 
 Introduction
 ============
-This section will introduce Pecan as a framework.
+A WSGI object-dispatching lean web framework, in the spirit of TurboGears, only 
+much much smaller, with many fewer dependencies. 
+
+ * Object-Dispatch for easy routing
+ * Pre and Post Hooks 
+ * REST capabilities 
+ * Validation and Error handling
+ * Secure controllers
+ * Template language support
+ * AppEngine out of the box (no patching!)
+
+
+
+Pecan Hello World
+------------------
+
+
 
 
 
