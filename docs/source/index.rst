@@ -28,12 +28,13 @@ Contents:
 
 Introduction
 ============
-A WSGI object-dispatching lean web framework, in the spirit of TurboGears, only 
-much much smaller, with many fewer dependencies. 
+Pecan packs a few good features but it is also extremely lean, it requires just
+a few dependencies but for the most part it feels like a full fledged web
+framework!
 
  * Object-Dispatch for easy routing
  * Pre and Post Hooks 
- * REST capabilities 
+ * REST controllers 
  * Validation and Error handling
  * Secure controllers
  * Template language support
@@ -62,11 +63,4 @@ WSGI server you want::
 
 
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
