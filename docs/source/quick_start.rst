@@ -89,7 +89,7 @@ Python it will bring up the development server and serve the app::
     
 To get up and running in no time the template helps a lot! 
 
-A few things have been layed out for you, let's review them one by one:
+A few things have been set for you, let's review them one by one:
 
 *  **public**: All your public static files like CSS and Javascript are placed
   here. If you have some images (this example app doesn't) it would make sense
@@ -106,3 +106,38 @@ Note how there is no **model** directory. Since we haven't defined any
 database for the app the template doesn't supply you one. In case you need it
 later you could create a ``models.py`` file or a ``model`` directory.
 
+
+Root Controller
+---------------
+The Root Controller is the main point of contact between your application and
+the framework.
+
+This is how it looks from the project template::
+
+    from pecan import expose, request
+    from formencode import Schema, validators as v
+
+
+    class SampleForm(Schema):
+        name = v.String(not_empty=True)
+        age = v.Int(not_empty=True)
+
+
+    class RootController(object):
+        @expose('index.html')
+        def index(self, name='', age=''):
+            return dict(errors=request.validation_error, name=name, age=age)
+        
+        @expose('success.html', schema=SampleForm(), error_handler='index')
+        def handle_form(self, name, age):
+            return dict(name=name, age=age)
+
+
+Here you can specify other classes if you need to do so later on your project,
+but for now we have an *index* method and a *handle_form* one.
+
+**index**: Is *exposed* as the root of the application, so anything that hits
+'/' will touch this method.
+
+**handle_form**: It receives 2 parameters (*name* and *age*) that are validated
+through the *SampleForm* schema class.
