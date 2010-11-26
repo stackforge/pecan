@@ -43,6 +43,21 @@ much much smaller, with many fewer dependencies.
 
 Pecan Hello World
 ------------------
+In this example we use ``httpserver`` from ``paste`` but feel free to use any 
+WSGI server you want::
+
+    from paste import httpserver
+    from pecan import make_app, expose
+
+
+    class RootController(object):
+
+        @expose()
+        def index(self):
+            return 'Hello, World!'
+
+    app = make_app(RootController(), debug=True)
+    httpserver.serve(app, host='0.0.0.0', port=8080)
 
 
 
