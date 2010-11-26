@@ -138,6 +138,10 @@ but for now we have an *index* method and a *handle_form* one.
 
 **index**: Is *exposed* as the root of the application, so anything that hits
 '/' will touch this method.
+Since we are doing some validation and want to pass any errors we might get to
+the template, we set ``errors`` to receive anything that
+``request.validation_error`` returns.
+
 
 **handle_form**: It receives 2 parameters (*name* and *age*) that are validated
 through the *SampleForm* schema class.
