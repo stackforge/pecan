@@ -15,7 +15,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   quick_start.rst 
+   installtion.rst
    routing.rst 
    configuration.rst 
    templates.rst 
@@ -23,7 +23,6 @@ Contents:
    jsonify.rst 
    secure_controller.rst 
    validation_n_errors.rst
-   app_engine.rst
 
 
 Introduction
@@ -59,6 +58,36 @@ WSGI server you want::
 
     app = make_app(RootController(), debug=True)
     httpserver.serve(app, host='0.0.0.0', port=8080)
+
+
+Tutorials
+=========
+We provide a couple of easy ways to get started including a short tutorial on
+App Engine.
+
+.. toctree::
+   :maxdepth: 2
+
+   quick_start.rst 
+   app_engine.rst
+
+
+API
+===
+The following section lists the main sections of Pecan, where you can find more
+specific details about methods and modules available.
+
+.. toctree::
+   :maxdepth: 2
+
+   decorators.rst 
+   hooks.rst 
+   jsonify.rst 
+   pecan.rst 
+   rest.rst 
+   routing.rst 
+   secure.rst
+   templating.rst
 
 License
 -------
