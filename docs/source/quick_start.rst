@@ -52,3 +52,27 @@ this is how it looks like when we run the whole command::
           Copying shared.js to ./test_project/public/javascript/shared.js
       Copying start.py_tmpl to ./test_project/start.py
 
+
+This is how the structure of your new project should look like::
+
+    test_project $ tree
+    .
+    ├── public
+    │   ├── css
+    │   │   └── style.css
+    │   └── javascript
+    │       └── shared.js
+    ├── start.py
+    └── test_project
+        ├── __init__.py
+        ├── controllers
+        │   ├── __init__.py
+        │   └── root.py
+        └── templates
+            ├── index.html
+            ├── layout.html
+            └── success.html
+
+    6 directories, 9 files
+
+
