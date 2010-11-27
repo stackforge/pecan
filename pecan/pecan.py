@@ -90,9 +90,14 @@ class Pecan(object):
         )
     
     def handle_hooks(self, hook_type, *args):
-        for hook in state.hooks:
-            getattr(hook, hook_type)(*args)
-    
+        if hook_type == 'before':
+            hooks = state.hooks
+        else:
+            hooks = reversed(state.hooks)
+
+        for hook in hooks:
+             getattr(hook, hook_type)(*args)
+
     def get_params(self, all_params, remainder, argspec, im_self):
         valid_params = dict()
         positional_params = []

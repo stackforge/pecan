@@ -70,9 +70,9 @@ class TestHooks(object):
         assert run_hook[1] == 'before2'
         assert run_hook[2] == 'before3'
         assert run_hook[3] == 'inside'
-        assert run_hook[4] == 'after1'
+        assert run_hook[4] == 'after3'
         assert run_hook[5] == 'after2'
-        assert run_hook[6] == 'after3'
+        assert run_hook[6] == 'after1'
     
     def test_prioritized_hooks(self):
         run_hook = []
@@ -109,9 +109,9 @@ class TestHooks(object):
         assert run_hook[1] == 'before2'
         assert run_hook[2] == 'before3'
         assert run_hook[3] == 'inside'
-        assert run_hook[4] == 'after1'
+        assert run_hook[4] == 'after3'
         assert run_hook[5] == 'after2'
-        assert run_hook[6] == 'after3'
+        assert run_hook[6] == 'after1'
         
         for i in range(len(run_hook)): run_hook.pop()
         
@@ -128,9 +128,9 @@ class TestHooks(object):
         assert run_hook[1] == 'before2'
         assert run_hook[2] == 'before1'
         assert run_hook[3] == 'inside'
-        assert run_hook[4] == 'after3'
+        assert run_hook[4] == 'after1'
         assert run_hook[5] == 'after2'
-        assert run_hook[6] == 'after1'
+        assert run_hook[6] == 'after3'
     
     def test_transaction_hook(self):
         run_hook = []
@@ -303,8 +303,8 @@ class TestHooks(object):
         assert run_hook[0] == 'before2'
         assert run_hook[1] == 'before1'
         assert run_hook[2] == 'inside_sub'
-        assert run_hook[3] == 'after2'
-        assert run_hook[4] == 'after1'
+        assert run_hook[3] == 'after1'
+        assert run_hook[4] == 'after2'
     
     def test_hooks_with_validation(self):
         run_hook = []
