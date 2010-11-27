@@ -102,7 +102,7 @@ class Pecan(object):
         
         # handle params that are POST or GET variables first
         for param_name, param_value in all_params.iteritems():
-            if param_name in argspec.args:
+            if param_name in argspec[0]:
                 valid_params[param_name] = param_value
         
         # handle positional arguments
