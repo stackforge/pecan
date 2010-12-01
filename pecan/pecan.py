@@ -62,7 +62,6 @@ class Pecan(object):
         self.default_renderer = default_renderer
         self.hooks            = hooks
         self.template_path    = template_path
-        state.app             = self
     
     def get_content_type(self, format):
         return {
@@ -214,10 +213,11 @@ class Pecan(object):
     
     def __call__(self, environ, start_response):
         # create the request and response object
-        state.request = Request(environ)
+        state.request  = Request(environ)
         state.response = Response()
-        state.hooks = []
-                
+        state.hooks    = []
+        state.app      = self
+        
         # handle the request
         try:
             # add context to the request 
