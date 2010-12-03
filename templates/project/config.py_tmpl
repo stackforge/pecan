@@ -3,16 +3,16 @@ from ${egg}.controllers.root import RootController
 
 # Server Specific Configurations
 server = {
-    'port' = '8080',
-    'host' = '0.0.0.0'
+    'port' : '8080',
+    'host' : '0.0.0.0'
 }
 
 # Pecan Application Configurations
 app = {
-    'root' = RootController()
-    'static_root' = 'public' 
-    'template_path' = '${egg}/templates'
-    'debug' = True 
+    'root' : RootController(),
+    'static_root' : 'public', 
+    'template_path' : '${egg}/templates',
+    'debug' : True 
 }
 
 # Custom Configurations must be in Python dictionary format::
