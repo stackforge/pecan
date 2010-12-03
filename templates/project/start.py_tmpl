@@ -1,5 +1,7 @@
 from pecan import make_app
+from pecan.configuration import configuration
 from ${egg}.controllers.root import RootController
+from ${egg} import config
 
 if __name__ == '__main__':
     app = make_app(
@@ -10,6 +12,7 @@ if __name__ == '__main__':
     )
 
     print 'Serving on http://0.0.0.0:8080'    
+    conf = configuration('Development')
     from paste import httpserver
     try:
         httpserver.serve(app, host='0.0.0.0', port=8080)

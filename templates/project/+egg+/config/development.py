@@ -1,5 +1,7 @@
 from pecan.configuration import PecanConfig
 
 class Development(PecanConfig):
-    pass
+    port    = '8080'
+    host    = '0.0.0.0'
+    threads = 1
 

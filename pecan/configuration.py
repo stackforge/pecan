@@ -10,8 +10,7 @@ class PecanConfig(object):
     threads = 1
 
 
-
-def _find_config(name):
+def configuration(name):
     for config in _sub_classes():
         if name == config.__name__:
             return config
