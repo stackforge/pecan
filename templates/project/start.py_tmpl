@@ -2,8 +2,13 @@ from pecan import make_app
 from ${egg}.config import development
 
 if __name__ == '__main__':
-    app_conf = development.application 
-    serv_conf = development.server
+    if len(sys.argv) <= 1:
+        sys.stderr.write('You must provide a configuration file to start the server\n')
+        sys.exit(1)
+
+    runtime_conf = set_config(sys.argv[1])
+    app_conf = runtime_conf.application 
+    serv_conf = runtime_conf.server
 
     app = make_app(
         app_conf.root,
