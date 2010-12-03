@@ -1,11 +1,7 @@
-
-
-
 class ServerConfig(object):
     port = '8080'
     host = '0.0.0.0'
     threads = 1
-
 
 
 class ApplicationConfig(object):
