@@ -9,6 +9,6 @@ server.host = '0.0.0.0'
 # Pecan Application Configurations
 application.root = RootController()
 application.static_root = 'public' 
-application.template_path = 'test_conf/templates'
+application.template_path = '${egg}/templates'
 application.debug = True 
 

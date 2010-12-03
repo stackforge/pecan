@@ -1,9 +1,10 @@
 from pecan import make_app
-from pecan.configuration import configuration
-from ${egg}.controllers.root import RootController
-from ${egg} import config
+from ${egg}.config import development
 
 if __name__ == '__main__':
+    app_conf = development.application 
+    serv_conf = development.server
+
     app = make_app(
         RootController(), 
         static_root='public',
