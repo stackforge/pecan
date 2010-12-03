@@ -2,6 +2,7 @@ README
 setup.cfg
 setup.py
 pecan/__init__.py
+pecan/configuration.py
 pecan/decorators.py
 pecan/hooks.py
 pecan/jsonify.py
