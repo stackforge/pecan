@@ -12,7 +12,7 @@ if __name__ == '__main__':
         debug           = app_conf.debug
         )
 
-    print 'Serving on http://0.0.0.0:8080'    
+    print 'Serving on http://%s:%s' % (serv_conf.host, serv_conf.port)   
     from paste import httpserver
     try:
         httpserver.serve(app, serv_conf.host, serv_conf.port)
