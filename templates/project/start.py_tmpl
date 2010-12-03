@@ -6,16 +6,15 @@ if __name__ == '__main__':
     serv_conf = development.server
 
     app = make_app(
-        RootController(), 
-        static_root='public',
-        template_path='${egg}/templates',
-        debug=True
-    )
+        app_conf.root,
+        static_root     = app_conf.static_root,
+        template_path   = app_conf.template_path,
+        debug           = app_conf.debug
+        )
 
     print 'Serving on http://0.0.0.0:8080'    
-    conf = configuration('Development')
     from paste import httpserver
     try:
-        httpserver.serve(app, host='0.0.0.0', port=8080)
+        httpserver.serve(app, serv_conf.host, serv_conf.port)
     except KeyboardInterrupt:
         print '^C'
