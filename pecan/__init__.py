@@ -9,9 +9,10 @@ from decorators import expose
 import configuration
 
 __all__ = [
-    'make_app', 'Pecan', 'request', 'response', 'override_template', 'expose', 'set_config'
+    'make_app', 'Pecan', 'request', 'response', 'override_template', 'expose', 'conf', 'set_config'
 ]
 
+conf = configuration.initconf()
 
 def make_app(root, static_root=None, debug=False, errorcfg={}, **kw):
     app = Pecan(root, **kw)
@@ -22,7 +23,4 @@ def make_app(root, static_root=None, debug=False, errorcfg={}, **kw):
     return app
 
 def set_config(name):
-    return configuration.import_runtime_conf(name)
-
-
-
+    pecan.conf.update_with_module(name)
