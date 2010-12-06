@@ -7,7 +7,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     runtime_conf = set_config(sys.argv[1])
-    app_conf = runtime_conf.application 
+    app_conf = runtime_conf.app
     serv_conf = runtime_conf.server
 
     app = make_app(

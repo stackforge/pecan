@@ -23,4 +23,4 @@ def make_app(root, static_root=None, debug=False, errorcfg={}, **kw):
     return app
 
 def set_config(name):
-    pecan.conf.update_with_module(name)
+    conf.update_with_module(name)
