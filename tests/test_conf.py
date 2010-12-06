@@ -6,8 +6,11 @@ class TestConf(TestCase):
     def setUp(self):
         import sys
         import os 
-        if 'test_config' not in sys.path:
-            sys.path.append(os.path.abspath('test_config'))
+
+        test_config_d = os.path.join(os.path.dirname(__file__), 'test_config')
+
+        if test_config_d not in sys.path:
+            sys.path.append(test_config_d)
 
 
     def test_update_config_fail_identifier(self):
@@ -17,8 +20,9 @@ class TestConf(TestCase):
 
     def test_update_set_config(self):
         """Update an empty configuration with the default values"""
-        from pecan import conf, set_config
-        set_config('config')
+
+        conf = configuration.initconf()
+        conf.update_with_module('config')
 
         self.assertTrue(conf.app.debug)
         self.assertEqual(conf.app.root, None)
@@ -31,8 +35,9 @@ class TestConf(TestCase):
 
     def test_update_set_default_config(self):
         """Update an empty configuration with the default values"""
-        from pecan import conf, set_config
-        set_config('empty')
+
+        conf = configuration.initconf()
+        conf.update_with_module('empty')
 
         self.assertFalse(conf.app.debug)
         self.assertEqual(conf.app.root, None)
