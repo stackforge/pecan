@@ -1,25 +1,23 @@
 import sys
-from pecan import make_app, set_config
+from pecan import make_app, set_config, conf
 
 if __name__ == '__main__':
     if len(sys.argv) <= 1:
         sys.stderr.write('You must provide a configuration file to start the server\n')
         sys.exit(1)
 
-    runtime_conf = set_config(sys.argv[1])
-    app_conf = runtime_conf.app
-    serv_conf = runtime_conf.server
+    set_config(sys.argv[1])
 
     app = make_app(
-        app_conf.root,
-        static_root     = app_conf.static_root,
-        template_path   = app_conf.template_path,
-        debug           = app_conf.debug
+        conf.app.root,
+        static_root     = conf.app.static_root,
+        template_path   = conf.app.template_path,
+        debug           = conf.app.debug
         )
 
-    print 'Serving on http://%s:%s' % (serv_conf.host, serv_conf.port)   
+    print 'Serving on http://%s:%s' % (conf.server.host, conf.server.port)   
     from paste import httpserver
     try:
-        httpserver.serve(app, serv_conf.host, serv_conf.port)
+        httpserver.serve(app, conf.server.host, conf.server.port)
     except KeyboardInterrupt:
         print '^C'
