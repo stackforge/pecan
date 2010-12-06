@@ -1,3 +1,4 @@
+import os
 from pecan import expose, make_app
 from webtest import TestApp
 
@@ -10,7 +11,10 @@ class TestStatic(object):
                 return 'Hello, World!'
         
         # make sure Cascade is working properly
-        app = TestApp(make_app(RootController(), static_root='tests/static'))
+        text = os.path.join(os.path.dirname(__file__), 'static/text.txt')
+        static_root = os.path.join(os.path.dirname(__file__), 'static')
+
+        app = TestApp(make_app(RootController(), static_root=static_root))
         response = app.get('/index.html')
         assert response.status_int == 200
         assert response.body == 'Hello, World!'
@@ -18,4 +22,4 @@ class TestStatic(object):
         # get a static resource
         response = app.get('/text.txt')
         assert response.status_int == 200
-        assert response.body == open('tests/static/text.txt', 'rb').read()
+        assert response.body == open(text, 'rb').read()

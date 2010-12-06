@@ -1,3 +1,4 @@
+import os
 from pecan import Pecan, expose, request, response, redirect
 from webtest import TestApp
 from formencode import Schema, validators
@@ -100,18 +101,20 @@ class TestBase(object):
 
 class TestEngines(object):
     
+    template_path = os.path.join(os.path.dirname(__file__), 'templates')
+
     def test_genshi(self):
         class RootController(object):
             @expose('genshi:genshi.html')
             def index(self, name='Jonathan'):
                 return dict(name=name)
         
-        app = TestApp(Pecan(RootController(), template_path='tests/templates'))
+        app = TestApp(Pecan(RootController(), template_path=self.template_path))    
         r = app.get('/')
         assert r.status_int == 200
         assert "<h1>Hello, Jonathan!</h1>" in r.body
         
-        app = TestApp(Pecan(RootController(), template_path='tests/templates'))
+        app = TestApp(Pecan(RootController(), template_path=self.template_path))
         r = app.get('/index.html?name=World')
         assert r.status_int == 200
         assert "<h1>Hello, World!</h1>" in r.body
@@ -122,12 +125,12 @@ class TestEngines(object):
             def index(self, name='Jonathan'):
                 return dict(name=name)
         
-        app = TestApp(Pecan(RootController(), template_path='tests/templates'))
+        app = TestApp(Pecan(RootController(), template_path=self.template_path))
         r = app.get('/')
         assert r.status_int == 200
         assert "<h1>Hello, Jonathan!</h1>" in r.body
         
-        app = TestApp(Pecan(RootController(), template_path='tests/templates'))
+        app = TestApp(Pecan(RootController(), template_path=self.template_path))
         r = app.get('/index.html?name=World')
         assert r.status_int == 200
         assert "<h1>Hello, World!</h1>" in r.body
@@ -138,12 +141,12 @@ class TestEngines(object):
             def index(self, name='Jonathan'):
                 return dict(name=name)
         
-        app = TestApp(Pecan(RootController(), template_path='tests/templates'))
+        app = TestApp(Pecan(RootController(), template_path=self.template_path))
         r = app.get('/')
         assert r.status_int == 200
         assert "<h1>Hello, Jonathan!</h1>" in r.body
         
-        app = TestApp(Pecan(RootController(), template_path='tests/templates'))
+        app = TestApp(Pecan(RootController(), template_path=self.template_path))
         r = app.get('/index.html?name=World')
         assert r.status_int == 200
         assert "<h1>Hello, World!</h1>" in r.body
