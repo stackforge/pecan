@@ -10,7 +10,13 @@ class Config(object):
 
     def update(self, conf_dict):
         # first check the keys for correct
-        for k in conf_dict:
+
+        if isinstance(conf_dict, dict):
+            iterator = conf_dict.iteritems()
+        else:
+            iterator = iter(conf_dict)
+
+        for k,v in iterator:
             if not IDENTIFIER.match(k):
                 raise ValueError('\'%s\' is not a valid indentifier' % k)
 
@@ -31,7 +37,7 @@ class Config(object):
         self.__dict__[key] = value
 
     def __iter__(self):
-        return self.__dict__.__iter__()
+        return self.__dict__.iteritems()
 
     def __dir__(self):
         return self.__dict__.keys()
