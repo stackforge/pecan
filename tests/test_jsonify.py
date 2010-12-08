@@ -1,7 +1,7 @@
 from pecan.jsonify  import jsonify, encode
 from pecan          import Pecan, expose
 from webtest        import TestApp
-from simplejson     import loads
+from json           import loads
 
 
 def make_person():
