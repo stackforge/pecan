@@ -152,7 +152,7 @@ class TestEngines(object):
         assert "<h1>Hello, World!</h1>" in r.body
     
     def test_json(self):
-        from simplejson import loads
+        from json import loads
         
         expected_result = dict(name='Jonathan', age=30, nested=dict(works=True))
         
