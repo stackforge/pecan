@@ -55,8 +55,8 @@ this is how it looks like when we run the whole command::
 
 This is how the structure of your new project should look like::
 
-    test_project $ tree
     .
+    ├── config.py
     ├── public
     │   ├── css
     │   │   └── style.css
@@ -73,21 +73,8 @@ This is how the structure of your new project should look like::
             ├── layout.html
             └── success.html
 
-    6 directories, 9 files
+    6 directories, 10 files
 
-
-.. _running_application:
-
-Running the application
------------------------
-The one file we are interested here is ``start.py``, if you just run it with
-Python it will bring up the development server and serve the app::
-
-    python start.py 
-    Serving on http://0.0.0.0:8080
-    serving on 0.0.0.0:8080 view at http://127.0.0.1:8080
-    
-To get up and running in no time the template helps a lot! 
 
 A few things have been set for you, let's review them one by one:
 
@@ -107,6 +94,70 @@ database for the app the template doesn't supply you one. In case you need it
 later you could create a ``models.py`` file or a ``model`` directory.
 
 
+.. _running_application:
+
+Running the application
+-----------------------
+There are 2 files that are important to start your application. In this case
+``start.py`` and ``config.py`` are in charge of getting everything up and running.
+
+If you just run ``start.py`` with Python, passing ``config`` as an argument for
+configuration it will bring up the development server and serve the app::
+
+    python start.py config
+    Serving on http://0.0.0.0:8080
+    serving on 0.0.0.0:8080 view at http://127.0.0.1:8080
+    
+To get up and running in no time the template helps a lot! 
+
+.. note::
+    If you fail to pass an argument you will get a small error message asking
+    for a configuration file. Remember you need to pass the name of the
+    configuration file without the ".py" extension. 
+
+
+Simple Configuration
+--------------------
+We mentioned that you get a Python file with some configurations. The only
+Python syntax that you will see is the first line that imports the
+RootController that is in turn placed as the application root. Everything else,
+including possible custom configurations are set as Python dictionaries.
+
+This is how your default configuration file should look like::
+
+    from test_project.controllers.root import RootController
+
+
+    # Server Specific Configurations
+    server = {
+        'port' : '8080',
+        'host' : '0.0.0.0'
+    }
+
+    # Pecan Application Configurations
+    app = {
+        'root' : RootController(),
+        'static_root' : 'public', 
+        'template_path' : 'test_project/templates',
+        'debug' : True 
+    }
+
+    # Custom Configurations must be in Python dictionary format::
+    #
+    # foo = {'bar':'baz'}
+    # 
+    # All configurations are accessible at::
+    # pecan.conf
+
+
+**Nothing** in the configuration file above is actually required for Pecan to
+be able to run. If you fail to provide some values Pecan will fill in the
+missing things it needs to run.
+
+You also get the ability to set your own configurations as dictionaries and you
+get a commented out example on how to do that.
+
+    
 Root Controller
 ---------------
 The Root Controller is the main point of contact between your application and

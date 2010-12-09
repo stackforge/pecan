@@ -93,7 +93,7 @@ License
 -------
 The Pecan framework and the documentation is BSD Licensed::
 
-    Copyright (c) <2010>, <Pecan Framework>
+    Copyright (c) <2010>, Pecan Framework
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
