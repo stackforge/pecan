@@ -79,6 +79,25 @@ Any application specifics should go in here in the case that your environment
 required it.
 
 
+.. _server_configuration:
+
+Server Configuration
+--------------------
+Depending on the WSGI server you choose, you will need some values. As shown
+before, Pecan has already some defaults and they would look like this::
+
+    server = {
+        'port' : '8080',
+        'host' : '0.0.0.0'
+    }
+
+There is not too much going on there, it is just specifying the port and the 
+host it should use to serve the application. Any other values that you might
+need can get added as key/values to that same dictionary so the server of your
+choosing can use them.
+
+.. _accessibility:
+
 Accessibility 
 --------------
 You can access any configuration values at runtime importing ``conf`` from
@@ -105,4 +124,17 @@ app is running I can access ``foo`` values like::
     False
     >>> conf.foo
     Config({'bar': True, 'baz': False})
+
+
+Files and Structure
+===================
+Pecan gives you a ``start.py`` file so you can manually run your application
+from the command line. By default, this file requires a parameter which is
+a configuration file without the ``.py`` extension.
+
+If you have a configuration file named ``config.py`` you would need to pass it
+to ``start.py`` like::
+
+    python start.py config 
+
 
