@@ -75,3 +75,34 @@ top of the file. In the example configuration, this would be something like::
 **debug** Enables ``WebError`` to have full tracebacks in the browser (this is
 OFF by default).
 
+Any application specifics should go in here in the case that your environment
+required it.
+
+
+Accessibility 
+--------------
+You can access any configuration values at runtime importing ``conf`` from
+``pecan``. This includes custom, application and server specific values.
+Below is an example on how to access those values for an application::
+
+    >>> from pecan import conf
+    >>> conf.app.root
+    <test_project.controllers.root.RootController object at 0x10292b0d0>
+    >>> conf.app.static_root
+    'public'
+    >>> conf.app.template_path
+    'test_project/templates'
+    >>> conf.app.debug
+    True
+
+Similarly, if I had a custom ``foo`` entry on my configuration file once the 
+app is running I can access ``foo`` values like::
+
+    >>> from pecan import conf
+    >>> conf.foo.bar
+    True
+    >>> conf.foo.baz
+    False
+    >>> conf.foo
+    Config({'bar': True, 'baz': False})
+
