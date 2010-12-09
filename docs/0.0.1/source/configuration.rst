@@ -7,7 +7,8 @@ using, setting and dealing with configuration should be very intuitive.
 
 Python files is what the framework uses to get the values from configuration
 files. These files need to specify the values in a key/value way (Python
-dictionaries).
+dictionaries) or if you need simple one-way values you can also specify them as
+direct variables (more on that below).
 
 Even if you want custom configuration values, you need to get them in the
 configuration file as dictionaries.
@@ -113,6 +114,23 @@ Below is an example on how to access those values for an application::
     'test_project/templates'
     >>> conf.app.debug
     True
+
+
+
+Custom and Single Values
+------------------------
+There might be times when you do not need to have a dictionary to specify some
+values because all you need is a simple key that holds a value. For example, if
+you needed to specify a global administrator, you could do so like this within
+the configuration file::
+
+    administrator = 'foo_bar_user'
+
+And it would be accessible like this::
+
+    >>>> from pecan import conf
+    >>>> conf.administrator
+    'foo_bar_user'
 
 Similarly, if I had a custom ``foo`` entry on my configuration file once the 
 app is running I can access ``foo`` values like::
