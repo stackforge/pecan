@@ -2,7 +2,7 @@
 
 Configuration
 =============
-Pecan is very easy to configured. As long as you follow certain conventions;
+Pecan is very easy to configure. As long as you follow certain conventions;
 using, setting and dealing with configuration should be very intuitive.
 
 Python files is what the framework uses to get the values from configuration
