@@ -190,11 +190,14 @@ This is how it looks from the project template::
 Here you can specify other classes if you need to do so later on your project,
 but for now we have an *index* method and a *handle_form* one.
 
-**index**: Is *exposed* as the root of the application, so anything that hits
+**index**: Is *exposed* via the decorator ``@expose`` (that in turn uses the
+``index.html`` file) as the root of the application, so anything that hits
 '/' will touch this method.
 Since we are doing some validation and want to pass any errors we might get to
 the template, we set ``errors`` to receive anything that
 ``request.validation_error`` returns.
+What your index method returns is dictionary that is received by the template
+engine.
 
 
 **handle_form**: It receives 2 parameters (*name* and *age*) that are validated

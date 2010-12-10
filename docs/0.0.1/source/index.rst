@@ -43,7 +43,7 @@ framework!
 
 Pecan Hello World
 ------------------
-In this example we use ``httpserver`` from ``paste`` but feel free to use any 
+In this example we use ``httpserver`` from ``paste`` but you can use any 
 WSGI server you want::
 
     from paste import httpserver
