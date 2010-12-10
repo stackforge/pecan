@@ -16,9 +16,9 @@ configuration file as dictionaries.
 No Configuration
 ----------------
 What happens when no configuration is passed? Or if you are missing some values?
-Pecan fills in anything that you might have left behind. This includes either
-**app** or **server** completely and even if you left out specifics about them,
-like the port number the server should be running on. 
+Pecan fills in anything that you might have left behind, like specific values or  
+even if you leave them out completely. This includes
+**app** and **server** but will not, however, include any custom configurations.
 
 Defaults
 --------
