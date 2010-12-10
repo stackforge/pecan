@@ -158,7 +158,7 @@ You also get the ability to set your own configurations as dictionaries and you
 get a commented out example on how to do that.
 
 We are not going to explain much more about configuration here, if you need
-more specific details, go to the :ref:Configuration section.
+more specific details, go to the :ref:`Configuration` section.
 
     
 Root Controller

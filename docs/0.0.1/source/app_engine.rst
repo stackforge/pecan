@@ -34,7 +34,7 @@ From this point forward, we will assume you are getting Kajiki, to avoid describ
 
 
 Creating the project
-============================
+----------------------------
 Create a directory called ``pecan_gae`` and ``cd`` into it so we can start adding files. We go step by 
 step into what needs to go there to get everything running properly.
 
@@ -149,7 +149,7 @@ This is how your layout (only showing directories) should look like::
 
 
 Trying it out
-=========================
+-------------------------
 Now everything should be ready to start serving, so go ahead and run the development server::
 
     $ ./dev_appserver.py pecan_gae 
