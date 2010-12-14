@@ -3,7 +3,8 @@
 # Server Specific Configurations
 server = {
     'port' : '8081',
-    'host' : '1.1.1.1'
+    'host' : '1.1.1.1',
+    'socket': '{pecan.conf.server.host}:{pecan.conf.server.host}'
 }
 
 # Pecan Application Configurations
