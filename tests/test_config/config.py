@@ -4,7 +4,7 @@
 server = {
     'port' : '8081',
     'host' : '1.1.1.1',
-    'socket': '{pecan.conf.server.host}:{pecan.conf.server.host}'
+    'hostport': '{pecan.conf.server.host}:{pecan.conf.server.port}'
 }
 
 # Pecan Application Configurations
