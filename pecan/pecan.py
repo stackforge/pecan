@@ -66,7 +66,7 @@ class Pecan(MonitorableProcess):
         self.template_path    = template_path
         
         MonitorableProcess.__init__(self)
-        if getattr(_runtime_conf.app, 'reload', False) is True:
+        if getattr(_runtime_conf, 'app', None) and getattr(_runtime_conf.app, 'reload', False) is True:
             self.start_monitoring()
     
     def get_content_type(self, format):
