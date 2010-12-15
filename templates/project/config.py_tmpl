@@ -12,6 +12,7 @@ app = {
     'root' : RootController(),
     'static_root' : 'public', 
     'template_path' : '${egg}/templates',
+    'reload': True,
     'debug' : True 
 }
 

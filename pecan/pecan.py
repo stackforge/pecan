@@ -1,3 +1,5 @@
+from configuration      import _runtime_conf
+from monitor            import MonitorableProcess
 from templating         import renderers
 from routing            import lookup_controller
 
@@ -50,7 +52,7 @@ def error_for(field):
     return request.validation_error.error_dict.get(field, '')
 
 
-class Pecan(object):
+class Pecan(MonitorableProcess):
     def __init__(self, root, 
                  renderers        = renderers, 
                  default_renderer = 'kajiki', 
@@ -62,6 +64,10 @@ class Pecan(object):
         self.default_renderer = default_renderer
         self.hooks            = hooks
         self.template_path    = template_path
+        
+        MonitorableProcess.__init__(self)
+        if getattr(_runtime_conf.app, 'reload', False) is True:
+            self.start_monitoring()
     
     def get_content_type(self, format):
         return {
