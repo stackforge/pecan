@@ -1,5 +1,6 @@
 import sys
 from pecan import make_app, set_config, conf
+from ${egg}.model import init_model
 
 if __name__ == '__main__':
     if len(sys.argv) <= 1:
@@ -7,6 +8,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     set_config(sys.argv[1])
+    init_model()
 
     app = make_app(
         conf.app.root,

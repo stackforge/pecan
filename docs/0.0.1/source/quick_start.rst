@@ -16,7 +16,7 @@ example project::
 
     $ paster create -t pecan-base
 
-The above commnad will prompt you for a project name. I chose *test_project*,
+The above command will prompt you for a project name. I chose *test_project*,
 this is how it looks like when we run the whole command:: 
 
     $ paster create -t pecan-base
@@ -37,6 +37,9 @@ this is how it looks like when we run the whole command::
           Creating ./test_project/test_project/controllers/
           Copying __init__.py to ./test_project/test_project/controllers/__init__.py
           Copying root.py to ./test_project/test_project/controllers/root.py
+        Recursing into model
+          Creating ./test_project/test_project/model/
+          Copying __init__.py to ./test_project/test_project/model/__init__.py
         Recursing into templates
           Creating ./test_project/test_project/templates/
           Copying index.html to ./test_project/test_project/templates/index.html
@@ -68,12 +71,14 @@ This is how the structure of your new project should look like::
         ├── controllers
         │   ├── __init__.py
         │   └── root.py
+        ├── model
+        │   ├── __init__.py
         └── templates
             ├── index.html
             ├── layout.html
             └── success.html
 
-    6 directories, 10 files
+    7 directories, 11 files
 
 
 A few things have been set for you, let's review them one by one:
@@ -89,9 +94,8 @@ most part, it will contain your models, controllers and templates:
 *  **controllers**: The container directory for your controller files. 
 *  **templates**: All your templates would go in here. 
 
-Note how there is no **model** directory. Since we haven't defined any
-database for the app the template doesn't supply you one. In case you need it
-later you could create a ``models.py`` file or a ``model`` directory.
+To avoid unneeded dependencies and to remain as flexible as possible, Pecan doesn't impose any database or
+ORM out of the box. You may notice that **model/__init__.py** is mostly empty. Its contents generally contain any code necessary define tables, ORM definitions, and parse bindings from ``pecan.conf``.
 
 
 .. _running_application:
