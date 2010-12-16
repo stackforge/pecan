@@ -95,8 +95,6 @@ class TestConf(TestCase):
         configuration.set_config('config')
         self.assertEqual(_runtime_conf.server.host, '1.1.1.1')
 
-    def test_config_user
-
 
     def test_config_string(self):
         s = '{pecan.conf.app}'
