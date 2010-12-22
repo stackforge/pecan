@@ -156,6 +156,9 @@ class Pecan(MonitorableProcess):
             im_self = controller.im_self
             handlers = controller.pecan['generic_handlers']
             controller = handlers.get(request.method, handlers['DEFAULT'])
+                    
+        # add the controller to the state so that hooks can use it
+        state.controller = controller            
     
         # determine content type
         if content_type is None:
