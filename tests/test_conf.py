@@ -47,6 +47,26 @@ class TestConf(TestCase):
 
         self.assertEqual(conf.server.host, '0.0.0.0')
         self.assertEqual(conf.server.port, '8080')
+        
+    def test_update_force_dict(self):
+        """Update an empty configuration with the default values"""
+
+        conf = configuration.initconf()
+        conf.update_with_module('forcedict')
+
+        self.assertFalse(conf.app.debug)
+        self.assertEqual(conf.app.root, None)
+        self.assertEqual(conf.app.template_path, '')
+        self.assertEqual(conf.app.static_root, 'public')
+
+        self.assertEqual(conf.server.host, '0.0.0.0')
+        self.assertEqual(conf.server.port, '8080')
+
+        self.assertEqual(type(conf.beaker), dict)
+        self.assertEqual(conf.beaker['session.key'], 'key')
+        self.assertEqual(conf.beaker['session.type'], 'cookie')
+        self.assertEqual(conf.beaker['session.validate_key'], '1a971a7df182df3e1dec0af7c6913ec7')
+        self.assertTrue(conf.beaker.get('__force_dict__'), None)
 
     def test_update_config_fail_bad_attribute(self):
         conf = configuration.initconf()

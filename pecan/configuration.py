@@ -42,15 +42,19 @@ class Config(object):
         self.update(conf_dict)
 
     def update(self, conf_dict):
+        __force_dict__ = False
         # first check the keys for correct
 
         if isinstance(conf_dict, dict):
+            if '__force_dict__' in conf_dict:
+                del conf_dict['__force_dict__']
+                __force_dict__ = True
             iterator = conf_dict.iteritems()
         else:
             iterator = iter(conf_dict)
-
+            
         for k,v in iterator:
-            if not IDENTIFIER.match(k):
+            if not IDENTIFIER.match(k) and not __force_dict__:
                 raise ValueError('\'%s\' is not a valid indentifier' % k)
 
             cur_val = self.__dict__.get(k)
@@ -68,7 +72,10 @@ class Config(object):
 
     def __setitem__(self, key, value):
         if isinstance(value, dict):
-            self.__dict__[key] = Config(value)
+            if value.get('__force_dict__'):
+                self.__dict__[key] = value
+            else:
+                self.__dict__[key] = Config(value)
         elif isinstance(value, str) and ConfigString.contains_formatting(value):
             self.__dict__[key] = ConfigString(value)
         else:
@@ -126,10 +133,7 @@ def conf_from_dict(conf_dict):
         elif inspect.ismodule(v):
             continue
         
-        if isinstance(v, dict):
-            conf[k] = Config(v)
-        else:
-            conf[k] = v
+        conf[k] = v
     conf()
     return conf
 
