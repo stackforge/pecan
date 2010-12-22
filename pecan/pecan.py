@@ -163,15 +163,15 @@ class Pecan(MonitorableProcess):
         # determine content type
         if content_type is None:
             content_type = controller.pecan.get('content_type', 'text/html')
-    
-        # handle security
-        self.handle_security(controller)
         
         # get a sorted list of hooks, by priority
         state.hooks = self.determine_hooks(controller)    
     
         # handle "before" hooks
         self.handle_hooks('before', state)
+        
+        # handle security
+        self.handle_security(controller)        
     
         # fetch and validate any parameters
         params, positional_params = self.get_params(
