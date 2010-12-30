@@ -3,7 +3,7 @@ from paste.cascade import Cascade
 from weberror.errormiddleware import ErrorMiddleware
 from paste.recursive import RecursiveMiddleware
 
-from pecan import Pecan, request, response, override_template, redirect, error_for
+from pecan import Pecan, request, response, override_template, abort, redirect, error_for
 from decorators import expose
 
 from configuration import set_config
