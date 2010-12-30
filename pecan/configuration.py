@@ -138,6 +138,9 @@ def conf_from_dict(conf_dict):
     return conf
 
 def import_module(conf):
+    if conf.endswith('.py'):
+        conf = conf[:-3]
+    
     if '.' in conf:
         parts = conf.split('.')
         name = '.'.join(parts[:-1])
