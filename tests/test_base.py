@@ -1,5 +1,5 @@
 import os
-from pecan import Pecan, expose, request, response, redirect
+from pecan import Pecan, expose, request, response, redirect, abort
 from webtest import TestApp
 from formencode import Schema, validators
 
@@ -183,11 +183,25 @@ class TestEngines(object):
         r = app.get('/?argument=value&extra=not')
         assert r.status_int == 200
     
+    def test_abort(self):
+        class RootController(object):
+            @expose()
+            def index(self):
+                abort(404)
+        
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/', status=404)
+        assert r.status_int == 404
+    
     def test_redirect(self):
         class RootController(object):
             @expose()
             def index(self):
                 redirect('/testing')
+            
+            @expose()
+            def permanent(self):
+                redirect('/testing', code=301)
             
             @expose()
             def testing(self):
@@ -196,6 +210,12 @@ class TestEngines(object):
         app = TestApp(Pecan(RootController()))
         r = app.get('/')
         assert r.status_int == 302
+        r = r.follow()
+        assert r.status_int == 200
+        assert r.body == 'it worked!'
+        
+        r = app.get('/permanent')
+        assert r.status_int == 301
         r = r.follow()
         assert r.status_int == 200
         assert r.body == 'it worked!'
