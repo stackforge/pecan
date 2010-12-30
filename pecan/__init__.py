@@ -1,6 +1,7 @@
 from paste.urlparser import StaticURLParser
 from paste.cascade import Cascade
 from weberror.errormiddleware import ErrorMiddleware
+from weberror.evalexception import EvalException
 from paste.recursive import RecursiveMiddleware
 
 from pecan import Pecan, request, response, override_template, abort, redirect, error_for
@@ -13,10 +14,15 @@ __all__ = [
     'make_app', 'Pecan', 'request', 'response', 'override_template', 'expose', 'conf', 'set_config', 'use_config'
 ]
 
-def make_app(root, static_root=None, debug=False, errorcfg={}, **kw):
+def make_app(root, static_root=None, debug=False, errorcfg={}, wrap_app=None, **kw):
     app = Pecan(root, **kw)
+    if wrap_app:
+        app = wrap_app(app)
     app = RecursiveMiddleware(app)
-    app = ErrorMiddleware(app, debug=debug, **errorcfg)
+    if debug:
+        app = EvalException(app, **errorcfg)
+    else:
+        app = ErrorMiddleware(app, **errorcfg)
     if static_root:
         app = Cascade([StaticURLParser(static_root), app])
     return app
