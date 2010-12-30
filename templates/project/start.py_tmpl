@@ -17,7 +17,6 @@ if __name__ == '__main__':
         debug           = conf.app.debug
         )
 
-    print 'Serving on http://%s:%s' % (conf.server.host, conf.server.port)   
     from paste import httpserver
     try:
         httpserver.serve(app, conf.server.host, conf.server.port)
