@@ -204,6 +204,7 @@ class Pecan(MonitorableProcess):
         
         # get the result from the controller
         result = controller(*positional_params, **params)
+        raw_namespace = result
         
         # pull the template out based upon content type and handle overrides
         template = controller.pecan.get('content_types', {}).get(content_type)
@@ -222,6 +223,14 @@ class Pecan(MonitorableProcess):
                 template = template.split(':')[1]
             result = renderer.render(template, result)
             content_type = renderer.content_type
+        
+        # If we are in a test request put the namespace where it can be
+        # accessed directly
+        if request.environ.get('paste.testing'):
+            testing_variables = request.environ['paste.testing_variables']
+            testing_variables['namespace'] = raw_namespace
+            testing_variables['template_name'] = template
+            testing_variables['controller_output'] = result
         
         # set the body content
         if isinstance(result, unicode):
