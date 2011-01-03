@@ -55,11 +55,6 @@ class TransactionHook(PecanHook):
         self.rollback = rollback
         self.clear    = clear
 
-        if defer is False:
-            self.on_route = self.__begin
-        else:
-            self.before = self.__begin
-
     def is_transactional(self, state):
         if state.request.method not in ('GET', 'HEAD'):
             return True
