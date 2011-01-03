@@ -94,16 +94,19 @@ class Pecan(MonitorableProcess):
             if not controller.pecan['check_permissions']():
                 raise exc.HTTPUnauthorized
     
-    def determine_hooks(self, controller):
+    def determine_hooks(self, controller=None):
+        controller_hooks = []
+        if controller:
+            controller_hooks = controller.pecan.get('hooks', [])
         return list(
             sorted(
-                chain(controller.pecan.get('hooks', []), self.hooks), 
+                chain(controller_hooks, self.hooks), 
                 lambda x,y: cmp(x.priority, y.priority)
             )
         )
     
     def handle_hooks(self, hook_type, *args):
-        if hook_type == 'before':
+        if hook_type in ['before', 'on_route']:
             hooks = state.hooks
         else:
             hooks = reversed(state.hooks)
@@ -146,6 +149,13 @@ class Pecan(MonitorableProcess):
         return schema.to_python(to_validate)
         
     def handle_request(self):
+        
+        # get a sorted list of hooks, by priority (no controller hooks yet)
+        state.hooks = self.determine_hooks()
+        
+        # handle "on_route" hooks
+        self.handle_hooks('on_route', state)
+        
         # lookup the controller, respecting content-type as requested
         # by the file extension on the URI
         path = state.request.path

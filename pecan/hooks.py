@@ -34,6 +34,9 @@ class HookController(object):
 class PecanHook(object):
     priority = 100
     
+    def on_route(self ,state):
+        return
+    
     def before(self, state):
         return
     
@@ -57,7 +60,7 @@ class TransactionHook(PecanHook):
             return True
         return False
     
-    def before(self, state):
+    def on_route(self, state):
         state.request.error = False
         if self.is_transactional(state):
             state.request.transactional = True

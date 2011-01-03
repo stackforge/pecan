@@ -17,6 +17,9 @@ class TestHooks(object):
                 return 'Hello, World!'
         
         class SimpleHook(PecanHook):
+            def on_route(self, state):
+                run_hook.append('on_route')
+            
             def before(self, state):
                 run_hook.append('before')
 
@@ -31,10 +34,11 @@ class TestHooks(object):
         assert response.status_int == 200
         assert response.body == 'Hello, World!'
         
-        assert len(run_hook) == 3
-        assert run_hook[0] == 'before'
-        assert run_hook[1] == 'inside'
-        assert run_hook[2] == 'after'
+        assert len(run_hook) == 4
+        assert run_hook[0] == 'on_route'
+        assert run_hook[1] == 'before'
+        assert run_hook[2] == 'inside'
+        assert run_hook[3] == 'after'
     
     def test_basic_multi_hook(self):
         run_hook = []
@@ -48,6 +52,9 @@ class TestHooks(object):
         class SimpleHook(PecanHook):
             def __init__(self, id):
                 self.id = str(id)
+            
+            def on_route(self, state):
+                run_hook.append('on_route'+self.id)
             
             def before(self, state):
                 run_hook.append('before'+self.id)
@@ -65,14 +72,17 @@ class TestHooks(object):
         assert response.status_int == 200
         assert response.body == 'Hello, World!'
         
-        assert len(run_hook) == 7
-        assert run_hook[0] == 'before1'
-        assert run_hook[1] == 'before2'
-        assert run_hook[2] == 'before3'
-        assert run_hook[3] == 'inside'
-        assert run_hook[4] == 'after3'
-        assert run_hook[5] == 'after2'
-        assert run_hook[6] == 'after1'
+        assert len(run_hook) == 10
+        assert run_hook[0] == 'on_route1'
+        assert run_hook[1] == 'on_route2'
+        assert run_hook[2] == 'on_route3'
+        assert run_hook[3] == 'before1'
+        assert run_hook[4] == 'before2'
+        assert run_hook[5] == 'before3'
+        assert run_hook[6] == 'inside'
+        assert run_hook[7] == 'after3'
+        assert run_hook[8] == 'after2'
+        assert run_hook[9] == 'after1'
     
     def test_prioritized_hooks(self):
         run_hook = []
@@ -86,6 +96,9 @@ class TestHooks(object):
         class SimpleHook(PecanHook):
             def __init__(self, id):
                 self.id = str(id)
+            
+            def on_route(self, state):
+                run_hook.append('on_route'+self.id)
             
             def before(self, state):
                 run_hook.append('before'+self.id)
@@ -104,16 +117,19 @@ class TestHooks(object):
         assert response.status_int == 200
         assert response.body == 'Hello, World!'
         
-        assert len(run_hook) == 7
-        assert run_hook[0] == 'before1'
-        assert run_hook[1] == 'before2'
-        assert run_hook[2] == 'before3'
-        assert run_hook[3] == 'inside'
-        assert run_hook[4] == 'after3'
-        assert run_hook[5] == 'after2'
-        assert run_hook[6] == 'after1'
+        assert len(run_hook) == 10
+        assert run_hook[0] == 'on_route1'
+        assert run_hook[1] == 'on_route2'
+        assert run_hook[2] == 'on_route3'
+        assert run_hook[3] == 'before1'
+        assert run_hook[4] == 'before2'
+        assert run_hook[5] == 'before3'
+        assert run_hook[6] == 'inside'
+        assert run_hook[7] == 'after3'
+        assert run_hook[8] == 'after2'
+        assert run_hook[9] == 'after1'
         
-        for i in range(len(run_hook)): run_hook.pop()
+        run_hook = []
         
         state.app.hooks[0].priority = 3
         state.app.hooks[1].priority = 2
@@ -123,14 +139,17 @@ class TestHooks(object):
         assert response.status_int == 200
         assert response.body == 'Hello, World!'
         
-        assert len(run_hook) == 7
-        assert run_hook[0] == 'before3'
-        assert run_hook[1] == 'before2'
-        assert run_hook[2] == 'before1'
-        assert run_hook[3] == 'inside'
-        assert run_hook[4] == 'after1'
-        assert run_hook[5] == 'after2'
-        assert run_hook[6] == 'after3'
+        assert len(run_hook) == 10
+        assert run_hook[0] == 'on_route3'
+        assert run_hook[1] == 'on_route2'
+        assert run_hook[2] == 'on_route1'
+        assert run_hook[3] == 'before3'
+        assert run_hook[4] == 'before2'
+        assert run_hook[5] == 'before1'
+        assert run_hook[6] == 'inside'
+        assert run_hook[7] == 'after1'
+        assert run_hook[8] == 'after2'
+        assert run_hook[9] == 'after3'
     
     def test_transaction_hook(self):
         run_hook = []
@@ -144,19 +163,6 @@ class TestHooks(object):
             @expose()
             def error(self):
                 return [][1]
-        
-        class SimpleHook(PecanHook):
-            def __init__(self, id):
-                self.id = str(id)
-            
-            def before(self, state):
-                run_hook.append('before'+self.id)
-
-            def after(self, state):
-                run_hook.append('after'+self.id)
-
-            def on_error(self, state, e):
-                run_hook.append('error'+self.id)
         
         def gen(event):
             return lambda: run_hook.append(event)
@@ -180,7 +186,7 @@ class TestHooks(object):
         assert run_hook[1] == 'inside'
         assert run_hook[2] == 'clear'
         
-        for i in range(len(run_hook)): run_hook.pop()
+        run_hook = []
         
         response = app.post('/')
         assert response.status_int == 200
@@ -192,7 +198,7 @@ class TestHooks(object):
         assert run_hook[2] == 'commit'
         assert run_hook[3] == 'clear'
         
-        for i in range(len(run_hook)): run_hook.pop()
+        run_hook = []
         try:
             response = app.post('/error')
         except IndexError:
@@ -207,6 +213,9 @@ class TestHooks(object):
         run_hook = []
         
         class SimpleHook(PecanHook):
+            def on_route(self, state):
+                run_hook.append('on_route')
+            
             def before(self, state):
                 run_hook.append('before')
 
@@ -240,7 +249,7 @@ class TestHooks(object):
         assert len(run_hook) == 1
         assert run_hook[0] == 'inside'
         
-        for i in range(len(run_hook)): run_hook.pop()
+        run_hook = []
         
         response = app.get('/sub')
         assert response.status_int == 200
@@ -257,6 +266,9 @@ class TestHooks(object):
         class SimpleHook(PecanHook):
             def __init__(self, id):
                 self.id = str(id)
+            
+            def on_route(self, state):
+                run_hook.append('on_route'+self.id)
             
             def before(self, state):
                 run_hook.append('before'+self.id)
@@ -288,23 +300,25 @@ class TestHooks(object):
         assert response.status_int == 200
         assert response.body == 'Hello, World!'
         
-        assert len(run_hook) == 3
-        assert run_hook[0] == 'before1'
-        assert run_hook[1] == 'inside'
-        assert run_hook[2] == 'after1'
+        assert len(run_hook) == 4
+        assert run_hook[0] == 'on_route1'
+        assert run_hook[1] == 'before1'
+        assert run_hook[2] == 'inside'
+        assert run_hook[3] == 'after1'
         
-        for i in range(len(run_hook)): run_hook.pop()
+        run_hook = []
         
         response = app.get('/sub')
         assert response.status_int == 200
         assert response.body == 'Inside here!'
         
-        assert len(run_hook) == 5
-        assert run_hook[0] == 'before2'
-        assert run_hook[1] == 'before1'
-        assert run_hook[2] == 'inside_sub'
-        assert run_hook[3] == 'after1'
-        assert run_hook[4] == 'after2'
+        assert len(run_hook) == 6
+        assert run_hook[0] == 'on_route1'
+        assert run_hook[1] == 'before2'
+        assert run_hook[2] == 'before1'
+        assert run_hook[3] == 'inside_sub'
+        assert run_hook[4] == 'after1'
+        assert run_hook[5] == 'after2'
     
     def test_hooks_with_validation(self):
         run_hook = []
@@ -322,6 +336,9 @@ class TestHooks(object):
             ]
         
         class SimpleHook(PecanHook):
+            def on_route(self, state):
+                run_hook.append('on_route')
+            
             def before(self, state):
                 run_hook.append('before')
 
@@ -372,11 +389,12 @@ class TestHooks(object):
         ))
         assert r.status_int == 200
         assert r.body == 'False'
-        assert len(run_hook) == 3
-        assert run_hook[0] == 'before'
-        assert run_hook[1] == 'inside'
-        assert run_hook[2] == 'after'
-        for i in range(len(run_hook)): run_hook.pop()
+        assert len(run_hook) == 4
+        assert run_hook[0] == 'on_route'
+        assert run_hook[1] == 'before'
+        assert run_hook[2] == 'inside'
+        assert run_hook[3] == 'after'
+        run_hook = []
         
         # test that the hooks get properly run with validation errors        
         app = TestApp(make_app(RootController(), hooks=[SimpleHook()]))
@@ -391,11 +409,12 @@ class TestHooks(object):
         ))
         assert r.status_int == 200
         assert r.body == 'True'
-        assert len(run_hook) == 3
-        assert run_hook[0] == 'before'
-        assert run_hook[1] == 'inside'
-        assert run_hook[2] == 'after'
-        for i in range(len(run_hook)): run_hook.pop()
+        assert len(run_hook) == 4
+        assert run_hook[0] == 'on_route'
+        assert run_hook[1] == 'before'
+        assert run_hook[2] == 'inside'
+        assert run_hook[3] == 'after'
+        run_hook = []
         
         # test that the hooks get properly run with validation errors 
         # and an error handler       
@@ -411,10 +430,11 @@ class TestHooks(object):
         ))
         assert r.status_int == 200
         assert r.body == 'errors'
-        assert len(run_hook) == 5
-        assert run_hook[0] == 'before'
-        assert run_hook[1] == 'after'
-        assert run_hook[2] == 'before'
-        assert run_hook[3] == 'inside'
-        assert run_hook[4] == 'after'
-        for i in range(len(run_hook)): run_hook.pop()
+        assert len(run_hook) == 7
+        assert run_hook[0] == 'on_route'
+        assert run_hook[1] == 'before'
+        assert run_hook[2] == 'after'
+        assert run_hook[3] == 'on_route'
+        assert run_hook[4] == 'before'
+        assert run_hook[5] == 'inside'
+        assert run_hook[6] == 'after'

@@ -9,17 +9,20 @@ There is nothing wrong with WSGI Middleware, and actually, it is really easy to
 use middleware with Pecan, but it is rather hard (sometimes impossible) to have
 access to Pecan's internals.
 
-Hooks offer three ways of dealing with a request: *before*, *after* and
-*on_error* . Obviously,
-an *after* hook will be triggered once the request has been processed, a *before* hook will
-be dealt before anything and a *on_error* will be called when the request
-generated an error.
+Hooks offer four ways of dealing with a request:
 
+* ``on_route``: called before Pecan attempts to route a request
+
+* ``before``: called after routing but before processing the request
+
+* ``after``: called after a request has been processed
+
+* ``on_error``: called when a request generates an error
 
 Implementation
 --------------
 They are very easy to plug into Pecan. In the below example we will go through
-a simple hooks that will gather some information about the request and then it
+a simple hook that will gather some information about the request and then it
 will print it out to ``stdout``.
 
 Your hook needs to import ``PecanHook`` which will be used to inherit from.
