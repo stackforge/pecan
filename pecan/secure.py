@@ -40,6 +40,13 @@ def walk_controller(root_class, controller):
                 
 
 class SecureController(object):
+    """
+    Used to apply security to a controller and its children.
+    Implementations of SecureController should extend the
+    `check_permissions` method to return a True or False
+    value (depending on whether or not the user has access
+    to the controller).
+    """
     class __metaclass__(type):
         def __init__(cls, name, bases, dict_):
             walk_controller(cls, cls)
@@ -47,3 +54,27 @@ class SecureController(object):
     @classmethod
     def check_permissions(cls):
         return True
+
+        
+class UnlockedControllerMeta(type):
+    """
+    Can be used to force (override) a controller and all of its
+    subcontrollers to be unlocked/unsecured.
+    
+    This has the same effect as applying @pecan.secure.unlocked
+    to every method in the class and its subclasses.
+    """
+    def __init__(cls, name, bases, ns):
+        cls.walk_and_apply_unlocked(cls, cls)
+
+    def walk_and_apply_unlocked(cls, root_class, controller):
+        if not isinstance(controller, (int, dict)):
+            for name, value in getmembers(controller):
+                if name == 'controller': continue
+
+                if ismethod(value):
+                    if iscontroller(value):
+                        value = unlocked(value)
+                elif hasattr(value, '__class__'):
+                    if name.startswith('__') and name.endswith('__'): continue
+                    cls.walk_and_apply_unlocked(root_class, value)
