@@ -54,12 +54,17 @@ class TransactionHook(PecanHook):
         self.commit   = commit
         self.rollback = rollback
         self.clear    = clear
-    
+
+        if defer is False:
+            self.on_route = self.__begin
+        else:
+            self.before = self.__begin
+
     def is_transactional(self, state):
         if state.request.method not in ('GET', 'HEAD'):
             return True
         return False
-    
+
     def on_route(self, state):
         state.request.error = False
         if self.is_transactional(state):
@@ -68,7 +73,13 @@ class TransactionHook(PecanHook):
         else:
             state.request.transactional = False
             self.start_ro()
-    
+
+    def before(self, state):
+        if self.is_transactional(state) and not state.request.transactional:
+            self.clear()
+            state.request.transactional = True
+            self.start()
+
     def on_error(self, state, e):
         state.request.error = True
     
