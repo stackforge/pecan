@@ -1,6 +1,6 @@
 from configuration      import _runtime_conf
 from monitor            import MonitorableProcess
-from templating         import renderers
+from templating         import RendererFactory
 from routing            import lookup_controller
 
 from webob              import Request, Response, exc
@@ -62,13 +62,15 @@ def error_for(field):
 
 class Pecan(MonitorableProcess):
     def __init__(self, root, 
-                 renderers        = renderers, 
-                 default_renderer = 'kajiki', 
-                 template_path    = 'templates', 
-                 hooks            = []):
+                 default_renderer    = 'mako', 
+                 template_path       = 'templates', 
+                 hooks               = [],
+                 custom_renderers    = {},
+                 extra_template_vars = {}
+                 ):
         
         self.root             = root
-        self.renderers        = renderers
+        self.renderers        = RendererFactory(custom_renderers, extra_template_vars)
         self.default_renderer = default_renderer
         self.hooks            = hooks
         self.template_path    = template_path

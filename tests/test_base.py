@@ -1,5 +1,7 @@
 import os
 from pecan import Pecan, expose, request, redirect, abort
+from pecan import Pecan, expose, request, redirect, abort
+from pecan.templating import _builtin_renderers as builtin_renderers
 from webtest import TestApp
 from formencode import Schema, validators
 
@@ -122,6 +124,9 @@ class TestEngines(object):
     template_path = os.path.join(os.path.dirname(__file__), 'templates')
 
     def test_genshi(self):
+        if 'genshi' not in builtin_renderers:
+            return
+
         class RootController(object):
             @expose('genshi:genshi.html')
             def index(self, name='Jonathan'):
@@ -138,6 +143,9 @@ class TestEngines(object):
         assert "<h1>Hello, World!</h1>" in r.body
     
     def test_kajiki(self):
+        if 'kajiki' not in builtin_renderers:
+            return
+
         class RootController(object):
             @expose('kajiki:kajiki.html')
             def index(self, name='Jonathan'):
@@ -152,8 +160,10 @@ class TestEngines(object):
         r = app.get('/index.html?name=World')
         assert r.status_int == 200
         assert "<h1>Hello, World!</h1>" in r.body
-    
+   
     def test_mako(self):
+        if 'mako' not in builtin_renderers:
+            return
         class RootController(object):
             @expose('mako:mako.html')
             def index(self, name='Jonathan'):
