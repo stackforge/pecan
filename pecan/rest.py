@@ -1,5 +1,5 @@
 from decorators import expose
-from pecan import request
+from core import request
 
 
 class RestController(object):

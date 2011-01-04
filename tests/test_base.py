@@ -105,7 +105,7 @@ class TestBase(object):
         After a request, the state local() should be totally clean
         except for state.app (so that objects don't leak between requests)
         """
-        from pecan.pecan import state
+        from pecan.core import state
         
         class RootController(object):
             @expose()

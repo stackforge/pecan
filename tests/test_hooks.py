@@ -1,5 +1,5 @@
 from pecan import make_app, expose, request, redirect
-from pecan.pecan import state
+from pecan.core import state
 from pecan.hooks import PecanHook, TransactionHook, HookController
 from pecan.decorators import transactional
 from formencode import Schema, validators
