@@ -1,5 +1,5 @@
-from inspect import getmembers, ismethod
-from routing import iscontroller
+from routing    import iscontroller
+from webob.exc  import HTTPFound
 
 
 __all__ = ['PecanHook', 'TransactionHook', 'HookController']
@@ -56,7 +56,13 @@ class TransactionHook(PecanHook):
         self.clear    = clear
 
     def is_transactional(self, state):
-        if state.request.method not in ('GET', 'HEAD'):
+        controller = getattr(state, 'controller', None)
+        if controller:
+            force_transactional = getattr(state.controller, '__transactional__', False)
+        else:
+            force_transactional = False
+
+        if state.request.method not in ('GET', 'HEAD') or force_transactional:
             return True
         return False
 
@@ -76,6 +82,18 @@ class TransactionHook(PecanHook):
             self.start()
 
     def on_error(self, state, e):
+        #
+        # If we should ignore redirects,
+        # (e.g., shouldn't consider them rollback-worthy)
+        # don't set `state.request.error = True`.
+        #
+        transactional_ignore_redirects = getattr(
+            state.controller, 
+            '__transactional_ignore_redirects__',
+            state.request.method not in ('GET', 'HEAD')
+        )
+        if type(e) is HTTPFound and transactional_ignore_redirects is True:
+            return
         state.request.error = True
     
     def after(self, state):

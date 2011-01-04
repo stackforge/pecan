@@ -53,3 +53,12 @@ def expose(template      = None,
             cfg['validate_json'] = True
         return f
     return decorate
+    
+def transactional(ignore_redirects=True):
+    def deco(f):
+        def wrap(*args, **kwargs):
+            return f(*args, **kwargs)
+        wrap.__transactional__ = True
+        wrap.__transactional_ignore_redirects__ = ignore_redirects
+        return wrap
+    return deco

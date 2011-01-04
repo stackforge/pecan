@@ -176,7 +176,7 @@ class Pecan(MonitorableProcess):
             controller = handlers.get(request.method, handlers['DEFAULT'])
                     
         # add the controller to the state so that hooks can use it
-        state.controller = controller            
+        state.controller = controller
     
         # determine content type
         if content_type is None:
@@ -288,3 +288,5 @@ class Pecan(MonitorableProcess):
             del state.request
             del state.response
             del state.hooks
+            if hasattr(state, 'controller'):
+                del state.controller
