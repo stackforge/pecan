@@ -162,6 +162,10 @@ class TestHooks(object):
                 return 'Hello, World!'
             
             @expose()
+            def redirect(self):
+                redirect('/')            
+            
+            @expose()
             def error(self):
                 return [][1]
         
@@ -199,6 +203,34 @@ class TestHooks(object):
         assert run_hook[2] == 'commit'
         assert run_hook[3] == 'clear'
         
+        #
+        # test hooks for GET /redirect
+        # This controller should always be non-transactional
+        #
+
+        run_hook = []
+        
+        response = app.get('/redirect')
+        assert response.status_int == 302
+        assert len(run_hook) == 2
+        assert run_hook[0] == 'start_ro'
+        assert run_hook[1] == 'clear'
+        
+        #
+        # test hooks for POST /redirect
+        # This controller should always be transactional,
+        # even in the case of redirects
+        #
+        
+        run_hook = []
+        
+        response = app.post('/redirect')
+        assert response.status_int == 302
+        assert len(run_hook) == 3
+        assert run_hook[0] == 'start'
+        assert run_hook[1] == 'commit'
+        assert run_hook[2] == 'clear'        
+        
         run_hook = []
         try:
             response = app.post('/error')
@@ -210,7 +242,7 @@ class TestHooks(object):
         assert run_hook[1] == 'rollback'
         assert run_hook[2] == 'clear'
         
-    def test_transaction_hook_with_transactional(self):
+    def test_transaction_hook_with_transactional_decorator(self):
         run_hook = []
 
         class RootController(object):
@@ -447,7 +479,7 @@ class TestHooks(object):
         assert len(run_hook) == 3
         assert run_hook[0] == 'start'
         assert run_hook[1] == 'rollback'
-        assert run_hook[2] == 'clear'     
+        assert run_hook[2] == 'clear'
     
     def test_basic_isolated_hook(self):
         run_hook = []
