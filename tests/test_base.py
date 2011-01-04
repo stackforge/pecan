@@ -1,5 +1,5 @@
 import os
-from pecan import Pecan, expose, request, response, redirect, abort
+from pecan import Pecan, expose, request, redirect, abort
 from webtest import TestApp
 from formencode import Schema, validators
 
@@ -97,7 +97,25 @@ class TestBase(object):
         r = app.get('/100/name')
         assert r.status_int == 200
         assert r.body == '/100/name'
-            
+
+    def test_request_state_cleanup(self):
+        """
+        After a request, the state local() should be totally clean
+        except for state.app (so that objects don't leak between requests)
+        """
+        from pecan.pecan import state
+        
+        class RootController(object):
+            @expose()
+            def index(self):
+                return '/'
+        
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert r.body == '/'
+        
+        assert state.__dict__.keys() == ['app']
 
 class TestEngines(object):
     
