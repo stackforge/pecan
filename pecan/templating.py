@@ -1,5 +1,6 @@
-__all__ = ['renderers']
+__all__ = ['RendererFactory']
 
+_builtin_renderers = {}
 
 #
 # JSON rendering engine
@@ -8,72 +9,91 @@ __all__ = ['renderers']
 class JsonRenderer(object):
     content_type = 'application/json'
     
-    def __init__(self, path, context):
+    def __init__(self, path, extra_vars):
         pass
     
     def render(self, template_path, namespace):
         from jsonify import encode
         return encode(namespace)
 
+_builtin_renderers['json'] = JsonRenderer
+
 
 #
 # Genshi rendering engine
 # 
 
-class GenshiRenderer(object):
-    content_type = 'text/html'
+try:
+    from genshi.template import TemplateLoader
 
-    def __init__(self, path, context):
-        from genshi.template import TemplateLoader
-        self.loader = TemplateLoader([path], auto_reload=True)
-        self.context = context
+    class GenshiRenderer(object):
+        content_type = 'text/html'
+
+        def __init__(self, path, extra_vars):
+            self.loader = TemplateLoader([path], auto_reload=True)
+            self.extra_vars = extra_vars
     
-    def render(self, template_path, namespace):
-        tmpl = self.loader.load(template_path)
-        stream = tmpl.generate(**self.context.make_ns(namespace))
-        return stream.render('html')
+        def render(self, template_path, namespace):
+            tmpl = self.loader.load(template_path)
+            stream = tmpl.generate(**self.extra_vars.make_ns(namespace))
+            return stream.render('html')
+
+    _builtin_renderers['genshi'] = GenshiRenderer
+except ImportError:                                 #pragma no cover
+    pass
 
 
 #
 # Mako rendering engine
 #
 
-class MakoRenderer(object):
-    content_type = 'text/html'
+try:
+    from mako.lookup import TemplateLookup
 
-    def __init__(self, path, context):
-        from mako.lookup import TemplateLookup
-        self.loader = TemplateLookup(directories=[path])
-        self.context = context
+    class MakoRenderer(object):
+        content_type = 'text/html'
+
+        def __init__(self, path, extra_vars):
+            self.loader = TemplateLookup(directories=[path])
+            self.extra_vars = extra_vars
     
-    def render(self, template_path, namespace):
-        tmpl = self.loader.get_template(template_path)
-        return tmpl.render(**self.context.make_ns(namespace))
+        def render(self, template_path, namespace):
+            tmpl = self.loader.get_template(template_path)
+            return tmpl.render(**self.extra_vars.make_ns(namespace))
+
+    _builtin_renderers['mako'] = MakoRenderer
+except ImportError:                                 # pragma no cover
+    pass
 
 
 #
 # Kajiki rendering engine
 #
 
-class KajikiRenderer(object):
-    content_type = 'text/html'
+try:
+    from kajiki.loader import FileLoader
 
-    def __init__(self, path, context):
-        from kajiki.loader import FileLoader
-        self.loader = FileLoader(path, reload=True)
-        self.context = context
+    class KajikiRenderer(object):
+        content_type = 'text/html'
+    
+        def __init__(self, path, extra_vars):
+            self.loader = FileLoader(path, reload=True)
+            self.extra_vars = extra_vars
 
-    def render(self, template_path, namespace):
-        Template = self.loader.import_(template_path)
-        stream = Template(self.context.make_ns(namespace))
-        return stream.render()
+        def render(self, template_path, namespace):
+            Template = self.loader.import_(template_path)
+            stream = Template(self.extra_vars.make_ns(namespace))
+            return stream.render()
+    _builtin_renderers['kajiki'] = KajikiRenderer
+except ImportError:                                 # pragma no cover
+    pass
 
 #
-# Rendering Context
+# Extra Vars Rendering 
 #
-class RenderingContext(object):
-    def __init__(self, globals={}):
-        self.namespace = dict(globals)
+class ExtraNamespace(object):
+    def __init__(self, extras={}):
+        self.namespace = dict(extras)
 
     def update(self, d):
         self.namespace.update(d)
@@ -91,20 +111,17 @@ class RenderingContext(object):
 # Rendering Factory
 #
 class RendererFactory(object):
-    def __init__(self, custom_renderers={}, extra_namespace={}):
+    def __init__(self, custom_renderers={}, extra_vars={}):
         self._renderers = {}
-        self._renderer_classes = {
-            'genshi': GenshiRenderer,
-            'kajiki': KajikiRenderer,
-            'mako'  : MakoRenderer,
-            'json'  : JsonRenderer
-        }
-
+        self._renderer_classes = dict(_builtin_renderers)
         self.add_renderers(custom_renderers)
-        self.context = RenderingContext(extra_namespace)
+        self.extra_vars = ExtraNamespace(extra_vars)
 
     def add_renderers(self, custom_dict):
         self._renderer_classes.update(custom_dict)
+
+    def available(self, name):
+        return name in self._renderer_classes
 
     def create(self, name, template_path):
         cls = self._renderer_classes.get(name)
@@ -112,7 +129,7 @@ class RendererFactory(object):
         if cls is None:
             return None
         else:
-            return cls(template_path, self.context)
+            return cls(template_path, self.extra_vars)
         
     def get(self, name, template_path):
         key = name+template_path

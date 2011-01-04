@@ -62,14 +62,15 @@ def error_for(field):
 
 class Pecan(MonitorableProcess):
     def __init__(self, root, 
-                 default_renderer = 'kajiki', 
-                 template_path    = 'templates', 
-                 hooks            = [],
-                 custom_renderers = {},
+                 default_renderer    = 'mako', 
+                 template_path       = 'templates', 
+                 hooks               = [],
+                 custom_renderers    = {},
+                 extra_template_vars = {}
                  ):
         
         self.root             = root
-        self.renderers        = RendererFactory(custom_renderers)
+        self.renderers        = RendererFactory(custom_renderers, extra_template_vars)
         self.default_renderer = default_renderer
         self.hooks            = hooks
         self.template_path    = template_path
