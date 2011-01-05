@@ -28,6 +28,7 @@ def proxy(key):
             return getattr(obj, attr)
         def __setattr__(self, attr, value):
             obj = getattr(state, key)
+
             return setattr(obj, attr, value)
     return ObjectProxy()
 
@@ -39,7 +40,6 @@ response    = proxy('response')
 
 def override_template(template):
     request.override_template = template
-
 
 def abort(status_code=None, detail='', headers=None, comment=None):
     raise exc.status_map[status_code](detail=detail, headers=headers, comment=comment)
@@ -83,7 +83,8 @@ class Pecan(MonitorableProcess):
         return {
             'html'  : 'text/html',
             'xhtml' : 'text/html',
-            'json'  : 'application/json'
+            'json'  : 'application/json',
+            'txt'   : 'text/plain'
         }.get(format, 'text/html')
     
     def route(self, node, path):
@@ -154,19 +155,20 @@ class Pecan(MonitorableProcess):
         
         # get a sorted list of hooks, by priority (no controller hooks yet)
         state.hooks = self.determine_hooks()
-        
+        state.content_type = None
+
         # handle "on_route" hooks
         self.handle_hooks('on_route', state)
         
         # lookup the controller, respecting content-type as requested
         # by the file extension on the URI
         path = state.request.path
-        content_type = None
-        if '.' in path.split('/')[-1]:
+
+        if state.content_type is None and '.' in path.split('/')[-1]:
             path, format = path.split('.')
-            content_type = self.get_content_type(format)      
+            state.content_type = self.get_content_type(format)      
         controller, remainder = self.route(self.root, path)
-        
+
         if controller.pecan.get('generic_handler'):
             raise exc.HTTPNotFound
         
@@ -180,10 +182,9 @@ class Pecan(MonitorableProcess):
         # add the controller to the state so that hooks can use it
         state.controller = controller
     
-        # determine content type
-        if content_type is None:
-            content_type = controller.pecan.get('content_type', 'text/html')
-        
+        # if unsure ask the controller for the default content type 
+        if state.content_type is None:
+            state.content_type = controller.pecan.get('content_type', 'text/html')
         # get a sorted list of hooks, by priority
         state.hooks = self.determine_hooks(controller)    
     
@@ -216,17 +217,24 @@ class Pecan(MonitorableProcess):
         
         # get the result from the controller
         result = controller(*positional_params, **params)
+
+        # a controller can return the response object which means they've taken 
+        # care of filling it out
+        if result == response:
+            return
+
         raw_namespace = result
         
         # pull the template out based upon content type and handle overrides
-        template = controller.pecan.get('content_types', {}).get(content_type)
+        template = controller.pecan.get('content_types', {}).get(state.content_type)
         template = getattr(request, 'override_template', template)
-        
+
         # if there is a template, render it
         if template:
             renderer = self.renderers.get(self.default_renderer, self.template_path)
             if template == 'json':
                 renderer = self.renderers.get('json', self.template_path)
+                state.content_type = self.get_content_type('json')
             else:
                 result['error_for'] = error_for
                 
@@ -234,7 +242,6 @@ class Pecan(MonitorableProcess):
                 renderer = self.renderers.get(template.split(':')[0], self.template_path)
                 template = template.split(':')[1]
             result = renderer.render(template, result)
-            content_type = renderer.content_type
         
         # If we are in a test request put the namespace where it can be
         # accessed directly
@@ -251,8 +258,8 @@ class Pecan(MonitorableProcess):
             state.response.body = result
         
         # set the content type
-        if content_type:
-            state.response.content_type = content_type
+        if state.content_type:
+            state.response.content_type = state.content_type
     
     def __call__(self, environ, start_response):
         # create the request and response object
@@ -287,8 +294,9 @@ class Pecan(MonitorableProcess):
             return state.response(environ, start_response)
         finally:        
             # clean up state
+            del state.content_type
+            del state.hooks
             del state.request
             del state.response
-            del state.hooks
             if hasattr(state, 'controller'):
                 del state.controller

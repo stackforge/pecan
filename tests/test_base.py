@@ -1,6 +1,5 @@
 import os
-from pecan import Pecan, expose, request, redirect, abort
-from pecan import Pecan, expose, request, redirect, abort
+from pecan import Pecan, expose, request, response, redirect, abort
 from pecan.templating import _builtin_renderers as builtin_renderers
 from webtest import TestApp
 from formencode import Schema, validators
@@ -305,3 +304,23 @@ class TestEngines(object):
         r = app.get('/test/1/2/3/4')
         assert r.status_int == 200
         assert r.body == 'it worked'
+
+    def test_streaming_response(self):
+        class RootController(object):
+            @expose(content_type='text/plain')
+            def test(self, foo):
+                if foo == 'stream':
+                    response.content_type='application/octet-stream'
+                    response.body = 'stream'
+                    return response
+                else:
+                    return 'plain text'
+
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/test/stream/')
+        assert r.content_type == 'application/octet-stream'
+        assert r.body == 'stream'
+
+        r = app.get('/test/plain/')
+        assert r.content_type == 'text/plain'
+        assert r.body == 'plain text'

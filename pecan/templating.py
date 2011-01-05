@@ -7,8 +7,6 @@ _builtin_renderers = {}
 #
 
 class JsonRenderer(object):
-    content_type = 'application/json'
-    
     def __init__(self, path, extra_vars):
         pass
     
@@ -27,8 +25,6 @@ try:
     from genshi.template import TemplateLoader
 
     class GenshiRenderer(object):
-        content_type = 'text/html'
-
         def __init__(self, path, extra_vars):
             self.loader = TemplateLoader([path], auto_reload=True)
             self.extra_vars = extra_vars
@@ -51,8 +47,6 @@ try:
     from mako.lookup import TemplateLookup
 
     class MakoRenderer(object):
-        content_type = 'text/html'
-
         def __init__(self, path, extra_vars):
             self.loader = TemplateLookup(directories=[path])
             self.extra_vars = extra_vars
@@ -74,8 +68,6 @@ try:
     from kajiki.loader import FileLoader
 
     class KajikiRenderer(object):
-        content_type = 'text/html'
-    
         def __init__(self, path, extra_vars):
             self.loader = FileLoader(path, reload=True)
             self.extra_vars = extra_vars
@@ -100,10 +92,10 @@ class ExtraNamespace(object):
 
     def make_ns(self, ns):
         if self.namespace:
-            retval = {}
-            retval.update(self.namespace)
-            retval.update(ns)
-            return retval
+            val = {}
+            val.update(self.namespace)
+            val.update(ns)
+            return val
         else:
             return ns
 
