@@ -28,7 +28,7 @@ requirements = [
   "WebOb == 1.0.0", 
   "WebCore == 1.0.0",
   "simplegeneric == 0.7",
-  "Kajiki == 0.3.1",
+  "Mako == 0.3.6",
   "Paste == 1.7.5.1",
   "PasteScript == 1.7.3",
   "formencode == 1.2.2"
