@@ -310,8 +310,10 @@ class TestEngines(object):
             @expose(content_type='text/plain')
             def test(self, foo):
                 if foo == 'stream':
+                    contents = 'stream'
                     response.content_type='application/octet-stream'
-                    response.body = 'stream'
+                    response.content_length = len(contents)
+                    response.app_iter = iter(contents)
                     return response
                 else:
                     return 'plain text'
