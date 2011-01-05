@@ -1,13 +1,20 @@
 <html>
   <head>
-    <title py:block="title">Default Title</title>
-    <py:block name="style">
-      <link rel="stylesheet" type="text/css" media="screen" href="/css/style.css" />
-    </py:block>
-    <py:block name="javascript" py:strip="True">
-      <script language="text/javascript" src="/javascript/shared.js" />
-    </py:block>
+      <title>${self.title()}</title>
+      ${self.style()}
+      ${self.javascript()}
   </head>
-  <body py:block="body">
-  </body>
+  ${self.body()}
 </html>
+
+<%def name="title()">
+    Default Title
+</%def>
+
+<%def name="style()">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/style.css" />
+</%def>
+
+<%def name="javascript()">
+    <script language="text/javascript" src="/javascript/shared.js"></script>
+</%def>

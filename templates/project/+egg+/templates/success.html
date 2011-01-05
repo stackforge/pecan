@@ -1,11 +1,12 @@
-<html py:extends="layout.html">
-  <head>
-    <title py:block="title">Success!</title>
-  </head>
-  <body py:block="body">
+<%inherit file="layout.html"/>
+
+## override the title
+<%def name="title()">
+    Success!
+</%def>
+
+## now define the body
     <header>
       <h1>Success!</h1>
     </header>
     <p>Your form submission was successful! Thanks, ${name}!</p>
-  </body>
-</html>

@@ -1,8 +1,11 @@
-<html py:extends="layout.html">
-  <head>
-    <title py:block="title">Welcome to Pecan!</title>
-  </head>
-  <body py:block="body">
+<%inherit file="layout.html" />
+
+## provide definitions for blocks we want to redefine
+<%def name="title()">
+    Welcome to Pecan!
+</%def>
+
+## now define the body of the template
     <header>
       <h1>Welcome to Pecan</h1>
     </header>
@@ -10,7 +13,7 @@
     
     <ul>
       <li>The ability to serve static files.</li>
-      <li>Templating using the <a href="http://kajiki.pythonisito.com/">Kajiki template engine</a>.</li>
+      <li>Templating using the <a href="http://www.makotemplates.org">Mako template engine</a>.</li>
       <li>Built-in error management using <a href="http://pypi.python.org/pypi/WebError">WebError</a>.</li>
     </ul>
     
@@ -40,5 +43,5 @@
       
       <input type="submit" />
     </form>
-  </body>
-</html>
+
+
