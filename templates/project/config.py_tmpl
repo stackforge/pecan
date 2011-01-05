@@ -10,6 +10,7 @@ server = {
 # Pecan Application Configurations
 app = {
     'root' : RootController(),
+    'modules' : ['${egg}'],
     'static_root' : 'public', 
     'template_path' : '${egg}/templates',
     'reload': True,

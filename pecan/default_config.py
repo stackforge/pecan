@@ -7,6 +7,7 @@ server = {
 # Pecan Application Configurations
 app = {
     'root' : None,
+    'modules' : [],
     'static_root' : 'public', 
     'template_path' : '',
     'debug' : False
