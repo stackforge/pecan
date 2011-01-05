@@ -306,14 +306,18 @@ class TestEngines(object):
         assert r.body == 'it worked'
 
     def test_streaming_response(self):
+        import StringIO
         class RootController(object):
             @expose(content_type='text/plain')
             def test(self, foo):
                 if foo == 'stream':
-                    contents = 'stream'
+                    # mimic large file
+                    contents = StringIO.StringIO('stream')
                     response.content_type='application/octet-stream'
-                    response.content_length = len(contents)
-                    response.app_iter = iter(contents)
+                    contents.seek(0, os.SEEK_END)
+                    response.content_length = contents.tell()
+                    contents.seek(0, os.SEEK_SET)
+                    response.app_iter = contents
                     return response
                 else:
                     return 'plain text'
