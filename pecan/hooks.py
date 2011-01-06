@@ -88,7 +88,7 @@ class TransactionHook(PecanHook):
         # don't set `state.request.error = True`.
         #
         transactional_ignore_redirects = getattr(
-            state.controller, 
+            getattr(state, 'controller', None), 
             '__transactional_ignore_redirects__',
             state.request.method not in ('GET', 'HEAD')
         )
