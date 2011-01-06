@@ -56,11 +56,15 @@ setup(
     license              = 'BSD',
     packages             = find_packages(exclude=['ez_setup', 'examples', 'tests']),
     include_package_data = True,
+    scripts              = ['bin/pecan']
     zip_safe             = False,
     cmdclass             = {'test': PyTest},
     install_requires     = requirements,
     entry_points         = """
     [paste.paster_create_template]
     pecan-base = templates:NewProjectTemplate
+    
+    [console_scripts]
+    pecan = pecan.commands:CommandRunner.handle_command_line
     """,
 )

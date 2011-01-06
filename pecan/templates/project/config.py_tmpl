@@ -1,5 +1,6 @@
-import ${egg}
-from ${egg}.controllers.root import RootController
+from ${package}.controllers.root import RootController
+
+import ${package}
 
 # Server Specific Configurations
 server = {
@@ -10,9 +11,9 @@ server = {
 # Pecan Application Configurations
 app = {
     'root' : RootController(),
-    'modules' : [${egg}],
+    'modules' : [${package}],
     'static_root' : 'public', 
-    'template_path' : '${egg}/templates',
+    'template_path' : '${package}/templates',
     'reload': True,
     'debug' : True 
 }
