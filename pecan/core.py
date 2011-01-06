@@ -34,7 +34,6 @@ def proxy(key):
 
 
 request     = proxy('request')
-context     = proxy('request.context')
 response    = proxy('response')
 
 

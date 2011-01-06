@@ -4,7 +4,7 @@ from weberror.errormiddleware import ErrorMiddleware
 from weberror.evalexception import EvalException
 from paste.recursive import RecursiveMiddleware
 
-from core import Pecan, context, request, response, override_template, abort, redirect, error_for
+from core import Pecan, request, response, override_template, abort, redirect, error_for
 from decorators import expose
 
 from configuration import set_config
