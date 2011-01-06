@@ -7,15 +7,16 @@ except ImportError:
     from setuptools import setup, find_packages
 
 setup(
-    name='${project}',
-    version='0.1',
-    description='',
-    author='',
-    author_email='',
-    install_requires=[
+    name = '${project}',
+    version = '0.1',
+    description = '',
+    author = '',
+    author_email = '',
+    install_requires = [
         "pecan",
     ],
     zip_safe = False,
+    paster_plugins = ${egg_plugins},
     include_package_data = True,
-    packages=find_packages(exclude=['ez_setup'])
+    packages = find_packages(exclude=['ez_setup'])
 )

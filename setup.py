@@ -61,8 +61,13 @@ setup(
     cmdclass             = {'test': PyTest},
     install_requires     = requirements,
     entry_points         = """
+    [paste.paster_command]
+    pecan-serve = pecan.commands:ServeCommand
+    pecan-shell = pecan.commands:ShellCommand
+    pecan-create = pecan.commands:CreateCommand
+    
     [paste.paster_create_template]
-    pecan-base = templates:NewProjectTemplate
+    pecan-base = pecan.templates:BaseTemplate
     
     [console_scripts]
     pecan = pecan.commands:CommandRunner.handle_command_line
