@@ -1,14 +1,14 @@
 """
-PasteScript commands for Pecan.
+PasteScript create command for Pecan.
 """
 from paste.script.create_distro import CreateDistroCommand
 
-from pecan.templates import DEFAULT_TEMPLATE
 from base import Command
+from pecan.templates import DEFAULT_TEMPLATE
 
 import copy
-import os
 import sys
+
 
 class CreateCommand(CreateDistroCommand, Command):
     """

@@ -1,10 +1,12 @@
 """
-PasteScript base commands for Pecan.
+PasteScript base command for Pecan.
 """
 from pecan.configuration import _runtime_conf, set_config
 from paste.script import command as paste_command
 
+import os.path
 import sys
+
 
 class Command(paste_command.Command):
     """
@@ -62,6 +64,9 @@ class Command(paste_command.Command):
                 return sys.modules[module_name]
         return None
     
+    def logging_file_config(self, config_file):
+        if os.path.splitext(config_file)[1].lower() == '.ini':
+            Command.logging_file_config(self, config_file)
+    
     def command(self):
         pass
-
