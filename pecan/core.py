@@ -1,5 +1,4 @@
 from configuration      import _runtime_conf
-from monitor            import MonitorableProcess
 from templating         import RendererFactory
 from routing            import lookup_controller
 
@@ -59,7 +58,7 @@ def error_for(field):
     return request.validation_error.error_dict.get(field, '')
 
 
-class Pecan(MonitorableProcess):
+class Pecan(object):
     def __init__(self, root, 
                  default_renderer    = 'mako', 
                  template_path       = 'templates', 
@@ -74,10 +73,6 @@ class Pecan(MonitorableProcess):
         self.hooks            = hooks
         self.template_path    = template_path
         
-        MonitorableProcess.__init__(self)
-        if getattr(_runtime_conf, 'app', None) and getattr(_runtime_conf.app, 'reload', False) is True:
-            self.start_monitoring()
-    
     def get_content_type(self, format):
         return {
             'html'  : 'text/html',
@@ -223,7 +218,7 @@ class Pecan(MonitorableProcess):
             return
 
         raw_namespace = result
-        
+
         # pull the template out based upon content type and handle overrides
         template = controller.pecan.get('content_types', {}).get(state.content_type)
         template = getattr(request, 'override_template', template)

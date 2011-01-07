@@ -56,7 +56,7 @@ setup(
     license              = 'BSD',
     packages             = find_packages(exclude=['ez_setup', 'examples', 'tests']),
     include_package_data = True,
-    scripts              = ['bin/pecan']
+    scripts              = ['bin/pecan'],
     zip_safe             = False,
     cmdclass             = {'test': PyTest},
     install_requires     = requirements,
