@@ -82,6 +82,11 @@ class TestConf(TestCase):
 
         self.assertTrue('__confdir__' in dir(conf))
 
+    def test_config_file(self):
+        conf = configuration.initconf()
+
+        self.assertTrue('__conffile__' in dir(conf))
+
     def test_config_repr(self):
         conf = configuration.Config({'a':1})
         self.assertEqual(repr(conf),"Config({'a': 1})")
@@ -98,7 +103,7 @@ class TestConf(TestCase):
     def test_config_illegal_ids(self):
         conf = configuration.Config({})
         conf.update_with_module('bad.module_and_underscore')
-        self.assertEqual(['__confdir__'], dir(conf))
+        self.assertEqual(['__confdir__', '__conffile__'], dir(conf))
 
     def test_config_bad_module(self):
         conf = configuration.Config({})
