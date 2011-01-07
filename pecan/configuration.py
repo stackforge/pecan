@@ -125,6 +125,7 @@ def conf_from_dict(conf_dict):
     if conf_dir == '':
         conf_dir = os.getcwd()
 
+    conf['__conffile__'] = conf_dict.get('__file__')
     conf['__confdir__'] = conf_dir + '/'
 
     for k,v in conf_dict.iteritems():
