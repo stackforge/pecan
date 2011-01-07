@@ -1,5 +1,5 @@
 """
-PasteScript Command Runner
+PasteScript command runner.
 """
 from paste.script import command as paste_command
 

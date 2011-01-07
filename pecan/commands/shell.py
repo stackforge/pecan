@@ -1,11 +1,11 @@
 """
 PasteScript shell command for Pecan.
 """
-import sys
-
 from webtest import TestApp
 
 from base import Command
+
+import sys
 
 
 class ShellCommand(Command):

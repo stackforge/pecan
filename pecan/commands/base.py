@@ -1,10 +1,11 @@
 """
-PasteScript base commands for Pecan.
+PasteScript base command for Pecan.
 """
 from pecan.configuration import _runtime_conf, set_config
 from paste.script import command as paste_command
 
 import sys
+
 
 class Command(paste_command.Command):
     """
