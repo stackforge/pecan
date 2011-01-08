@@ -7,11 +7,13 @@ from routing import iscontroller, lookup_controller
 
 class RestController(object):
     
+    _custom_actions = {}
+    
     @expose()
     def _route(self, args):
         
         # convention uses "_method" to handle browser-unsupported methods
-        method = request.GET.get('_method', request.method).lower()
+        method = request.params.get('_method', request.method).lower()
         
         # make sure DELETE/PUT requests don't use GET
         if request.method == 'GET' and method in ('delete', 'put'):
@@ -108,13 +110,13 @@ class RestController(object):
                 return controller, remainder[:-1]
         
         # check for custom GET requests
-        if method_name in getattr(self, '_custom_actions', []):
-            controller = self._find_controller(method_name, 'get_%s' % method_name)
+        if method.upper() in self._custom_actions.get(method_name, []):
+            controller = self._find_controller('get_%s' % method_name, method_name)
             if controller:
                 return controller, remainder[:-1]
         controller = getattr(self, remainder[0], None)
         if controller and not ismethod(controller):
-            return controller, remainder[1:]
+            return lookup_controller(controller, remainder[1:])
         
         # finally, check for the regular get_one/get requests
         controller = self._find_controller('get_one', 'get')
@@ -142,20 +144,23 @@ class RestController(object):
         abort(404)
     
     def _handle_post(self, method, remainder):
-        
-        # check for custom controllers or sub-controllers
+
+        # check for custom POST/PUT requests
         if remainder:
-            controller = self._find_controller(remainder[0])
-            if controller:
-                return controller, remainder[1:]
-            sub_controller = getattr(self, remainder[0], None)
-            if sub_controller and not ismethod(sub_controller):
-                return lookup_controller(sub_controller, remainder[1:])
+            method_name = remainder[-1]
+            if method.upper() in self._custom_actions.get(method_name, []):
+                controller = self._find_controller('%s_%s' % (method, method_name), method_name)
+                if controller:
+                    return controller, remainder[:-1]
+            controller = getattr(self, remainder[0], None)
+            if controller and not ismethod(controller):
+                return lookup_controller(controller, remainder[1:])
         
-        # check for regular post/put requests
+        # check for regular POST/PUT requests
         controller = self._find_controller(method)
         if controller:
             return controller, remainder
+        
         abort(404)
     
     _handle_put = _handle_post
