@@ -123,6 +123,10 @@ class Pecan(MonitorableProcess):
         if im_self is not None:
             positional_params.append(im_self)
         
+        # grab the routing args from nested REST controllers
+        if 'routing_args' in request.context:
+            remainder = request.context.pop('routing_args') + list(remainder)
+        
         # handle params that are POST or GET variables first
         for param_name, param_value in all_params.iteritems():
             if param_name in argspec[0]:
