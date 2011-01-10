@@ -66,7 +66,7 @@ class Command(paste_command.Command):
     
     def logging_file_config(self, config_file):
         if os.path.splitext(config_file)[1].lower() == '.ini':
-            Command.logging_file_config(self, config_file)
+            paste_command.Command.logging_file_config(self, config_file)
     
     def command(self):
         pass
