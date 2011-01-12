@@ -130,13 +130,13 @@ class Pecan(object):
         # handle positional arguments
         used = set()
         for i, value in enumerate(remainder):
-            if len(argspec.args) > (i+1):
-                if valid_params.get(argspec.args[i+1]) is None:
+            if len(argspec[0]) > (i+1):
+                if valid_params.get(argspec[0][i+1]) is None:
                     used.add(i)
-                    valid_params[argspec.args[i+1]] = value
+                    valid_params[argspec[0][i+1]] = value
         
         # handle unconsumed positional arguments
-        if len(used) < len(remainder) and argspec.varargs is not None:
+        if len(used) < len(remainder) and argspec[1] is not None:
             for i, value in enumerate(remainder):
                 if i not in used:
                     positional_params.append(value)
