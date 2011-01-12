@@ -10,9 +10,9 @@ from paste.recursive    import ForwardRequestException
 
 
 try:
-    from json import loads
-except ImportError:
     from simplejson import loads
+except ImportError:
+    from json import loads
 
 
 state = local()

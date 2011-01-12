@@ -5,9 +5,9 @@ from formencode import validators, Schema
 
 
 try:
-    from json import dumps
-except ImportError:
     from simplejson import dumps
+except ImportError:
+    from json import dumps
 
 
 class TestValidation(object):
