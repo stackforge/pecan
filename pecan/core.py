@@ -111,37 +111,42 @@ class Pecan(object):
         for hook in hooks:
              getattr(hook, hook_type)(*args)
 
-    def get_params(self, all_params, remainder, argspec, im_self):
-        valid_params = dict()
-        positional_params = []
+    def get_args(self, all_params, remainder, argspec, im_self):
+        args = []
+        kwargs = dict()
+        valid_args = argspec[0][1:]
         
         if im_self is not None:
-            positional_params.append(im_self)
+            args.append(im_self)
         
         # grab the routing args from nested REST controllers
         if 'routing_args' in request.context:
             remainder = request.context.pop('routing_args') + list(remainder)
         
-        # handle params that are POST or GET variables first
-        for param_name, param_value in all_params.iteritems():
-            if param_name in argspec[0]:
-                valid_params[param_name] = param_value
-        
         # handle positional arguments
-        used = set()
-        for i, value in enumerate(remainder):
-            if len(argspec.args) > (i+1):
-                if valid_params.get(argspec.args[i+1]) is None:
-                    used.add(i)
-                    valid_params[argspec.args[i+1]] = value
+        if valid_args and remainder:
+            args.extend(remainder[:len(valid_args)])
+            remainder = remainder[len(valid_args):]
+            valid_args = valid_args[len(args):]
         
-        # handle unconsumed positional arguments
-        if len(used) < len(remainder) and argspec.varargs is not None:
-            for i, value in enumerate(remainder):
-                if i not in used:
-                    positional_params.append(value)
+        # handle wildcard arguments
+        if remainder:
+            if not argspec[1]:
+                abort(404)
+            args.extend(remainder)
         
-        return valid_params, positional_params
+        # handle positional GET/POST params
+        for name in valid_args:
+            if name in all_params:
+                args.append(all_params.pop(name))
+        
+        # handle wildcard GET/POST params
+        if argspec[2]:
+            for name, value in all_params.iteritems():
+                if name not in argspec[0]:
+                    kwargs[name] = value
+        
+        return args, kwargs
     
     def validate(self, schema, params=None, json=False):
         to_validate = params
@@ -193,12 +198,7 @@ class Pecan(object):
         self.handle_security(controller)        
     
         # fetch and validate any parameters
-        params, positional_params = self.get_params(
-            dict(state.request.str_params), 
-            remainder,
-            controller.pecan['argspec'],
-            im_self
-        )
+        params = dict(state.request.str_params)
         if 'schema' in controller.pecan:
             request.validation_error = None
             try:
@@ -213,8 +213,16 @@ class Pecan(object):
                     redirect(controller.pecan['error_handler'], internal=True)
             if controller.pecan['validate_json']: params = dict(data=params)
         
+        # fetch the arguments for the controller
+        args, kwargs = self.get_args(
+            params, 
+            remainder,
+            controller.pecan['argspec'],
+            im_self
+        )
+        
         # get the result from the controller
-        result = controller(*positional_params, **params)
+        result = controller(*args, **kwargs)
 
         # a controller can return the response object which means they've taken 
         # care of filling it out
