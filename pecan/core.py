@@ -8,11 +8,12 @@ from itertools          import chain
 from formencode         import Invalid
 from paste.recursive    import ForwardRequestException
 
-
 try:
     from simplejson import loads
 except ImportError:
     from json import loads
+
+import os
 
 
 state = local()
@@ -75,11 +76,11 @@ class Pecan(object):
         
     def get_content_type(self, format):
         return {
-            'html'  : 'text/html',
-            'xhtml' : 'text/html',
-            'json'  : 'application/json',
-            'txt'   : 'text/plain'
-        }.get(format, 'text/html')
+            '.html'  : 'text/html',
+            '.xhtml' : 'text/html',
+            '.json'  : 'application/json',
+            '.txt'   : 'text/plain'
+        }.get(format)
     
     def route(self, node, path):
         path = path.split('/')[1:]
@@ -168,7 +169,9 @@ class Pecan(object):
         path = state.request.path
 
         if state.content_type is None and '.' in path.split('/')[-1]:
-            path, format = path.split('.')
+            path, format = os.path.splitext(path)
+            # store the extension for retrieval by controllers
+            request.context['extension'] = format
             state.content_type = self.get_content_type(format)      
         controller, remainder = self.route(self.root, path)
 

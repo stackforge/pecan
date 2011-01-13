@@ -432,6 +432,38 @@ class TestBase(object):
         
         assert state.__dict__.keys() == ['app']
 
+    def test_extension(self):
+        """
+        Test extension splits
+        """
+        class RootController(object):
+            @expose()
+            def _default(self, *args):
+                from pecan.core import request
+                return request.context['extension']
+
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/index.html')
+        assert r.status_int == 200
+        assert r.body == '.html'
+
+        r = app.get('/image.png')
+        assert r.status_int == 200
+        assert r.body == '.png'
+
+        r = app.get('/.vimrc')
+        assert r.status_int == 200
+        assert r.body == ''
+
+        r = app.get('/gradient.js.js')
+        assert r.status_int == 200
+        assert r.body == '.js'
+
+
+
+
+            
+
 class TestEngines(object):
     
     template_path = os.path.join(os.path.dirname(__file__), 'templates')
