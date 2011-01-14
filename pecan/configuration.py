@@ -3,8 +3,10 @@ import inspect
 import os
 import string
 
+
 IDENTIFIER = re.compile(r'[a-z_](\w)*$', re.IGNORECASE)
 STRING_FORMAT = re.compile(r'{pecan\.conf(?P<var>([.][a-z_][\w]*)+)+?}', re.IGNORECASE)
+
 
 class ConfigString(object):
     def __init__(self, format_string):
@@ -36,6 +38,7 @@ class ConfigString(object):
     @staticmethod
     def contains_formatting(value):
         return STRING_FORMAT.match(value)
+
 
 class Config(object):
     def __init__(self, conf_dict={}):
@@ -99,7 +102,6 @@ class Config(object):
         return self
 
 
-
 def conf_from_module(module):
     if isinstance(module, str):
         module = import_module(module)
@@ -107,6 +109,7 @@ def conf_from_module(module):
     module_dict = dict(inspect.getmembers(module))
 
     return conf_from_dict(module_dict)
+
 
 def conf_from_file(filepath):
     abspath = os.path.abspath(os.path.expanduser(filepath))
@@ -116,6 +119,7 @@ def conf_from_file(filepath):
     conf_dict['__file__'] = abspath
 
     return conf_from_dict(conf_dict)
+
 
 def conf_from_dict(conf_dict):
     conf = Config()
@@ -137,6 +141,7 @@ def conf_from_dict(conf_dict):
         conf[k] = v
     conf()
     return conf
+
 
 def import_module(conf):
     if conf.endswith('.py'):
@@ -164,17 +169,20 @@ def import_module(conf):
 
     return conf_mod
 
+
 def initconf():
     import default_config
     conf = conf_from_module(default_config)
     conf()
     return conf
 
+
 def set_config(name):
     if '/' in name:
         _runtime_conf.update(conf_from_file(name))
     else:
         _runtime_conf.update_with_module(name)
+
 
 _runtime_conf = initconf()
 
