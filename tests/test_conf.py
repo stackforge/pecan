@@ -13,7 +13,6 @@ class TestConf(TestCase):
         if test_config_d not in sys.path:
             sys.path.append(test_config_d)
 
-
     def test_update_config_fail_identifier(self):
         """Fail when naming does not pass correctness"""
         bad_dict = {'bad name':'value'}
@@ -69,15 +68,12 @@ class TestConf(TestCase):
     def test_update_config_fail_bad_attribute(self):
         conf = configuration.initconf()
         self.assertRaises(AttributeError, conf.update_with_module, 'bad.attribute')
+
     def test_update_config_with_dict(self):
         conf = configuration.initconf()
         d = {'attr':True}
         conf['attr'] = d
         self.assertTrue(conf.attr.attr)
-
-    def test_module_ends_in_py(self):
-        conf = configuration.initconf()
-        conf.update_with_module('config.py')
 
     def test_config_dir(self):
         conf = configuration.initconf()
@@ -131,4 +127,3 @@ class TestConf(TestCase):
         self.assertTrue(configuration.ConfigString.contains_formatting(s))
         cs = configuration.ConfigString(s)
         self.assertEqual(str(cs), s)
-
