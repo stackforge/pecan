@@ -15,7 +15,11 @@ app = {
     'static_root' : 'public', 
     'template_path' : '${package}/templates',
     'reload': True,
-    'debug' : True 
+    'debug' : True,
+    'errors' : {
+        '404' : '/error/404',
+        '__force_dict__' : True
+    }
 }
 
 # Custom Configurations must be in Python dictionary format::

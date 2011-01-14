@@ -1,8 +1,9 @@
-from paste.urlparser import StaticURLParser
 from paste.cascade import Cascade
+from paste.errordocument import make_errordocument
+from paste.recursive import RecursiveMiddleware
+from paste.urlparser import StaticURLParser
 from weberror.errormiddleware import ErrorMiddleware
 from weberror.evalexception import EvalException
-from paste.recursive import RecursiveMiddleware
 
 from core import Pecan, request, response, override_template, abort, redirect, error_for
 from decorators import expose
@@ -23,6 +24,7 @@ def make_app(root, static_root=None, debug=False, errorcfg={}, wrap_app=None, **
         app = EvalException(app, **errorcfg)
     else:
         app = ErrorMiddleware(app, **errorcfg)
+    app = make_errordocument(app, conf, **conf.app.errors)
     if static_root:
         app = Cascade([StaticURLParser(static_root), app])
     return app

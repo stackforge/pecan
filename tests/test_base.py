@@ -1,11 +1,15 @@
-import os
+from formencode import Schema, validators
+from paste.recursive import ForwardRequestException
+from unittest import TestCase
+from webtest import TestApp
+
 from pecan import Pecan, expose, request, response, redirect, abort
 from pecan.templating import _builtin_renderers as builtin_renderers
-from webtest import TestApp
-from formencode import Schema, validators
+
+import os
 
 
-class TestBase(object):
+class TestBase(TestCase):
     
     def test_simple_app(self):    
         class RootController(object):
@@ -367,6 +371,10 @@ class TestBase(object):
                 redirect('/testing')
             
             @expose()
+            def internal(self):
+                redirect('/testing', internal=True)
+            
+            @expose()
             def permanent(self):
                 redirect('/testing', code=301)
             
@@ -380,6 +388,8 @@ class TestBase(object):
         r = r.follow()
         assert r.status_int == 200
         assert r.body == 'it worked!'
+        
+        self.assertRaises(ForwardRequestException, app.get, '/internal')
         
         r = app.get('/permanent')
         assert r.status_int == 301
