@@ -77,6 +77,10 @@ class TestConf(TestCase):
         conf['attr'] = d
         self.assertTrue(conf.attr.attr)
 
+    def test_module_ends_in_py(self):
+        conf = configuration.initconf()
+        conf.update_with_module('config.py')
+
     def test_config_dir(self):
         conf = configuration.initconf()
 
