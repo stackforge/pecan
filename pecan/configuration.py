@@ -8,6 +8,10 @@ IDENTIFIER = re.compile(r'[a-z_](\w)*$', re.IGNORECASE)
 STRING_FORMAT = re.compile(r'{pecan\.conf(?P<var>([.][a-z_][\w]*)+)+?}', re.IGNORECASE)
 
 
+class ConfigDict(dict):
+    pass
+
+
 class ConfigString(object):
     def __init__(self, format_string):
         self.raw_string = format_string
@@ -45,19 +49,14 @@ class Config(object):
         self.update(conf_dict)
 
     def update(self, conf_dict):
-        __force_dict__ = False
-        # first check the keys for correct
 
         if isinstance(conf_dict, dict):
-            if '__force_dict__' in conf_dict:
-                del conf_dict['__force_dict__']
-                __force_dict__ = True
             iterator = conf_dict.iteritems()
         else:
             iterator = iter(conf_dict)
             
         for k,v in iterator:
-            if not IDENTIFIER.match(k) and not __force_dict__:
+            if not IDENTIFIER.match(k):
                 raise ValueError('\'%s\' is not a valid indentifier' % k)
 
             cur_val = self.__dict__.get(k)
@@ -74,9 +73,10 @@ class Config(object):
         return self.__dict__[key]
 
     def __setitem__(self, key, value):
-        if isinstance(value, dict):
+        if isinstance(value, dict) and not isinstance(value, ConfigDict):
             if value.get('__force_dict__'):
-                self.__dict__[key] = value
+                del value['__force_dict__']
+                self.__dict__[key] = ConfigDict(value)
             else:
                 self.__dict__[key] = Config(value)
         elif isinstance(value, str) and ConfigString.contains_formatting(value):
