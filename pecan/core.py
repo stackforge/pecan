@@ -87,15 +87,10 @@ class Pecan(object):
         node, remainder = lookup_controller(node, path)        
         return node, remainder
     
-    def handle_security(self, controller):
-        if controller.pecan.get('secured', False):
-            if not controller.pecan['check_permissions']():
-                raise exc.HTTPUnauthorized
-    
     def determine_hooks(self, controller=None):
         controller_hooks = []
         if controller:
-            controller_hooks = controller.pecan.get('hooks', [])
+            controller_hooks = controller._pecan.get('hooks', [])
         return list(
             sorted(
                 chain(controller_hooks, self.hooks), 
@@ -175,14 +170,14 @@ class Pecan(object):
             state.content_type = self.get_content_type(format)      
         controller, remainder = self.route(self.root, path)
 
-        if controller.pecan.get('generic_handler'):
+        if controller._pecan.get('generic_handler'):
             raise exc.HTTPNotFound
         
         # handle generic controllers
         im_self = None
-        if controller.pecan.get('generic'):
+        if controller._pecan.get('generic'):
             im_self = controller.im_self
-            handlers = controller.pecan['generic_handlers']
+            handlers = controller._pecan['generic_handlers']
             controller = handlers.get(request.method, handlers['DEFAULT'])
                     
         # add the controller to the state so that hooks can use it
@@ -190,37 +185,34 @@ class Pecan(object):
     
         # if unsure ask the controller for the default content type 
         if state.content_type is None:
-            state.content_type = controller.pecan.get('content_type', 'text/html')
+            state.content_type = controller._pecan.get('content_type', 'text/html')
         # get a sorted list of hooks, by priority
         state.hooks = self.determine_hooks(controller)    
     
         # handle "before" hooks
         self.handle_hooks('before', state)
         
-        # handle security
-        self.handle_security(controller)        
-    
         # fetch and validate any parameters
         params = dict(state.request.str_params)
-        if 'schema' in controller.pecan:
+        if 'schema' in controller._pecan:
             request.validation_error = None
             try:
                 params = self.validate(
-                    controller.pecan['schema'], 
-                    json   = controller.pecan['validate_json'],
+                    controller._pecan['schema'], 
+                    json   = controller._pecan['validate_json'],
                     params = params
                 )
             except Invalid, e:
                 request.validation_error = e
-                if controller.pecan['error_handler'] is not None:
-                    redirect(controller.pecan['error_handler'], internal=True)
-            if controller.pecan['validate_json']: params = dict(data=params)
+                if controller._pecan['error_handler'] is not None:
+                    redirect(controller._pecan['error_handler'], internal=True)
+            if controller._pecan['validate_json']: params = dict(data=params)
         
         # fetch the arguments for the controller
         args, kwargs = self.get_args(
             params, 
             remainder,
-            controller.pecan['argspec'],
+            controller._pecan['argspec'],
             im_self
         )
         
@@ -235,7 +227,7 @@ class Pecan(object):
         raw_namespace = result
 
         # pull the template out based upon content type and handle overrides
-        template = controller.pecan.get('content_types', {}).get(state.content_type)
+        template = controller._pecan.get('content_types', {}).get(state.content_type)
         template = getattr(request, 'override_template', template)
 
         # if there is a template, render it

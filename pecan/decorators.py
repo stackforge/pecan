@@ -1,8 +1,8 @@
 from inspect import getargspec
 
 def _cfg(f):
-    if not hasattr(f, 'pecan'): f.pecan = {}
-    return f.pecan
+    if not hasattr(f, '_pecan'): f._pecan = {}
+    return f._pecan
 
 
 def when_for(controller):
@@ -10,7 +10,7 @@ def when_for(controller):
         def decorate(f):
             expose(**kw)(f)
             _cfg(f)['generic_handler'] = True
-            controller.pecan['generic_handlers'][method.upper()] = f
+            controller._pecan['generic_handlers'][method.upper()] = f
             return f
         return decorate
     return when

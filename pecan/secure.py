@@ -1,80 +1,73 @@
-from inspect import getmembers, ismethod
+from inspect import getmembers, ismethod, isfunction
+from decorators import _cfg
 
 from routing import iscontroller
 
+__all__ = ['Any', 'Protected', 'unlock', 'secure']
 
-__all__ = ['secure', 'unlocked', 'SecureController']
+class _Unlocked(object):
+    """ 
+    A wrapper class to declare a class as unlocked inside of a SecureController
+    """
+    def __init__(self, obj):
+        self.obj = obj
 
 
-def unlocked(func):
-    if not hasattr(func, 'pecan'): func.pecan = {}
-    func.pecan['unlocked'] = True
-    return func
+class _SecureState(object):
+    def __init__(self, desc, boolean_value):
+        self.description = desc
+        self.boolean_value = boolean_value
+    def __repr__(self):
+        return '<SecureState %s>' % self.description
+    def __nonzero__(self):
+        return self.boolean_value
+
+Any = _SecureState('Any', False)
+Protected = _SecureState('Protected', True)
+
+
+def unlocked(func_or_obj):
+    if ismethod(func_or_obj) or isfunction(func_or_obj):
+        _cfg(func_or_obj)['secured'] = Any
+        return func_or_obj
+    else:
+        return _Unlocked(func_or_obj)
 
 
 def secure(check_permissions):
     def wrap(func):
-        if not hasattr(func, 'pecan'): func.pecan = {}
-        func.pecan['secured'] = True
-        func.pecan['check_permissions'] = check_permissions
+        cfg = _cfg(func)
+        cfg['secured'] = Protected
+        cfg['check_permissions'] = check_permissions
         return func
     return wrap
 
 
-def walk_controller(root_class, controller):    
-    if hasattr(controller, '_lookup'):
-        # TODO: what about this?
-        controller._check_security = root_class._perform_validation
-    
-    if not isinstance(controller, (int, dict)):
-        for name, value in getmembers(controller):
-            if name == 'controller': continue
-            
-            if ismethod(value):
-                if iscontroller(value) and not value.pecan.get('unlocked', False):
-                    value.pecan['secured'] = True
-                    value.pecan['check_permissions'] = root_class.check_permissions
-            elif hasattr(value, '__class__'):
-                if name.startswith('__') and name.endswith('__'): continue
-                walk_controller(root_class, value)
-                
-
 class SecureController(object):
     """
-    Used to apply security to a controller and its children.
+    Used to apply security to a controller. 
     Implementations of SecureController should extend the
     `check_permissions` method to return a True or False
-    value (depending on whether or not the user has access
+    value (depending on whether or not the user has permissions
     to the controller).
     """
     class __metaclass__(type):
         def __init__(cls, name, bases, dict_):
-            walk_controller(cls, cls)
-    
-    @classmethod
-    def check_permissions(cls):
-        return True
+            cls._pecan = dict(secured=Protected, check_permissions=cls.check_permissions, unlocked=[])
 
-        
-class UnlockedControllerMeta(type):
-    """
-    Can be used to force (override) a controller and all of its
-    subcontrollers to be unlocked/unsecured.
-    
-    This has the same effect as applying @pecan.secure.unlocked
-    to every method in the class and its subclasses.
-    """
-    def __init__(cls, name, bases, ns):
-        cls.walk_and_apply_unlocked(cls, cls)
-
-    def walk_and_apply_unlocked(cls, root_class, controller):
-        if not isinstance(controller, (int, dict)):
-            for name, value in getmembers(controller):
-                if name == 'controller': continue
-
+            for name, value in getmembers(cls):
                 if ismethod(value):
-                    if iscontroller(value):
-                        value = unlocked(value)
+                    if iscontroller(value) and value._pecan.get('secured') is not Any:
+                        value._pecan['secured'] = Protected
+                        value._pecan['check_permissions'] = cls.check_permissions
                 elif hasattr(value, '__class__'):
                     if name.startswith('__') and name.endswith('__'): continue
-                    cls.walk_and_apply_unlocked(root_class, value)
+                    if isinstance(value, _Unlocked):
+                        # mark it as unlocked and remove wrapper
+                        cls._pecan['unlocked'].append(value.obj)
+                        setattr(cls, name, value.obj)
+
+    @classmethod
+    def check_permissions(cls):
+        return False
+
