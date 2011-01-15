@@ -3,7 +3,7 @@ from decorators import _cfg
 
 from routing import iscontroller
 
-__all__ = ['Any', 'Protected', 'unlock', 'secure']
+__all__ = ['Any', 'Protected', 'unlocked', 'secure', 'SecureController'] 
 
 class _Unlocked(object):
     """ 
@@ -25,14 +25,12 @@ class _SecureState(object):
 Any = _SecureState('Any', False)
 Protected = _SecureState('Protected', True)
 
-
 def unlocked(func_or_obj):
     if ismethod(func_or_obj) or isfunction(func_or_obj):
         _cfg(func_or_obj)['secured'] = Any
         return func_or_obj
     else:
         return _Unlocked(func_or_obj)
-
 
 def secure(check_permissions):
     def wrap(func):
