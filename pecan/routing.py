@@ -1,8 +1,6 @@
 from webob import exc
 from inspect import ismethod, isfunction
 
-STOP_NOW = False
-
 __all__ = ['lookup_controller', 'find_object']
 
 def handle_security(controller):
