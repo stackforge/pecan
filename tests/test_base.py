@@ -3,7 +3,7 @@ from paste.recursive import ForwardRequestException
 from unittest import TestCase
 from webtest import TestApp
 
-from pecan import Pecan, expose, request, response, redirect, abort
+from pecan import Pecan, expose, request, response, redirect, abort, make_app
 from pecan.templating import _builtin_renderers as builtin_renderers
 
 import os
@@ -469,9 +469,17 @@ class TestBase(TestCase):
         assert r.status_int == 200
         assert r.body == '.js'
 
+    def test_app_wrap(self):
+        class RootController(object):
+            pass
 
+        wrapped_apps = []
+        def wrap(app):
+            wrapped_apps.append(app)
+            return app
 
-
+        app = make_app(RootController(), wrap_app=wrap, debug=True)
+        assert len(wrapped_apps) == 1
             
 
 class TestEngines(object):
