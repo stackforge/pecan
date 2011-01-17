@@ -1,3 +1,4 @@
+from inspect    import getmembers
 from routing    import iscontroller
 from webob.exc  import HTTPFound
 
@@ -11,7 +12,7 @@ def walk_controller(root_class, controller, hooks):
         pass
         
     if not isinstance(controller, (int, dict)):
-        for name, value in controller.__dict__.iteritems():
+        for name, value in getmembers(controller):
             if name == 'controller': continue
             if name.startswith('__') and name.endswith('__'): continue
             
