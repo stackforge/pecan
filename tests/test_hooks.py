@@ -84,7 +84,50 @@ class TestHooks(object):
         assert run_hook[7] == 'after3'
         assert run_hook[8] == 'after2'
         assert run_hook[9] == 'after1'
-    
+
+    def test_partial_hooks(self):
+        run_hook = []
+
+        class RootController(object):
+            @expose()
+            def index(self):
+                run_hook.append('inside')
+                return 'Hello World!'
+
+            @expose()
+            def causeerror(self):
+                return [][1]
+
+        class ErrorHook(PecanHook):
+            def on_error(self, state, e):
+                run_hook.append('error')
+
+        class OnRouteHook(PecanHook):
+            def on_route(self, state):
+                run_hook.append('on_route')
+
+        app = TestApp(make_app(RootController(), hooks=[
+            ErrorHook(), OnRouteHook()
+        ]))
+
+        response = app.get('/')
+        assert response.status_int == 200
+        assert response.body == 'Hello World!'
+
+        assert len(run_hook) == 2
+        assert run_hook[0] == 'on_route'
+        assert run_hook[1] == 'inside'
+
+        run_hook = []
+        try:
+            response = app.get('/causeerror')
+        except Exception, e:
+            assert isinstance(e, IndexError)
+
+        assert len(run_hook) == 2
+        assert run_hook[0] == 'on_route'
+        assert run_hook[1] == 'error'
+
     def test_prioritized_hooks(self):
         run_hook = []
         
@@ -496,6 +539,12 @@ class TestHooks(object):
 
             def on_error(self, state, e):
                 run_hook.append('error')
+
+        class SubSubController(object):
+            @expose()
+            def index(self):
+                run_hook.append('inside_sub_sub')
+                return 'Deep inside here!'
         
         class SubController(HookController):
             __hooks__ = [SimpleHook()]
@@ -504,6 +553,8 @@ class TestHooks(object):
             def index(self):
                 run_hook.append('inside_sub')
                 return 'Inside here!'
+            
+            sub = SubSubController()
         
         class RootController(object):
             @expose()
@@ -530,6 +581,16 @@ class TestHooks(object):
         assert len(run_hook) == 3
         assert run_hook[0] == 'before'
         assert run_hook[1] == 'inside_sub'
+        assert run_hook[2] == 'after'
+
+        run_hook = []
+        response = app.get('/sub/sub')
+        assert response.status_int == 200
+        assert response.body == 'Deep inside here!'
+        
+        assert len(run_hook) == 3
+        assert run_hook[0] == 'before'
+        assert run_hook[1] == 'inside_sub_sub'
         assert run_hook[2] == 'after'
     
     def test_isolated_hook_with_global_hook(self):

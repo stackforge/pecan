@@ -5,9 +5,15 @@ except ImportError:
 
 from datetime               import datetime, date
 from decimal                import Decimal
-from webob.multidict        import MultiDict
-from sqlalchemy.engine.base import ResultProxy, RowProxy
+from webob.multidict        import MultiDict, UnicodeMultiDict
 from simplegeneric          import generic
+
+try:
+    from sqlalchemy.engine.base import ResultProxy, RowProxy
+except ImportError:         #pragma no cover
+    # dummy classes since we don't have SQLAlchemy installed
+    class ResultProxy: pass
+    class RowProxy: pass
 
 #
 # exceptions
@@ -32,6 +38,9 @@ class GenericJSON(JSONEncoder):
         elif isinstance(obj, (date, datetime)):
             return str(obj)
         elif isinstance(obj, Decimal):
+              # XXX What to do about JSONEncoder crappy handling of Decimals?
+              # SimpleJSON has better Decimal encoding than the std lib
+              # but only in recent versions
             return float(obj)
         elif is_saobject(obj):
             props = {}
@@ -43,7 +52,7 @@ class GenericJSON(JSONEncoder):
             return dict(rows=list(obj), count=obj.rowcount)
         elif isinstance(obj, RowProxy):
             return dict(rows=dict(obj), count=1)
-        elif isinstance(obj, MultiDict):
+        elif isinstance(obj, (MultiDict, UnicodeMultiDict)):
             return obj.mixed()
         else:
             return JSONEncoder.default(self, obj)
@@ -63,6 +72,4 @@ _instance = GenericFunctionJSON()
     
 
 def encode(obj):
-    if isinstance(obj, basestring):
-        return _instance.encode(obj)
     return _instance.encode(obj)

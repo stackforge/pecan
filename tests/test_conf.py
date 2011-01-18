@@ -13,7 +13,6 @@ class TestConf(TestCase):
         if test_config_d not in sys.path:
             sys.path.append(test_config_d)
 
-
     def test_update_config_fail_identifier(self):
         """Fail when naming does not pass correctness"""
         bad_dict = {'bad name':'value'}
@@ -33,7 +32,6 @@ class TestConf(TestCase):
         self.assertEqual(conf.server.host, '1.1.1.1')
         self.assertEqual(conf.server.port, '8081')
 
-
     def test_update_set_default_config(self):
         """Update an empty configuration with the default values"""
 
@@ -50,7 +48,6 @@ class TestConf(TestCase):
         
     def test_update_force_dict(self):
         """Update an empty configuration with the default values"""
-
         conf = configuration.initconf()
         conf.update_with_module('forcedict')
 
@@ -62,15 +59,16 @@ class TestConf(TestCase):
         self.assertEqual(conf.server.host, '0.0.0.0')
         self.assertEqual(conf.server.port, '8080')
 
-        self.assertEqual(type(conf.beaker), dict)
+        self.assertTrue(isinstance(conf.beaker, dict))
         self.assertEqual(conf.beaker['session.key'], 'key')
         self.assertEqual(conf.beaker['session.type'], 'cookie')
         self.assertEqual(conf.beaker['session.validate_key'], '1a971a7df182df3e1dec0af7c6913ec7')
-        self.assertTrue(conf.beaker.get('__force_dict__'), None)
+        self.assertEqual(conf.beaker.get('__force_dict__'), None)
 
     def test_update_config_fail_bad_attribute(self):
         conf = configuration.initconf()
         self.assertRaises(AttributeError, conf.update_with_module, 'bad.attribute')
+
     def test_update_config_with_dict(self):
         conf = configuration.initconf()
         d = {'attr':True}
@@ -120,10 +118,12 @@ class TestConf(TestCase):
         configuration.set_config('config')
         self.assertEqual(_runtime_conf.server.host, '1.1.1.1')
 
+    def test_config_set_from_module_with_extension(self):
+        configuration.set_config('config.py')
+        self.assertEqual(_runtime_conf.server.host, '1.1.1.1')
 
     def test_config_string(self):
         s = '{pecan.conf.app}'
         self.assertTrue(configuration.ConfigString.contains_formatting(s))
         cs = configuration.ConfigString(s)
         self.assertEqual(str(cs), s)
-

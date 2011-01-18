@@ -10,7 +10,10 @@ app = {
     'modules' : [],
     'static_root' : 'public', 
     'template_path' : '',
-    'debug' : False
+    'debug' : False,
+    'errors' : {
+        '__force_dict__' : True
+    }
 }
 
 # Custom Configurations must be in Python dictionary format in user config
