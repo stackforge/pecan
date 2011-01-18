@@ -1,5 +1,4 @@
 from webob import exc
-from inspect import ismethod, isfunction
 
 __all__ = ['lookup_controller', 'find_object']
 
