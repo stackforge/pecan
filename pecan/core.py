@@ -43,14 +43,14 @@ def abort(status_code=None, detail='', headers=None, comment=None):
     raise exc.status_map[status_code](detail=detail, headers=headers, comment=comment)
 
 
-def redirect(location, internal=False, code=None):
+def redirect(location, internal=False, code=None, headers={}):
     if internal:
         if code is not None:
             raise ValueError('Cannot specify a code for internal redirects')
         raise ForwardRequestException(location)
     if code is None:
         code = 302
-    raise exc.status_map[code](location=location)
+    raise exc.status_map[code](location=location, headers=getattr(response, 'headers', headers))
 
 
 def error_for(field):
