@@ -1,6 +1,7 @@
 from inspect    import getmembers
-from routing    import iscontroller
 from webob.exc  import HTTPFound
+
+from util    import iscontroller
 
 
 __all__ = ['PecanHook', 'TransactionHook', 'HookController']
@@ -18,7 +19,7 @@ def walk_controller(root_class, controller, hooks):
             
             if iscontroller(value):
                 for hook in hooks:
-                    value.pecan.setdefault('hooks', []).append(hook)
+                    value._pecan.setdefault('hooks', []).append(hook)
             elif hasattr(value, '__class__'):
                 if name.startswith('__') and name.endswith('__'): continue
                 walk_controller(root_class, value, hooks)

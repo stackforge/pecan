@@ -102,7 +102,17 @@ class TestBase(TestCase):
         r = app.get('/100/name')
         assert r.status_int == 200
         assert r.body == '/100/name'
-    
+
+    def test_lookup_with_wrong_argspec(self):
+        class RootController(object):
+            @expose()
+            def _lookup(self, someID):
+                return 'Bad arg spec'
+
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/foo/bar', expect_errors=True)
+        r.status_int == 404
+
     def test_controller_args(self):
         class RootController(object):
             @expose()
