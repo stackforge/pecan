@@ -1,25 +1,8 @@
 from webob import exc
+from inspect import ismethod
+from secure import handle_security, cross_boundary
 
 __all__ = ['lookup_controller', 'find_object']
-
-def handle_security(controller):
-    if controller._pecan.get('secured', False):
-        if not controller._pecan['check_permissions']():
-            raise exc.HTTPUnauthorized
-
-def cross_boundary(prev_obj, obj):
-    """
-    check the security as we move across a boundary
-    """
-    if prev_obj is None:
-        return 
-
-    meta = getattr(prev_obj, '_pecan', {})
-
-    if meta.get('secured', False):
-        if obj not in meta.get('unlocked', []):
-            if not meta['check_permissions']():
-                raise exc.HTTPUnauthorized
 
 def lookup_controller(obj, url_path):
     remainder = url_path
@@ -82,7 +65,9 @@ def find_object(obj, remainder, notfound_handlers):
         
         route = getattr(obj, '_route', None)
         if iscontroller(route):
-            return route(remainder)
+            next, next_remainder = route(remainder)
+            cross_boundary(route, next)
+            return next, next_remainder
         
         if not remainder: raise exc.HTTPNotFound
         next, remainder = remainder[0], remainder[1:]
