@@ -1,13 +1,10 @@
 from inspect import getmembers, ismethod, isfunction
 from webob import exc
 
-from decorators import _cfg, expose
+from decorators import expose
+from util import _cfg, iscontroller
 
 __all__ = ['unlocked', 'secure', 'SecureController']
-
-# helper method
-def iscontroller(obj):
-    return getattr(obj, 'exposed', False)
 
 class _SecureState(object):
     def __init__(self, desc, boolean_value):
@@ -21,7 +18,7 @@ class _SecureState(object):
 Any = _SecureState('Any', False)
 Protected = _SecureState('Protected', True)
 
-# decorators just for methods
+# security method decorators 
 def _unlocked_method(func):
     _cfg(func)['secured'] = Any
     return func
@@ -35,17 +32,16 @@ def _secure_method(check_permissions_func):
     return wrap
 
 # classes to assist with wrapping attributes
-class _Unlocked(object):
-    """ 
-    A wrapper class to declare an object as unlocked inside of a SecureController
-    """
+class _UnlockedAttribute(object):
     def __init__(self, obj):
         self.obj = obj
 
-class _Secured(object):
-    """
-    A wrapper class to secure an object on a controller
-    """
+    @_unlocked_method
+    @expose()
+    def _lookup(self, *remainder):
+        return self.obj, remainder
+
+class _SecuredAttribute(object):
     def __init__(self, obj, check_permissions):
         self.obj = obj
         self.check_permissions = check_permissions
@@ -53,12 +49,12 @@ class _Secured(object):
 
     def _check_permissions(self):
         if isinstance(self.check_permissions, basestring):
-            return getattr(self._parent, self.check_permissions)()
+            return getattr(self.parent, self.check_permissions)()
         else:
             return self.check_permissions()
 
     def __get_parent(self):
-        return self.__parent
+        return self._parent
     def __set_parent(self, parent):
         if ismethod(parent):
             self._parent = parent.im_self
@@ -71,6 +67,13 @@ class _Secured(object):
     def _lookup(self, *remainder):
         return self.obj, remainder
 
+# helper for secure decorator
+def _allowed_check_permissions_types(x):
+    return (ismethod(x) or 
+            isfunction(x) or 
+            isinstance(x, basestring)
+        )
+
 # methods that can either decorate functions or wrap classes
 # these should be the main methods used for securing or unlocking
 def unlocked(func_or_obj):
@@ -81,13 +84,8 @@ def unlocked(func_or_obj):
     if ismethod(func_or_obj) or isfunction(func_or_obj):
         return _unlocked_method(func_or_obj)
     else:
-        return _Unlocked(func_or_obj)
+        return _UnlockedAttribute(func_or_obj)
 
-def __allowed_check_permissions_types(x):
-    return (ismethod(x) or 
-            isfunction(x) or 
-            isinstance(x, basestring)
-           )
 
 def secure(func_or_obj, check_permissions_for_obj=None):
     """
@@ -99,12 +97,13 @@ def secure(func_or_obj, check_permissions_for_obj=None):
     To secure a class, invoke with two arguments:
         secure(<obj instance>, <check_permissions_method>)
     """
-    if __allowed_check_permissions_types(func_or_obj):
+
+    if _allowed_check_permissions_types(func_or_obj):
         return _secure_method(func_or_obj)
     else:
-        if not __allowed_check_permissions_types(check_permissions_for_obj):
+        if not _allowed_check_permissions_types(check_permissions_for_obj):
             raise TypeError, "When securing an object, secure() requires the second argument to be method"
-        return _Secured(func_or_obj, check_permissions_for_obj)
+        return _SecuredAttribute(func_or_obj, check_permissions_for_obj)
 
 
 class SecureController(object):
@@ -126,24 +125,25 @@ class SecureController(object):
                         value._pecan['check_permissions'] = cls.check_permissions
                 elif hasattr(value, '__class__'):
                     if name.startswith('__') and name.endswith('__'): continue
-                    if isinstance(value, _Unlocked):
+                    if isinstance(value, _UnlockedAttribute):
                         # mark it as unlocked and remove wrapper
                         cls._pecan['unlocked'].append(value.obj)
                         setattr(cls, name, value.obj)
-                    elif isinstance(value, _Secured):
+                    elif isinstance(value, _SecuredAttribute):
                         # The user has specified a different check_permissions
                         # than the class level version.  As far as the class
                         # is concerned, this method is unlocked because 
                         # it is using a check_permissions function embedded in
-                        # the _Secured wrapper
+                        # the _SecuredAttribute wrapper
                         cls._pecan['unlocked'].append(value)
 
     @classmethod
     def check_permissions(cls):
         return False
 
-# methods to evaluate security
+# methods to evaluate security during routing
 def handle_security(controller):
+    """ Checks the security of a controller.  """
     if controller._pecan.get('secured', False):
         check_permissions = controller._pecan['check_permissions']
 
@@ -154,13 +154,11 @@ def handle_security(controller):
             raise exc.HTTPUnauthorized
 
 def cross_boundary(prev_obj, obj):
-    """
-    check the security as we move across a boundary
-    """
+    """ Check permissions as we move between object instances. """
     if prev_obj is None:
         return
 
-    if isinstance(obj, _Secured):
+    if isinstance(obj, _SecuredAttribute):
         # a secure attribute can live in unsecure class so we have to set
         # while we walk the route
         obj.parent = prev_obj

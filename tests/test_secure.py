@@ -215,6 +215,8 @@ class TestObjectPathSecurity(TestCase):
             def _lookup(self, someID, *remainder):
                 if someID == 'notfound':
                     return None
+                elif someID == 'lookup_wrapped':
+                    return self.wrapped, remainder
                 return SubController(someID), remainder
 
             @secure('independent_check_permissions')
@@ -239,6 +241,9 @@ class TestObjectPathSecurity(TestCase):
                 if someID == 'notfound':
                     return None
                 return SubController(someID), remainder
+
+            unlocked = unlocked(SubController('unlocked'))
+
 
         class RootController(object):
             secret = SecretController()
@@ -350,3 +355,18 @@ class TestObjectPathSecurity(TestCase):
         assert response.body == 'Index wrapped'
         assert len(self.permissions_checked) == 1
         assert 'independent' in self.permissions_checked
+
+    def test_lookup_to_wrapped_attribute_on_self(self):
+        self.secret_cls.authorized = True
+        self.secret_cls.independent_authorization = True
+        response = self.app.get('/secret/lookup_wrapped/')
+        assert response.status_int == 200
+        assert response.body == 'Index wrapped'
+        assert len(self.permissions_checked) == 2
+        assert 'independent' in self.permissions_checked
+        assert 'secretcontroller' in self.permissions_checked
+
+    def test_unlocked_attribute_in_insecure(self):
+        response = self.app.get('/notsecret/unlocked/')
+        assert response.status_int == 200
+        assert response.body == 'Index unlocked'
