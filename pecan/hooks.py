@@ -1,5 +1,5 @@
-from routing    import iscontroller
 from webob.exc  import HTTPFound
+from util    import iscontroller
 
 
 __all__ = ['PecanHook', 'TransactionHook', 'HookController']

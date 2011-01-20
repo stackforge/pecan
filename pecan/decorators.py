@@ -1,9 +1,5 @@
 from inspect import getargspec
-
-def _cfg(f):
-    if not hasattr(f, '_pecan'): f._pecan = {}
-    return f._pecan
-
+from util import _cfg
 
 def when_for(controller):
     def when(method=None, **kw):
@@ -14,7 +10,6 @@ def when_for(controller):
             return f
         return decorate
     return when
-
 
 def expose(template      = None, 
            content_type  = 'text/html', 

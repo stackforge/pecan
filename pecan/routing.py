@@ -1,6 +1,8 @@
 from webob import exc
 from inspect import ismethod
+
 from secure import handle_security, cross_boundary
+from util import iscontroller
 
 __all__ = ['lookup_controller', 'find_object']
 
@@ -73,6 +75,3 @@ def find_object(obj, remainder, notfound_handlers):
         next, remainder = remainder[0], remainder[1:]
         prev_obj = obj
         obj = getattr(obj, next, None)
-
-def iscontroller(obj):
-    return getattr(obj, 'exposed', False)
