@@ -154,7 +154,6 @@ class Pecan(object):
         
         # get a sorted list of hooks, by priority (no controller hooks yet)
         state.hooks = self.determine_hooks()
-        state.content_type = None
 
         # handle "on_route" hooks
         self.handle_hooks('on_route', state)
@@ -264,10 +263,11 @@ class Pecan(object):
     
     def __call__(self, environ, start_response):
         # create the request and response object
-        state.request  = Request(environ)
-        state.response = Response()
-        state.hooks    = []
-        state.app      = self
+        state.request      = Request(environ)
+        state.content_type = None
+        state.response     = Response()
+        state.hooks        = []
+        state.app          = self
         
         # handle the request
         try:
