@@ -677,3 +677,44 @@ class TestRestController(object):
         r = app.get('/things/one/two/three/others')
         assert r.status_int == 200
         assert r.body == 'NESTED: one, two, three'
+    
+    def test_sub_nested_rest(self):
+        
+        class BazsController(RestController):
+            
+            data = [[['zero-zero-zero']]]
+            
+            @expose()
+            def get_one(self, foo_id, bar_id, id):
+                return self.data[int(foo_id)][int(bar_id)][int(id)]
+        
+        class BarsController(RestController):
+            
+            data = [['zero-zero']]
+            
+            bazs = BazsController()
+            
+            @expose()
+            def get_one(self, foo_id, id):
+                return self.data[int(foo_id)][int(id)]
+        
+        class FoosController(RestController):
+            
+            data = ['zero']
+            
+            bars = BarsController()
+            
+            @expose()
+            def get_one(self, id):
+                return self.data[int(id)]
+        
+        class RootController(object):
+            foos = FoosController()
+        
+        # create the app
+        app = TestApp(make_app(RootController()))
+        
+        # test sub-nested get_one
+        r = app.get('/foos/0/bars/0/bazs/0')
+        assert r.status_int == 200
+        assert r.body == 'zero-zero-zero'

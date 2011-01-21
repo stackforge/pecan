@@ -58,7 +58,7 @@ class RestController(object):
         
         # get the args to figure out how much to chop off
         args = getargspec(getattr(self, method))
-        fixed_args = len(args[0][1:])
+        fixed_args = len(args[0][1:]) - len(getattr(request, 'routing_args', []))
         var_args = args[1]
         
         # attempt to locate a sub-controller
