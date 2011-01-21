@@ -28,8 +28,10 @@ def proxy(key):
             return getattr(obj, attr)
         def __setattr__(self, attr, value):
             obj = getattr(state, key)
-
             return setattr(obj, attr, value)
+        def __delattr__(self, attr):
+            obj = getattr(state, key)
+            return delattr(obj, attr)
     return ObjectProxy()
 
 
@@ -116,8 +118,9 @@ class Pecan(object):
             args.append(im_self)
         
         # grab the routing args from nested REST controllers
-        if 'routing_args' in request.context:
-            remainder = request.context.pop('routing_args') + list(remainder)
+        if hasattr(request, 'routing_args'):
+            remainder = request.routing_args + list(remainder)
+            delattr(request, 'routing_args')
         
         # handle positional arguments
         if valid_args and remainder:
@@ -165,7 +168,7 @@ class Pecan(object):
         if state.content_type is None and '.' in path.split('/')[-1]:
             path, format = os.path.splitext(path)
             # store the extension for retrieval by controllers
-            request.context['extension'] = format
+            request.extension = format
             state.content_type = self.get_content_type(format)      
         controller, remainder = self.route(self.root, path)
 

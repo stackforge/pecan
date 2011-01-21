@@ -66,12 +66,12 @@ class RestController(object):
             for i, item in enumerate(remainder):
                 controller = getattr(self, item, None)
                 if controller and not ismethod(controller):
-                    request.context.setdefault('routing_args', []).extend(remainder[:i])
+                    self._set_routing_args(remainder[:i])
                     return lookup_controller(controller, remainder[i + 1:])
         elif fixed_args < len(remainder) and hasattr(self, remainder[fixed_args]):
             controller = getattr(self, remainder[fixed_args])
             if not ismethod(controller):
-                request.context.setdefault('routing_args', []).extend(remainder[:fixed_args])
+                self._set_routing_args(remainder[:fixed_args])
                 return lookup_controller(controller, remainder[fixed_args + 1:])
     
     def _handle_custom(self, method, remainder):
@@ -165,3 +165,9 @@ class RestController(object):
         abort(404)
     
     _handle_put = _handle_post
+    
+    def _set_routing_args(self, args):
+        if hasattr(request, 'routing_args'):
+            request.routing_args.extend(args)
+        else:
+            setattr(request, 'routing_args', args)

@@ -460,7 +460,7 @@ class TestBase(TestCase):
             @expose()
             def _default(self, *args):
                 from pecan.core import request
-                return request.context['extension']
+                return request.extension
 
         app = TestApp(Pecan(RootController()))
         r = app.get('/index.html')
