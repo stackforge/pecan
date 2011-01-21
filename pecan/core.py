@@ -157,13 +157,16 @@ class Pecan(object):
         
         # get a sorted list of hooks, by priority (no controller hooks yet)
         state.hooks = self.determine_hooks()
+        
+        # store the routing path to allow hooks to modify it
+        state.request.routing_path = state.request.path
 
         # handle "on_route" hooks
         self.handle_hooks('on_route', state)
         
         # lookup the controller, respecting content-type as requested
         # by the file extension on the URI
-        path = state.request.path
+        path = state.request.routing_path
 
         if state.content_type is None and '.' in path.split('/')[-1]:
             path, format = os.path.splitext(path)
