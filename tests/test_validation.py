@@ -1,8 +1,10 @@
-from pecan import make_app, expose, request, response, redirect
+from formencode import ForEach, Schema, validators
 from webtest import TestApp
 
-from formencode import validators, Schema
+import os.path
 
+from pecan import make_app, expose, request, response, redirect
+from pecan.templating import _builtin_renderers as builtin_renderers
 
 try:
     from simplejson import dumps
@@ -11,6 +13,8 @@ except ImportError:
 
 
 class TestValidation(object):
+    
+    template_path = os.path.join(os.path.dirname(__file__), 'templates')
     
     def test_simple_validation(self):
         class RegistrationSchema(Schema):
@@ -91,7 +95,7 @@ class TestValidation(object):
 
             @expose()
             def errors(self, *args, **kwargs):
-                assert request.validation_error is not None
+                assert request.validation_errors is not None
                 return 'There was an error!'
             
             @expose(schema=RegistrationSchema())
@@ -102,7 +106,7 @@ class TestValidation(object):
                             password,
                             password_confirm,
                             age):
-                assert request.validation_error is not None
+                assert request.validation_errors is not None
                 return 'Success!'
             
             @expose(schema=RegistrationSchema(), error_handler='/errors')
@@ -113,17 +117,17 @@ class TestValidation(object):
                             password,
                             password_confirm,
                             age):
-                assert request.validation_error is not None
+                assert request.validation_errors is not None
                 return 'Success!'
             
             @expose(json_schema=RegistrationSchema())
             def json(self, data):
-                assert request.validation_error is not None
+                assert request.validation_errors is not None
                 return 'Success!'
             
             @expose(json_schema=RegistrationSchema(), error_handler='/errors')
             def json_with_handler(self, data):
-                assert request.validation_error is not None
+                assert request.validation_errors is not None
                 return 'Success!'
                 
 
@@ -142,7 +146,6 @@ class TestValidation(object):
         assert r.body == 'Success!'
         
         # test with error handler
-        app = TestApp(make_app(RootController()))
         r = app.post('/with_handler', dict(
             first_name='Jonathan',
             last_name='LaCour',
@@ -178,5 +181,544 @@ class TestValidation(object):
             password_confirm='654321',
             age='31'
         )), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'There was an error!'
+
+    def test_with_variable_decode(self):
+        
+        class ColorSchema(Schema):
+            colors = ForEach(validators.String(not_empty=True))
+        
+        class RootController(object):
+            
+            @expose()
+            def errors(self, *args, **kwargs):
+                return 'Error with %s!' % ', '.join(request.validation_errors.keys())
+            
+            @expose(schema=ColorSchema(), 
+                    variable_decode=True)
+            def index(self, **kwargs):
+                if request.validation_errors is not None:
+                    return ', '.join(request.validation_errors.keys())
+                else:
+                    return 'Success!'
+            
+            @expose(schema=ColorSchema(), 
+                    error_handler='/errors', 
+                    variable_decode=True)
+            def with_handler(self, **kwargs):
+                if request.validation_errors is not None:
+                    return ', '.join(request.validation_errors.keys())
+                else:
+                    return 'Success!'
+            
+            @expose(json_schema=ColorSchema(), 
+                    variable_decode=True)
+            def json(self, data):
+                if request.validation_errors is not None:
+                    return ', '.join(request.validation_errors.keys())
+                else:
+                    return 'Success!'
+            
+            @expose(json_schema=ColorSchema(), 
+                    error_handler='/errors', 
+                    variable_decode=True)
+            def json_with_handler(self, data):
+                if request.validation_errors is not None:
+                    return ', '.join(request.validation_errors.keys())
+                else:
+                    return 'Success!'
+            
+            @expose(schema=ColorSchema(),
+                    variable_decode=dict())
+            def custom(self, **kwargs):
+                if request.validation_errors is not None:
+                    return ', '.join(request.validation_errors.keys())
+                else:
+                    return 'Success!'
+            
+            @expose(schema=ColorSchema(),
+                    error_handler='/errors',
+                    variable_decode=dict())
+            def custom_with_handler(self, **kwargs):
+                if request.validation_errors is not None:
+                    return ', '.join(request.validation_errors.keys())
+                else:
+                    return 'Success!'
+            
+            @expose(json_schema=ColorSchema(),
+                    variable_decode=dict())
+            def custom_json(self, data):
+                if request.validation_errors is not None:
+                    return ', '.join(request.validation_errors.keys())
+                else:
+                    return 'Success!'
+
+            @expose(json_schema=ColorSchema(),
+                    error_handler='/errors',
+                    variable_decode=dict())
+            def custom_json_with_handler(self, data):
+                if request.validation_errors is not None:
+                    return ', '.join(request.validation_errors.keys())
+                else:
+                    return 'Success!'
+
+            @expose(schema=ColorSchema(),
+                    variable_decode=dict(dict_char='-', list_char='.'))
+            def alternate(self, **kwargs):
+                if request.validation_errors is not None:
+                    return ', '.join(request.validation_errors.keys())
+                else:
+                    return 'Success!'
+            
+            @expose(schema=ColorSchema(),
+                    error_handler='/errors',
+                    variable_decode=dict(dict_char='-', list_char='.'))
+            def alternate_with_handler(self, **kwargs):
+                if request.validation_errors is not None:
+                    return ', '.join(request.validation_errors.keys())
+                else:
+                    return 'Success!'
+            
+            @expose(json_schema=ColorSchema(),
+                    variable_decode=dict(dict_char='-', list_char='.'))
+            def alternate_json(self, data):
+                if request.validation_errors is not None:
+                    return ', '.join(request.validation_errors.keys())
+                else:
+                    return 'Success!'
+
+            @expose(json_schema=ColorSchema(),
+                    error_handler='/errors',
+                    variable_decode=dict(dict_char='-', list_char='.'))
+            def alternate_json_with_handler(self, data):
+                if request.validation_errors is not None:
+                    return ', '.join(request.validation_errors.keys())
+                else:
+                    return 'Success!'
+        
+        # test without error handler
+        app = TestApp(make_app(RootController()))
+        r = app.post('/', {
+            'colors-0' : 'blue',
+            'colors-1' : 'red'
+        })
+        assert r.status_int == 200
+        assert r.body == 'Success!'
+        
+        # test failure without error handler
+        r = app.post('/', {
+            'colors-0' : 'blue',
+            'colors-1' : ''
+        })
+        assert r.status_int == 200
+        assert r.body == 'colors-1'
+        
+        # test with error handler
+        r = app.post('/with_handler', {
+            'colors-0' : 'blue',
+            'colors-1' : 'red'
+        })
+        assert r.status_int == 200
+        assert r.body == 'Success!'
+        
+        # test failure with error handler
+        r = app.post('/with_handler', {
+            'colors-0' : '',
+            'colors-1' : 'red'
+        })
+        assert r.status_int == 200
+        assert r.body == 'Error with colors-0!'
+        
+        # test JSON without error handler
+        r = app.post('/json', dumps({
+            'colors-0' : 'blue',
+            'colors-1' : 'red'
+        }), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'Success!'
+        
+        # test JSON failure without error handler
+        r = app.post('/json', dumps({
+            'colors-0' : 'blue',
+            'colors-1' : ''
+        }), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'colors-1'
+        
+        # test JSON with error handler
+        r = app.post('/json_with_handler', dumps({
+            'colors-0' : 'blue',
+            'colors-1' : 'red'
+        }), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'Success!'
+        
+        # test JSON failure with error handler
+        r = app.post('/json_with_handler', dumps({
+            'colors-0' : '',
+            'colors-1' : 'red'
+        }), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'Error with colors-0!'
+        
+        # test custom without error handler
+        r = app.post('/custom', {
+            'colors-0' : 'blue',
+            'colors-1' : 'red'
+        })
+        assert r.status_int == 200
+        assert r.body == 'Success!'
+        
+        # test custom failure without error handler
+        r = app.post('/custom', {
+            'colors-0' : 'blue',
+            'colors-1' : ''
+        })
+        assert r.status_int == 200
+        assert r.body == 'colors-1'
+        
+        # test custom with error handler
+        r = app.post('/custom_with_handler', {
+            'colors-0' : 'blue',
+            'colors-1' : 'red'
+        })
+        assert r.status_int == 200
+        assert r.body == 'Success!'
+        
+        # test custom failure with error handler
+        r = app.post('/custom_with_handler', {
+            'colors-0' : '',
+            'colors-1' : 'red'
+        })
+        assert r.status_int == 200
+        assert r.body == 'Error with colors-0!'
+        
+        # test custom JSON without error handler
+        r = app.post('/custom_json', dumps({
+            'colors-0' : 'blue',
+            'colors-1' : 'red'
+        }), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'Success!'
+        
+        # test custom JSON failure without error handler
+        r = app.post('/custom_json', dumps({
+            'colors-0' : 'blue',
+            'colors-1' : ''
+        }), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'colors-1'
+        
+        # test custom JSON with error handler
+        r = app.post('/custom_json_with_handler', dumps({
+            'colors-0' : 'blue',
+            'colors-1' : 'red'
+        }), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'Success!'
+        
+        # test custom JSON failure with error handler
+        r = app.post('/custom_json_with_handler', dumps({
+            'colors-0' : '',
+            'colors-1' : 'red'
+        }), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'Error with colors-0!'
+        
+        # test alternate without error handler
+        r = app.post('/alternate', {
+            'colors.0' : 'blue',
+            'colors.1' : 'red'
+        })
+        assert r.status_int == 200
+        assert r.body == 'Success!'
+        
+        # test alternate failure without error handler
+        r = app.post('/alternate', {
+            'colors.0' : 'blue',
+            'colors.1' : ''
+        })
+        assert r.status_int == 200
+        assert r.body == 'colors.1'
+        
+        # test alternate with error handler
+        r = app.post('/alternate_with_handler', {
+            'colors.0' : 'blue',
+            'colors.1' : 'red'
+        })
+        assert r.status_int == 200
+        assert r.body == 'Success!'
+        
+        # test alternate failure with error handler
+        r = app.post('/alternate_with_handler', {
+            'colors.0' : '',
+            'colors.1' : 'red'
+        })
+        assert r.status_int == 200
+        assert r.body == 'Error with colors.0!'
+        
+        # test alternate JSON without error handler
+        r = app.post('/alternate_json', dumps({
+            'colors.0' : 'blue',
+            'colors.1' : 'red'
+        }), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'Success!'
+        
+        # test alternate JSON failure without error handler
+        r = app.post('/alternate_json', dumps({
+            'colors.0' : 'blue',
+            'colors.1' : ''
+        }), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'colors.1'
+        
+        # test alternate JSON with error handler
+        r = app.post('/alternate_json_with_handler', dumps({
+            'colors.0' : 'blue',
+            'colors.1' : 'red'
+        }), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'Success!'
+        
+        # test alternate JSON failure with error handler
+        r = app.post('/alternate_json_with_handler', dumps({
+            'colors.0' : '',
+            'colors.1' : 'red'
+        }), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'Error with colors.0!'
+    
+    def test_htmlfill(self):
+        
+        if 'mako' not in builtin_renderers:
+            return
+        
+        class ColorSchema(Schema):
+            colors = ForEach(validators.String(not_empty=True))
+        
+        class NameSchema(Schema):
+            name = validators.String(not_empty=True)
+        
+        class RootController(object):
+            
+            @expose('mako:errors.html')
+            def errors(self, *args, **kwargs):
+                return dict(errors=request.validation_errors)
+            
+            @expose(template='mako:form_colors.html',
+                    schema=ColorSchema(), 
+                    variable_decode=True)
+            def index(self, **kwargs):
+                if request.validation_errors:
+                    return dict()
+                else:
+                    return dict(data=kwargs)
+            
+            @expose(schema=ColorSchema(),
+                    error_handler='/errors',
+                    variable_decode=True)
+            def with_handler(self, **kwargs):
+                return ', '.join(kwargs['colors'])
+            
+            @expose(template='mako:form_name.html',
+                    schema=NameSchema(),
+                    htmlfill=dict(auto_insert_errors=True))
+            def with_errors(self, **kwargs):
+                return kwargs
+            
+            @expose(schema=NameSchema(),
+                    error_handler='/errors',
+                    htmlfill=dict(auto_insert_errors=True))
+            def with_handler_and_errors(self, **kwargs):
+                return kwargs['name']
+            
+            @expose(template='json',
+                    schema=NameSchema(),
+                    htmlfill=dict(auto_insert_errors=True))
+            def json(self, **kwargs):
+                if request.validation_errors:
+                    return dict(error_with=request.validation_errors.keys())
+                else:
+                    return kwargs
+        
+        def _get_contents(filename):
+            return open(os.path.join(self.template_path, filename), 'r').read()
+        
+        # test without error handler
+        app = TestApp(make_app(RootController(), template_path=self.template_path))
+        r = app.post('/', {
+            'colors-0' : 'blue',
+            'colors-1' : 'red'
+        })
+        assert r.status_int == 200
+        assert r.body == _get_contents('form_colors_valid.html')
+        
+        # test failure without error handler
+        r = app.post('/', {
+            'colors-0' : 'blue',
+            'colors-1' : ''
+        })
+        assert r.status_int == 200
+        assert r.body == _get_contents('form_colors_invalid.html')
+        
+        # test with error handler
+        r = app.post('/with_handler', {
+            'colors-0' : 'blue',
+            'colors-1' : 'red'
+        })
+        assert r.status_int == 200
+        assert r.body == 'blue, red'
+        
+        # test failure with error handler
+        r = app.post('/with_handler', {
+            'colors-0' : 'blue',
+            'colors-1' : ''
+        })
+        assert r.status_int == 200
+        assert r.body == _get_contents('errors_colors.html')
+        
+        # test with errors
+        r = app.post('/with_errors', {
+            'name' : 'Yoann'
+        })
+        assert r.status_int == 200
+        assert r.body == _get_contents('form_name_valid.html')
+        
+        # test failure with errors
+        r = app.post('/with_errors', {
+            'name' : ''
+        })
+        assert r.status_int == 200
+        assert r.body == _get_contents('form_name_invalid.html')
+        
+        # test with error handler and errors
+        r = app.post('/with_handler_and_errors', {
+            'name' : 'Yoann'
+        })
+        assert r.status_int == 200
+        assert r.body == 'Yoann'
+        
+        # test failure with error handler and errors
+        r = app.post('/with_handler_and_errors', {
+            'name' : ''
+        })
+        assert r.status_int == 200
+        assert r.body == _get_contents('errors_name.html')
+        
+        # test JSON
+        r = app.post('/json', {
+            'name' : 'Yoann'
+        })
+        assert r.status_int == 200
+        assert r.body == dumps(dict(name='Yoann'))
+        
+        # test JSON failure
+        r = app.post('/json', {
+            'name' : ''
+        })
+        assert r.status_int == 200
+        assert r.body == dumps(dict(error_with=['name']))
+    
+    def test_error_for(self):
+        
+        class ColorSchema(Schema):
+            colors = ForEach(validators.String(not_empty=True))
+        
+        class RootController(object):
+            
+            @expose(template='mako:error_for.html')
+            def errors(self, *args, **kwargs):
+                return dict()
+            
+            @expose(template='mako:error_for.html',
+                    schema=ColorSchema(), 
+                    variable_decode=True)
+            def index(self, **kwargs):
+                return dict()
+            
+            @expose(schema=ColorSchema(), 
+                    error_handler='/errors', 
+                    variable_decode=True)
+            def with_handler(self, **kwargs):
+                return dict()
+            
+            @expose(template='mako:error_for.html',
+                    json_schema=ColorSchema(), 
+                    variable_decode=True)
+            def json(self, data):
+                return dict()
+            
+            @expose(json_schema=ColorSchema(), 
+                    error_handler='/errors', 
+                    variable_decode=True)
+            def json_with_handler(self, data):
+                return dict()
+        
+        # test without error handler
+        app = TestApp(make_app(RootController(), template_path=self.template_path))
+        r = app.post('/', {
+            'colors-0' : 'blue',
+            'colors-1' : ''
+        })
+        assert r.status_int == 200
+        assert r.body == 'Please enter a value'
+        
+        # test with error handler
+        r = app.post('/with_handler', {
+            'colors-0' : 'blue',
+            'colors-1' : ''
+        })
+        assert r.status_int == 200
+        assert r.body == 'Please enter a value'
+        
+        # test JSON without error handler
+        r = app.post('/json', dumps({
+            'colors-0' : 'blue',
+            'colors-1' : ''
+        }), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'Please enter a value'
+        
+        # test JSON with error handler
+        r = app.post('/json_with_handler', dumps({
+            'colors-0' : 'blue',
+            'colors-1' : ''
+        }), [('content-type', 'application/json')])
+        assert r.status_int == 200
+        assert r.body == 'Please enter a value'
+    
+    def test_callable_error_handler(self):
+        
+        class ColorSchema(Schema):
+            colors = ForEach(validators.String(not_empty=True))
+        
+        class RootController(object):
+            
+            @expose()
+            def errors(self, *args, **kwargs):
+                return 'There was an error!'
+            
+            @expose(schema=ColorSchema(), 
+                    error_handler=lambda: '/errors',
+                    variable_decode=True)
+            def index(self, **kwargs):
+                return 'Success!'
+        
+        # test with error handler
+        app = TestApp(make_app(RootController()))
+        r = app.post('/', {
+            'colors-0' : 'blue',
+            'colors-1' : 'red'
+        })
+        assert r.status_int == 200
+        assert r.body == 'Success!'
+        
+        # test with error handler
+        r = app.post('/', {
+            'colors-0' : 'blue',
+            'colors-1' : ''
+        })
         assert r.status_int == 200
         assert r.body == 'There was an error!'

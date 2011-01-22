@@ -11,12 +11,14 @@ def when_for(controller):
         return decorate
     return when
 
-def expose(template      = None, 
-           content_type  = 'text/html', 
-           schema        = None, 
-           json_schema   = None, 
-           error_handler = None,
-           generic       = False):
+def expose(template        = None, 
+           content_type    = 'text/html', 
+           schema          = None, 
+           json_schema     = None, 
+           variable_decode = False,
+           error_handler   = None,
+           htmlfill        = None,
+           generic         = False):
     
     if template == 'json': content_type = 'application/json'
     def decorate(f):
@@ -38,7 +40,7 @@ def expose(template      = None,
         # store the arguments for this controller method
         cfg['argspec'] = getargspec(f)
         
-        # store the validator
+        # store the schema
         cfg['error_handler'] = error_handler
         if schema is not None: 
             cfg['schema'] = schema
@@ -46,6 +48,20 @@ def expose(template      = None,
         elif json_schema is not None: 
             cfg['schema'] = json_schema
             cfg['validate_json'] = True
+        
+        # store the variable decode configuration
+        if isinstance(variable_decode, dict) or variable_decode == True:
+            _variable_decode = dict(dict_char='.', list_char='-')
+            if isinstance(variable_decode, dict):
+                _variable_decode.update(variable_decode)
+            cfg['variable_decode'] = _variable_decode
+        
+        # store the htmlfill configuration
+        if isinstance(htmlfill, dict) or htmlfill == True or schema is not None:
+            _htmlfill = dict(auto_insert_errors=False)
+            if isinstance(htmlfill, dict):
+                _htmlfill.update(htmlfill)
+            cfg['htmlfill'] = _htmlfill
         return f
     return decorate
     

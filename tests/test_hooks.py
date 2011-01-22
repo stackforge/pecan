@@ -696,7 +696,7 @@ class TestHooks(object):
                             password_confirm,
                             age):
                 run_hook.append('inside')
-                return str(request.validation_error is not None)
+                return str(request.validation_errors is not None)
             
             @expose(schema=RegistrationSchema(), error_handler='/errors')
             def with_handler(self, first_name, 
@@ -707,7 +707,7 @@ class TestHooks(object):
                             password_confirm,
                             age):
                 run_hook.append('inside')
-                return str(request.validation_error is not None)
+                return str(request.validation_errors is not None)
         
         # test that the hooks get properly run with no validation errors        
         app = TestApp(make_app(RootController(), hooks=[SimpleHook()]))

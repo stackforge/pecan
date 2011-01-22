@@ -1,11 +1,12 @@
 from configuration      import _runtime_conf
 from templating         import RendererFactory
 from routing            import lookup_controller
+from util               import _cfg
 
 from webob              import Request, Response, exc
 from threading          import local
 from itertools          import chain
-from formencode         import Invalid
+from formencode         import htmlfill, Invalid, variabledecode
 from paste.recursive    import ForwardRequestException
 
 try:
@@ -23,8 +24,8 @@ def proxy(key):
     class ObjectProxy(object):
         def __getattr__(self, attr):
             obj = getattr(state, key)
-            if attr == 'validation_error':
-                return getattr(obj, attr, None)
+            if attr == 'validation_errors':
+                return getattr(obj, attr, {})
             return getattr(obj, attr)
         def __setattr__(self, attr, value):
             obj = getattr(state, key)
@@ -57,8 +58,8 @@ def redirect(location, internal=False, code=None, headers={}):
 
 
 def error_for(field):
-    if request.validation_error is None: return ''
-    return request.validation_error.error_dict.get(field, '')
+    if request.validation_errors is None: return ''
+    return request.validation_errors.get(field, '')
 
 
 class Pecan(object):
@@ -92,7 +93,7 @@ class Pecan(object):
     def determine_hooks(self, controller=None):
         controller_hooks = []
         if controller:
-            controller_hooks = controller._pecan.get('hooks', [])
+            controller_hooks = _cfg(controller).get('hooks', [])
         return list(
             sorted(
                 chain(controller_hooks, self.hooks), 
@@ -147,26 +148,49 @@ class Pecan(object):
         
         return args, kwargs
     
-    def validate(self, schema, params=None, json=False):
-        to_validate = params
+    def validate(self, schema, params, json=False, error_handler=None, 
+                 htmlfill=None, variable_decode=None):
+        request.validation_errors = None
+        try:
+            to_validate = params
+            if json:
+                to_validate = loads(request.body)
+            if variable_decode is not None:
+                to_validate = variabledecode.variable_decode(to_validate, **variable_decode)
+            params = schema.to_python(to_validate)
+        except Invalid, e:
+            kwargs = {}
+            if variable_decode is not None:
+                kwargs['encode_variables'] = True
+                kwargs.update(variable_decode)
+            request.validation_errors = e.unpack_errors(**kwargs)
+            if error_handler is not None:
+                if callable(error_handler):
+                    error_handler = error_handler()
+                request.environ['REQUEST_METHOD'] = 'GET'
+                request.environ['pecan.params'] = params
+                request.environ['pecan.validation_errors'] = request.validation_errors
+                if htmlfill is not None:
+                    request.environ['pecan.htmlfill'] = htmlfill
+                redirect(error_handler, internal=True)
         if json:
-            to_validate = loads(request.body)
-        return schema.to_python(to_validate)
-        
+            params = dict(data=params)
+        return params
+    
     def handle_request(self):
         
         # get a sorted list of hooks, by priority (no controller hooks yet)
         state.hooks = self.determine_hooks()
         
         # store the routing path to allow hooks to modify it
-        state.request.routing_path = state.request.path
+        request.routing_path = request.path
 
         # handle "on_route" hooks
         self.handle_hooks('on_route', state)
         
         # lookup the controller, respecting content-type as requested
         # by the file extension on the URI
-        path = state.request.routing_path
+        path = request.routing_path
 
         if state.content_type is None and '.' in path.split('/')[-1]:
             path, format = os.path.splitext(path)
@@ -174,50 +198,51 @@ class Pecan(object):
             request.extension = format
             state.content_type = self.get_content_type(format)      
         controller, remainder = self.route(self.root, path)
+        cfg = _cfg(controller)
 
-        if controller._pecan.get('generic_handler'):
+        if cfg.get('generic_handler'):
             raise exc.HTTPNotFound
         
         # handle generic controllers
         im_self = None
-        if controller._pecan.get('generic'):
+        if cfg.get('generic'):
             im_self = controller.im_self
-            handlers = controller._pecan['generic_handlers']
+            handlers = cfg['generic_handlers']
             controller = handlers.get(request.method, handlers['DEFAULT'])
+            cfg = _cfg(controller)
                     
         # add the controller to the state so that hooks can use it
         state.controller = controller
     
         # if unsure ask the controller for the default content type 
         if state.content_type is None:
-            state.content_type = controller._pecan.get('content_type', 'text/html')
+            state.content_type = cfg.get('content_type', 'text/html')
+        
         # get a sorted list of hooks, by priority
-        state.hooks = self.determine_hooks(controller)    
+        state.hooks = self.determine_hooks(controller)
     
         # handle "before" hooks
         self.handle_hooks('before', state)
         
         # fetch and validate any parameters
-        params = dict(state.request.str_params)
-        if 'schema' in controller._pecan:
-            request.validation_error = None
-            try:
-                params = self.validate(
-                    controller._pecan['schema'], 
-                    json   = controller._pecan['validate_json'],
-                    params = params
-                )
-            except Invalid, e:
-                request.validation_error = e
-                if controller._pecan['error_handler'] is not None:
-                    redirect(controller._pecan['error_handler'], internal=True)
-            if controller._pecan['validate_json']: params = dict(data=params)
+        params = dict(request.str_params)
+        if 'schema' in cfg:
+            params = self.validate(
+                        cfg['schema'], 
+                        params, 
+                        json=cfg['validate_json'], 
+                        error_handler=cfg.get('error_handler'), 
+                        htmlfill=cfg.get('htmlfill'),
+                        variable_decode=cfg.get('variable_decode')
+                    )
+        elif 'pecan.validation_errors' in request.environ:
+            request.validation_errors = request.environ.pop('pecan.validation_errors')
         
         # fetch the arguments for the controller
         args, kwargs = self.get_args(
             params, 
             remainder,
-            controller._pecan['argspec'],
+            cfg['argspec'],
             im_self
         )
         
@@ -232,7 +257,7 @@ class Pecan(object):
         raw_namespace = result
 
         # pull the template out based upon content type and handle overrides
-        template = controller._pecan.get('content_types', {}).get(state.content_type)
+        template = cfg.get('content_types', {}).get(state.content_type)
         template = getattr(request, 'override_template', template)
 
         # if there is a template, render it
@@ -249,6 +274,17 @@ class Pecan(object):
                 template = template.split(':')[1]
             result = renderer.render(template, result)
         
+        # pass the response through htmlfill (items are popped out of the 
+        # environment even if htmlfill won't run for proper cleanup)
+        _htmlfill = cfg.get('htmlfill')
+        if _htmlfill is None and 'pecan.htmlfill' in request.environ:
+            _htmlfill = request.environ.pop('pecan.htmlfill')
+        if 'pecan.params' in request.environ:
+            params = request.environ.pop('pecan.params')
+        if request.validation_errors and _htmlfill is not None and state.content_type == 'text/html':
+            errors = getattr(request, 'validation_errors', {})
+            result = htmlfill.render(result, defaults=params, errors=errors, **_htmlfill)
+        
         # If we are in a test request put the namespace where it can be
         # accessed directly
         if request.environ.get('paste.testing'):
@@ -259,13 +295,13 @@ class Pecan(object):
         
         # set the body content
         if isinstance(result, unicode):
-            state.response.unicode_body = result
+            response.unicode_body = result
         else:
-            state.response.body = result
+            response.body = result
         
         # set the content type
         if state.content_type:
-            state.response.content_type = state.content_type
+            response.content_type = state.content_type
     
     def __call__(self, environ, start_response):
         # create the request and response object
