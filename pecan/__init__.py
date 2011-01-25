@@ -5,7 +5,7 @@ from paste.urlparser import StaticURLParser
 from weberror.errormiddleware import ErrorMiddleware
 from weberror.evalexception import EvalException
 
-from core import Pecan, request, response, override_template, abort, redirect, error_for
+from core import Pecan, request, response, override_template, abort, redirect, error_for, ValidationException
 from decorators import expose
 
 from configuration import set_config

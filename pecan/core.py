@@ -62,6 +62,24 @@ def error_for(field):
     return request.validation_errors.get(field, '')
 
 
+class ValidationException(ForwardRequestException):
+    def __init__(self, location=None):
+        if hasattr(state, 'controller'):
+            cfg = _cfg(state.controller)
+        else:
+            cfg = {}
+        if location is None and 'error_handler' in cfg:
+            location = cfg['error_handler']
+            if callable(location):
+                location = location()
+        request.environ['REQUEST_METHOD'] = 'GET'
+        request.environ['pecan.params'] = dict(request.str_params)
+        request.environ['pecan.validation_errors'] = request.validation_errors
+        if cfg.get('htmlfill') is not None:
+            request.environ['pecan.htmlfill'] = cfg['htmlfill']
+        ForwardRequestException.__init__(self, location)
+
+
 class Pecan(object):
     def __init__(self, root, 
                  default_renderer    = 'mako', 
@@ -175,14 +193,7 @@ class Pecan(object):
                 kwargs.update(variable_decode)
             request.validation_errors = e.unpack_errors(**kwargs)
             if error_handler is not None:
-                if callable(error_handler):
-                    error_handler = error_handler()
-                request.environ['REQUEST_METHOD'] = 'GET'
-                request.environ['pecan.params'] = params
-                request.environ['pecan.validation_errors'] = request.validation_errors
-                if htmlfill is not None:
-                    request.environ['pecan.htmlfill'] = htmlfill
-                redirect(error_handler, internal=True)
+                raise ValidationException()
         if json:
             params = dict(data=params)
         return params
