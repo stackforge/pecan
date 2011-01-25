@@ -128,6 +128,10 @@ class TestBase(TestCase):
                 return 'optional: %s' % str(id)
             
             @expose()
+            def multiple_optional(self, one=None, two=None, three=None):
+                return 'multiple_optional: %s, %s, %s' % (one, two, three)
+            
+            @expose()
             def variable_args(self, *args):
                 return 'variable_args: %s' % ', '.join(args)
             
@@ -245,6 +249,55 @@ class TestBase(TestCase):
         r = app.post('/optional', {'id': '7', 'dummy': 'dummy'})
         assert r.status_int == 200
         assert r.body == 'optional: 7'
+        
+        # multiple optional args
+        
+        r = app.get('/multiple_optional')
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: None, None, None'
+        
+        r = app.get('/multiple_optional/1')
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: 1, None, None'
+        
+        r = app.get('/multiple_optional/1/2/3')
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: 1, 2, 3'
+        
+        r = app.get('/multiple_optional/1/2/3/dummy', status=404)
+        assert r.status_int == 404
+        
+        r = app.get('/multiple_optional?one=1')
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: 1, None, None'
+        
+        r = app.get('/multiple_optional/1?one=one')
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: 1, None, None'
+        
+        r = app.post('/multiple_optional', {'one': '1'})
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: 1, None, None'
+        
+        r = app.post('/multiple_optional/1', {'one': 'one'})
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: 1, None, None'
+        
+        r = app.get('/multiple_optional?one=1&two=2&three=3&four=4')
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: 1, 2, 3'
+        
+        r = app.post('/multiple_optional', {'one': '1', 'two': '2', 'three': '3', 'four': '4'})
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: 1, 2, 3'
+        
+        r = app.get('/multiple_optional?three=3')
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: None, None, 3'
+        
+        r = app.get('/multiple_optional', {'two': '2'})
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: None, 2, None'
         
         # variable args
         

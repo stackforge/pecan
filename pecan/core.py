@@ -134,10 +134,20 @@ class Pecan(object):
                 abort(404)
             args.extend(remainder)
         
+        # get the default positional arguments
+        if argspec[3]:
+            defaults = dict(zip(argspec[0][-len(argspec[3]):], argspec[3]))
+        else:
+            defaults = dict()
+        
         # handle positional GET/POST params
         for name in valid_args:
             if name in all_params:
                 args.append(all_params.pop(name))
+            elif name in defaults:
+                args.append(defaults[name])
+            else:
+                break
         
         # handle wildcard GET/POST params
         if argspec[2]:
