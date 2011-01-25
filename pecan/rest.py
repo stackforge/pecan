@@ -29,12 +29,6 @@ class RestController(object):
         handler = getattr(self, '_handle_%s' % method, self._handle_custom)
         result = handler(method, args)
         
-        # remove the "_method" workaround
-        if '_method' in request.POST:
-            del request.POST['_method']
-        if '_method' in request.GET:
-            del request.GET['_method']
-        
         # return the result
         return result
     
