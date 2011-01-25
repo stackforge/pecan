@@ -503,10 +503,6 @@ class TestValidation(object):
         
         class RootController(object):
             
-            @expose('mako:errors.html')
-            def errors(self, *args, **kwargs):
-                return dict(errors=request.validation_errors)
-            
             @expose(template='mako:form_colors.html',
                     schema=ColorSchema(), 
                     variable_decode=True)
@@ -517,10 +513,14 @@ class TestValidation(object):
                     return dict(data=kwargs)
             
             @expose(schema=ColorSchema(),
-                    error_handler='/errors',
+                    error_handler='/errors_with_handler',
                     variable_decode=True)
             def with_handler(self, **kwargs):
                 return ', '.join(kwargs['colors'])
+            
+            @expose('mako:form_colors.html')
+            def errors_with_handler(self):
+                return dict()
             
             @expose(template='mako:form_name.html',
                     schema=NameSchema(),
@@ -529,10 +529,14 @@ class TestValidation(object):
                 return kwargs
             
             @expose(schema=NameSchema(),
-                    error_handler='/errors',
+                    error_handler='/errors_with_handler_and_errors',
                     htmlfill=dict(auto_insert_errors=True))
             def with_handler_and_errors(self, **kwargs):
                 return kwargs['name']
+            
+            @expose('mako:form_name.html')
+            def errors_with_handler_and_errors(self):
+                return dict()
             
             @expose(template='json',
                     schema=NameSchema(),
@@ -577,7 +581,7 @@ class TestValidation(object):
             'colors-1' : ''
         })
         assert r.status_int == 200
-        assert r.body == _get_contents('errors_colors.html')
+        assert r.body == _get_contents('form_colors_invalid.html')
         
         # test with errors
         r = app.post('/with_errors', {
@@ -605,7 +609,7 @@ class TestValidation(object):
             'name' : ''
         })
         assert r.status_int == 200
-        assert r.body == _get_contents('errors_name.html')
+        assert r.body == _get_contents('form_name_invalid.html')
         
         # test JSON
         r = app.post('/json', {

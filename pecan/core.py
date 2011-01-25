@@ -72,11 +72,11 @@ class ValidationException(ForwardRequestException):
             location = cfg['error_handler']
             if callable(location):
                 location = location()
-        request.environ['REQUEST_METHOD'] = 'GET'
         request.environ['pecan.params'] = dict(request.str_params)
         request.environ['pecan.validation_errors'] = request.validation_errors
         if cfg.get('htmlfill') is not None:
             request.environ['pecan.htmlfill'] = cfg['htmlfill']
+        request.environ['REQUEST_METHOD'] = 'GET'
         ForwardRequestException.__init__(self, location)
 
 
