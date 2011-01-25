@@ -3,7 +3,7 @@ from webtest import TestApp
 
 import os.path
 
-from pecan import make_app, expose, request, response, redirect
+from pecan import make_app, expose, request, response, redirect, ValidationException
 from pecan.templating import _builtin_renderers as builtin_renderers
 
 try:
@@ -95,7 +95,7 @@ class TestValidation(object):
 
             @expose()
             def errors(self, *args, **kwargs):
-                assert request.validation_errors is not None
+                assert len(request.validation_errors) > 0
                 return 'There was an error!'
             
             @expose(schema=RegistrationSchema())
@@ -106,7 +106,7 @@ class TestValidation(object):
                             password,
                             password_confirm,
                             age):
-                assert request.validation_errors is not None
+                assert len(request.validation_errors) > 0
                 return 'Success!'
             
             @expose(schema=RegistrationSchema(), error_handler='/errors')
@@ -117,17 +117,17 @@ class TestValidation(object):
                             password,
                             password_confirm,
                             age):
-                assert request.validation_errors is not None
+                assert len(request.validation_errors) > 0
                 return 'Success!'
             
             @expose(json_schema=RegistrationSchema())
             def json(self, data):
-                assert request.validation_errors is not None
+                assert len(request.validation_errors) > 0
                 return 'Success!'
             
             @expose(json_schema=RegistrationSchema(), error_handler='/errors')
             def json_with_handler(self, data):
-                assert request.validation_errors is not None
+                assert len(request.validation_errors) > 0
                 return 'Success!'
                 
 
@@ -198,7 +198,7 @@ class TestValidation(object):
             @expose(schema=ColorSchema(), 
                     variable_decode=True)
             def index(self, **kwargs):
-                if request.validation_errors is not None:
+                if request.validation_errors:
                     return ', '.join(request.validation_errors.keys())
                 else:
                     return 'Success!'
@@ -207,7 +207,7 @@ class TestValidation(object):
                     error_handler='/errors', 
                     variable_decode=True)
             def with_handler(self, **kwargs):
-                if request.validation_errors is not None:
+                if request.validation_errors:
                     return ', '.join(request.validation_errors.keys())
                 else:
                     return 'Success!'
@@ -215,7 +215,7 @@ class TestValidation(object):
             @expose(json_schema=ColorSchema(), 
                     variable_decode=True)
             def json(self, data):
-                if request.validation_errors is not None:
+                if request.validation_errors:
                     return ', '.join(request.validation_errors.keys())
                 else:
                     return 'Success!'
@@ -224,7 +224,7 @@ class TestValidation(object):
                     error_handler='/errors', 
                     variable_decode=True)
             def json_with_handler(self, data):
-                if request.validation_errors is not None:
+                if request.validation_errors:
                     return ', '.join(request.validation_errors.keys())
                 else:
                     return 'Success!'
@@ -232,7 +232,7 @@ class TestValidation(object):
             @expose(schema=ColorSchema(),
                     variable_decode=dict())
             def custom(self, **kwargs):
-                if request.validation_errors is not None:
+                if request.validation_errors:
                     return ', '.join(request.validation_errors.keys())
                 else:
                     return 'Success!'
@@ -241,7 +241,7 @@ class TestValidation(object):
                     error_handler='/errors',
                     variable_decode=dict())
             def custom_with_handler(self, **kwargs):
-                if request.validation_errors is not None:
+                if request.validation_errors:
                     return ', '.join(request.validation_errors.keys())
                 else:
                     return 'Success!'
@@ -249,7 +249,7 @@ class TestValidation(object):
             @expose(json_schema=ColorSchema(),
                     variable_decode=dict())
             def custom_json(self, data):
-                if request.validation_errors is not None:
+                if request.validation_errors:
                     return ', '.join(request.validation_errors.keys())
                 else:
                     return 'Success!'
@@ -258,7 +258,7 @@ class TestValidation(object):
                     error_handler='/errors',
                     variable_decode=dict())
             def custom_json_with_handler(self, data):
-                if request.validation_errors is not None:
+                if request.validation_errors:
                     return ', '.join(request.validation_errors.keys())
                 else:
                     return 'Success!'
@@ -266,7 +266,7 @@ class TestValidation(object):
             @expose(schema=ColorSchema(),
                     variable_decode=dict(dict_char='-', list_char='.'))
             def alternate(self, **kwargs):
-                if request.validation_errors is not None:
+                if request.validation_errors:
                     return ', '.join(request.validation_errors.keys())
                 else:
                     return 'Success!'
@@ -275,7 +275,7 @@ class TestValidation(object):
                     error_handler='/errors',
                     variable_decode=dict(dict_char='-', list_char='.'))
             def alternate_with_handler(self, **kwargs):
-                if request.validation_errors is not None:
+                if request.validation_errors:
                     return ', '.join(request.validation_errors.keys())
                 else:
                     return 'Success!'
@@ -283,7 +283,7 @@ class TestValidation(object):
             @expose(json_schema=ColorSchema(),
                     variable_decode=dict(dict_char='-', list_char='.'))
             def alternate_json(self, data):
-                if request.validation_errors is not None:
+                if request.validation_errors:
                     return ', '.join(request.validation_errors.keys())
                 else:
                     return 'Success!'
@@ -292,7 +292,7 @@ class TestValidation(object):
                     error_handler='/errors',
                     variable_decode=dict(dict_char='-', list_char='.'))
             def alternate_json_with_handler(self, data):
-                if request.validation_errors is not None:
+                if request.validation_errors:
                     return ', '.join(request.validation_errors.keys())
                 else:
                     return 'Success!'
@@ -627,6 +627,9 @@ class TestValidation(object):
     
     def test_error_for(self):
         
+        if 'mako' not in builtin_renderers:
+            return
+        
         class ColorSchema(Schema):
             colors = ForEach(validators.String(not_empty=True))
         
@@ -664,12 +667,20 @@ class TestValidation(object):
         app = TestApp(make_app(RootController(), template_path=self.template_path))
         r = app.post('/', {
             'colors-0' : 'blue',
+            'colors-1' : 'red'
+        })
+        assert r.status_int == 200
+        assert r.body == ''
+        
+        # test failure without error handler
+        r = app.post('/', {
+            'colors-0' : 'blue',
             'colors-1' : ''
         })
         assert r.status_int == 200
         assert r.body == 'Please enter a value'
         
-        # test with error handler
+        # test failure with error handler
         r = app.post('/with_handler', {
             'colors-0' : 'blue',
             'colors-1' : ''
@@ -677,7 +688,7 @@ class TestValidation(object):
         assert r.status_int == 200
         assert r.body == 'Please enter a value'
         
-        # test JSON without error handler
+        # test JSON failure without error handler
         r = app.post('/json', dumps({
             'colors-0' : 'blue',
             'colors-1' : ''
@@ -685,7 +696,7 @@ class TestValidation(object):
         assert r.status_int == 200
         assert r.body == 'Please enter a value'
         
-        # test JSON with error handler
+        # test JSON failure with error handler
         r = app.post('/json_with_handler', dumps({
             'colors-0' : 'blue',
             'colors-1' : ''
@@ -726,3 +737,48 @@ class TestValidation(object):
         })
         assert r.status_int == 200
         assert r.body == 'There was an error!'
+    
+    def test_validation_exception(self):
+        
+        if 'mako' not in builtin_renderers:
+            return
+        
+        class NameSchema(Schema):
+            name = validators.String(not_empty=True)
+        
+        class SubController(object):
+            @expose()
+            def _route(self, *args):
+                raise ValidationException('/success')
+        
+        class RootController(object):
+            
+            sub = SubController()
+            
+            @expose('mako:form_name.html')
+            def errors_name(self):
+                return dict()
+            
+            @expose(schema=NameSchema(), 
+                    error_handler='/errors_name',
+                    htmlfill=dict(auto_insert_errors=True))
+            def name(self, name):
+                raise ValidationException(errors={'name': 'Names must be unique'})
+            
+            @expose()
+            def success(self):
+                return 'Success!'
+        
+        def _get_contents(filename):
+            return open(os.path.join(self.template_path, filename), 'r').read()
+        
+        # test exception with no controller
+        app = TestApp(make_app(RootController(), template_path=self.template_path))
+        r = app.get('/sub')
+        assert r.status_int == 200
+        assert r.body == 'Success!'
+        
+        # test exception with additional errors
+        r = app.post('/name', {'name': 'Yoann'})
+        assert r.status_int == 200
+        assert r.body == _get_contents('form_name_invalid_custom.html')

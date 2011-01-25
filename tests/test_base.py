@@ -3,7 +3,7 @@ from paste.recursive import ForwardRequestException
 from unittest import TestCase
 from webtest import TestApp
 
-from pecan import Pecan, expose, request, response, redirect, abort, make_app, ValidationException
+from pecan import Pecan, expose, request, response, redirect, abort, make_app
 from pecan.templating import _builtin_renderers as builtin_renderers
 
 import os
@@ -543,25 +543,6 @@ class TestBase(TestCase):
 
         app = make_app(RootController(), wrap_app=wrap, debug=True)
         assert len(wrapped_apps) == 1
-    
-    def test_validation_exception(self):
-        class SubController(object):
-            @expose()
-            def _route(self, *args):
-                raise ValidationException('/success')
-        
-        class RootController(object):
-            
-            sub = SubController()
-            
-            @expose()
-            def success(self):
-                return 'Success!'
-        
-        app = TestApp(make_app(RootController()))
-        r = app.get('/sub')
-        assert r.status_int == 200
-        assert r.body == 'Success!'
 
 
 class TestEngines(object):

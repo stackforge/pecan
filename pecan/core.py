@@ -7,6 +7,7 @@ from webob              import Request, Response, exc
 from threading          import local
 from itertools          import chain
 from formencode         import htmlfill, Invalid, variabledecode
+from formencode.schema  import merge_dicts
 from paste.recursive    import ForwardRequestException
 
 try:
@@ -58,12 +59,13 @@ def redirect(location, internal=False, code=None, headers={}):
 
 
 def error_for(field):
-    if request.validation_errors is None: return ''
+    if not request.validation_errors:
+        return ''
     return request.validation_errors.get(field, '')
 
 
 class ValidationException(ForwardRequestException):
-    def __init__(self, location=None):
+    def __init__(self, location=None, errors={}):
         if hasattr(state, 'controller'):
             cfg = _cfg(state.controller)
         else:
@@ -72,6 +74,7 @@ class ValidationException(ForwardRequestException):
             location = cfg['error_handler']
             if callable(location):
                 location = location()
+        merge_dicts(request.validation_errors, errors)
         request.environ['pecan.params'] = dict(request.str_params)
         request.environ['pecan.validation_errors'] = request.validation_errors
         if cfg.get('htmlfill') is not None:
@@ -178,7 +181,7 @@ class Pecan(object):
     
     def validate(self, schema, params, json=False, error_handler=None, 
                  htmlfill=None, variable_decode=None):
-        request.validation_errors = None
+        request.validation_errors = {}
         try:
             to_validate = params
             if json:
