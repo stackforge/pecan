@@ -624,6 +624,70 @@ class TestValidation(object):
         })
         assert r.status_int == 200
         assert r.body == dumps(dict(error_with=['name']))
+                
+    def test_htmlfill_static(self):
+
+        if 'mako' not in builtin_renderers:
+            return
+
+        class LoginSchema(Schema):
+            username = validators.String(not_empty=True)
+            password = validators.String(not_empty=True)            
+
+        class RootController(object):
+
+            @expose(template='mako:form_login.html',
+                    schema=LoginSchema())
+            def index(self, **kwargs):
+                if request.validation_errors:
+                    return dict()
+                else:
+                    return dict(data=kwargs)
+
+            @expose(schema=LoginSchema(),
+                    error_handler='/errors_with_handler')
+            def with_handler(self, **kwargs):
+                return '%s:%s' % (kwargs['username'], kwargs['password'])
+
+            @expose('mako:form_login.html')
+            def errors_with_handler(self):
+                return dict()             
+
+        def _get_contents(filename):
+            return open(os.path.join(self.template_path, filename), 'r').read()
+
+        # test without error handler
+        app = TestApp(make_app(RootController(), template_path=self.template_path))
+        r = app.post('/', {
+            'username' : 'ryan',
+            'password' : 'password'
+        })
+        assert r.status_int == 200
+        assert r.body == _get_contents('form_login_valid.html')
+
+        # test failure without error handler
+        r = app.post('/', {
+            'username' : 'ryan',
+            'password' : ''
+        })
+        assert r.status_int == 200
+        assert r.body == _get_contents('form_login_invalid.html')
+
+        # test with error handler
+        r = app.post('/with_handler', {
+            'username' : 'ryan',
+            'password' : 'password'
+        })
+        assert r.status_int == 200
+        assert r.body == 'ryan:password'
+
+        # test failure with error handler
+        r = app.post('/with_handler', {
+            'username' : 'ryan',
+            'password' : ''
+        })
+        assert r.status_int == 200
+        assert r.body == _get_contents('form_login_invalid.html')
     
     def test_error_for(self):
         

@@ -63,6 +63,13 @@ def error_for(field):
         return ''
     return request.validation_errors.get(field, '')
 
+    
+def static(name, value):
+    if 'pecan.params' not in request.environ:
+        request.environ['pecan.params'] = dict(request.str_params)    
+    request.environ['pecan.params'][name] = value
+    return value
+
 
 class ValidationException(ForwardRequestException):
     def __init__(self, location=None, errors={}):
@@ -75,7 +82,8 @@ class ValidationException(ForwardRequestException):
             if callable(location):
                 location = location()
         merge_dicts(request.validation_errors, errors)
-        request.environ['pecan.params'] = dict(request.str_params)
+        if 'pecan.params' not in request.environ:
+            request.environ['pecan.params'] = dict(request.str_params)
         request.environ['pecan.validation_errors'] = request.validation_errors
         if cfg.get('htmlfill') is not None:
             request.environ['pecan.htmlfill'] = cfg['htmlfill']
@@ -292,6 +300,7 @@ class Pecan(object):
                 state.content_type = self.get_content_type('json')
             else:
                 result['error_for'] = error_for
+                result['static'] = static
                 
             if ':' in template:
                 renderer = self.renderers.get(template.split(':')[0], self.template_path)
