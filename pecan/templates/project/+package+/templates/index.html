@@ -32,16 +32,16 @@
         <tr>
           <td><label for="name">What is your name</label></td>
           <td><input name="name" value="${name}" class="${'invalid' if error_for('name') else ''}" /></td>
-          <td py:if="errors">${error_for('name')}</td>
+          <td>${error_for('name')}</td>
         </tr>
         <tr>
           <td><label for="age">How old are you?</label></td>
           <td><input name="age" value="${age}" class="${'invalid' if error_for('age') else ''}" /></td>
-          <td py:if="errors">${error_for('age')}</td>
+          <td>${error_for('age')}</td>
         </tr>
       </table>
       
-      <input type="submit" />
+      <input type="submit" value="Submit" />
     </form>
 
 
