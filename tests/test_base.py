@@ -632,3 +632,4 @@ class TestEngines(object):
         r = app.get('/')
         assert r.status_int == 200
         assert 'Override' in r.body 
+        assert r.content_type == 'text/plain'
