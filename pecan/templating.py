@@ -115,16 +115,11 @@ class RendererFactory(object):
     def available(self, name):
         return name in self._renderer_classes
 
-    def create(self, name, template_path):
-        cls = self._renderer_classes.get(name)
-
-        if cls is None:
-            return None
-        else:
-            return cls(template_path, self.extra_vars)
-        
     def get(self, name, template_path):
-        key = name+template_path
-        if key not in self._renderers:
-            self._renderers[key] = self.create(name, template_path)
-        return self._renderers[key]
+        if name not in self._renderers:
+            cls = self._renderer_classes.get(name)
+            if cls is None:
+                return None
+            else:
+                self._renderers[name] = cls(template_path, self.extra_vars)
+        return self._renderers[name]
