@@ -3,7 +3,7 @@ from paste.recursive import ForwardRequestException
 from unittest import TestCase
 from webtest import TestApp
 
-from pecan import Pecan, expose, request, response, redirect, abort, make_app
+from pecan import Pecan, expose, request, response, redirect, abort, make_app, override_template
 from pecan.templating import _builtin_renderers as builtin_renderers
 
 import os
@@ -620,3 +620,15 @@ class TestEngines(object):
         assert r.status_int == 200
         result = dict(loads(r.body))
         assert result == expected_result
+
+    def test_override_template(self):
+        class RootController(object):
+            @expose('foo.html')
+            def index(self):
+                override_template(None, content_type='text/plain')
+                return 'Override'
+
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert 'Override' in r.body 

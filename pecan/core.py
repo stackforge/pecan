@@ -41,8 +41,10 @@ request     = proxy('request')
 response    = proxy('response')
 
 
-def override_template(template):
+def override_template(template, content_type=None):
     request.override_template = template
+    if content_type:
+        request.override_content_type = content_type 
 
 def abort(status_code=None, detail='', headers=None, comment=None):
     raise exc.status_map[status_code](detail=detail, headers=headers, comment=comment)
@@ -290,7 +292,10 @@ class Pecan(object):
 
         # pull the template out based upon content type and handle overrides
         template = cfg.get('content_types', {}).get(state.content_type)
+
+        # check if for controller override of template
         template = getattr(request, 'override_template', template)
+        state.content_type = getattr(request, 'override_content_type', state.content_type)
 
         # if there is a template, render it
         if template:
