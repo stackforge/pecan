@@ -6,8 +6,8 @@ version = '0.1'
 # integration with py.test for `python setup.py test`
 #
 tests_require = [
-  "py == 1.3.4",
-  "WebTest == 1.2.2",
+  "py >= 1.3.4",
+  "WebTest >= 1.2.2",
 ]
 
 class PyTest(Command):
@@ -25,19 +25,19 @@ class PyTest(Command):
 # determine requirements
 #
 requirements = [
-  "WebOb == 1.0.0", 
-  "WebCore == 1.0.0",
-  "simplegeneric == 0.7",
-  "Mako == 0.3.6",
-  "Paste == 1.7.5.1",
-  "PasteScript == 1.7.3",
-  "formencode == 1.2.2"
+  "WebOb >= 1.0.0", 
+  "WebCore >= 1.0.0",
+  "simplegeneric >= 0.7",
+  "Mako >= 0.3.6",
+  "Paste >= 1.7.5.1",
+  "PasteScript >= 1.7.3",
+  "formencode >= 1.2.2"
 ]
 
 try:
     import json
 except:
-    requirements.append("simplejson == 2.1.1")
+    requirements.append("simplejson >= 2.1.1")
 
 
 #
