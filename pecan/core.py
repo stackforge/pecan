@@ -302,7 +302,7 @@ class Pecan(object):
             renderer = self.renderers.get(self.default_renderer, self.template_path)
             if template == 'json':
                 renderer = self.renderers.get('json', self.template_path)
-                state.content_type = self.get_content_type('json')
+                state.content_type = self.get_content_type('.json')
             else:
                 result['error_for'] = error_for
                 result['static'] = static
