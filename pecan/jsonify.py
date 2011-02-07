@@ -1,6 +1,6 @@
 try:
     from simplejson import JSONEncoder
-except ImportError:
+except ImportError: # pragma: no cover
     from json import JSONEncoder
 
 from datetime               import datetime, date

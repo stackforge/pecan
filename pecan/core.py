@@ -12,7 +12,7 @@ from paste.recursive    import ForwardRequestException
 
 try:
     from simplejson import loads
-except ImportError:
+except ImportError: # pragma: no cover
     from json import loads
 
 import os

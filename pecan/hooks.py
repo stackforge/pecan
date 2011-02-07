@@ -8,10 +8,6 @@ __all__ = ['PecanHook', 'TransactionHook', 'HookController']
 
 
 def walk_controller(root_class, controller, hooks):
-    if hasattr(controller, '_lookup'):
-        # TODO: what about this?
-        pass
-        
     if not isinstance(controller, (int, dict)):
         for name, value in getmembers(controller):
             if name == 'controller': continue
