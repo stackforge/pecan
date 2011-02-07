@@ -7,6 +7,7 @@ from weberror.evalexception import EvalException
 
 from core import Pecan, request, response, override_template, abort, redirect, error_for, ValidationException
 from decorators import expose
+from templating import error_formatters
 
 from configuration import set_config
 from configuration import _runtime_conf as conf
@@ -16,12 +17,14 @@ __all__ = [
 ]
 
 def make_app(root, static_root=None, debug=False, errorcfg={}, wrap_app=None, **kw):
+
+
     app = Pecan(root, **kw)
     if wrap_app:
         app = wrap_app(app)
     app = RecursiveMiddleware(app)
     if debug:
-        app = EvalException(app, **errorcfg)
+        app = EvalException(app, templating_formatters=error_formatters, **errorcfg)
     else:
         app = ErrorMiddleware(app, **errorcfg)
     app = make_errordocument(app, conf, **conf.app.errors)

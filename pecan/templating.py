@@ -1,6 +1,7 @@
 __all__ = ['RendererFactory']
 
 _builtin_renderers = {}
+error_formatters = []
 
 #
 # JSON rendering engine
@@ -35,6 +36,7 @@ try:
             return stream.render('html')
 
     _builtin_renderers['genshi'] = GenshiRenderer
+    # TODO: add error formatter for genshi
 except ImportError:                                 #pragma no cover
     pass
 
@@ -45,6 +47,8 @@ except ImportError:                                 #pragma no cover
 
 try:
     from mako.lookup import TemplateLookup
+    from mako.exceptions import CompileException, SyntaxException, \
+            html_error_template
 
     class MakoRenderer(object):
         def __init__(self, path, extra_vars):
@@ -56,6 +60,12 @@ try:
             return tmpl.render(**self.extra_vars.make_ns(namespace))
 
     _builtin_renderers['mako'] = MakoRenderer
+
+    def format_mako_error(exc_value):
+        if isinstance(exc_value, (CompileException, SyntaxException)):
+            return html_error_template().render(full=False, css=False)
+
+    error_formatters.append(format_mako_error)
 except ImportError:                                 # pragma no cover
     pass
 
@@ -77,6 +87,7 @@ try:
             stream = Template(self.extra_vars.make_ns(namespace))
             return stream.render()
     _builtin_renderers['kajiki'] = KajikiRenderer
+    # TODO: add error formatter for kajiki
 except ImportError:                                 # pragma no cover
     pass
 

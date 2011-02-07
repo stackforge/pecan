@@ -4,7 +4,7 @@ from unittest import TestCase
 from webtest import TestApp
 
 from pecan import Pecan, expose, request, response, redirect, abort, make_app, override_template
-from pecan.templating import _builtin_renderers as builtin_renderers
+from pecan.templating import _builtin_renderers as builtin_renderers, error_formatters
 
 import os
 
@@ -594,6 +594,10 @@ class TestEngines(object):
             @expose('mako:mako.html')
             def index(self, name='Jonathan'):
                 return dict(name=name)
+
+            @expose('mako:mako_bad.html')
+            def badtemplate(self):
+                return dict()
         
         app = TestApp(Pecan(RootController(), template_path=self.template_path))
         r = app.get('/')
@@ -604,6 +608,18 @@ class TestEngines(object):
         r = app.get('/index.html?name=World')
         assert r.status_int == 200
         assert "<h1>Hello, World!</h1>" in r.body
+        
+        error_msg = None
+        try:
+            r = app.get('/badtemplate.html')
+        except Exception, e:
+            for error_f in error_formatters:
+                error_msg = error_f(e)
+                if error_msg:
+                    break
+        assert error_msg is not None
+
+
     
     def test_json(self):
         from json import loads
