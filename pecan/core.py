@@ -73,6 +73,19 @@ def static(name, value):
     return value
 
 
+def render(template, namespace):
+    renderer = state.app.renderers.get(state.app.default_renderer, state.app.template_path)
+    if template == 'json':
+        renderer = state.app.renderers.get('json', state.app.template_path)
+    else:
+        namespace['error_for'] = error_for
+        namespace['static'] = static
+    if ':' in template:
+        renderer = state.app.renderers.get(template.split(':')[0], state.app.template_path)
+        template = template.split(':')[1]
+    return renderer.render(template, namespace)
+
+
 class ValidationException(ForwardRequestException):
     def __init__(self, location=None, errors={}):
         if hasattr(state, 'controller'):
@@ -299,18 +312,9 @@ class Pecan(object):
 
         # if there is a template, render it
         if template:
-            renderer = self.renderers.get(self.default_renderer, self.template_path)
             if template == 'json':
-                renderer = self.renderers.get('json', self.template_path)
                 state.content_type = self.get_content_type('.json')
-            else:
-                result['error_for'] = error_for
-                result['static'] = static
-                
-            if ':' in template:
-                renderer = self.renderers.get(template.split(':')[0], self.template_path)
-                template = template.split(':')[1]
-            result = renderer.render(template, result)
+            result = render(template, result)
         
         # pass the response through htmlfill (items are popped out of the 
         # environment even if htmlfill won't run for proper cleanup)
