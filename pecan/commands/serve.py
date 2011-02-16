@@ -47,7 +47,7 @@ class ServeCommand(_ServeCommand, Command):
         # for file-watching to work, we need a filename, not a module
         if self.requires_config_file and self.args:
             self.config = self.load_configuration(self.args[0])
-            self.args[0] = self.config.__conffile__
+            self.args[0] = self.config._filename
             if self.options.reload is None:
                 self.options.reload = getattr(self.config.app, 'reload', False)
         

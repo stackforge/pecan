@@ -10,8 +10,8 @@ class ConfigDict(dict):
     pass
 
 class Config(object):
-    def __init__(self, conf_dict={}, dirname=None):
-        self.dirname = dirname or os.getcwd()
+    def __init__(self, conf_dict={}, filename=''):
+        self._filename = filename
         self.update(conf_dict)
 
     def update(self, conf_dict):
@@ -43,9 +43,10 @@ class Config(object):
                 del value['__force_dict__']
                 self.__dict__[key] = ConfigDict(value)
             else:
-                self.__dict__[key] = Config(value, dirname=self.dirname)
+                self.__dict__[key] = Config(value, filename=self._filename)
         elif isinstance(value, basestring) and '%(confdir)s' in value:
-            self.__dict__[key] = value.replace('%(confdir)s', self.dirname)
+            confdir = os.path.dirname(self._filename) or os.getcwd()
+            self.__dict__[key] = value.replace('%(confdir)s', confdir)
         else:
             self.__dict__[key] = value
 
@@ -78,13 +79,7 @@ def conf_from_file(filepath):
 
 
 def conf_from_dict(conf_dict):
-
-    # set the configdir
-    dirname = os.path.dirname(conf_dict.get('__file__', ''))
-    if dirname == '':
-        dirname = os.getcwd()
-
-    conf = Config(dirname=dirname)
+    conf = Config(filename=conf_dict.get('__file__', ''))
 
     for k,v in conf_dict.iteritems():
         if k.startswith('__'):
