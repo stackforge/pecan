@@ -65,10 +65,6 @@ class TestConf(TestCase):
         self.assertEqual(conf.beaker['session.validate_key'], '1a971a7df182df3e1dec0af7c6913ec7')
         self.assertEqual(conf.beaker.get('__force_dict__'), None)
 
-    def test_update_config_fail_bad_attribute(self):
-        conf = configuration.initconf()
-        self.assertRaises(AttributeError, conf.update_with_module, 'bad.attribute')
-
     def test_update_config_with_dict(self):
         conf = configuration.initconf()
         d = {'attr':True}
@@ -76,22 +72,19 @@ class TestConf(TestCase):
         self.assertTrue(conf.attr.attr)
 
     def test_config_dir(self):
+        from pecan import default_config
         conf = configuration.initconf()
-
-        self.assertTrue('__confdir__' in dir(conf))
-
-    def test_config_file(self):
-        conf = configuration.initconf()
-
-        self.assertTrue('__conffile__' in dir(conf))
+        conf['path'] = '%(confdir)s'
+        self.assertEqual(conf.path, os.path.dirname(default_config.__file__))
 
     def test_config_repr(self):
         conf = configuration.Config({'a':1})
-        self.assertEqual(repr(conf),"Config({'a': 1})")
+        self.assertEqual(repr(conf),"Config({'a': 1, 'dirname': '%s'})" % os.getcwd())
 
     def test_config_from_dict(self):
         conf = configuration.conf_from_dict({})
-        self.assertTrue(os.path.samefile(conf.__confdir__, os.getcwd()))
+        conf['path'] = '%(confdir)s'
+        self.assertTrue(os.path.samefile(conf['path'], os.getcwd()))
 
     def test_config_from_file(self):
         path = os.path.join(os.path.dirname(__file__), 'test_config', 'config.py')
@@ -101,7 +94,7 @@ class TestConf(TestCase):
     def test_config_illegal_ids(self):
         conf = configuration.Config({})
         conf.update_with_module('bad.module_and_underscore')
-        self.assertEqual(['__confdir__', '__conffile__'], dir(conf))
+        self.assertEqual(['dirname'], dir(conf))
 
     def test_config_bad_module(self):
         conf = configuration.Config({})
@@ -121,9 +114,3 @@ class TestConf(TestCase):
     def test_config_set_from_module_with_extension(self):
         configuration.set_config('config.py')
         self.assertEqual(_runtime_conf.server.host, '1.1.1.1')
-
-    def test_config_string(self):
-        s = '{pecan.conf.app}'
-        self.assertTrue(configuration.ConfigString.contains_formatting(s))
-        cs = configuration.ConfigString(s)
-        self.assertEqual(str(cs), s)

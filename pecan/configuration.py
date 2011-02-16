@@ -5,51 +5,16 @@ import string
 
 
 IDENTIFIER = re.compile(r'[a-z_](\w)*$', re.IGNORECASE)
-STRING_FORMAT = re.compile(r'{pecan\.conf(?P<var>([.][a-z_][\w]*)+)+?}', re.IGNORECASE)
-
 
 class ConfigDict(dict):
     pass
 
-
-class ConfigString(object):
-    def __init__(self, format_string):
-        self.raw_string = format_string
-
-    def __call__(self):
-        retval = self.raw_string
-
-        for candidate in STRING_FORMAT.finditer(self.raw_string):
-            var = candidate.groupdict().get('var','')
-
-            try:
-                obj = _runtime_conf
-                for dotted_part in var.split('.'):
-                    if dotted_part == '':
-                        continue
-                    obj = getattr(obj, dotted_part)
-                
-                retval = retval.replace(candidate.group(), str(obj))
-
-            except AttributeError, e:
-                raise AttributeError, 'Cannot substitute \'%s\' using the current configuration' % candidate.group()
-
-        return retval
-
-    def __str__(self):
-        return self.raw_string
-
-    @staticmethod
-    def contains_formatting(value):
-        return STRING_FORMAT.match(value)
-
-
 class Config(object):
-    def __init__(self, conf_dict={}):
+    def __init__(self, conf_dict={}, dirname=None):
+        self.dirname = dirname or os.getcwd()
         self.update(conf_dict)
 
     def update(self, conf_dict):
-
         if isinstance(conf_dict, dict):
             iterator = conf_dict.iteritems()
         else:
@@ -78,9 +43,9 @@ class Config(object):
                 del value['__force_dict__']
                 self.__dict__[key] = ConfigDict(value)
             else:
-                self.__dict__[key] = Config(value)
-        elif isinstance(value, str) and ConfigString.contains_formatting(value):
-            self.__dict__[key] = ConfigString(value)
+                self.__dict__[key] = Config(value, dirname=self.dirname)
+        elif isinstance(value, basestring) and '%(confdir)s' in value:
+            self.__dict__[key] = value.replace('%(confdir)s', self.dirname)
         else:
             self.__dict__[key] = value
 
@@ -92,15 +57,6 @@ class Config(object):
 
     def __repr__(self):
         return 'Config(%s)' % str(self.__dict__)
-
-    def __call__(self):
-        for k,v in self:
-            if isinstance(v, Config):
-                v()
-            elif hasattr(v, '__call__'):
-                self.__dict__[k] = v()
-        return self
-
 
 def conf_from_module(module):
     if isinstance(module, str):
@@ -122,15 +78,13 @@ def conf_from_file(filepath):
 
 
 def conf_from_dict(conf_dict):
-    conf = Config()
 
     # set the configdir
-    conf_dir = os.path.dirname(conf_dict.get('__file__', ''))
-    if conf_dir == '':
-        conf_dir = os.getcwd()
+    dirname = os.path.dirname(conf_dict.get('__file__', ''))
+    if dirname == '':
+        dirname = os.getcwd()
 
-    conf['__conffile__'] = conf_dict.get('__file__')
-    conf['__confdir__'] = conf_dir + '/'
+    conf = Config(dirname=dirname)
 
     for k,v in conf_dict.iteritems():
         if k.startswith('__'):
@@ -139,7 +93,6 @@ def conf_from_dict(conf_dict):
             continue
         
         conf[k] = v
-    conf()
     return conf
 
 
@@ -173,7 +126,6 @@ def import_module(conf):
 def initconf():
     import default_config
     conf = conf_from_module(default_config)
-    conf()
     return conf
 
 
