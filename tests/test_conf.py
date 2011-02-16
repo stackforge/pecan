@@ -79,7 +79,7 @@ class TestConf(TestCase):
 
     def test_config_repr(self):
         conf = configuration.Config({'a':1})
-        self.assertEqual(repr(conf),"Config({'a': 1, '_filename': ''})")
+        self.assertEqual(repr(conf),"Config({'a': 1})")
 
     def test_config_from_dict(self):
         conf = configuration.conf_from_dict({})
@@ -94,7 +94,7 @@ class TestConf(TestCase):
     def test_config_illegal_ids(self):
         conf = configuration.Config({})
         conf.update_with_module('bad.module_and_underscore')
-        self.assertEqual(['_filename'], dir(conf))
+        self.assertEqual([], dir(conf))
 
     def test_config_bad_module(self):
         conf = configuration.Config({})
