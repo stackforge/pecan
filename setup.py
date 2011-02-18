@@ -6,8 +6,7 @@ version = '0.1'
 # integration with py.test for `python setup.py test`
 #
 tests_require = [
-  "py >= 1.3.4",
-  "WebTest >= 1.2.2",
+  "pytest"
 ]
 
 class PyTest(Command):
@@ -31,7 +30,8 @@ requirements = [
   "Mako >= 0.3.6",
   "Paste >= 1.7.5.1",
   "PasteScript >= 1.7.3",
-  "formencode >= 1.2.2"
+  "formencode >= 1.2.2",
+  "WebTest >= 1.2.2"
 ]
 
 try:
