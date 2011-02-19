@@ -6,6 +6,11 @@ from util import iscontroller
 
 __all__ = ['lookup_controller', 'find_object']
 
+class NonCanonicalPath(Exception):
+    def __init__(self, controller, remainder):
+        self.controller = controller
+        self.remainder = remainder
+
 def lookup_controller(obj, url_path):
     remainder = url_path
     notfound_handlers = []
@@ -52,11 +57,10 @@ def find_object(obj, remainder, notfound_handlers):
             index = getattr(obj, 'index', None)
             if iscontroller(index): return index, remainder[1:]
         elif not remainder:
+            # the URL has hit an index method without a trailing slash
             index = getattr(obj, 'index', None)
-            if iscontroller(index):
-                return index, remainder[1:] # TODO: why did I have to do this instead?
-                #raise exc.HTTPFound(add_slash=True)
-
+            if iscontroller(index): 
+                raise NonCanonicalPath(index, remainder[1:])
         default = getattr(obj, '_default', None)
         if iscontroller(default):
             notfound_handlers.append(('_default', default, remainder))

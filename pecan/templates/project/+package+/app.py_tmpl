@@ -9,5 +9,6 @@ def setup_app(config):
         config.app.root,
         static_root     = config.app.static_root,
         template_path   = config.app.template_path,
-        debug           = config.app.debug
+        debug           = config.app.debug,
+        force_canonical = config.app.force_canonical
     )

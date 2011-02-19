@@ -212,12 +212,16 @@ class TestRestController(object):
         assert r.status_int == 405
         
         # test the "others" custom action
-        r = app.request('/things/others', method='MISC')
+        r = app.request('/things/others/', method='MISC')
         assert r.status_int == 200
         assert r.body == 'OTHERS'
+
+        # test the "others" custom action missing trailing slash
+        r = app.request('/things/others', method='MISC', status=302)
+        assert r.status_int == 302
         
         # test the "others" custom action with the _method parameter
-        r = app.get('/things/others?_method=MISC')
+        r = app.get('/things/others/?_method=MISC')
         assert r.status_int == 200
         assert r.body == 'OTHERS'
         
@@ -619,16 +623,16 @@ class TestRestController(object):
         assert r.status_int == 405
         
         # test custom delete without ID
-        r = app.delete('/things/others')
+        r = app.delete('/things/others/')
         assert r.status_int == 200
         assert r.body == 'DELETE'
         
         # test custom delete without ID with _method parameter and GET
-        r = app.get('/things/others?_method=delete', status=405)
+        r = app.get('/things/others/?_method=delete', status=405)
         assert r.status_int == 405
         
         # test custom delete without ID with _method parameter and POST
-        r = app.post('/things/others', {'_method':'delete'})
+        r = app.post('/things/others/', {'_method':'delete'})
         assert r.status_int == 200
         assert r.body == 'DELETE'
         
@@ -674,7 +678,7 @@ class TestRestController(object):
         assert r.body == 'one, two, three'
         
         # test nested get request
-        r = app.get('/things/one/two/three/others')
+        r = app.get('/things/one/two/three/others/')
         assert r.status_int == 200
         assert r.body == 'NESTED: one, two, three'
     

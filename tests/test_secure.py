@@ -57,7 +57,7 @@ class TestSecure(object):
         response = app.get('/locked', expect_errors=True)
         assert response.status_int == 401
         
-        response = app.get('/secret', expect_errors=True)
+        response = app.get('/secret/', expect_errors=True)
         assert response.status_int == 401
         
         response = app.get('/secret/allowed')
@@ -116,14 +116,14 @@ class TestSecure(object):
         response = app.get('/locked', expect_errors=True)
         assert response.status_int == 401
 
-        response = app.get('/secret', expect_errors=True)
+        response = app.get('/secret/', expect_errors=True)
         assert response.status_int == 401
 
         response = app.get('/secret/allowed')
         assert response.status_int == 200
         assert response.body == 'Allowed!'
         
-        response = app.get('/secret/authorized')
+        response = app.get('/secret/authorized/')
         assert response.status_int == 200
         assert response.body == 'Index'    
         

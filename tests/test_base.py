@@ -34,7 +34,7 @@ class TestBase(TestCase):
         class SubSubController(object):
             @expose()
             def index(self):
-                return '/sub/sub'
+                return '/sub/sub/'
             
             @expose()
             def deeper(self):
@@ -43,7 +43,7 @@ class TestBase(TestCase):
         class SubController(object):
             @expose()
             def index(self):
-                return '/sub'
+                return '/sub/'
                 
             @expose()
             def deeper(self):
@@ -63,7 +63,7 @@ class TestBase(TestCase):
             sub = SubController()
         
         app = TestApp(Pecan(RootController()))
-        for path in ('/', '/deeper', '/sub', '/sub/deeper', '/sub/sub', '/sub/sub/deeper'):
+        for path in ('/', '/deeper', '/sub/', '/sub/deeper', '/sub/sub/', '/sub/sub/deeper'):
             r = app.get(path)
             assert r.status_int == 200
             assert r.body == path
@@ -95,7 +95,7 @@ class TestBase(TestCase):
         assert r.status_int == 200
         assert r.body == '/'
         
-        r = app.get('/100')
+        r = app.get('/100/')
         assert r.status_int == 200
         assert r.body == '/100'
         
@@ -618,8 +618,6 @@ class TestEngines(object):
                 if error_msg:
                     break
         assert error_msg is not None
-
-
     
     def test_json(self):
         from json import loads
@@ -649,3 +647,61 @@ class TestEngines(object):
         assert r.status_int == 200
         assert 'Override' in r.body 
         assert r.content_type == 'text/plain'
+
+    def test_canonical_index(self):
+        class ArgSubController(object):
+            @expose()
+            def index(self, arg):
+                return arg
+        class SubController(object):
+            @expose()
+            def index(self):
+                return 'subindex'
+        class RootController(object):
+            @expose()
+            def index(self):
+                return 'index'
+
+            sub = SubController()
+            arg = ArgSubController()
+
+        app = TestApp(Pecan(RootController()))
+
+        r = app.get('/')
+        assert r.status_int == 200
+        assert 'index' in r.body
+
+        r = app.get('/index')
+        assert r.status_int == 200
+        assert 'index' in r.body
+
+        r = app.get('/sub/')
+        assert r.status_int == 200
+        assert 'subindex' in r.body
+
+        r = app.get('/sub', expect_errors=True)
+        assert r.status_int == 302
+
+        r = app.get('/arg/index/foo')
+        assert r.status_int == 200
+        assert r.body == 'foo'
+
+        app = TestApp(Pecan(RootController(), force_canonical=False))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert 'index' in r.body
+
+        r = app.get('/sub')
+        assert r.status_int == 200
+        assert 'subindex' in r.body
+
+        r = app.get('/sub/')
+        assert r.status_int == 200
+        assert 'subindex' in r.body
+
+
+
+
+
+
+

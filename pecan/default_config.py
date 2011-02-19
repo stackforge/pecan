@@ -11,6 +11,7 @@ app = {
     'static_root' : 'public', 
     'template_path' : '',
     'debug' : False,
+    'force_canonical' : True,
     'errors' : {
         '__force_dict__' : True
     }

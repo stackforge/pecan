@@ -574,7 +574,7 @@ class TestHooks(object):
         
         run_hook = []
         
-        response = app.get('/sub')
+        response = app.get('/sub/')
         assert response.status_int == 200
         assert response.body == 'Inside here!'
         
@@ -584,7 +584,7 @@ class TestHooks(object):
         assert run_hook[2] == 'after'
 
         run_hook = []
-        response = app.get('/sub/sub')
+        response = app.get('/sub/sub/')
         assert response.status_int == 200
         assert response.body == 'Deep inside here!'
         
@@ -641,7 +641,7 @@ class TestHooks(object):
         
         run_hook = []
         
-        response = app.get('/sub')
+        response = app.get('/sub/')
         assert response.status_int == 200
         assert response.body == 'Inside here!'
         

@@ -1,6 +1,5 @@
-from configuration      import _runtime_conf
 from templating         import RendererFactory
-from routing            import lookup_controller
+from routing            import lookup_controller, NonCanonicalPath
 from util               import _cfg
 
 from webob              import Request, Response, exc
@@ -112,14 +111,16 @@ class Pecan(object):
                  template_path       = 'templates', 
                  hooks               = [],
                  custom_renderers    = {},
-                 extra_template_vars = {}
+                 extra_template_vars = {},
+                 force_canonical     = True
                  ):
-        
+
         self.root             = root
         self.renderers        = RendererFactory(custom_renderers, extra_template_vars)
         self.default_renderer = default_renderer
         self.hooks            = hooks
         self.template_path    = template_path
+        self.force_canonical  = force_canonical
         
     def get_content_type(self, format):
         return {
@@ -131,8 +132,13 @@ class Pecan(object):
     
     def route(self, node, path):
         path = path.split('/')[1:]
-        node, remainder = lookup_controller(node, path)        
-        return node, remainder
+        try:
+            node, remainder = lookup_controller(node, path)
+            return node, remainder
+        except NonCanonicalPath, e:
+            if self.force_canonical:
+                raise exc.HTTPFound(add_slash=True)
+            return e.controller, e.remainder
     
     def determine_hooks(self, controller=None):
         controller_hooks = []
