@@ -19,6 +19,7 @@ def expose(template        = None,
            error_handler   = None,
            htmlfill        = None,
            generic         = False):
+
     
     if template == 'json': content_type = 'application/json'
     def decorate(f):
@@ -73,3 +74,7 @@ def transactional(ignore_redirects=True):
         wrap.__transactional_ignore_redirects__ = ignore_redirects
         return wrap
     return deco
+
+def accept_noncanonical(func):
+    _cfg(func)['accept_noncanonical'] = True
+    return func

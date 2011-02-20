@@ -5,6 +5,7 @@ from webtest import TestApp
 
 from pecan import Pecan, expose, request, response, redirect, abort, make_app, override_template
 from pecan.templating import _builtin_renderers as builtin_renderers, error_formatters
+from pecan.decorators import accept_noncanonical
 
 import os
 
@@ -653,6 +654,11 @@ class TestEngines(object):
             @expose()
             def index(self, arg):
                 return arg
+        class AcceptController(object):
+            @accept_noncanonical
+            @expose()
+            def index(self):
+                return 'accept'
         class SubController(object):
             @expose()
             def index(self):
@@ -664,6 +670,7 @@ class TestEngines(object):
 
             sub = SubController()
             arg = ArgSubController()
+            accept = AcceptController()
 
         app = TestApp(Pecan(RootController()))
 
@@ -685,6 +692,14 @@ class TestEngines(object):
         r = app.get('/arg/index/foo')
         assert r.status_int == 200
         assert r.body == 'foo'
+
+        r = app.get('/accept/')
+        assert r.status_int == 200
+        assert 'accept' == r.body
+
+        r = app.get('/accept')
+        assert r.status_int == 200
+        assert 'accept' == r.body
 
         app = TestApp(Pecan(RootController(), force_canonical=False))
         r = app.get('/')

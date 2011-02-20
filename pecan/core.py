@@ -136,7 +136,7 @@ class Pecan(object):
             node, remainder = lookup_controller(node, path)
             return node, remainder
         except NonCanonicalPath, e:
-            if self.force_canonical:
+            if self.force_canonical and not _cfg(e.controller).get('accept_noncanonical', False):
                 raise exc.HTTPFound(add_slash=True)
             return e.controller, e.remainder
     
