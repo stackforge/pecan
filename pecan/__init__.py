@@ -13,7 +13,7 @@ from configuration import set_config
 from configuration import _runtime_conf as conf
 
 __all__ = [
-    'make_app', 'Pecan', 'request', 'response', 'override_template', 'expose', 'conf', 'set_config', 'use_config'
+    'make_app', 'Pecan', 'request', 'response', 'override_template', 'expose', 'conf', 'set_config' 
 ]
 
 def make_app(root, static_root=None, debug=False, errorcfg={}, wrap_app=None, **kw):
