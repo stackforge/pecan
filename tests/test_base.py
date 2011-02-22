@@ -681,12 +681,16 @@ class TestEngines(object):
         r = app.get('/index')
         assert r.status_int == 200
         assert 'index' in r.body
+        
+        # for broken clients
+        r = app.get('', status=302)
+        assert r.status_int == 302
 
         r = app.get('/sub/')
         assert r.status_int == 200
         assert 'subindex' in r.body
 
-        r = app.get('/sub', expect_errors=True)
+        r = app.get('/sub', status=302)
         assert r.status_int == 302
 
         r = app.get('/arg/index/foo')
