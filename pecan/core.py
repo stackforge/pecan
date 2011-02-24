@@ -137,6 +137,8 @@ class Pecan(object):
             return node, remainder
         except NonCanonicalPath, e:
             if self.force_canonical and not _cfg(e.controller).get('accept_noncanonical', False):
+                if request.method == 'POST':
+                    raise RuntimeError, "You have POSTed to a URL '%s' which requires a slash.  Most browsers will not maintain POST data when redirected.  Please update you code to POST to '%s/' or set force_canonical to False" % (request.routing_path, request.routing_path)
                 raise exc.HTTPFound(add_slash=True)
             return e.controller, e.remainder
     

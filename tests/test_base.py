@@ -693,6 +693,13 @@ class TestEngines(object):
         r = app.get('/sub', status=302)
         assert r.status_int == 302
 
+        try:
+            r = app.post('/sub', dict(foo=1))
+            raise Exception, "Post should fail"
+        except Exception, e:
+            raise e
+            assert isinstance(e, RuntimeError)
+
         r = app.get('/arg/index/foo')
         assert r.status_int == 200
         assert r.body == 'foo'
@@ -711,6 +718,10 @@ class TestEngines(object):
         assert 'index' in r.body
 
         r = app.get('/sub')
+        assert r.status_int == 200
+        assert 'subindex' in r.body
+
+        r = app.post('/sub', dict(foo=1))
         assert r.status_int == 200
         assert 'subindex' in r.body
 
