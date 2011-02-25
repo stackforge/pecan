@@ -697,7 +697,6 @@ class TestEngines(object):
             r = app.post('/sub', dict(foo=1))
             raise Exception, "Post should fail"
         except Exception, e:
-            raise e
             assert isinstance(e, RuntimeError)
 
         r = app.get('/arg/index/foo')
