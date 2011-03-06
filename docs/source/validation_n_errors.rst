@@ -9,7 +9,7 @@ error handling activities, like:
 * Transforming strings from form submissions into useful Python objects.
 * Simplifying the process of re-displaying form values and associated error messages inline.
 
-Rather than re-inventing the wheel, Pecan uses FormEncode for schemas and form validation.
+Rather than re-inventing the wheel, Pecan uses `FormEncode <http://formencode.org/>`_ for schemas and form validation.
 
 Writing and Applying Schemas
 ------------------------------
@@ -37,7 +37,7 @@ Pecan's ``expose`` decorator::
 Validating JSON Content
 ------------------------------
 In addition to simple form arguments, Pecan also makes it easy to validate JSON request bodies.
-Often, especially in AJAX requests, the request content is encoded as a JSON in the request body.
+Often, especially in AJAX requests, the request content is encoded as JSON in the request body.
 Pecan's validation can handle the decoding for you and apply schema validation to the decoded
 data structure::
 
@@ -94,7 +94,6 @@ This is especially useful when used in combination with generic
 controller methods::
 
   from pecan import request, expose
-
   from formencode import Schema, validators as v
 
   class ProfileSchema(Schema):    
@@ -121,7 +120,8 @@ controller methods::
           """
           This method will do something with POST arguments.
           If the schema validation fails, an internal redirect will
-          cause the `profile.html` template to be rendered.
+          cause the `profile.html` template to be rendered via the
+          ``index_get`` method.
           """
           
           name = kw.get('name')
@@ -133,27 +133,27 @@ In this example, when form validation errors occur (for example, the email provi
 Pecan will handle pre-filling the form values in ``profile.html`` for you.  Additionally, inline
 errors will be appended to the template using FormEncode's ``htmlfill``.
 
-Bypassing htmlfill
+Bypassing ``htmlfill``
 ------------------------------
-Sometimes you want certain fields in your templates to be ignored (i.e., not pre-filled) by htmlfill.
+Sometimes you want certain fields in your templates to be ignored (i.e., not pre-filled) by ``htmlfill``.
 A perfect use case for this is password and hidden input fields.  The default Pecan template namespace
 includes a built-in function, ``static``, which allows you to enforce a static value for form fields,
-preventing htmlfill from filling it in form arguments::
+preventing ``htmlfill`` from filling in submitted form variables::
 
-<form method="POST">
-  <dl>
-    <dt>Username:</dt>
-      <dd><input type="text" name="username" /></dd>
-    <dt>Password:</dt>        
-      <dd><input type="password" name="password" value="${static('password', '')}" /></dd>
-    <input type="hidden" name="ticket" value="${static('ticket', 'RANDOM_PER_REQUEST_VALUE')}" />
-  </dl>
-  <button>Login</button>
-</form>
+    <form method="POST">
+      <dl>
+        <dt>Username:</dt>
+          <dd><input type="text" name="username" /></dd>
+        <dt>Password:</dt>        
+          <dd><input type="password" name="password" value="${static('password', '')}" /></dd>
+        <input type="hidden" name="ticket" value="${static('ticket', 'RANDOM_PER_REQUEST_VALUE')}" />
+      </dl>
+      <button>Login</button>
+    </form>
 
-Working with variabledecode
+Working with ``variabledecode``
 ------------------------------
-Pecan also lets you take advantage of FormEncode's variabledecode for transforming flat HTML form
+Pecan also lets you take advantage of FormEncode's ``variabledecode`` for transforming flat HTML form
 submissions into nested structures::
 
     from pecan import expose

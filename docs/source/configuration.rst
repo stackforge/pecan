@@ -143,16 +143,3 @@ app is running I can access ``foo`` values like::
     >>> conf.foo
     Config({'bar': True, 'baz': False})
 
-
-Files and Structure
-===================
-Pecan gives you a ``start.py`` file so you can manually run your application
-from the command line. By default, this file requires a parameter which is
-a configuration file without the ``.py`` extension.
-
-If you have a configuration file named ``config.py`` you would need to pass it
-to ``start.py`` like::
-
-    python start.py config 
-
-
