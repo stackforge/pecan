@@ -35,6 +35,32 @@ This is how running those tests with ``py.test`` would look like::
     ========== 11 passed in 0.30 seconds ===========
 
 
+Configuration and Testing
+-------------------------
+When running tests, you would want to avoid as much as possible setting up test
+cases by creating a Pecan app on each instance. To avoid this, you need to
+create a proper test configuration file and load it at setup time.
+
+To do this, you need to know the absolute path for your configuration file and 
+then call ``set_config`` with it. A typical ``setUp`` method would look like::
+
+    def setUp(self):
+        config_path = '/path/to/test_config.py'
+        pecan.set_config(config_path)
+
+        self.app = TestApp(
+            make_app(
+                config.app.root
+                template_path   = config.app.template_path
+            )
+        )
+        
+
+As you can see, we are loading the configuration file into Pecan first and then
+creating a Pecan application with it. Any interaction after ``setUp`` will be
+exactly as if your application was really running via an HTTP server.
+
+
 Using WebTest with a UnitTest
 -----------------------------
 
