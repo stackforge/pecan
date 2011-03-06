@@ -5,6 +5,8 @@ from util               import _cfg
 from webob              import Request, Response, exc
 from threading          import local
 from itertools          import chain
+from mimetypes          import guess_type
+
 from formencode         import htmlfill, Invalid, variabledecode
 from formencode.schema  import merge_dicts
 from paste.recursive    import ForwardRequestException
@@ -119,12 +121,7 @@ class Pecan(object):
         self.force_canonical  = force_canonical
         
     def get_content_type(self, format):
-        return {
-            '.html'  : 'text/html',
-            '.xhtml' : 'text/html',
-            '.json'  : 'application/json',
-            '.txt'   : 'text/plain'
-        }.get(format)
+        return guess_type(format)[0]
     
     def route(self, node, path):
         path = path.split('/')[1:]
