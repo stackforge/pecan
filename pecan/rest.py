@@ -7,6 +7,11 @@ from util import iscontroller
 
 
 class RestController(object):
+    '''
+    A base class for ``REST`` based controllers. Inherit from this class
+    to implement a REST controller. A set of custom actions can also
+    be specified. For more details, see :ref:`pecan_rest`.
+    '''
     
     _custom_actions = {}
     
