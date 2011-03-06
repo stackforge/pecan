@@ -371,7 +371,7 @@ class Pecan(object):
         path = request.routing_path
 
         if state.content_type is None and '.' in path.split('/')[-1]:
-            state.content_type = self.get_content_type(path)
+            state.content_type = guess_type(path)[0]
 
             # store the extension for retrieval by controllers
             ext_index = path.rfind('.')
@@ -450,7 +450,7 @@ class Pecan(object):
         # if there is a template, render it
         if template:
             if template == 'json':
-                state.content_type = self.get_content_type('.json')
+                state.content_type = 'application/json'
             result = render(template, result)
         
         # pass the response through htmlfill (items are popped out of the 
