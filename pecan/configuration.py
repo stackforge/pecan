@@ -85,6 +85,9 @@ class Config(object):
         return self.__values__.iteritems()
 
     def __dir__(self):
+        """
+        When using dir() returns a list of the values in the config.  Note: This function only works in Python2.6 or later.
+        """
         return self.__values__.keys()
 
     def __repr__(self):

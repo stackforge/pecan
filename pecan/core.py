@@ -5,6 +5,7 @@ from util               import _cfg
 from webob              import Request, Response, exc
 from threading          import local
 from itertools          import chain
+from mimetypes          import guess_type
 from formencode         import htmlfill, Invalid, variabledecode
 from formencode.schema  import merge_dicts
 from paste.recursive    import ForwardRequestException
@@ -370,10 +371,16 @@ class Pecan(object):
         path = request.routing_path
 
         if state.content_type is None and '.' in path.split('/')[-1]:
-            path, format = os.path.splitext(path)
+            state.content_type = self.get_content_type(path)
+
             # store the extension for retrieval by controllers
-            request.extension = format
-            state.content_type = self.get_content_type(format)      
+            ext_index = path.rfind('.')
+            if ext_index > 1:
+                request.extension = path[ext_index:]
+                path = path[:ext_index]
+            else:
+                request.extension = ''
+
         controller, remainder = self.route(self.root, path)
         cfg = _cfg(controller)
 

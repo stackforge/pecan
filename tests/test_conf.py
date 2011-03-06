@@ -1,4 +1,5 @@
 import os
+import sys
 from unittest import TestCase
 from pecan import configuration
 from pecan import conf as _runtime_conf
@@ -94,7 +95,7 @@ class TestConf(TestCase):
     def test_config_illegal_ids(self):
         conf = configuration.Config({})
         conf.update_with_module('bad.module_and_underscore')
-        self.assertEqual([], dir(conf))
+        self.assertEqual([], list(conf))
 
     def test_config_bad_module(self):
         conf = configuration.Config({})
@@ -107,7 +108,7 @@ class TestConf(TestCase):
     def test_config_set_from_file(self):
         path = os.path.join(os.path.dirname(__file__), 'test_config', 'empty.py')
         configuration.set_config(path)
-        self.assertTrue(dir(_runtime_conf.app), [])
+        assert list(_runtime_conf.server) == list(configuration.initconf().server)
 
     def test_config_set_from_module(self):
         configuration.set_config('config')
@@ -116,3 +117,11 @@ class TestConf(TestCase):
     def test_config_set_from_module_with_extension(self):
         configuration.set_config('config.py')
         self.assertEqual(_runtime_conf.server.host, '1.1.1.1')
+
+    def test_config_dir(self):
+        if sys.version_info >= (2, 6):
+            conf = configuration.Config({})
+            self.assertEqual([], dir(conf))
+            conf = configuration.Config({'a':1})
+            self.assertEqual(['a'], dir(conf))
+
