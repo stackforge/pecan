@@ -649,6 +649,21 @@ class TestBase(TestCase):
         r = app.get('/sub/')
         assert r.status_int == 200
         assert 'subindex' in r.body
+    
+    def test_proxy(self):
+        class RootController(object):
+            @expose()
+            def index(self):
+                request.testing = True
+                assert request.testing == True
+                del request.testing
+                assert hasattr(request, 'testing') == False
+                return '/'
+        
+        app = TestApp(make_app(RootController(), debug=True))
+        r = app.get('/')
+        assert r.status_int == 200
+
 
 class TestEngines(object):
     
