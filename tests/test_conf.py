@@ -101,6 +101,8 @@ class TestConf(TestCase):
         self.assertRaises(ImportError, conf.update_with_module, 'doesnotexist')
         self.assertRaises(ImportError, conf.update_with_module, 'bad.doesnotexists')
         self.assertRaises(ImportError, conf.update_with_module, 'bad.bad.doesnotexist')
+        self.assertRaises(SyntaxError, conf.update_with_module, 'bad.syntaxerror')
+        self.assertRaises(ImportError, conf.update_with_module, 'bad.importerror')
 
     def test_config_set_from_file(self):
         path = os.path.join(os.path.dirname(__file__), 'test_config', 'empty.py')

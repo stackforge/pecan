@@ -110,17 +110,10 @@ def import_module(conf):
         try:
             module = __import__(name, fromlist=fromlist)
             conf_mod = getattr(module, parts[-1])
-        except ImportError, e:
-            raise ImportError('No module named %s' % conf)
         except AttributeError, e:
             raise ImportError('No module named %s' % conf)
     else:
-        name = conf
-
-        try:
-            conf_mod =  __import__(name)
-        except ImportError, e:
-            raise ImportError('No module named %s' % conf)
+        conf_mod =  __import__(conf)
 
     return conf_mod
 
