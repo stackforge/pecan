@@ -35,6 +35,8 @@ This is how running those tests with ``py.test`` would look like::
     ========== 11 passed in 0.30 seconds ===========
 
 
+Using WebTest with a UnitTest
+-----------------------------
 
 
 
