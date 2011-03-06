@@ -1,13 +1,8 @@
-.. Pecan documentation master file, created by
-   sphinx-quickstart on Sat Oct  9 14:41:27 2010.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Pecan Documentation
+===================
 
-Pecan's documentation
-=========================
-
-A WSGI object-dispatching web framework, in the spirit of TurboGears, only 
-much much smaller, with many fewer dependencies.
+A WSGI object-dispatching web framework, designed to be lean and fast,
+with few dependancies.
 
 
 Contents:
@@ -28,39 +23,33 @@ Contents:
    testing.rst
 
 
-Introduction
-============
-Pecan packs a few good features but it is also extremely lean, it requires just
-a few dependencies but for the most part it feels like a full fledged web
-framework!
+Introduction and History
+========================
+Welcome to Pecan, a lean Python web framework inspired by CherryPy,
+TurboGears, and Pylons. Pecan was originally created by the developers
+of `ShootQ <http://shootq.com>`_ while working at `Pictage
+<http://pictage.com>`_.
 
- * Object-Dispatch for easy routing
- * Pre and Post Hooks 
- * REST controllers 
- * Validation and Error handling
- * Secure controllers
- * Template language support
- * AppEngine out of the box (no patching!)
+Pecan was created to fill a void in the Python web-framework world – a
+very lightweight framework that provides object-dispatch style routing.
+Pecan does not aim to be a "full stack" framework, and therefore
+includes no out of the box support for things like sessions or
+databases. Pecan instead focuses on HTTP itself.
 
+Although it is lightweight, Pecan does offer an extensive feature set
+for building HTTP-based applications, including:
 
+ * Object-dispatch for easy routing
+ * Full support for REST-style controllers
+ * Validation and error handling
+ * Extensible security framework
+ * Extensible template language support
+ * Extensible JSON support
+ * Easy Python-based configuration
 
-Pecan Hello World
-------------------
-In this example we use ``httpserver`` from ``paste`` but you can use any 
-WSGI server you want::
-
-    from paste import httpserver
-    from pecan import make_app, expose
-
-
-    class RootController(object):
-
-        @expose()
-        def index(self):
-            return 'Hello, World!'
-
-    app = make_app(RootController(), debug=True)
-    httpserver.serve(app, host='0.0.0.0', port=8080)
+While Pecan doesn't provide support for sessions or databases out of the
+box, tutorials are included for integrating these yourself in just a few
+lines of code.
 
 
 Cookbook
