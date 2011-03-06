@@ -22,6 +22,12 @@ def walk_controller(root_class, controller, hooks):
 
 
 class HookController(object):
+    '''
+    A base class for controllers that would like to specify hooks on
+    their controller methods. Simply create a list of hook objects 
+    called ``__hooks__`` as a member of the controller's namespace.
+    '''
+    
     __hooks__ = []
     
     class __metaclass__(type):
@@ -30,23 +36,69 @@ class HookController(object):
 
 
 class PecanHook(object):
+    '''
+    A base class for Pecan hooks. Inherit from this class to create your
+    own hooks. Set a priority on a hook by setting the ``priority``
+    attribute for the hook, which defaults to 100.
+    '''
+    
     priority = 100
     
-    def on_route(self ,state):
+    def on_route(self, state):
+        '''
+        Override this method to create a hook that gets called upon
+        the start of routing.
+        
+        :param state: The Pecan ``state`` object for the current request.
+        '''
         return
     
     def before(self, state):
+        '''
+        Override this method to create a hook that gets called after
+        routing, but before the request gets passed to your controller.
+        
+        :param state: The Pecan ``state`` object for the current request.
+        '''
         return
     
     def after(self, state):
+        '''
+        Override this method to create a hook that gets called after
+        the request has been handled by the controller.
+        
+        :param state: The Pecan ``state`` object for the current request.
+        '''
         return
     
     def on_error(self, state, e):
+        '''
+        Override this method to create a hook that gets called upon
+        an exception being raised in your controller.
+        
+        :param state: The Pecan ``state`` object for the current request.
+        :param e: The ``Exception`` object that was raised.
+        '''
         return
 
 
 class TransactionHook(PecanHook):
+    '''
+    A basic framework hook for supporting wrapping requests in
+    transactions. By default, it will wrap all but ``GET`` and ``HEAD``
+    requests in a transaction. Override the ``is_transactional`` method
+    to define your own rules for what requests should be transactional.
+    '''
+    
     def __init__(self, start, start_ro, commit, rollback, clear):
+        '''
+        :param start: A callable that will bind to a writable database and start a transaction.
+        :param start_ro: A callable that will bind to a readable database.
+        :param commit: A callable that will commit the active transaction.
+        :param rollback: A callable that will roll back the active transaction.
+        :param clear: A callable that will clear your current context.
+        '''
+        
         self.start    = start
         self.start_ro = start_ro
         self.commit   = commit
@@ -54,6 +106,15 @@ class TransactionHook(PecanHook):
         self.clear    = clear
 
     def is_transactional(self, state):
+        '''
+        Decide if a request should be wrapped in a transaction, based
+        upon the state of the request. By default, wraps all but ``GET``
+        and ``HEAD`` requests in a transaction, along with respecting
+        the ``transactional`` decorator from :mod:pecan.decorators.
+        
+        :param state: The Pecan state object for the current request.
+        '''
+        
         controller = getattr(state, 'controller', None)
         if controller:
             force_transactional = getattr(state.controller, '__transactional__', False)
