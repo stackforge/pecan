@@ -69,16 +69,7 @@ def static(name, value):
 
 
 def render(template, namespace):
-    renderer = state.app.renderers.get(state.app.default_renderer, state.app.template_path)
-    if template == 'json':
-        renderer = state.app.renderers.get('json', state.app.template_path)
-    else:
-        namespace['error_for'] = error_for
-        namespace['static'] = static
-    if ':' in template:
-        renderer = state.app.renderers.get(template.split(':')[0], state.app.template_path)
-        template = template.split(':')[1]
-    return renderer.render(template, namespace)
+    return state.app.render(template, namespace)
 
 
 class ValidationException(ForwardRequestException):
@@ -210,6 +201,18 @@ class Pecan(object):
         
         return args, kwargs
     
+    def render(self, template, namespace):
+        renderer = self.renderers.get(self.default_renderer, self.template_path)
+        if template == 'json':
+            renderer = self.renderers.get('json', self.template_path)
+        else:
+            namespace['error_for'] = error_for
+            namespace['static'] = static
+        if ':' in template:
+            renderer = self.renderers.get(template.split(':')[0], self.template_path)
+            template = template.split(':')[1]
+        return renderer.render(template, namespace)
+    
     def validate(self, schema, params, json=False, error_handler=None, 
                  htmlfill=None, variable_decode=None):
         try:
@@ -324,7 +327,7 @@ class Pecan(object):
         if template:
             if template == 'json':
                 request.pecan['content_type'] = self.get_content_type('.json')
-            result = render(template, result)
+            result = self.render(template, result)
         
         # pass the response through htmlfill (items are popped out of the 
         # environment even if htmlfill won't run for proper cleanup)
