@@ -2,32 +2,29 @@
 
 Hooks
 =====
-Pecan Hooks are a nice way to interact with the framework itself rather than
-writing middleware.
+Pecan Hooks are a nice way to interact with the framework itself without having to
+write WSGI middleware.
 
 There is nothing wrong with WSGI Middleware, and actually, it is really easy to
-use middleware with Pecan, but it is rather hard (sometimes impossible) to have
-access to Pecan's internals.
+use middleware with Pecan, but it can be hard (sometimes impossible) to have
+access to Pecan's internals from within middleware.  Hooks make this easier.
 
 Hooks offer four ways of dealing with a request:
 
-* ``on_route``: called before Pecan attempts to route a request
+* ``on_route``: called before Pecan attempts to route a request to a controller
 
-* ``before``: called after routing but before processing the request
+* ``before``: called after routing, but before controller code is run
 
-* ``after``: called after a request has been processed
+* ``after``: called after controller code has been run
 
-* ``on_error``: called when a request generates an error
+* ``on_error``: called when a request generates an exception
 
 Implementation
 --------------
-They are very easy to plug into Pecan. In the below example we will go through
-a simple hook that will gather some information about the request and then it
-will print it out to ``stdout``.
+In the below example, we will write a simple hook that will gather
+some information about the request and print it out to ``stdout``.
 
-Your hook needs to import ``PecanHook`` which will be used to inherit from.
-
-This is how your hook file should look like::
+Your hook implementation needs to import ``PecanHook`` so it can be used as a base class::
 
     from pecan.hooks import PecanHook
 
@@ -35,41 +32,48 @@ This is how your hook file should look like::
 
         def after(self, state):
             print "\nmethod: \t %s" % state.request.method
-            print "response: \t %s" % state.response.status
-
-The ``after`` method will be called after the request has been dealt with.
-
-If you save your file as ``my_hook.py`` you should be able to add it to your 
-application like this::
+            print "\nresponse: \t %s" % state.response.status
+            
+``on_route``, ``before``, and ``after`` are passed a shared state object which includes useful
+information about the request, such as the request and response object, and which controller
+was chosen by Pecan's routing.
+            
+Attaching Hooks
+--------------
+Hooks can be attached in a project-wide manner by specifying a list of hooks
+in your project's ``app.py`` file::
 
     from application.root import RootController
-    from my_hook import SimpleHook
-
+    from my_hooks import SimpleHook
+    
     app = make_app(
         RootController(),
-        hooks           = [SimpleHook()]
-        )
+        hooks = [SimpleHook()]
+    )
 
-We are passing the ``RootController`` of our application (make sure to replace
-the bogus values with your own) and our ``SimpleHook`` goes into a list for the
-``hooks`` parameter.
+Hooks can also be applied selectively to controllers and their sub-controllers
+using the ``__hooks__`` attribute on one or more controllers::
 
-We are not displaying how the entire file should look like but showing what is
-of interest to get a hook into Pecan.
+    from pecan import expose
+    from my_hooks import SimpleHook
+
+    class SimpleController(object):
+    
+        __hooks__ = [SimpleHook()]
+    
+        @expose('json')
+        def index(self):
+            return dict()
 
 Running it
 ----------
-Now that our ``SimpleHook`` is passed on, let's see what happens when we run
+Now that our ``SimpleHook`` is included, let's see what happens when we run
 the app and browse the application::
 
-    python start.py config
-    Serving on http://0.0.0.0:8080
+    pecan serve config.py
     serving on 0.0.0.0:8080 view at http://127.0.0.1:8080
 
     method: 	 GET
     response: 	 200 OK
-
-``config`` is our configuration file that we pass on to ``start.py`` and as
-soon as a request is served we see the information from our ``after`` method.
 
 
