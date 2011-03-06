@@ -1,0 +1,25 @@
+from unittest import TestCase
+from webtest import TestApp
+from pecan import make_app
+
+from ${package}.controllers.root import RootController
+
+
+class TestRootController(TestCase):
+    
+    def setUp(self):
+
+        self.app = TestApp(
+            make_app(
+                RootController(),
+                template_path = '${package}/templates'
+            )
+        )
+        
+    def test_get(self):
+        response = self.app.get('/')
+        assert response.status_int == 200
+
+    def test_get_not_found(self):
+        response = self.app.get('/a/bogus/url', expect_errors=True)
+        assert response.status_int == 404
