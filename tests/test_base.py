@@ -439,6 +439,10 @@ class TestBase(TestCase):
                 redirect('/testing', internal=True)
             
             @expose()
+            def bad_internal(self):
+                redirect('/testing', internal=True, code=301)
+            
+            @expose()
             def permanent(self):
                 redirect('/testing', code=301)
             
@@ -446,21 +450,25 @@ class TestBase(TestCase):
             def testing(self):
                 return 'it worked!'
         
-        app = TestApp(Pecan(RootController()))
+        app = TestApp(make_app(RootController(), debug=True))
         r = app.get('/')
         assert r.status_int == 302
         r = r.follow()
         assert r.status_int == 200
         assert r.body == 'it worked!'
         
-        self.assertRaises(ForwardRequestException, app.get, '/internal')
+        r = app.get('/internal')
+        assert r.status_int == 200
+        assert r.body == 'it worked!'
+        
+        self.assertRaises(ValueError, app.get, '/bad_internal')
         
         r = app.get('/permanent')
         assert r.status_int == 301
         r = r.follow()
         assert r.status_int == 200
         assert r.body == 'it worked!'
-    
+        
     def test_streaming_response(self):
         import StringIO
         class RootController(object):
