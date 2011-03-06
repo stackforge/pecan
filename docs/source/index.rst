@@ -79,6 +79,16 @@ docstrings here:
    :maxdepth: 2
    
    pecan_core.rst
+   pecan_configuration.rst
+   pecan_decorators.rst
+   pecan_default_config.rst
+   pecan_hooks.rst
+   pecan_jsonify.rst
+   pecan_rest.rst
+   pecan_routing.rst
+   pecan_secure.rst
+   pecan_templating.rst
+   pecan_util.rst
 
 
 License
