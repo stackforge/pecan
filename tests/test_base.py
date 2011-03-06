@@ -519,7 +519,7 @@ class TestBase(TestCase):
         Test extension splits
         """
         class RootController(object):
-            @expose()
+            @expose(content_type=None)
             def _default(self, *args):
                 from pecan.core import request
                 return request.pecan['extension']
