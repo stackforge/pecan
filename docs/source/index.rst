@@ -69,6 +69,18 @@ tutorial on App Engine.
    reporting.rst
    
 
+API Documentation
+=================
+Pecan's source code is well documented using Python docstrings and 
+comments. In addition, we have generated API documentation from the
+docstrings here:
+
+.. toctree::
+   :maxdepth: 2
+   
+   pecan_core.rst
+
+
 License
 -------
 The Pecan framework and the documentation is BSD Licensed::

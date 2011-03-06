@@ -1,3 +1,6 @@
+'''
+'''
+
 from paste.cascade import Cascade
 from paste.errordocument import make_errordocument
 from paste.recursive import RecursiveMiddleware
@@ -17,7 +20,9 @@ __all__ = [
 ]
 
 def make_app(root, static_root=None, debug=False, errorcfg={}, wrap_app=None, **kw):
-
+    '''
+    
+    '''
 
     app = Pecan(root, **kw)
     if wrap_app:

@@ -41,15 +41,44 @@ response    = proxy('response')
 
 
 def override_template(template, content_type=None):
+    '''
+    Call within a controller to override the template that is used in
+    your response.
+    
+    :param template: a valid path to a template file, just as you would specify in an ``@expose``.
+    :param content_type: a valid MIME type to use for the response.
+    '''
+    
     request.override_template = template
     if content_type:
         request.override_content_type = content_type 
 
 def abort(status_code=None, detail='', headers=None, comment=None):
+    '''
+    Raise an HTTP status code, as specified. Useful for returning status
+    codes like 401 Unauthorized or 403 Forbidden.
+    
+    :param status_code: The HTTP status code as an integer.
+    :param detail: The message to send along, as a string.
+    :param headers: A dictionary of headers to send along with the response.
+    :param comment: A comment to include in the response.
+    '''
+    
     raise exc.status_map[status_code](detail=detail, headers=headers, comment=comment)
 
 
 def redirect(location, internal=False, code=None, headers={}):
+    '''
+    Perform a redirect, either internal or external. An internal redirect
+    performs the redirect server-side, while the external redirect utilizes
+    an HTTP 302 status code.
+    
+    :param location: The HTTP location to redirect to.
+    :param internal: A boolean indicating whether the redirect should be internal.
+    :param code: The HTTP status code to use for the redirect. Defaults to 302.
+    :param headers: Any HTTP headers to send with the response, as a dictionary.
+    '''
+    
     if internal:
         if code is not None:
             raise ValueError('Cannot specify a code for internal redirects')
@@ -60,12 +89,29 @@ def redirect(location, internal=False, code=None, headers={}):
 
 
 def error_for(field):
+    '''
+    A convenience function for fetching the validation error for a
+    particular field in a form. Useful within templates when not using
+    ``htmlfill`` for forms.
+    
+    :param field: The name of the field to get the error for.
+    '''
+    
     if not request.validation_errors:
         return ''
     return request.validation_errors.get(field, '')
 
     
 def static(name, value):
+    '''
+    When using ``htmlfill`` validation support, this function indicates
+    that ``htmlfill`` should not fill in a value for this field, and
+    should instead use the value specified.
+    
+    :param name: The name of the field.
+    :param value: The value to specify.
+    '''
+    
     if 'pecan.params' not in request.environ:
         request.environ['pecan.params'] = dict(request.str_params)    
     request.environ['pecan.params'][name] = value
@@ -73,6 +119,15 @@ def static(name, value):
 
 
 def render(template, namespace):
+    '''
+    Render the specified template using the Pecan rendering framework
+    with the specified template namespace as a dictionary. Useful in a
+    controller where you have no template specified in the ``@expose``.
+    
+    :param template: The path to your template, as you would specify in ``@expose``.
+    :param namespace: The namespace to use for rendering the template, as a dictionary.
+    '''
+    
     renderer = state.app.renderers.get(state.app.default_renderer, state.app.template_path)
     if template == 'json':
         renderer = state.app.renderers.get('json', state.app.template_path)
@@ -86,6 +141,11 @@ def render(template, namespace):
 
 
 class ValidationException(ForwardRequestException):
+    '''
+    This exception is raised when a validation error occurs using Pecan's
+    built-in validation framework.
+    '''
+    
     def __init__(self, location=None, errors={}):
         if hasattr(state, 'controller'):
             cfg = _cfg(state.controller)
@@ -106,6 +166,11 @@ class ValidationException(ForwardRequestException):
 
 
 class Pecan(object):
+    '''
+    Base Pecan application object. Generally created using ``pecan.make_app``,
+    rather than being created manually.
+    '''
+    
     def __init__(self, root, 
                  default_renderer    = 'mako', 
                  template_path       = 'templates', 
@@ -114,6 +179,17 @@ class Pecan(object):
                  extra_template_vars = {},
                  force_canonical     = True
                  ):
+        '''
+        Creates a Pecan application instance, which is a WSGI application.
+        
+        :param root: The root controller object.
+        :param default_renderer: The default rendering engine to use. Defaults to mako.
+        :param template_path: The default relative path to use for templates. Defaults to 'templates'.
+        :param hooks: A list of Pecan hook objects to use for this application.
+        :param custom_renderers: Custom renderer objects, as a dictionary keyed by engine name.
+        :param extra_template_vars: Any variables to inject into the template namespace automatically.
+        :param force_canonical: A boolean indicating if this project should require canonical URLs.
+        '''
 
         self.root             = root
         self.renderers        = RendererFactory(custom_renderers, extra_template_vars)
@@ -123,6 +199,12 @@ class Pecan(object):
         self.force_canonical  = force_canonical
         
     def get_content_type(self, format):
+        '''
+        Returns a content-type for a file extension.
+        
+        :param format: The file extension, such as .html, .json, or .txt.
+        '''
+        
         return {
             '.html'  : 'text/html',
             '.xhtml' : 'text/html',
@@ -131,6 +213,13 @@ class Pecan(object):
         }.get(format)
     
     def route(self, node, path):
+        '''
+        Looks up a controller from a node based upon the specified path.
+        
+        :param node: The node, such as a root controller object.
+        :param path: The path to look up on this node.
+        '''
+        
         path = path.split('/')[1:]
         try:
             node, remainder = lookup_controller(node, path)
@@ -143,6 +232,12 @@ class Pecan(object):
             return e.controller, e.remainder
     
     def determine_hooks(self, controller=None):
+        '''
+        Determines the hooks to be run, in which order.
+        
+        :param controller: If specified, includes hooks for a specific controller.
+        '''
+        
         controller_hooks = []
         if controller:
             controller_hooks = _cfg(controller).get('hooks', [])
@@ -154,6 +249,13 @@ class Pecan(object):
         )
     
     def handle_hooks(self, hook_type, *args):
+        '''
+        Processes hooks of the specified type.
+        
+        :param hook_type: The type of hook, including ``before``, ``after``, ``on_error``, and ``on_route``.
+        :param *args: Arguments to pass to the hooks.
+        '''
+        
         if hook_type in ['before', 'on_route']:
             hooks = state.hooks
         else:
@@ -163,6 +265,11 @@ class Pecan(object):
              getattr(hook, hook_type)(*args)
 
     def get_args(self, all_params, remainder, argspec, im_self):
+        '''
+        Determines the arguments for a controller based upon parameters
+        passed the argument specification for the controller.
+        '''
+        
         args = []
         kwargs = dict()
         valid_args = argspec[0][1:]
@@ -212,6 +319,18 @@ class Pecan(object):
     
     def validate(self, schema, params, json=False, error_handler=None, 
                  htmlfill=None, variable_decode=None):
+        '''
+        Performs validation against a schema for any passed params, 
+        including support for ``JSON``.
+        
+        :param schema: A ``formencode`` ``Schema`` object to validate against.
+        :param params: The dictionary of parameters to validate.
+        :param json: A boolean, indicating whether or not the validation should validate against JSON content.
+        :param error_handler: The path to a controller which will handle errors. If not specified, validation errors will raise a ``ValidationException``.
+        :param htmlfill: Specifies whether or not to use htmlfill.
+        :param variable_decode: Indicates whether or not to decode variables when using htmlfill.
+        '''
+        
         request.validation_errors = {}
         try:
             to_validate = params
@@ -233,6 +352,9 @@ class Pecan(object):
         return params
     
     def handle_request(self):
+        '''
+        The main request handler for Pecan applications.
+        '''
         
         # get a sorted list of hooks, by priority (no controller hooks yet)
         state.hooks = self.determine_hooks()
@@ -354,6 +476,10 @@ class Pecan(object):
             response.content_type = state.content_type
     
     def __call__(self, environ, start_response):
+        '''
+        Implements the WSGI specification for Pecan applications, utilizing ``WebOb``.
+        '''
+        
         # create the request and response object
         state.request      = Request(environ)
         state.content_type = None
