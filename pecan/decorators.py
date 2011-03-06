@@ -1,7 +1,16 @@
 from inspect import getargspec
 from util import _cfg
 
+__all__ = [
+    'expose', 'transactional', 'accept_noncanonical'
+]
+
+
 def when_for(controller):
+    '''
+    
+    '''
+    
     def when(method=None, **kw):
         def decorate(f):
             expose(**kw)(f)
@@ -19,7 +28,19 @@ def expose(template        = None,
            error_handler   = None,
            htmlfill        = None,
            generic         = False):
-
+    
+    '''
+    Decorator used to flag controller methods as being "exposed" for
+    access via HTTP, and to configure that access.
+    
+    :param template: The path to a template, relative to the base template directory.
+    :param content_type: The content-type to use for this template.
+    :param schema: A ``formencode`` ``Schema`` object to use for validation.
+    :param json_schema: A ``formencode`` ``Schema`` object to use for validation of JSON POST/PUT content.
+    :param variable_decode: A boolean indicating if you want to use ``htmlfill``'s variable decode capability of transforming flat HTML form structures into nested ones.
+    :param htmlfill: Indicates whether or not you want to use ``htmlfill`` for this controller.
+    :param generic: A boolean which flags this as a "generic" controller, which uses generic functions based upon ``simplegeneric`` generic functions. Allows you to split a single controller into multiple paths based upon HTTP method.
+    '''
     
     if template == 'json': content_type = 'application/json'
     def decorate(f):
@@ -67,6 +88,14 @@ def expose(template        = None,
     return decorate
     
 def transactional(ignore_redirects=True):
+    '''
+    If utilizing the :mod:`pecan.hooks` ``TransactionHook``, allows you
+    to flag a controller method as being wrapped in a transaction,
+    regardless of HTTP method.
+    
+    :param ignore_redirects: Indicates if the hook should ignore redirects for this controller or not.
+    '''
+    
     def deco(f):
         def wrap(*args, **kwargs):
             return f(*args, **kwargs)
@@ -76,5 +105,9 @@ def transactional(ignore_redirects=True):
     return deco
 
 def accept_noncanonical(func):
+    '''
+    Flags a controller method as accepting non-canoncial URLs.
+    '''
+    
     _cfg(func)['accept_noncanonical'] = True
     return func
