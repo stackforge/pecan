@@ -14,12 +14,14 @@ We include a basic template to have a good layout for a Pecan project. This is
 accomplished by ``PasteScript`` so we need to invoke a command to create our
 example project::
 
-    $ paster create -t pecan-base
+    $ pecan create -t base
 
 The above command will prompt you for a project name. I chose *test_project*,
-this is how it looks like when we run the whole command:: 
+but you can also provided as an argument at the end of the example command
+above.
+This is how it looks like when we run the whole command:: 
 
-    $ paster create -t pecan-base
+    $ pecan create -t base
     Selected and implied templates:
       pecan#pecan-base  Template for creating a basic Framework package
 
