@@ -63,6 +63,28 @@ exactly as if your application was really running via an HTTP server.
 
 Using WebTest with a UnitTest
 -----------------------------
+Once you have a ``setUp`` method with your Pecan configuration loaded you have
+a wealth of actions provided within the test class to interact with your Pecan
+application::
 
+ *  POST   => self.app.post
+ *  GET    => self.app.get
+ *  DELETE => self.app.delete
+ *  PUT    => self.app.put
 
+For example, if I wanted to assert that I can get the root of my application,
+I would probably do something similar to this:
+
+     response = self.app.get('/')
+     assert response.status_int == 200
+
+If you are expecting error responses from your application, you should make
+sure that you pass the `expect_errors` flag and set it to True::
+
+    response = self.app.get('/url/does/not/exist', expect_errors=True)
+    assert response.status_int == 404
+
+If you would like to dig in to more examples in how to test and verify more
+actions, make sure you take a look at the 
+`WebTest documentation <http://pythonpaste.org/webtest/>`_
 
