@@ -11,6 +11,7 @@ Contents:
    :maxdepth: 2
    
    installation.rst
+   quick_start.rst   
    routing.rst
    validation_n_errors.rst
    configuration.rst
@@ -60,7 +61,6 @@ tutorial on App Engine.
 .. toctree::
    :maxdepth: 2
 
-   quick_start.rst 
    app_engine.rst
    sessions.rst
    celery.rst

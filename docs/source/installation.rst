@@ -36,10 +36,3 @@ If you are still in the *pecan-dev* virtual environment that we created before,
 you should call ``setup.py`` to install::
 
     python setup.py develop
-
-
-Testing
-=======
-For testing purposes, we use `py.test <http://pytest.org/>`_ and
-WebTest, so make sure you have those installed in your environment before
-running the tests.  
