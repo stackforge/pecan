@@ -621,7 +621,10 @@ class TestEngines(object):
         assert error_msg is not None
     
     def test_json(self):
-        from json import loads
+        try:
+            from simplejson import loads
+        except:
+            from json import loads
         
         expected_result = dict(name='Jonathan', age=30, nested=dict(works=True))
         

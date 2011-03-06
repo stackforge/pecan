@@ -1,6 +1,9 @@
 from datetime           import datetime, date
 from decimal            import Decimal
-from json               import loads
+try:
+    from simplejson     import loads
+except:
+    from json           import loads
 from unittest           import TestCase
 
 from pecan.jsonify      import jsonify, encode

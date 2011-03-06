@@ -1,7 +1,10 @@
 from pecan import abort, expose, make_app, request, response
 from pecan.rest import RestController
 from webtest import TestApp
-from json import dumps, loads
+try:
+    from simplejson import dumps, loads
+except:
+    from json import dumps, loads
 
 
 class TestRestController(object):

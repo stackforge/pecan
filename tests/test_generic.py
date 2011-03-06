@@ -1,6 +1,9 @@
 from pecan import Pecan, expose, request, response, redirect
 from webtest import TestApp
-from json import dumps
+try:
+    from simplejson import dumps
+except:
+    from json import dumps
 
 
 class TestGeneric(object):
