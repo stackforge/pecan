@@ -14,16 +14,17 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-
+   
    installation.rst
    routing.rst
-   configuration.rst 
-   templates.rst 
-   hooks.rst 
-   jsonify.rst 
-   secure_controller.rst 
    validation_n_errors.rst
+   configuration.rst
    commands.rst
+   templates.rst
+   rest.rst
+   secure_controller.rst
+   jsonify.rst
+   hooks.rst
    testing.rst
 
 
