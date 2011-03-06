@@ -696,7 +696,7 @@ class TestHooks(object):
                             password_confirm,
                             age):
                 run_hook.append('inside')
-                return str(len(request.validation_errors) > 0)
+                return str(len(request.pecan['validation_errors']) > 0)
             
             @expose(schema=RegistrationSchema(), error_handler='/errors')
             def with_handler(self, first_name, 
@@ -707,7 +707,7 @@ class TestHooks(object):
                             password_confirm,
                             age):
                 run_hook.append('inside')
-                return str(len(request.validation_errors) > 0)
+                return str(len(request.pecan['validation_errors']) > 0)
         
         # test that the hooks get properly run with no validation errors        
         app = TestApp(make_app(RootController(), hooks=[SimpleHook()]))

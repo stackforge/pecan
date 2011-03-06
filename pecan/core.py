@@ -24,8 +24,6 @@ def proxy(key):
     class ObjectProxy(object):
         def __getattr__(self, attr):
             obj = getattr(state, key)
-            if attr == 'validation_errors':
-                return getattr(obj, attr, {})
             return getattr(obj, attr)
         def __setattr__(self, attr, value):
             obj = getattr(state, key)
@@ -41,9 +39,9 @@ response    = proxy('response')
 
 
 def override_template(template, content_type=None):
-    request.override_template = template
+    request.pecan['override_template'] = template
     if content_type:
-        request.override_content_type = content_type 
+        request.pecan['override_content_type'] = content_type 
 
 def abort(status_code=None, detail='', headers=None, comment=None):
     raise exc.status_map[status_code](detail=detail, headers=headers, comment=comment)
@@ -60,11 +58,9 @@ def redirect(location, internal=False, code=None, headers={}):
 
 
 def error_for(field):
-    if not request.validation_errors:
-        return ''
-    return request.validation_errors.get(field, '')
+    return request.pecan['validation_errors'].get(field, '')
 
-    
+
 def static(name, value):
     if 'pecan.params' not in request.environ:
         request.environ['pecan.params'] = dict(request.str_params)    
@@ -95,10 +91,10 @@ class ValidationException(ForwardRequestException):
             location = cfg['error_handler']
             if callable(location):
                 location = location()
-        merge_dicts(request.validation_errors, errors)
+        merge_dicts(request.pecan['validation_errors'], errors)
         if 'pecan.params' not in request.environ:
             request.environ['pecan.params'] = dict(request.str_params)
-        request.environ['pecan.validation_errors'] = request.validation_errors
+        request.environ['pecan.validation_errors'] = request.pecan['validation_errors']
         if cfg.get('htmlfill') is not None:
             request.environ['pecan.htmlfill'] = cfg['htmlfill']
         request.environ['REQUEST_METHOD'] = 'GET'
@@ -138,7 +134,11 @@ class Pecan(object):
         except NonCanonicalPath, e:
             if self.force_canonical and not _cfg(e.controller).get('accept_noncanonical', False):
                 if request.method == 'POST':
-                    raise RuntimeError, "You have POSTed to a URL '%s' which requires a slash.  Most browsers will not maintain POST data when redirected.  Please update your code to POST to '%s/' or set force_canonical to False" % (request.routing_path, request.routing_path)
+                    raise RuntimeError, "You have POSTed to a URL '%s' which '\
+                        'requires a slash. Most browsers will not maintain '\
+                        'POST data when redirected. Please update your code '\
+                        'to POST to '%s/' or set force_canonical to False" % \
+                        (request.pecan['routing_path'], request.pecan['routing_path'])
                 raise exc.HTTPFound(add_slash=True)
             return e.controller, e.remainder
     
@@ -171,9 +171,9 @@ class Pecan(object):
             args.append(im_self)
         
         # grab the routing args from nested REST controllers
-        if hasattr(request, 'routing_args'):
-            remainder = request.routing_args + list(remainder)
-            delattr(request, 'routing_args')
+        if 'routing_args' in request.pecan:
+            remainder = request.pecan['routing_args'] + list(remainder)
+            del request.pecan['routing_args']
         
         # handle positional arguments
         if valid_args and remainder:
@@ -212,7 +212,6 @@ class Pecan(object):
     
     def validate(self, schema, params, json=False, error_handler=None, 
                  htmlfill=None, variable_decode=None):
-        request.validation_errors = {}
         try:
             to_validate = params
             if json:
@@ -225,7 +224,7 @@ class Pecan(object):
             if variable_decode is not None:
                 kwargs['encode_variables'] = True
                 kwargs.update(variable_decode)
-            request.validation_errors = e.unpack_errors(**kwargs)
+            request.pecan['validation_errors'] = e.unpack_errors(**kwargs)
             if error_handler is not None:
                 raise ValidationException()
         if json:
@@ -238,20 +237,20 @@ class Pecan(object):
         state.hooks = self.determine_hooks()
         
         # store the routing path to allow hooks to modify it
-        request.routing_path = request.path
+        request.pecan['routing_path'] = request.path
 
         # handle "on_route" hooks
         self.handle_hooks('on_route', state)
         
         # lookup the controller, respecting content-type as requested
         # by the file extension on the URI
-        path = request.routing_path
+        path = request.pecan['routing_path']
 
-        if state.content_type is None and '.' in path.split('/')[-1]:
+        if not request.pecan['content_type'] and '.' in path.split('/')[-1]:
             path, format = os.path.splitext(path)
             # store the extension for retrieval by controllers
-            request.extension = format
-            state.content_type = self.get_content_type(format)      
+            request.pecan['extension'] = format
+            request.pecan['content_type'] = self.get_content_type(format)
         controller, remainder = self.route(self.root, path)
         cfg = _cfg(controller)
 
@@ -270,8 +269,8 @@ class Pecan(object):
         state.controller = controller
     
         # if unsure ask the controller for the default content type 
-        if state.content_type is None:
-            state.content_type = cfg.get('content_type', 'text/html')
+        if not request.pecan['content_type']:
+            request.pecan['content_type'] = cfg.get('content_type', 'text/html')
         
         # get a sorted list of hooks, by priority
         state.hooks = self.determine_hooks(controller)
@@ -291,7 +290,7 @@ class Pecan(object):
                         variable_decode=cfg.get('variable_decode')
                     )
         elif 'pecan.validation_errors' in request.environ:
-            request.validation_errors = request.environ.pop('pecan.validation_errors')
+            request.pecan['validation_errors'] = request.environ.pop('pecan.validation_errors')
         
         # fetch the arguments for the controller
         args, kwargs = self.get_args(
@@ -312,16 +311,16 @@ class Pecan(object):
         raw_namespace = result
 
         # pull the template out based upon content type and handle overrides
-        template = cfg.get('content_types', {}).get(state.content_type)
+        template = cfg.get('content_types', {}).get(request.pecan['content_type'])
 
         # check if for controller override of template
-        template = getattr(request, 'override_template', template)
-        state.content_type = getattr(request, 'override_content_type', state.content_type)
+        template = request.pecan.get('override_template', template)
+        request.pecan['content_type'] = request.pecan.get('override_content_type', request.pecan['content_type'])
 
         # if there is a template, render it
         if template:
             if template == 'json':
-                state.content_type = self.get_content_type('.json')
+                request.pecan['content_type'] = self.get_content_type('.json')
             result = render(template, result)
         
         # pass the response through htmlfill (items are popped out of the 
@@ -331,8 +330,8 @@ class Pecan(object):
             _htmlfill = request.environ.pop('pecan.htmlfill')
         if 'pecan.params' in request.environ:
             params = request.environ.pop('pecan.params')
-        if request.validation_errors and _htmlfill is not None and state.content_type == 'text/html':
-            errors = getattr(request, 'validation_errors', {})
+        if request.pecan['validation_errors'] and _htmlfill is not None and request.pecan['content_type'] == 'text/html':
+            errors = request.pecan['validation_errors']
             result = htmlfill.render(result, defaults=params, errors=errors, **_htmlfill)
         
         # If we are in a test request put the namespace where it can be
@@ -350,21 +349,21 @@ class Pecan(object):
             response.body = result
         
         # set the content type
-        if state.content_type:
-            response.content_type = state.content_type
+        if request.pecan['content_type']:
+            response.content_type = request.pecan['content_type']
     
     def __call__(self, environ, start_response):
         # create the request and response object
         state.request      = Request(environ)
-        state.content_type = None
         state.response     = Response()
         state.hooks        = []
         state.app          = self
         
         # handle the request
         try:
-            # add context to the request 
+            # add context and environment to the request 
             state.request.context = {}
+            state.request.pecan = dict(content_type=None, validation_errors={})
 
             self.handle_request()
         except Exception, e:
@@ -387,7 +386,6 @@ class Pecan(object):
             return state.response(environ, start_response)
         finally:        
             # clean up state
-            del state.content_type
             del state.hooks
             del state.request
             del state.response
