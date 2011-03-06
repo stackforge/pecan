@@ -13,7 +13,7 @@ Your ``json`` module will contain a series of rules for generating
 `simplegeneric <http://pypi.python.org/pypi/simplegeneric>`_ library.
 
 Let us imagine that we have a controller in our Pecan application which
-we want to use to return ``JSON`` output for a ``User`` object:
+we want to use to return ``JSON`` output for a ``User`` object::
     
     from myproject.lib import get_current_user
     
@@ -30,7 +30,7 @@ we want to use to return ``JSON`` output for a ``User`` object:
 In order for this controller to function, Pecan will need to know how to
 convert the ``User`` object into a ``JSON``-friendly data structure. One
 way to tell Pecan how to convert an object into ``JSON`` is to define a
-rule in your ``json.py``:
+rule in your ``json.py``::
 
     from pecan.jsonify import jsonify
     from myproject import model
@@ -50,7 +50,7 @@ that the rule does not generate a ``JSON`` string, but rather generates
 a Python dictionary which contains only ``JSON`` friendly data types.
 
 Alternatively, the rule can be specified on the object itself, by
-specifying a ``__json__`` method on the object:
+specifying a ``__json__`` method on the object::
 
     class User(object):
         def __init__(self, name, email, birthday):
