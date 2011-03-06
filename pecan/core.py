@@ -85,7 +85,7 @@ def redirect(location, internal=False, code=None, headers={}):
         raise ForwardRequestException(location)
     if code is None:
         code = 302
-    raise exc.status_map[code](location=location, headers=getattr(response, 'headers', headers))
+    raise exc.status_map[code](location=location, headers=headers)
 
 
 def error_for(field):
