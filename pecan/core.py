@@ -271,6 +271,9 @@ class Pecan(object):
         # if unsure ask the controller for the default content type 
         if not request.pecan['content_type']:
             request.pecan['content_type'] = cfg.get('content_type', 'text/html')
+        elif cfg.get('content_type') is not None and \
+            request.pecan['content_type'] not in cfg.get('content_types', {}):
+            raise exc.HTTPNotFound
         
         # get a sorted list of hooks, by priority
         state.hooks = self.determine_hooks(controller)

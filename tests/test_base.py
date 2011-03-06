@@ -544,7 +544,24 @@ class TestBase(TestCase):
 
         app = make_app(RootController(), wrap_app=wrap, debug=True)
         assert len(wrapped_apps) == 1
+    
+    def test_bad_content_type(self):
+        class RootController(object):
+            @expose()
+            def index(self):
+                return '/'
+    
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert r.body == '/'
+        
+        r = app.get('/index.html', expect_errors=True)
+        assert r.status_int == 200
+        assert r.body == '/'
 
+        r = app.get('/index.txt', expect_errors=True)
+        assert r.status_int == 404
 
 class TestEngines(object):
     
