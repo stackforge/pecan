@@ -111,9 +111,6 @@ class Pecan(object):
         self.template_path    = template_path
         self.force_canonical  = force_canonical
         
-    def get_content_type(self, format):
-        return guess_type(format)[0]
-    
     def route(self, node, path):
         path = path.split('/')[1:]
         try:
@@ -247,10 +244,10 @@ class Pecan(object):
         path = request.pecan['routing_path']
 
         if not request.pecan['content_type'] and '.' in path.split('/')[-1]:
-            path, format = os.path.splitext(path)
+            request.pecan['content_type'] = guess_type(path)[0]
             # store the extension for retrieval by controllers
+            path, format = os.path.splitext(path)
             request.pecan['extension'] = format
-            request.pecan['content_type'] = self.get_content_type(format)
         controller, remainder = self.route(self.root, path)
         cfg = _cfg(controller)
 
@@ -323,7 +320,7 @@ class Pecan(object):
         # if there is a template, render it
         if template:
             if template == 'json':
-                request.pecan['content_type'] = self.get_content_type('.json')
+                request.pecan['content_type'] = 'application/json'
             result = self.render(template, result)
         
         # pass the response through htmlfill (items are popped out of the 
