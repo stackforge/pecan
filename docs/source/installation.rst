@@ -2,6 +2,10 @@
 
 Installation
 ============
+
+.. warning::
+    This section is out of date. Please do not refer to it directly.
+
 We recommend installing Pecan with ``pip`` but you can also try with
 ``easy_install`` and ``virtualenv``. Creating a spot in your environment where
 Pecan can be isolated from other packages is best practice.
