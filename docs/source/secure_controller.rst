@@ -103,11 +103,11 @@ The ``check_permissions`` method should be used to determine user authentication
 code you implement here could range from simple session assertions (the existing user is authenticated
 as an administrator) to connecting to an LDAP service.  
 
-More on the ``secure`` Method
+More on ``secure``
 ----------------
 The ``secure`` method has several advanced uses that allow you to create robust security policies for your application.
 
-First, when you pass a string ``secure`` to secure.  The string must be the name of either be a classmethod or an instance method of the controller.  Instance methods are useful, if you wish to authorize access to attriubutes of a particular model instance. For instance is you had a controller which managed a virtual file system. ::
+First, you can pass via a string  the name of either be a classmethod or an instance method of the controller to use as the ``check_permission`` method.  Instance methods are particularly useful if you wish to authorize access to attriubutes of a particular model instance.  Consider the following example of a basic virtual filesystem: ::
 
     from pecan import expose
     from pecan.secure import secure
@@ -134,7 +134,12 @@ First, when you pass a string ``secure`` to secure.  The string must be the name
         def download_file(self):
             pass 
 
-Second, the method also accepts a function instead of a string.  When passing a function to ``secure``, the function must be either imported from another file or defined in the same file before the class definition. ::
+    class RootController(object):
+        def _lookup(self, name, *remainder):
+            return FileController(name), *remainder
+
+
+The ``secure`` method also accepts a function instead of a string.  When passing a function,  make sure that the function is imported from another file or defined in the same file before the class definition. ::
 
     from pecan import expose
     from pecan.secure import secure
@@ -147,7 +152,8 @@ Second, the method also accepts a function instead of a string.  When passing a 
         def index(self):
             return 'Logged in'
 
-You can use the ``secure`` method within a SecureController to indicate another security function for a controller method.  This is useful for situations where you want a different level or type of security. ::
+
+You can also use the ``secure`` method to change the behavior of a SecureController.  Decorating a method or wrapping a subcontroller lets tell Pecan to use another security function other than the default controller method.  This is useful for situations where you want a different level or type of security. ::
 
     from pecan import expose
     from pecan.secure import SecureController, secure
@@ -176,7 +182,7 @@ In the example above, pecan will *only* call ``check_api_permissions`` when a re
 
 Multiple Secure Controllers
 ---------------------------
-Pecan allows you to have nested secure controllers. In the example below, when a request is made for ``/admin/index/``, Pecan first calls ``check_permissions`` on first the RootController and then calls ``check_permissions`` on the AdminController. The ability to nest secured controllers allows you to protect specific controllers on a role basis while inheriting protection from the parent. :: 
+Pecan allows you to have nested secure controllers. In the example below, when a request is made for ``/admin/index/``, Pecan first calls ``check_permissions`` on the RootController and then calls ``check_permissions`` on the AdminController. The ability to nest secured controllers allows you to protect specific controllers on a role basis while inheriting protection from the parent. :: 
 
     from pecan import expose
     from pecan.secure import SecureController, secure
