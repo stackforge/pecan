@@ -11,6 +11,9 @@ examples and methods are not covered here.
     details please go to :ref:`installation`
 
 
+Base Application Template
+-------------------------
+
 We include a basic template to have a good layout for a Pecan project. This is
 accomplished by  the ``pecan`` command line script bundled with the framework. 
 Invoking the command to create a project is trivial::
@@ -111,22 +114,30 @@ A few things have been set for you, let's review them one by one:
   to get them here as well.
 
 
-Inside the project name you chose you have a couple of directories, and for the
+Inside the project name you chose you have a few directories, and for the
 most part, it will contain your models, controllers and templates:
 
-*  **controllers**: The container directory for your controller files. 
-*  **templates**: All your templates would go in here. 
+*  **controllers**:  The container directory for your controller files.
+*  **templates**:    All your templates would go in here.
+*  **model**:        Container for your model files.
+*  **tests**:        All your application test files.
 
 To avoid unneeded dependencies and to remain as flexible as possible, Pecan doesn't impose any database or
-ORM out of the box. You may notice that **model/__init__.py** is mostly empty. Its contents generally contain any code necessary define tables, ORM definitions, and parse bindings from ``pecan.conf``.
+ORM (Object Relational Mapper) out of the box. You may notice that **model/__init__.py** is mostly empty. 
+Its contents generally contain any code necessary to define tables, ORM definitions, and parse bindings from 
+your configuration file.
 
 
 .. _running_application:
 
 Running the application
 -----------------------
-There are 2 files that are important to start your application. In this case
-``start.py`` and ``config.py`` are in charge of getting everything up and running.
+The most important file to run your application is your configuration file, the
+base project template should have created one for you already and it should be
+named ``config.py``.
+
+This file already contains the necessary information to run a Pecan app, like
+ports, static paths and so forth. 
 
 If you just run ``start.py`` with Python, passing ``config`` as an argument for
 configuration it will bring up the development server and serve the app::
