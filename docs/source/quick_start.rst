@@ -3,9 +3,6 @@
 Quick Start
 ===========
 
-.. warning::
-    This section is out of date. Please do not refer to it directly.
-
 Here we will cover the basics for a small project in Pecan. More advanced
 examples and methods are not covered here.
 
@@ -15,14 +12,17 @@ examples and methods are not covered here.
 
 
 We include a basic template to have a good layout for a Pecan project. This is
-accomplished by ``PasteScript`` so we need to invoke a command to create our
-example project::
+accomplished by  the ``pecan`` command line script bundled with the framework. 
+Invoking the command to create a project is trivial::
 
     $ pecan create -t base
 
 The above command will prompt you for a project name. I chose *test_project*,
 but you can also provided as an argument at the end of the example command
-above.
+above, like::
+
+    $ pecan create -t base test_project
+
 This is how it looks like when we run the whole command:: 
 
     $ pecan create -t base
@@ -64,28 +64,45 @@ This is how it looks like when we run the whole command::
 
 This is how the structure of your new project should look like::
 
-    .
+    ├── MANIFEST.in
     ├── config.py
     ├── public
     │   ├── css
     │   │   └── style.css
     │   └── javascript
     │       └── shared.js
+    ├── setup.py
     ├── start.py
-    └── test_project
-        ├── __init__.py
-        ├── controllers
-        │   ├── __init__.py
-        │   └── root.py
-        ├── model
-        │   ├── __init__.py
-        └── templates
-            ├── index.html
-            ├── layout.html
-            └── success.html
+    ├── test_project
+    │   ├── __init__.py
+    │   ├── app.py
+    │   ├── controllers
+    │   │   ├── __init__.py
+    │   │   └── root.py
+    │   ├── model
+    │   │   └── __init__.py
+    │   ├── templates
+    │   │   ├── error.html
+    │   │   ├── index.html
+    │   │   ├── layout.html
+    │   │   └── success.html
+    │   └── tests
+    │       ├── __init__.py
+    │       ├── test_config.py
+    │       └── test_root.py
+    └── test_project.egg-info
+        ├── PKG-INFO
+        ├── SOURCES.txt
+        ├── dependency_links.txt
+        ├── not-zip-safe
+        ├── paster_plugins.txt
+        ├── requires.txt
+        └── top_level.txt
 
-    7 directories, 11 files
+    9 directories, 25 files
 
+The amount of files and directories may vary from time to time, but the above
+structure should give you an idea of what you should expect.
 
 A few things have been set for you, let's review them one by one:
 
