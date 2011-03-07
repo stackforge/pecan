@@ -1,6 +1,6 @@
 from templating         import RendererFactory
 from routing            import lookup_controller, NonCanonicalPath
-from util               import _cfg
+from util               import _cfg, splitext
 
 from webob              import Request, Response, exc
 from threading          import local
@@ -199,20 +199,6 @@ class Pecan(object):
         self.template_path    = template_path
         self.force_canonical  = force_canonical
         
-    def get_content_type(self, format):
-        '''
-        Returns a content-type for a file extension.
-        
-        :param format: The file extension, such as .html, .json, or .txt.
-        '''
-        
-        return {
-            '.html'  : 'text/html',
-            '.xhtml' : 'text/html',
-            '.json'  : 'application/json',
-            '.txt'   : 'text/plain'
-        }.get(format)
-    
     def route(self, node, path):
         '''
         Looks up a controller from a node based upon the specified path.
@@ -371,15 +357,11 @@ class Pecan(object):
         path = request.routing_path
 
         if state.content_type is None and '.' in path.split('/')[-1]:
-            state.content_type = guess_type(path)[0]
+            path, extension = splitext(path)
 
-            # store the extension for retrieval by controllers
-            ext_index = path.rfind('.')
-            if ext_index > 1:
-                request.extension = path[ext_index:]
-                path = path[:ext_index]
-            else:
-                request.extension = ''
+            request.extension = extension
+            # preface with a letter to ensure compat for 2.5
+            state.content_type = guess_type('x' + extension)[0]
 
         controller, remainder = self.route(self.root, path)
         cfg = _cfg(controller)
