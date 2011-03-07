@@ -107,7 +107,7 @@ More on ``secure``
 ----------------
 The ``secure`` method has several advanced uses that allow you to create robust security policies for your application.
 
-First, you can pass via a string  the name of either be a classmethod or an instance method of the controller to use as the ``check_permission`` method.  Instance methods are particularly useful if you wish to authorize access to attriubutes of a particular model instance.  Consider the following example of a basic virtual filesystem: ::
+First, you can pass via a string  the name of either a classmethod or an instance method of the controller to use as the ``check_permission`` method.  Instance methods are particularly useful if you wish to authorize access to attriubutes of a particular model instance.  Consider the following example of a basic virtual filesystem: ::
 
     from pecan import expose
     from pecan.secure import secure
