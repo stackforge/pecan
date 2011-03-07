@@ -116,3 +116,8 @@ class TestConf(TestCase):
     def test_config_set_from_module_with_extension(self):
         configuration.set_config('config.py')
         self.assertEqual(_runtime_conf.server.host, '1.1.1.1')
+    
+    def test_config_bad_key(self):
+        conf = configuration.Config({'a': 1})
+        assert conf.a == 1
+        self.assertRaises(AttributeError, getattr, conf, 'b')
