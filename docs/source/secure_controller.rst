@@ -139,7 +139,7 @@ First, you can pass via a string  the name of either be a classmethod or an inst
             return FileController(name), *remainder
 
 
-The ``secure`` method also accepts a function instead of a string.  When passing a function,  make sure that the function is imported from another file or defined in the same file before the class definition. ::
+The ``secure`` method also accepts a function instead of a string.  When passing a function,  make sure that the function is imported from another file or defined in the same file before the class definition -- otherwise you will likely get error during module import. ::
 
     from pecan import expose
     from pecan.secure import secure
@@ -153,7 +153,7 @@ The ``secure`` method also accepts a function instead of a string.  When passing
             return 'Logged in'
 
 
-You can also use the ``secure`` method to change the behavior of a SecureController.  Decorating a method or wrapping a subcontroller lets tell Pecan to use another security function other than the default controller method.  This is useful for situations where you want a different level or type of security. ::
+You can also use the ``secure`` method to change the behavior of a SecureController.  Decorating a method or wrapping a subcontroller tells Pecan to use another security function other than the default controller method.  This is useful for situations where you want a different level or type of security. ::
 
     from pecan import expose
     from pecan.secure import SecureController, secure
@@ -182,7 +182,7 @@ In the example above, pecan will *only* call ``check_api_permissions`` when a re
 
 Multiple Secure Controllers
 ---------------------------
-Pecan allows you to have nested secure controllers. In the example below, when a request is made for ``/admin/index/``, Pecan first calls ``check_permissions`` on the RootController and then calls ``check_permissions`` on the AdminController. The ability to nest secured controllers allows you to protect specific controllers on a role basis while inheriting protection from the parent. :: 
+Pecan allows you to have nested secure controllers. In the example below, when a request is made for ``/admin/index/``, Pecan first calls ``check_permissions`` on the RootController and then calls ``check_permissions`` on the AdminController. The ability to nest ``SsecureController`` instances allows you to protect controllers with an increasing level of protection. ::
 
     from pecan import expose
     from pecan.secure import SecureController, secure
