@@ -32,7 +32,7 @@ you might want to check that engine's dependencies as well.
 
  *  Genshi >= 0.6
  *  Kajiki >= 0.3.1
- *  Mako >= 0.3
+ *  Mako   >= 0.3
  
 From this point forward, we will assume you are going to be using Mako (it is the recommended Pecan template
 engine), to avoid describing third party dependencies.
@@ -105,6 +105,11 @@ lib
 Go ahead and create a ``lib`` directory inside of your ``pecan_gae`` directory
 application and add the requirements for Pecan there. Make sure you have
 a ``__init__.py`` file too. 
+
+.. warning::
+    You should **not** run ``setup.py`` on any of the libraries. This prevents
+    activating C extensions which are forbidden in App Engine. Copy the
+    *actual* source for the libraries only.
 
 The ``lib`` directory should contain the source for all the dependencies we need. For our example, it should
 contain these libraries:
