@@ -107,38 +107,40 @@ More on ``secure``
 ----------------
 The ``secure`` method has several advanced uses that allow you to create robust security policies for your application.
 
-First, you can pass via a string  the name of either a classmethod or an instance method of the controller to use as the ``check_permission`` method.  Instance methods are particularly useful if you wish to authorize access to attriubutes of a particular model instance.  Consider the following example of a basic virtual filesystem: ::
+First, you can pass via a string the name of either a classmethod or an instance method of the controller to use as the
+``check_permission`` method.  Instance methods are particularly useful if you wish to authorize access to attributes
+of a particular model instance.  Consider the following example of a basic virtual filesystem::
 
     from pecan import expose
     from pecan.secure import secure
-
+    
     from myapp.session import get_current_user
     from myapp.model import FileObject
-
+    
     class FileController(object):
         def __init__(self, name):
             self.file_object = FileObject(name)
-
+    
         def read_access(self):
             self.file_object.read_access(get_current_user())
-
+    
         def write_access(self):
             self.file_object.write_access(get_current_user())
-
+    
         @secure('write_access')
         @expose()
         def upload_file(self):
             pass
-
+    
         @secure('read_access')
         @expose()
         def download_file(self):
             pass 
-
+    
     class RootController(object):
         @expose()
         def _lookup(self, name, *remainder):
-            return FileController(name), *remainder
+            return FileController(name), remainder
 
 
 The ``secure`` method also accepts a function instead of a string.  When passing a function,  make sure that the function is imported from another file or defined in the same file before the class definition -- otherwise you will likely get error during module import. ::
@@ -155,12 +157,14 @@ The ``secure`` method also accepts a function instead of a string.  When passing
             return 'Logged in'
 
 
-You can also use the ``secure`` method to change the behavior of a SecureController.  Decorating a method or wrapping a subcontroller tells Pecan to use another security function other than the default controller method.  This is useful for situations where you want a different level or type of security. ::
+You can also use the ``secure`` method to change the behavior of a SecureController.  Decorating a method or wrapping a subcontroller tells Pecan to use another security function other than the default controller method.  This is useful for situations where you want a different level or type of security.
+
+::
 
     from pecan import expose
     from pecan.secure import SecureController, secure
 
-    from myapp.auth import user_authenticated, api_autheniticated
+    from myapp.auth import user_authenticated, admin_user
 
     class ApiController(object):
         pass
@@ -170,7 +174,7 @@ You can also use the ``secure`` method to change the behavior of a SecureControl
         def check_permissions(cls):
             return user_authenticated()
 
-        @classmethid
+        @classmethod
         def check_api_permissions(cls):
             return admin_user()
 
@@ -178,16 +182,16 @@ You can also use the ``secure`` method to change the behavior of a SecureControl
         def index(self):
             return 'logged in user'
 
-        api = secure(ApiController(), 'check_admin')
+        api = secure(ApiController(), 'check_api_permissions')
 
-In the example above, pecan will *only* call ``check_api_permissions`` when a request is made for ``/api/``.  
+In the example above, pecan will *only* call ``admin_user`` when a request is made for ``/api/``.
 
 Multiple Secure Controllers
 ---------------------------
 Pecan allows you to have nested secure controllers. In the example below, when a request is made for ``/admin/index/``, Pecan first calls ``check_permissions`` on the RootController and then calls ``check_permissions`` on the AdminController. The ability to nest ``SsecureController`` instances allows you to protect controllers with an increasing level of protection. ::
 
     from pecan import expose
-    from pecan.secure import SecureController, secure
+    from pecan.secure import SecureController
 
     from myapp.auth import user_logged_in, is_admin
 
@@ -200,7 +204,7 @@ Pecan allows you to have nested secure controllers. In the example below, when a
         def index(self):
             return 'admin dashboard'
 
-    class RootController(SecureController():
+    class RootController(SecureController):
         @classmethod
         def check_permissions(cls):
             return user_logged_in
