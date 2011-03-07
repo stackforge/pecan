@@ -135,6 +135,7 @@ First, you can pass via a string  the name of either a classmethod or an instanc
             pass 
 
     class RootController(object):
+        @expose()
         def _lookup(self, name, *remainder):
             return FileController(name), *remainder
 
