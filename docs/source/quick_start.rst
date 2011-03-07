@@ -148,16 +148,23 @@ ports, static paths and so forth.
 If you just run ``pecan serve`` passing ``config.py`` as an argument for
 configuration it will bring up the development server and serve the app::
 
-    python start.py config
-    Serving on http://0.0.0.0:8080
+    $ pecan serve config.py 
+    Starting subprocess with file monitor
+    Starting server in PID 000.
     serving on 0.0.0.0:8080 view at http://127.0.0.1:8080
+
     
 To get up and running in no time the template helps a lot! 
 
 .. note::
     If you fail to pass an argument you will get a small error message asking
-    for a configuration file. Remember you need to pass the name of the
-    configuration file without the ".py" extension. 
+    for a configuration file. 
+
+The location for the config file and the argument itself are very flexible. You
+can pass an absolute path or just the name of the file without an extension,
+like::
+
+    $ pecan serve config
 
 
 Simple Configuration
@@ -171,6 +178,7 @@ This is how your default configuration file should look like::
 
     from test_project.controllers.root import RootController
 
+    import test_project
 
     # Server Specific Configurations
     server = {
@@ -181,9 +189,15 @@ This is how your default configuration file should look like::
     # Pecan Application Configurations
     app = {
         'root' : RootController(),
+        'modules' : [test_project],
         'static_root' : 'public', 
         'template_path' : 'test_project/templates',
-        'debug' : True 
+        'reload': True,
+        'debug' : True,
+        'errors' : {
+            '404' : '/error/404',
+            '__force_dict__' : True
+        }
     }
 
     # Custom Configurations must be in Python dictionary format::
@@ -192,6 +206,11 @@ This is how your default configuration file should look like::
     # 
     # All configurations are accessible at::
     # pecan.conf
+
+
+.. note::
+    If you named your project something other than *test_project* 
+    you should see that same name above instead.
 
 
 **Nothing** in the configuration file above is actually required for Pecan to
@@ -214,6 +233,7 @@ This is how it looks from the project template::
 
     from pecan import expose, request
     from formencode import Schema, validators as v
+    from webob.exc import status_map
 
 
     class SampleForm(Schema):
@@ -224,11 +244,21 @@ This is how it looks from the project template::
     class RootController(object):
         @expose('index.html')
         def index(self, name='', age=''):
-            return dict(errors=request.validation_error, name=name, age=age)
+            return dict(errors=request.validation_errors, name=name, age=age)
         
         @expose('success.html', schema=SampleForm(), error_handler='index')
         def handle_form(self, name, age):
             return dict(name=name, age=age)
+        
+        @expose('error.html')
+        def error(self, status):
+            try:
+                status = int(status)
+            except ValueError:
+                status = 0
+            message = getattr(status_map.get(status), 'explanation', '')
+            return dict(status=status, message=message)
+
 
 
 Here you can specify other classes if you need to do so later on your project,
@@ -236,13 +266,30 @@ but for now we have an *index* method and a *handle_form* one.
 
 **index**: Is *exposed* via the decorator ``@expose`` (that in turn uses the
 ``index.html`` file) as the root of the application, so anything that hits
-'/' will touch this method.
+the root of you application will touch this method.
+
+What your index method returns is a dictionary that is received by the template
+engine and translated into valid HTML.
+
 Since we are doing some validation and want to pass any errors we might get to
 the template, we set ``errors`` to receive anything that
-``request.validation_error`` returns.
-What your index method returns is dictionary that is received by the template
-engine.
+``request.validation_errors`` returns.
 
 
-**handle_form**: It receives 2 parameters (*name* and *age*) that are validated
+**handle_form**: It receives 2 arguments (*name* and *age*) that are validated
 through the *SampleForm* schema class.
+
+The ``error_handler`` has been set to index, this means that when errors are raised 
+they will be sent to the index controller so it returns them to the template.
+
+**error**: Finally, we have the error controller that allows you application to 
+custom display any possible errors that you might want to display. 
+
+Application Interaction
+-----------------------
+If you still have your application running and you visit your browser, you should
+see a nice page with some information about Pecan and a form so you can play a bit 
+with.
+
+This is very basic but it will give you the grounds necessary to build your application
+and understand some of the features the framework packs.
