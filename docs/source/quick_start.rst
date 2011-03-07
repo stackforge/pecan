@@ -2,6 +2,10 @@
 
 Quick Start
 ===========
+
+.. warning::
+    This section is out of date. Please do not refer to it directly.
+
 Here we will cover the basics for a small project in Pecan. More advanced
 examples and methods are not covered here.
 
