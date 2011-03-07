@@ -8,7 +8,8 @@ examples and methods are not covered here.
 
 .. note::
     We will not cover how to get Pecan installed here. If you need installation
-    details please go to :ref:`installation`
+    details please go to :ref:`installation` which includes the recommended way
+    of setting up a proper development environment.
 
 
 Base Application Template
@@ -128,6 +129,11 @@ Its contents generally contain any code necessary to define tables, ORM definiti
 your configuration file.
 
 
+.. note::
+    With your base project you also got some ready-to-run tests. Try running
+    ``py.test`` (the recommended test runner for Pecan) and see them passing!
+
+
 .. _running_application:
 
 Running the application
@@ -139,7 +145,7 @@ named ``config.py``.
 This file already contains the necessary information to run a Pecan app, like
 ports, static paths and so forth. 
 
-If you just run ``start.py`` with Python, passing ``config`` as an argument for
+If you just run ``pecan serve`` passing ``config.py`` as an argument for
 configuration it will bring up the development server and serve the app::
 
     python start.py config
