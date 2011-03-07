@@ -49,9 +49,12 @@ class GenericJSON(JSONEncoder):
                     props[key] = getattr(obj, key)
             return props
         elif isinstance(obj, ResultProxy):
-            return dict(rows=list(obj), count=obj.rowcount)
+            props = dict(rows=list(obj), count=obj.rowcount)
+            if props['count'] < 0:
+                props['count'] = len(props['rows'])
+            return props
         elif isinstance(obj, RowProxy):
-            return dict(rows=dict(obj), count=1)
+            return dict(obj)
         elif isinstance(obj, (MultiDict, UnicodeMultiDict)):
             return obj.mixed()
         else:
