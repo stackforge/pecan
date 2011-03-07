@@ -17,13 +17,16 @@ To decorate a method, use one argument::
 To secure a class, invoke with two arguments::
 
     secure(<object instance>, '<check_permissions_method>')
-    
+
 ::
 
     from pecan import expose
     from pecan.secure import secure
     
     class HighlyClassifiedController(object):
+        pass
+
+    class UnclassifiedController(object):
         pass
 
     class RootController(object):
@@ -52,6 +55,7 @@ To secure a class, invoke with two arguments::
             return dict()
     
         highly_classified = secure(HighlyClassifiedController(), 'check_permissions')
+        unclassified = UnclassifiedController()
 
 Alternatively, the same functionality can also be accomplished by subclassing Pecan's ``SecureController`` class.
 Implementations of ``SecureController`` should extend the ``check_permissions`` classmethod to return a ``True``
@@ -61,6 +65,9 @@ or ``False`` value (depending on whether or not the user has permissions to the 
     from pecan.secure import SecureController, unlocked
     
     class HighlyClassifiedController(object):
+        pass
+
+    class UnclassifiedController(object):
         pass
 
     class RootController(SecureController):
@@ -89,9 +96,107 @@ or ``False`` value (depending on whether or not the user has permissions to the 
             return dict()
     
         highly_classified = HighlyClassifiedController()
-        
-Writing Authentication Methods
+        unclassified = unlocked(UnclassifiedController())
+Writing Authentication/Authorization Methods
 ----------------
 The ``check_permissions`` method should be used to determine user authentication and authorization.  The
 code you implement here could range from simple session assertions (the existing user is authenticated
-as an administrator) to connecting to an LDAP service.
+as an administrator) to connecting to an LDAP service.  
+
+More on the ``secure`` Method
+----------------
+The ``secure`` method has several advanced uses that allow you to create robust security policies for your application.
+
+First, when you pass a string ``secure`` to secure.  The string must be the name of either be a classmethod or an instance method of the controller.  Instance methods are useful, if you wish to authorize access to attriubutes of a particular model instance. For instance is you had a controller which managed a virtual file system. ::
+
+    from pecan import expose
+    from pecan.secure import secure
+
+    from myapp.session import get_current_user
+
+    class FileController(object):
+        def __init__(self, file_object):
+            self.file_object = file_object
+
+        def read_access(self):
+            self.file_object.read_access(get_current_user())
+
+        def write_access(self):
+            self.file_object.write_access(get_current_user())
+
+        @secure('write_access')
+        @expose()
+        def upload_file(self):
+            pass
+
+        @secure('read_access')
+        @expose()
+        def download_file(self):
+            pass 
+
+Second, the method also accepts a function instead of a string.  When passing a function to ``secure``, the function must be either imported from another file or defined in the same file before the class definition. ::
+
+    from pecan import expose
+    from pecan.secure import secure
+
+    from myapp.auth import user_authenitcated
+
+    class RootController(object):
+        @secure(user_authenticated)
+        @expose()
+        def index(self):
+            return 'Logged in'
+
+You can use the ``secure`` method within a SecureController to indicate another security function for a controller method.  This is useful for situations where you want a different level or type of security. ::
+
+    from pecan import expose
+    from pecan.secure import SecureController, secure
+
+    from myapp.auth import user_authenticated, api_autheniticated
+
+    class ApiController(object):
+        pass
+
+    class RootController(SecureController):
+        @classmethod
+        def check_permissions(cls):
+            return user_authenticated()
+
+        @classmethid
+        def check_api_permissions(cls):
+            return admin_user()
+
+        @expose()
+        def index(self):
+            return 'logged in user'
+
+        api = secure(ApiController(), 'check_admin')
+
+In the example above, pecan will *only* call ``check_api_permissions`` when a request is made for ``/api/``.  
+
+Multiple Secure Controllers
+---------------------------
+Pecan allows you to have nested secure controllers. In the example below, when a request is made for ``/admin/index/``, Pecan first calls ``check_permissions`` on first the RootController and then calls ``check_permissions`` on the AdminController. The ability to nest secured controllers allows you to protect specific controllers on a role basis while inheriting protection from the parent. :: 
+
+    from pecan import expose
+    from pecan.secure import SecureController, secure
+
+    from myapp.auth import user_logged_in, is_admin
+
+    class AdminController(SecureController):
+        @classmethod
+        def check_permissions(cls):
+            return is_admin()
+
+        @expose()
+        def index(self):
+            return 'admin dashboard'
+
+    class RootController(SecureController():
+        @classmethod
+        def check_permissions(cls):
+            return user_logged_in
+
+        @expose()
+        def index(self):
+            return 'user dashboard'
