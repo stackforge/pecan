@@ -113,10 +113,11 @@ First, you can pass via a string  the name of either a classmethod or an instanc
     from pecan.secure import secure
 
     from myapp.session import get_current_user
+    from myapp.model import FileObject
 
     class FileController(object):
-        def __init__(self, file_object):
-            self.file_object = file_object
+        def __init__(self, name):
+            self.file_object = FileObject(name)
 
         def read_access(self):
             self.file_object.read_access(get_current_user())
