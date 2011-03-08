@@ -95,7 +95,7 @@ class TestValidation(object):
 
             @expose()
             def errors(self, *args, **kwargs):
-                assert len(request.validation_errors) > 0
+                assert len(request.pecan['validation_errors']) > 0
                 return 'There was an error!'
             
             @expose(schema=RegistrationSchema())
@@ -106,7 +106,7 @@ class TestValidation(object):
                             password,
                             password_confirm,
                             age):
-                assert len(request.validation_errors) > 0
+                assert len(request.pecan['validation_errors']) > 0
                 return 'Success!'
             
             @expose(schema=RegistrationSchema(), error_handler='/errors')
@@ -117,17 +117,17 @@ class TestValidation(object):
                             password,
                             password_confirm,
                             age):
-                assert len(request.validation_errors) > 0
+                assert len(request.pecan['validation_errors']) > 0
                 return 'Success!'
             
             @expose(json_schema=RegistrationSchema())
             def json(self, data):
-                assert len(request.validation_errors) > 0
+                assert len(request.pecan['validation_errors']) > 0
                 return 'Success!'
             
             @expose(json_schema=RegistrationSchema(), error_handler='/errors')
             def json_with_handler(self, data):
-                assert len(request.validation_errors) > 0
+                assert len(request.pecan['validation_errors']) > 0
                 return 'Success!'
                 
 
@@ -193,13 +193,13 @@ class TestValidation(object):
             
             @expose()
             def errors(self, *args, **kwargs):
-                return 'Error with %s!' % ', '.join(request.validation_errors.keys())
+                return 'Error with %s!' % ', '.join(request.pecan['validation_errors'].keys())
             
             @expose(schema=ColorSchema(), 
                     variable_decode=True)
             def index(self, **kwargs):
-                if request.validation_errors:
-                    return ', '.join(request.validation_errors.keys())
+                if request.pecan['validation_errors']:
+                    return ', '.join(request.pecan['validation_errors'].keys())
                 else:
                     return 'Success!'
             
@@ -207,16 +207,16 @@ class TestValidation(object):
                     error_handler='/errors', 
                     variable_decode=True)
             def with_handler(self, **kwargs):
-                if request.validation_errors:
-                    return ', '.join(request.validation_errors.keys())
+                if request.pecan['validation_errors']:
+                    return ', '.join(request.pecan['validation_errors'].keys())
                 else:
                     return 'Success!'
             
             @expose(json_schema=ColorSchema(), 
                     variable_decode=True)
             def json(self, data):
-                if request.validation_errors:
-                    return ', '.join(request.validation_errors.keys())
+                if request.pecan['validation_errors']:
+                    return ', '.join(request.pecan['validation_errors'].keys())
                 else:
                     return 'Success!'
             
@@ -224,16 +224,16 @@ class TestValidation(object):
                     error_handler='/errors', 
                     variable_decode=True)
             def json_with_handler(self, data):
-                if request.validation_errors:
-                    return ', '.join(request.validation_errors.keys())
+                if request.pecan['validation_errors']:
+                    return ', '.join(request.pecan['validation_errors'].keys())
                 else:
                     return 'Success!'
             
             @expose(schema=ColorSchema(),
                     variable_decode=dict())
             def custom(self, **kwargs):
-                if request.validation_errors:
-                    return ', '.join(request.validation_errors.keys())
+                if request.pecan['validation_errors']:
+                    return ', '.join(request.pecan['validation_errors'].keys())
                 else:
                     return 'Success!'
             
@@ -241,16 +241,16 @@ class TestValidation(object):
                     error_handler='/errors',
                     variable_decode=dict())
             def custom_with_handler(self, **kwargs):
-                if request.validation_errors:
-                    return ', '.join(request.validation_errors.keys())
+                if request.pecan['validation_errors']:
+                    return ', '.join(request.pecan['validation_errors'].keys())
                 else:
                     return 'Success!'
             
             @expose(json_schema=ColorSchema(),
                     variable_decode=dict())
             def custom_json(self, data):
-                if request.validation_errors:
-                    return ', '.join(request.validation_errors.keys())
+                if request.pecan['validation_errors']:
+                    return ', '.join(request.pecan['validation_errors'].keys())
                 else:
                     return 'Success!'
 
@@ -258,16 +258,16 @@ class TestValidation(object):
                     error_handler='/errors',
                     variable_decode=dict())
             def custom_json_with_handler(self, data):
-                if request.validation_errors:
-                    return ', '.join(request.validation_errors.keys())
+                if request.pecan['validation_errors']:
+                    return ', '.join(request.pecan['validation_errors'].keys())
                 else:
                     return 'Success!'
 
             @expose(schema=ColorSchema(),
                     variable_decode=dict(dict_char='-', list_char='.'))
             def alternate(self, **kwargs):
-                if request.validation_errors:
-                    return ', '.join(request.validation_errors.keys())
+                if request.pecan['validation_errors']:
+                    return ', '.join(request.pecan['validation_errors'].keys())
                 else:
                     return 'Success!'
             
@@ -275,16 +275,16 @@ class TestValidation(object):
                     error_handler='/errors',
                     variable_decode=dict(dict_char='-', list_char='.'))
             def alternate_with_handler(self, **kwargs):
-                if request.validation_errors:
-                    return ', '.join(request.validation_errors.keys())
+                if request.pecan['validation_errors']:
+                    return ', '.join(request.pecan['validation_errors'].keys())
                 else:
                     return 'Success!'
             
             @expose(json_schema=ColorSchema(),
                     variable_decode=dict(dict_char='-', list_char='.'))
             def alternate_json(self, data):
-                if request.validation_errors:
-                    return ', '.join(request.validation_errors.keys())
+                if request.pecan['validation_errors']:
+                    return ', '.join(request.pecan['validation_errors'].keys())
                 else:
                     return 'Success!'
 
@@ -292,8 +292,8 @@ class TestValidation(object):
                     error_handler='/errors',
                     variable_decode=dict(dict_char='-', list_char='.'))
             def alternate_json_with_handler(self, data):
-                if request.validation_errors:
-                    return ', '.join(request.validation_errors.keys())
+                if request.pecan['validation_errors']:
+                    return ', '.join(request.pecan['validation_errors'].keys())
                 else:
                     return 'Success!'
         
@@ -507,7 +507,7 @@ class TestValidation(object):
                     schema=ColorSchema(), 
                     variable_decode=True)
             def index(self, **kwargs):
-                if request.validation_errors:
+                if request.pecan['validation_errors']:
                     return dict()
                 else:
                     return dict(data=kwargs)
@@ -542,8 +542,8 @@ class TestValidation(object):
                     schema=NameSchema(),
                     htmlfill=dict(auto_insert_errors=True))
             def json(self, **kwargs):
-                if request.validation_errors:
-                    return dict(error_with=request.validation_errors.keys())
+                if request.pecan['validation_errors']:
+                    return dict(error_with=request.pecan['validation_errors'].keys())
                 else:
                     return kwargs
         
@@ -639,7 +639,7 @@ class TestValidation(object):
             @expose(template='mako:form_login.html',
                     schema=LoginSchema())
             def index(self, **kwargs):
-                if request.validation_errors:
+                if request.pecan['validation_errors']:
                     return dict()
                 else:
                     return dict(data=kwargs)

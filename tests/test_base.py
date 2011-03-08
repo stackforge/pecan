@@ -3,7 +3,7 @@ from paste.recursive import ForwardRequestException
 from unittest import TestCase
 from webtest import TestApp
 
-from pecan import Pecan, expose, request, response, redirect, abort, make_app, override_template
+from pecan import Pecan, expose, request, response, redirect, abort, make_app, override_template, render
 from pecan.templating import _builtin_renderers as builtin_renderers, error_formatters
 from pecan.decorators import accept_noncanonical
 
@@ -439,6 +439,10 @@ class TestBase(TestCase):
                 redirect('/testing', internal=True)
             
             @expose()
+            def bad_internal(self):
+                redirect('/testing', internal=True, code=301)
+            
+            @expose()
             def permanent(self):
                 redirect('/testing', code=301)
             
@@ -446,21 +450,25 @@ class TestBase(TestCase):
             def testing(self):
                 return 'it worked!'
         
-        app = TestApp(Pecan(RootController()))
+        app = TestApp(make_app(RootController(), debug=True))
         r = app.get('/')
         assert r.status_int == 302
         r = r.follow()
         assert r.status_int == 200
         assert r.body == 'it worked!'
         
-        self.assertRaises(ForwardRequestException, app.get, '/internal')
+        r = app.get('/internal')
+        assert r.status_int == 200
+        assert r.body == 'it worked!'
+        
+        self.assertRaises(ValueError, app.get, '/bad_internal')
         
         r = app.get('/permanent')
         assert r.status_int == 301
         r = r.follow()
         assert r.status_int == 200
         assert r.body == 'it worked!'
-    
+        
     def test_streaming_response(self):
         import StringIO
         class RootController(object):
@@ -511,10 +519,10 @@ class TestBase(TestCase):
         Test extension splits
         """
         class RootController(object):
-            @expose()
+            @expose(content_type=None)
             def _default(self, *args):
                 from pecan.core import request
-                return request.extension
+                return request.pecan['extension']
 
         app = TestApp(Pecan(RootController()))
         r = app.get('/index.html')
@@ -544,6 +552,117 @@ class TestBase(TestCase):
 
         app = make_app(RootController(), wrap_app=wrap, debug=True)
         assert len(wrapped_apps) == 1
+    
+    def test_bad_content_type(self):
+        class RootController(object):
+            @expose()
+            def index(self):
+                return '/'
+    
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert r.body == '/'
+        
+        r = app.get('/index.html', expect_errors=True)
+        assert r.status_int == 200
+        assert r.body == '/'
+
+        r = app.get('/index.txt', expect_errors=True)
+        assert r.status_int == 404
+
+    def test_canonical_index(self):
+        class ArgSubController(object):
+            @expose()
+            def index(self, arg):
+                return arg
+        class AcceptController(object):
+            @accept_noncanonical
+            @expose()
+            def index(self):
+                return 'accept'
+        class SubController(object):
+            @expose()
+            def index(self):
+                return 'subindex'
+        class RootController(object):
+            @expose()
+            def index(self):
+                return 'index'
+
+            sub = SubController()
+            arg = ArgSubController()
+            accept = AcceptController()
+
+        app = TestApp(Pecan(RootController()))
+
+        r = app.get('/')
+        assert r.status_int == 200
+        assert 'index' in r.body
+
+        r = app.get('/index')
+        assert r.status_int == 200
+        assert 'index' in r.body
+        
+        # for broken clients
+        r = app.get('', status=302)
+        assert r.status_int == 302
+
+        r = app.get('/sub/')
+        assert r.status_int == 200
+        assert 'subindex' in r.body
+
+        r = app.get('/sub', status=302)
+        assert r.status_int == 302
+
+        try:
+            r = app.post('/sub', dict(foo=1))
+            raise Exception, "Post should fail"
+        except Exception, e:
+            assert isinstance(e, RuntimeError)
+
+        r = app.get('/arg/index/foo')
+        assert r.status_int == 200
+        assert r.body == 'foo'
+
+        r = app.get('/accept/')
+        assert r.status_int == 200
+        assert 'accept' == r.body
+
+        r = app.get('/accept')
+        assert r.status_int == 200
+        assert 'accept' == r.body
+
+        app = TestApp(Pecan(RootController(), force_canonical=False))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert 'index' in r.body
+
+        r = app.get('/sub')
+        assert r.status_int == 200
+        assert 'subindex' in r.body
+
+        r = app.post('/sub', dict(foo=1))
+        assert r.status_int == 200
+        assert 'subindex' in r.body
+
+        r = app.get('/sub/')
+        assert r.status_int == 200
+        assert 'subindex' in r.body
+    
+    def test_proxy(self):
+        class RootController(object):
+            @expose()
+            def index(self):
+                request.testing = True
+                assert request.testing == True
+                del request.testing
+                assert hasattr(request, 'testing') == False
+                return '/'
+        
+        app = TestApp(make_app(RootController(), debug=True))
+        r = app.get('/')
+        assert r.status_int == 200
 
 
 class TestEngines(object):
@@ -652,88 +771,18 @@ class TestEngines(object):
         assert 'Override' in r.body 
         assert r.content_type == 'text/plain'
 
-    def test_canonical_index(self):
-        class ArgSubController(object):
-            @expose()
-            def index(self, arg):
-                return arg
-        class AcceptController(object):
-            @accept_noncanonical
-            @expose()
-            def index(self):
-                return 'accept'
-        class SubController(object):
-            @expose()
-            def index(self):
-                return 'subindex'
+    def test_render(self):
+        
+        #if 'mako' not in builtin_renderers:
+        #    return
+        
         class RootController(object):
             @expose()
-            def index(self):
-                return 'index'
-
-            sub = SubController()
-            arg = ArgSubController()
-            accept = AcceptController()
-
-        app = TestApp(Pecan(RootController()))
-
-        r = app.get('/')
-        assert r.status_int == 200
-        assert 'index' in r.body
-
-        r = app.get('/index')
-        assert r.status_int == 200
-        assert 'index' in r.body
+            def index(self, name='Jonathan'):
+                return render('mako.html', dict(name=name))
+                return dict(name=name)
         
-        # for broken clients
-        r = app.get('', status=302)
-        assert r.status_int == 302
-
-        r = app.get('/sub/')
-        assert r.status_int == 200
-        assert 'subindex' in r.body
-
-        r = app.get('/sub', status=302)
-        assert r.status_int == 302
-
-        try:
-            r = app.post('/sub', dict(foo=1))
-            raise Exception, "Post should fail"
-        except Exception, e:
-            assert isinstance(e, RuntimeError)
-
-        r = app.get('/arg/index/foo')
-        assert r.status_int == 200
-        assert r.body == 'foo'
-
-        r = app.get('/accept/')
-        assert r.status_int == 200
-        assert 'accept' == r.body
-
-        r = app.get('/accept')
-        assert r.status_int == 200
-        assert 'accept' == r.body
-
-        app = TestApp(Pecan(RootController(), force_canonical=False))
+        app = TestApp(Pecan(RootController(), template_path=self.template_path))
         r = app.get('/')
         assert r.status_int == 200
-        assert 'index' in r.body
-
-        r = app.get('/sub')
-        assert r.status_int == 200
-        assert 'subindex' in r.body
-
-        r = app.post('/sub', dict(foo=1))
-        assert r.status_int == 200
-        assert 'subindex' in r.body
-
-        r = app.get('/sub/')
-        assert r.status_int == 200
-        assert 'subindex' in r.body
-
-
-
-
-
-
-
+        assert "<h1>Hello, Jonathan!</h1>" in r.body

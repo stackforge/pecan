@@ -57,7 +57,7 @@ class RestController(object):
         
         # get the args to figure out how much to chop off
         args = getargspec(getattr(self, method))
-        fixed_args = len(args[0][1:]) - len(getattr(request, 'routing_args', []))
+        fixed_args = len(args[0][1:]) - len(request.pecan.get('routing_args', []))
         var_args = args[1]
         
         # attempt to locate a sub-controller
@@ -166,7 +166,4 @@ class RestController(object):
     _handle_put = _handle_post
     
     def _set_routing_args(self, args):
-        if hasattr(request, 'routing_args'):
-            request.routing_args.extend(args)
-        else:
-            setattr(request, 'routing_args', args)
+        request.pecan.setdefault('routing_args', []).extend(args)

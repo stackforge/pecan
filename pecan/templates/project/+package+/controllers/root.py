@@ -11,9 +11,9 @@ class SampleForm(Schema):
 class RootController(object):
     @expose('index.html')
     def index(self, name='', age=''):
-        return dict(errors=request.validation_errors, name=name, age=age)
+        return dict(errors=request.pecan['validation_errors'], name=name, age=age)
     
-    @expose('success.html', schema=SampleForm(), error_handler='index')
+    @expose('success.html', schema=SampleForm(), error_handler='/index')
     def handle_form(self, name, age):
         return dict(name=name, age=age)
     

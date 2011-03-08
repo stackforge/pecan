@@ -125,3 +125,7 @@ class TestConf(TestCase):
             conf = configuration.Config({'a':1})
             self.assertEqual(['a'], dir(conf))
 
+    def test_config_bad_key(self):
+        conf = configuration.Config({'a': 1})
+        assert conf.a == 1
+        self.assertRaises(AttributeError, getattr, conf, 'b')
