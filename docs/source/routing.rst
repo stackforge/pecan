@@ -1,8 +1,10 @@
 .. _routing:
-*******
+
 Routing
-*******
+=======
+
 When a user requests a Pecan-powered page how does Pecan know which controller to use? Pecan uses a method known as Object-dispatch to map a HTTP request to a controller.  Obejct-dispatch begins by spliting the path into a list of components and then walking object path starting at the root controller.  Let's look at a simple store application: ::
+
     from pecan import expose
 
     class BooksController(object):
