@@ -39,11 +39,14 @@ A request for ``/catalog/books/bestsellers`` from the online store would begin b
 Routing Algorithm
 -----------------
 
+
+
 ``_lookup``
 -----------
- ::
-    from pecan import expose
 
+Example ::
+
+    from pecan import expose
     from mymodel import get_student_by_name
 
     class StudentController(object):
@@ -59,13 +62,15 @@ Routing Algorithm
         def _lookup(self, name, *remainder):
             student = get_student_by_name(name)
             if student:
-                return StudentController(student, remainder)
+                return StudentController(student), remainder
             else:
                 abort(404)
 
 ``_default``
 ------------
- ::
+
+Example ::
+
     from pecan import expose
 
     class RootController(object):
@@ -84,12 +89,16 @@ Routing Algorithm
 
 ``_route``
 ----------
- ::
+
+Example  ::
+
     from pecan import expose
 
 Controller Args
 ---------------
-  ::
+
+Example  ::
+
     from pecan import expose
 
     class RootController(object):
@@ -99,7 +108,8 @@ Controller Args
 
 Client requests ``/say/hi`` the controller returns "hi".
 
-    ::
+kwargs    ::
+
     from pecan import expose
     
     class RootController(object):
@@ -114,7 +124,9 @@ Client requests ``/say?msg=hello`` the controller returns "hello".
 
 Generic Functions
 -----------------
- ::
+
+Example  ::
+
     from pecan import expose
 
     class RootController(object):
@@ -132,11 +144,13 @@ Generic Functions
 
 Helper Functions
 ----------------
+
 redirect
 abort
 
 ``@expose``
 ===========
+
 At its core, ``expose`` is how you tell Pecan which methods in a class are controllers.  ``expose`` accepts eight optional parameters some of which can impact routing.  ::
 
     def expose(template    = None,
