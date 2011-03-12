@@ -149,7 +149,7 @@ redirect
 abort
 
 ``@expose``
-===========
+-----------
 
 At its core, ``expose`` is how you tell Pecan which methods in a class are controllers.  ``expose`` accepts eight optional parameters some of which can impact routing.  ::
 
