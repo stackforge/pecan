@@ -92,6 +92,37 @@ except ImportError:                                 # pragma no cover
     pass
 
 #
+# Jinja2 rendering engine
+#
+try:
+    from jinja2 import Environment, FileSystemLoader
+    from jinja2 import exceptions as jinja_exceptions
+
+    class JinjaRenderer(object):
+        def __init__(self, path, extra_vars):
+            self.env = Environment(loader=FileSystemLoader(path))
+            self.extra_vars = extra_vars
+
+        def render(self, template_path, namespace):
+            template = self.env.get_template(template_path)
+            return template.render(self.extra_vars.make_ns(namespace))
+    _builtin_renderers['jinja'] = JinjaRenderer
+
+    def format_jinja_error(exc_value):
+        import cgi
+        if isinstance(exc_value, (jinja_exceptions.TemplateSyntaxError)):
+            retval = '<h4>Jinja2 template syntax error in \'%s\' on line %d</h4>' % (exc_value.name, exc_value.lineno)
+            lines = [cgi.escape(x) for x in open(exc_value.filename)]
+            lineno = exc_value.lineno - 1 # files are 1 not 0 index
+            lines[lineno] = '<strong>%s</strong>' % lines[lineno]
+
+            retval +='<div style="background-color:#ccc;padding:2em;">%s</div>' % '<br>'.join(lines)
+            return retval
+    error_formatters.append(format_jinja_error)
+except ImportError:                                 # pragma no cover
+    pass
+
+#
 # Extra Vars Rendering 
 #
 class ExtraNamespace(object):

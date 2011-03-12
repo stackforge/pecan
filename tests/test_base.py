@@ -706,6 +706,33 @@ class TestEngines(object):
         r = app.get('/index.html?name=World')
         assert r.status_int == 200
         assert "<h1>Hello, World!</h1>" in r.body
+
+    def test_jinja(self):
+        if 'jinja' not in builtin_renderers:
+            return
+        class RootController(object):
+            @expose('jinja:jinja.html')
+            def index(self, name='Jonathan'):
+                return dict(name=name)
+
+            @expose('jinja:jinja_bad.html')
+            def badtemplate(self):
+                return dict()
+
+        app = TestApp(Pecan(RootController(), template_path=self.template_path))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert "<h1>Hello, Jonathan!</h1>" in r.body
+
+        error_msg = None
+        try:
+            r = app.get('/badtemplate.html')
+        except Exception, e:
+            for error_f in error_formatters:
+                error_msg = error_f(e)
+                if error_msg:
+                    break
+        assert error_msg is not None
    
     def test_mako(self):
         if 'mako' not in builtin_renderers:
@@ -724,7 +751,6 @@ class TestEngines(object):
         assert r.status_int == 200
         assert "<h1>Hello, Jonathan!</h1>" in r.body
         
-        app = TestApp(Pecan(RootController(), template_path=self.template_path))
         r = app.get('/index.html?name=World')
         assert r.status_int == 200
         assert "<h1>Hello, World!</h1>" in r.body
