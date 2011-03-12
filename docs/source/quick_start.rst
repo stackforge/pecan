@@ -63,7 +63,6 @@ This is how it looks like when we run the whole command::
         Recursing into javascript
           Creating ./test_project/public/javascript/
           Copying shared.js to ./test_project/public/javascript/shared.js
-      Copying start.py_tmpl to ./test_project/start.py
 
 
 This is how the structure of your new project should look like::
@@ -76,7 +75,6 @@ This is how the structure of your new project should look like::
     │   └── javascript
     │       └── shared.js
     ├── setup.py
-    ├── start.py
     ├── test_project
     │   ├── __init__.py
     │   ├── app.py
