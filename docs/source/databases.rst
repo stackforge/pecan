@@ -49,7 +49,7 @@ Here's what a sample Pecan configuration file with database bindings might look 
     
     # Bindings and options to pass to SQLAlchemy's ``create_engine``
     sqlalchemy = {
-        'url'           : 'mysql://root:@localhost/atrium?charset=utf8&use_unicode=0',
+        'url'           : 'mysql://root:@localhost/dbname?charset=utf8&use_unicode=0',
         'echo'          : False,
         'echo_pool'     : False,
         'pool_recycle'  : 3600,

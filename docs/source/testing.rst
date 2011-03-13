@@ -73,10 +73,10 @@ application::
  *  PUT    => self.app.put
 
 For example, if I wanted to assert that I can get the root of my application,
-I would probably do something similar to this:
+I would probably do something similar to this::
 
-     response = self.app.get('/')
-     assert response.status_int == 200
+    response = self.app.get('/')
+    assert response.status_int == 200
 
 If you are expecting error responses from your application, you should make
 sure that you pass the `expect_errors` flag and set it to True::
