@@ -1,3 +1,5 @@
+import cgi
+
 __all__ = ['RendererFactory']
 
 _builtin_renderers = {}
@@ -23,7 +25,8 @@ _builtin_renderers['json'] = JsonRenderer
 # 
 
 try:
-    from genshi.template import TemplateLoader
+    from genshi.template import (TemplateLoader,
+                                TemplateError as gTemplateError)
 
     class GenshiRenderer(object):
         def __init__(self, path, extra_vars):
@@ -36,7 +39,13 @@ try:
             return stream.render('html')
 
     _builtin_renderers['genshi'] = GenshiRenderer
-    # TODO: add error formatter for genshi
+ 
+    def format_genshi_error(exc_value):
+        if isinstance(exc_value, (gTemplateError)):
+            retval = '<h4>Genshi error %s</h4>' % cgi.escape(exc_value.message)
+            retval += format_line_context(exc_value.filename, exc_value.lineno)
+            return retval
+    error_formatters.append(format_genshi_error)
 except ImportError:                                 #pragma no cover
     pass
 
@@ -90,6 +99,52 @@ try:
     # TODO: add error formatter for kajiki
 except ImportError:                                 # pragma no cover
     pass
+
+#
+# Jinja2 rendering engine
+#
+try:
+    from jinja2 import Environment, FileSystemLoader
+    from jinja2.exceptions import TemplateSyntaxError as jTemplateSyntaxError
+
+    class JinjaRenderer(object):
+        def __init__(self, path, extra_vars):
+            self.env = Environment(loader=FileSystemLoader(path))
+            self.extra_vars = extra_vars
+
+        def render(self, template_path, namespace):
+            template = self.env.get_template(template_path)
+            return template.render(self.extra_vars.make_ns(namespace))
+    _builtin_renderers['jinja'] = JinjaRenderer
+
+    def format_jinja_error(exc_value):
+        if isinstance(exc_value, (jTemplateSyntaxError)):
+            retval = '<h4>Jinja2 template syntax error in \'%s\' on line %d</h4><div>%s</div>' % (exc_value.name, exc_value.lineno, exc_value.message)
+            retval += format_line_context(exc_value.filename, exc_value.lineno)
+            return retval
+    error_formatters.append(format_jinja_error)
+except ImportError:                                 # pragma no cover
+    pass
+
+#
+# format helper function
+#
+def format_line_context(filename, lineno, context=10):
+    lines = open(filename).readlines()
+
+    lineno = lineno - 1 # files are indexed by 1 not 0
+    if lineno > 0:
+        start_lineno = max(lineno-context, 0)
+        end_lineno = lineno+context
+
+        lines = [cgi.escape(l) for l in lines[start_lineno:end_lineno]]
+        i = lineno-start_lineno
+        lines[i] = '<strong>%s</strong>' % lines[i]
+
+    else:
+        lines = [cgi.escape(l) for l in lines[:context]]
+
+    return '<pre style="background-color:#ccc;padding:2em;">%s</pre>' % ''.join(lines)
 
 #
 # Extra Vars Rendering 
