@@ -3,7 +3,14 @@
 Routing
 =======
 
-When a user requests a Pecan-powered page how does Pecan know which controller to use? Pecan uses a method known as Object-dispatch to map a HTTP request to a controller.  Obejct-dispatch begins by spliting the path into a list of components and then walking object path starting at the root controller.  Let's look at a simple store application: ::
+.. note::
+    This portion of the documentation is still a work in progress.
+
+When a user requests a Pecan-powered page how does Pecan know which
+controller to use? Pecan uses a method known as Object-dispatch to map a
+HTTP request to a controller. Obejct-dispatch begins by splitting the
+path into a list of components and then walking object path starting at
+the root controller. Let's look at a simple store application: ::
 
     from pecan import expose
 
@@ -34,7 +41,13 @@ When a user requests a Pecan-powered page how does Pecan know which controller t
 
         catalog = CatalogController()
 
-A request for ``/catalog/books/bestsellers`` from the online store would begin by Pecan breaking the request up into ``catalog``, ``books``, and ``bestsellers``.  Next, Pecan would then lookup ``catalog`` on the root controller.  Using the ``catalog`` object, Pecan would then lookup ``books`` followed by ``bestsellers``.   What if the URL ends in a slash? Pecan will check for an ``index`` method on the current object.  In the example above, you may have noticed the ``expose`` decorator.  
+A request for ``/catalog/books/bestsellers`` from the online store would
+begin by Pecan breaking the request up into ``catalog``, ``books``, and
+``bestsellers``. Next, Pecan would then lookup ``catalog`` on the root
+controller. Using the ``catalog`` object, Pecan would then lookup
+``books`` followed by ``bestsellers``. What if the URL ends in a slash?
+Pecan will check for an ``index`` method on the current object. In the
+example above, you may have noticed the ``expose`` decorator.
 
 Routing Algorithm
 -----------------
@@ -87,8 +100,8 @@ Example ::
             return 'I cannot say hi in that language'
             
 
-``_route``
-----------
+Overriding ``_route``
+---------------------
 
 Example  ::
 
@@ -149,9 +162,11 @@ redirect
 abort
 
 ``@expose``
-===========
+-----------
 
-At its core, ``expose`` is how you tell Pecan which methods in a class are controllers.  ``expose`` accepts eight optional parameters some of which can impact routing.  ::
+At its core, ``expose`` is how you tell Pecan which methods in a class
+are controllers. ``expose`` accepts eight optional parameters some of
+which can impact routing. ::
 
     def expose(template    = None,
            content_type    = 'text/html',
@@ -173,7 +188,13 @@ Let's look at an example using template and content_type::
         def hello(self):
             return {'msg': 'Hello!'}
 
-You'll notice that we used three expose decorators.  The first tells Pecan to serialize ``dict`` using JSON serialization when the client requests ``/hello.json``.  The second tells the templating engine to use ``text_template.mako`` when the client request ``/hello.txt``.  The third tells Pecan to use the html_template.mako when the client requests ``/hello.html``. If the client requests ``/hello``, Pecan will use the text/html template.
+You'll notice that we used three expose decorators. The first tells
+Pecan to serialize ``dict`` using JSON serialization when the client
+requests ``/hello.json``. The second tells the templating engine to use
+``text_template.mako`` when the client request ``/hello.txt``. The third
+tells Pecan to use the html_template.mako when the client requests
+``/hello.html``. If the client requests ``/hello``, Pecan will use the
+text/html template.
 
 Advanced Routing
 ----------------
