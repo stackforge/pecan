@@ -37,7 +37,10 @@ requirements = [
 try:
     import json
 except:
-    requirements.append("simplejson >= 2.1.1")
+    try:
+        import simplejson
+    except:
+        requirements.append("simplejson >= 2.1.1")
 
 
 #
