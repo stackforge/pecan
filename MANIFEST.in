@@ -1,1 +1,1 @@
-recursive-include templates *
+include pecan/templates/project/*
