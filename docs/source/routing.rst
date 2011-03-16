@@ -10,7 +10,9 @@ When a user requests a Pecan-powered page how does Pecan know which
 controller to use? Pecan uses a method known as Object-dispatch to map a
 HTTP request to a controller. Obejct-dispatch begins by splitting the
 path into a list of components and then walking object path starting at
-the root controller. Let's look at a simple store application: ::
+the root controller. Let's look at a simple store application: 
+
+::
 
     from pecan import expose
 
@@ -57,7 +59,9 @@ Routing Algorithm
 ``_lookup``
 -----------
 
-Example ::
+Example 
+
+::
 
     from pecan import expose
     from mymodel import get_student_by_name
@@ -82,7 +86,9 @@ Example ::
 ``_default``
 ------------
 
-Example ::
+Example 
+
+::
 
     from pecan import expose
 
@@ -91,11 +97,11 @@ Example ::
         def hello(self):
             return 'hello'
 
-        @expose():
+        @expose()
         def bonjour(self):
             return 'bonjour'
 
-        @expose():
+        @expose()
         def _default(self):
             return 'I cannot say hi in that language'
             
@@ -103,14 +109,19 @@ Example ::
 Overriding ``_route``
 ---------------------
 
-Example  ::
+Example  
+
+::
 
     from pecan import expose
+
 
 Controller Args
 ---------------
 
-Example  ::
+Example  
+
+::
 
     from pecan import expose
 
@@ -119,14 +130,17 @@ Example  ::
         def say(self, msg):
             return msg
 
+
 Client requests ``/say/hi`` the controller returns "hi".
 
-kwargs    ::
+kwargs    
+
+::
 
     from pecan import expose
     
     class RootController(object):
-        @expose():
+        @expose()
         def say(self, msg=None):
             if msg is None:
                 return "I not sure what to say"
@@ -138,7 +152,9 @@ Client requests ``/say?msg=hello`` the controller returns "hello".
 Generic Functions
 -----------------
 
-Example  ::
+Example  
+
+::
 
     from pecan import expose
 
@@ -147,13 +163,14 @@ Example  ::
         def index(self):
             pass
 
-        @index.when(method='POST'):
+        @index.when(method='POST')
         def index_post(self):
             pass
 
-        @index.when(method='GET'):
+        @index.when(method='GET')
         def index_get(self):
             pass
+
 
 Helper Functions
 ----------------
@@ -161,12 +178,15 @@ Helper Functions
 redirect
 abort
 
+
 ``@expose``
 -----------
 
 At its core, ``expose`` is how you tell Pecan which methods in a class
 are controllers. ``expose`` accepts eight optional parameters some of
-which can impact routing. ::
+which can impact routing. 
+
+::
 
     def expose(template    = None,
            content_type    = 'text/html',
@@ -177,7 +197,10 @@ which can impact routing. ::
            htmlfill        = None,
            generic         = False):
 
-Let's look at an example using template and content_type::
+
+Let's look at an example using template and content_type
+
+::
 
     from pecan import decorators
 
@@ -195,6 +218,7 @@ requests ``/hello.json``. The second tells the templating engine to use
 tells Pecan to use the html_template.mako when the client requests
 ``/hello.html``. If the client requests ``/hello``, Pecan will use the
 text/html template.
+
 
 Advanced Routing
 ----------------
