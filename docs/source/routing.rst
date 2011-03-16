@@ -67,7 +67,7 @@ Example
     from mymodel import get_student_by_name
 
     class StudentController(object):
-        def __init__(self, person):
+        def __init__(self, student):
             self.student = student
 
         @expose()
