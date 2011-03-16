@@ -12,8 +12,8 @@ server = {
 app = {
     'root' : RootController(),
     'modules' : [${package}],
-    'static_root' : 'public', 
-    'template_path' : '${package}/templates',
+    'static_root' : '%(confdir)s/public', 
+    'template_path' : '%(confdir)s/${package}/templates',
     'reload': True,
     'debug' : True,
     'errors' : {
