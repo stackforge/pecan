@@ -1,1 +1,2 @@
+recursive-include pecan/templates/project *
 include pecan/templates/project/*
