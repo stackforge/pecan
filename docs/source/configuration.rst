@@ -143,3 +143,35 @@ app is running I can access ``foo`` values like::
     >>> conf.foo
     Config({'bar': True, 'baz': False})
 
+
+Fully Valid Dictionaries
+------------------------
+In certain situations you might want to deal with keys and values but in strict
+dictionary form. The ``Config`` object has a helper method for this purpose
+that will return a dictionary representation of itself including nested values.
+
+Below is a representation of how you can access the ``as_dict`` method and what
+should return as a result (shortened for brevity):
+
+::
+
+    >>> from pecan import conf
+    >>> conf
+    Config({'app': Config({'errors': {}, 'template_path': '', 'static_root': 'public', [...]
+    >>> conf.as_dict()
+    {'app': {'errors': {}, 'template_path': '', 'static_root': 'public', [...]
+    
+
+Prefixing Values
+----------------
+The ``as_dict`` method allows you to pass an optional argument if you need to
+prefix the keys in the returned dictionary. This is a single argument in string
+form and it works like this (shortened for brevity):
+
+::
+
+    >>> from pecan import conf
+    >>> conf
+    Config({'app': Config({'errors': {}, 'template_path': '', 'static_root': 'public', [...]
+    >>> conf.as_dict('prefixed_')
+    {'prefixed_app': {'prefixed_errors': {}, 'prefixed_template_path': '', 'prefixed_static_root': 'prefixed_public', [...]
