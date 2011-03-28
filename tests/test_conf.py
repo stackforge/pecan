@@ -7,8 +7,6 @@ from pecan import conf as _runtime_conf
 class TestConf(TestCase):
 
     def setUp(self):
-        import sys
-
         test_config_d = os.path.join(os.path.dirname(__file__), 'test_config')
 
         if test_config_d not in sys.path:
