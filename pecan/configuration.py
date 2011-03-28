@@ -58,6 +58,7 @@ class Config(object):
         '''
         for k, v in obj.items():
             if prefix:
+                del obj[k]
                 k = "%s%s" % (prefix, k)
             if isinstance(v, Config):
                 v = self.__dictify__(dict(v), prefix)
@@ -69,10 +70,11 @@ class Config(object):
         '''
         Converts recursively the Config object into a valid dictionary.
         
-        :param prefix: A string to optionally prefix key elements in the dict.
+        :param prefix: A string to optionally prefix all key elements in the 
+        returned dictonary.
         '''
         
-        conf_obj = dict(copy.deepcopy(self))
+        conf_obj = dict(self)
         return self.__dictify__(conf_obj, prefix)
 
 
