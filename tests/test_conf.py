@@ -127,3 +127,26 @@ class TestConf(TestCase):
         conf = configuration.Config({'a': 1})
         assert conf.a == 1
         self.assertRaises(AttributeError, getattr, conf, 'b')
+
+    def test_config_as_dict(self):
+        default = _runtime_conf
+
+        assert isinstance(default, configuration.Config)
+
+        as_dict = default.as_dict()
+
+        assert isinstance(as_dict, dict)
+        assert as_dict['server']['host']         == '0.0.0.0'
+        assert as_dict['server']['port']         == '8080'
+        assert as_dict['app']['debug']           == False
+        assert as_dict['app']['errors']          == {}
+        assert as_dict['app']['force_canonical'] == True
+        assert as_dict['app']['modules']         == []
+        assert as_dict['app']['root']            == None
+        assert as_dict['app']['static_root']     == 'public'
+        assert as_dict['app']['template_path']   == ''
+
+
+
+
+
