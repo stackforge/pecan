@@ -59,9 +59,9 @@ class Config(object):
         for k, v in obj.items():
             if prefix:
                 k = "%s%s" % (prefix, k)
-            if not isinstance(v, dict):
-                v = self.__dictify__(dict(v))
-                obj[k] = v
+            if isinstance(v, Config):
+                v = self.__dictify__(dict(v), prefix)
+            obj[k] = v
         return obj
 
 
