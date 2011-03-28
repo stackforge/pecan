@@ -146,6 +146,25 @@ class TestConf(TestCase):
         assert as_dict['app']['static_root']     == 'public'
         assert as_dict['app']['template_path']   == ''
 
+    def test_config_as_dict_nested(self):
+        """have more than one level nesting and convert to dict"""
+        conf = configuration.initconf()
+        nested = {'one':{'two':2}}
+        conf['nested'] = nested
+
+        as_dict = conf.as_dict()
+
+        assert isinstance(as_dict, dict)
+        assert as_dict['server']['host']         == '0.0.0.0'
+        assert as_dict['server']['port']         == '8080'
+        assert as_dict['app']['debug']           == False
+        assert as_dict['app']['errors']          == {}
+        assert as_dict['app']['force_canonical'] == True
+        assert as_dict['app']['modules']         == []
+        assert as_dict['app']['root']            == None
+        assert as_dict['app']['static_root']     == 'public'
+        assert as_dict['app']['template_path']   == ''
+        assert as_dict['nested']['one']['two']   == 2
 
 
 
