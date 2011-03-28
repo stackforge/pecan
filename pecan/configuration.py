@@ -1,3 +1,4 @@
+import copy
 import re
 import inspect
 import os
@@ -48,6 +49,32 @@ class Config(object):
                 cur_val.update(conf_dict[k])
             else:
                 self[k] = conf_dict[k]
+
+
+    def __dictify__(self, obj, prefix):
+        '''
+        Private helper method for as_dict.
+        Do not use directly.
+        '''
+        for k, v in obj.items():
+            if prefix:
+                k = "%s%s" % (prefix, k)
+            if not isinstance(v, dict):
+                v = self.__dictify__(dict(v))
+                obj[k] = v
+        return obj
+
+
+    def as_dict(self, prefix=None):
+        '''
+        Converts recursively the Config object into a valid dictionary.
+        
+        :param prefix: A string to optionally prefix key elements in the dict.
+        '''
+        
+        conf_obj = dict(copy.deepcopy(self))
+        return self.__dictify__(conf_obj, prefix)
+
 
     def update_with_module(self, module):
         '''
