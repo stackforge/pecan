@@ -53,7 +53,7 @@ class Config(object):
     def __dictify__(self, obj, prefix):
         '''
         Private helper method for as_dict.
-        Do not use directly.
+        **Do not use directly**
         '''
         for k, v in obj.items():
             if prefix:
@@ -63,7 +63,6 @@ class Config(object):
                 v = self.__dictify__(dict(v), prefix)
             obj[k] = v
         return obj
-
 
     def as_dict(self, prefix=None):
         '''
@@ -75,7 +74,6 @@ class Config(object):
         
         conf_obj = dict(self)
         return self.__dictify__(conf_obj, prefix)
-
 
     def update_with_module(self, module):
         '''
