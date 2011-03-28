@@ -129,11 +129,11 @@ class TestConf(TestCase):
         self.assertRaises(AttributeError, getattr, conf, 'b')
 
     def test_config_as_dict(self):
-        default = _runtime_conf
+        conf = configuration.initconf()
 
-        assert isinstance(default, configuration.Config)
+        assert isinstance(conf, configuration.Config)
 
-        as_dict = default.as_dict()
+        as_dict = conf.as_dict()
 
         assert isinstance(as_dict, dict)
         assert as_dict['server']['host']         == '0.0.0.0'
@@ -167,5 +167,22 @@ class TestConf(TestCase):
         assert as_dict['nested']['one']['two']   == 2
 
 
+    def test_config_as_dict_prefixed(self):
+        """Add a prefix for keys"""
+        conf = configuration.initconf()
 
+        assert isinstance(conf, configuration.Config)
+
+        as_dict = conf.as_dict('prefix_')
+
+        assert isinstance(as_dict, dict)
+        assert as_dict['prefix_server']['prefix_host']         == '0.0.0.0'
+        assert as_dict['prefix_server']['prefix_port']         == '8080'
+        assert as_dict['prefix_app']['prefix_debug']           == False
+        assert as_dict['prefix_app']['prefix_errors']          == {}
+        assert as_dict['prefix_app']['prefix_force_canonical'] == True
+        assert as_dict['prefix_app']['prefix_modules']         == []
+        assert as_dict['prefix_app']['prefix_root']            == None
+        assert as_dict['prefix_app']['prefix_static_root']     == 'public'
+        assert as_dict['prefix_app']['prefix_template_path']   == ''
 
