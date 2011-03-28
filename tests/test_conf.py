@@ -70,7 +70,7 @@ class TestConf(TestCase):
         conf['attr'] = d
         self.assertTrue(conf.attr.attr)
 
-    def test_config_dir(self):
+    def test_config_dirname(self):
         from pecan import default_config
         conf = configuration.initconf()
         conf['path'] = '%(confdir)s'
