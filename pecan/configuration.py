@@ -1,7 +1,6 @@
 import re
 import inspect
 import os
-import string
 
 
 IDENTIFIER = re.compile(r'[a-z_](\w)*$', re.IGNORECASE)
