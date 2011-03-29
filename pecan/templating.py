@@ -61,7 +61,7 @@ try:
 
     class MakoRenderer(object):
         def __init__(self, path, extra_vars):
-            self.loader = TemplateLookup(directories=[path])
+            self.loader = TemplateLookup(directories=[path], output_encoding='utf-8')
             self.extra_vars = extra_vars
     
         def render(self, template_path, namespace):
