@@ -1,7 +1,7 @@
 .. _validation_n_errors:
 
 Validation and Error Handling
-============
+=============================
 Pecan provides a variety of tools to help you handle common form validation and
 error handling activities, like:
 
