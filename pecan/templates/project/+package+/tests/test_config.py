@@ -21,7 +21,7 @@ class TestConfigApp(TestCase):
         assert len(config.app['modules']) == 1
         
     def test_app_static_root(self):
-        assert config.app['static_root'] == 'public'
+        assert 'public' in config.app['static_root']
         
     def test_app_template_path(self):
         assert 'templates' in config.app['template_path']
