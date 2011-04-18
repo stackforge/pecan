@@ -6,7 +6,7 @@ version = '0.1'
 # integration with py.test for `python setup.py test`
 #
 tests_require = [
-  "pytest"
+  "pytest>=2.0.3"
 ]
 
 class PyTest(Command):
