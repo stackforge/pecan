@@ -71,9 +71,10 @@ data structure::
 
 Handling Schema Failures
 ------------------------------
-When schema validation fails, the validation errors from FormEncode are applied to
-``pecan.request.validation_errors``.  This list can be browsed in your controller
-methods to react to errors appropriately::
+When schema validation fails, the validation errors from FormEncode are applied to Pecan's
+request object (``pecan.request.pecan``) as a dictionary.
+The key where the actual errors go is ``validation_errors`` and this can be
+inspected by your controller methods to react to errors appropiately::
 
     from pecan import expose, request
     from myproject.schemas import SimpleSchema
@@ -82,7 +83,7 @@ methods to react to errors appropriately::
 
         @expose(schema=SimpleSchema)
         def login(self, **kw):
-            if request.validation_errors:
+            if request.pecan['validation_errors']:
                 pass # Don't Panic!
             return dict()
 
