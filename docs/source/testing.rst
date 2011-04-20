@@ -17,7 +17,7 @@ Structure
 ---------
 This guide assumes that you have all your tests in a ``tests`` directory. If
 you have created a project from the ``base`` project template that Pecan
-provides you should already have this directory with a few tests.
+provides, you should already have this directory with a few tests.
 
 The template project uses UnitTest-type tests and some of those tests use
 WebTest. We will describe how they work in the next section.
@@ -37,34 +37,54 @@ This is how running those tests with ``py.test`` would look like::
 
 Configuration and Testing
 -------------------------
-When running tests, you would want to avoid as much as possible setting up test
-cases by creating a Pecan app on each instance. To avoid this, you need to
-create a proper test configuration file and load it at setup time.
+When you create a new project using the ``base`` project template, Pecan adds 
+a reference to its ``py.test`` plugin to your project's ``setup.cfg`` file. 
+This handles loading your Pecan configuration and setting up your app as 
+defined by your project's ``app.py`` file.
 
-To do this, you need to know the absolute path for your configuration file and 
-then call ``set_config`` with it. A typical ``setUp`` method would look like::
+If you've created your own project without using Pecan's template, you can 
+load the plugin yourself by adding this to your ``setup.cfg`` file::
 
-    def setUp(self):
-        config_path = '/path/to/test_config.py'
-        pecan.set_config(config_path)
+    [pytest]
+    addopts = -p pecan.testing --with-config=./config.py
 
-        self.app = TestApp(
-            make_app(
-                config.app.root
-                template_path   = config.app.template_path
-            )
-        )
-        
+Alternatively, you can just pass those options to ``py.test`` directly.
 
-As you can see, we are loading the configuration file into Pecan first and then
-creating a Pecan application with it. Any interaction after ``setUp`` will be
-exactly as if your application was really running via an HTTP server.
+By default, Pecan's testing plugin assumes you will be using the ``config.py`` 
+configuration file to run your tests. To change which configuration file gets 
+used once, run ``py.test`` with the `--with-config` option. To make the change 
+permanent, modify that option in the `addopts` setting of your ``setup.cfg`` 
+file.
+
+Pecan's ``py.test`` plugin exposes two new variables in the ``py.test`` 
+namespace: ``temp_dir`` and ``wsgi_app``.
+
+``py.test.temp_dir`` is a temporary directory that you can use for your tests. 
+It's created at startup and deleted after all tests have completed. When using 
+locally distributed testing with py.test, this is guaranteed to be shared by 
+each test process. This is useful if you need to create some initial resource 
+(e.g., a database template) that is later copied by each test. If you're using 
+remotely distributed testing, the directory won't be shared across nodes.
+
+``py.test.wsgi_app`` is your Pecan app loaded and configured per your project's 
+``app.py`` file. In your test's ``setUp`` method, you would wrap this with 
+``TestApp``::
+
+    from unittest import TestCase
+    from webtest import TestApp
+
+    import py.test
+
+    class TestRootController(TestCase):
+    
+        def setUp(self):
+            self.app = TestApp(py.test.wsgi_app)
 
 
 Using WebTest with a UnitTest
 -----------------------------
-Once you have a ``setUp`` method with your Pecan configuration loaded you have
-a wealth of actions provided within the test class to interact with your Pecan
+Once you have a ``setUp`` method with your ``TestApp`` created, you have a 
+wealth of actions provided within the test class to interact with your Pecan
 application::
 
  *  POST   => self.app.post
@@ -72,19 +92,18 @@ application::
  *  DELETE => self.app.delete
  *  PUT    => self.app.put
 
-For example, if I wanted to assert that I can get the root of my application,
-I would probably do something similar to this::
+For example, if you want to assert that you can get to the root of your 
+application, you could do something similar to this::
 
     response = self.app.get('/')
     assert response.status_int == 200
 
-If you are expecting error responses from your application, you should make
-sure that you pass the `expect_errors` flag and set it to True::
+If you are expecting error responses from your application, make sure to pass 
+`expect_errors=True`::
 
     response = self.app.get('/url/does/not/exist', expect_errors=True)
     assert response.status_int == 404
 
 If you would like to dig in to more examples in how to test and verify more
-actions, make sure you take a look at the 
+actions, take a look at the 
 `WebTest documentation <http://pythonpaste.org/webtest/>`_
-

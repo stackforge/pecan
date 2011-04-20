@@ -32,17 +32,14 @@ class Command(paste_command.Command):
             ex.args[0] = self.parser.error(ex.args[0])
             raise
     
-    def can_import(self, name):
-        try:
-            __import__(name)
-            return True
-        except ImportError:
-            return False
-    
     def get_package_names(self, config):
         if not hasattr(config.app, 'modules'):
             return []
         return [module.__name__ for module in config.app.modules if hasattr(module, '__name__')]
+    
+    def import_module(self, package, name):
+        parent = __import__(package, fromlist=[name])
+        return getattr(parent, name, None)
     
     def load_configuration(self, name):
         set_config(name)
@@ -50,18 +47,16 @@ class Command(paste_command.Command):
     
     def load_app(self, config):
         for package_name in self.get_package_names(config):
-            module_name = '%s.app' % package_name
-            if self.can_import(module_name):
-                module = sys.modules[module_name]
-                if hasattr(module, 'setup_app'):
-                    return module.setup_app(config)
-        raise paste_command.BadCommand('No app.setup_app found in any of the configured app.modules')
+            module = self.import_module(package_name, 'app')
+            if hasattr(module, 'setup_app'):
+                return module.setup_app(config)
+        raise paste_command.BadCommand('No app.setup_app found in any app modules')
     
     def load_model(self, config):
         for package_name in self.get_package_names(config):
-            module_name = '%s.model' % package_name
-            if self.can_import(module_name):
-                return sys.modules[module_name]
+            module = self.import_module(package_name, 'model')
+            if module:
+                return module
         return None
     
     def logging_file_config(self, config_file):

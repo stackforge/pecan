@@ -5,10 +5,6 @@ version = '0.1'
 #
 # integration with py.test for `python setup.py test`
 #
-tests_require = [
-  "pytest"
-]
-
 class PyTest(Command):
     user_options = []
     def initialize_options(self):
@@ -31,7 +27,8 @@ requirements = [
   "Paste >= 1.7.5.1",
   "PasteScript >= 1.7.3",
   "formencode >= 1.2.2",
-  "WebTest >= 1.2.2"
+  "WebTest >= 1.2.2",
+  "pytest >= 2.0.3"
 ]
 
 try:
