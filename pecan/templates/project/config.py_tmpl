@@ -10,14 +10,15 @@ server = {
 
 # Pecan Application Configurations
 app = {
-    'root' : RootController(),
-    'modules' : [${package}],
-    'static_root' : '%(confdir)s/public', 
+    'root'          : RootController(),
+    'modules'       : [${package}],
+    'static_root'   : '%(confdir)s/public', 
     'template_path' : '%(confdir)s/${package}/templates',
-    'reload': True,
-    'debug' : True,
-    'errors' : {
-        '404' : '/error/404',
+    'reload'        : True,
+    'debug'         : True,
+    'logging'       : False,
+    'errors'        : {
+        '404'            : '/error/404',
         '__force_dict__' : True
     }
 }

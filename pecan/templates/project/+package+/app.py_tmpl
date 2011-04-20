@@ -8,7 +8,8 @@ def setup_app(config):
     return make_app(
         config.app.root,
         static_root     = config.app.static_root,
-        template_path   = config.app.template_path,
         debug           = config.app.debug,
+        logging         = config.app.logging,
+        template_path   = config.app.template_path,
         force_canonical = config.app.force_canonical
     )

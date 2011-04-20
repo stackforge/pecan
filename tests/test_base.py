@@ -1,5 +1,6 @@
 from formencode import Schema, validators
 from paste.recursive import ForwardRequestException
+from paste.translogger import TransLogger
 from unittest import TestCase
 from webtest import TestApp
 
@@ -663,6 +664,135 @@ class TestBase(TestCase):
         app = TestApp(make_app(RootController(), debug=True))
         r = app.get('/')
         assert r.status_int == 200
+
+
+class TestLogging(TestCase):
+    """
+    Mocks logging calls so we can make sure they get called. We could use 
+    Fudge for this, but it would add an additional dependency to Pecan for 
+    a single set of tests.
+    """
+    
+    def setUp(self):
+        self._write_log = TransLogger.write_log
+    
+    def tearDown(self):
+        TransLogger.write_log = self._write_log
+    
+    def test_default(self):
+        
+        class RootController(object):
+            @expose()
+            def index(self):
+                return '/'
+        
+        # monkeypatch the logger
+        writes = []
+        def _write_log(self, *args, **kwargs):
+            writes.append(1)
+        TransLogger.write_log = _write_log
+        
+        # check the request
+        app = TestApp(make_app(RootController(), debug=True))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert writes == []
+    
+    def test_default(self):
+        
+        class RootController(object):
+            @expose()
+            def index(self):
+                return '/'
+        
+        # monkeypatch the logger
+        writes = []
+        def _write_log(self, *args, **kwargs):
+            writes.append(1)
+        TransLogger.write_log = _write_log
+        
+        # check the request
+        app = TestApp(make_app(RootController(), debug=True))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert len(writes) == 0
+    
+    def test_no_logging(self):
+        
+        class RootController(object):
+            @expose()
+            def index(self):
+                return '/'
+        
+        # monkeypatch the logger
+        writes = []
+        def _write_log(self, *args, **kwargs):
+            writes.append(1)
+        TransLogger.write_log = _write_log
+        
+        # check the request
+        app = TestApp(make_app(RootController(), debug=True, logging=False))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert len(writes) == 0
+    
+    def test_basic_logging(self):
+        
+        class RootController(object):
+            @expose()
+            def index(self):
+                return '/'
+        
+        # monkeypatch the logger
+        writes = []
+        def _write_log(self, *args, **kwargs):
+            writes.append(1)
+        TransLogger.write_log = _write_log
+        
+        # check the request
+        app = TestApp(make_app(RootController(), debug=True, logging=True))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert len(writes) == 1
+    
+    def test_empty_config(self):
+        
+        class RootController(object):
+            @expose()
+            def index(self):
+                return '/'
+        
+        # monkeypatch the logger
+        writes = []
+        def _write_log(self, *args, **kwargs):
+            writes.append(1)
+        TransLogger.write_log = _write_log
+        
+        # check the request
+        app = TestApp(make_app(RootController(), debug=True, logging={}))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert len(writes) == 1
+    
+    def test_custom_config(self):
+        
+        class RootController(object):
+            @expose()
+            def index(self):
+                return '/'
+        
+        # create a custom logger
+        writes = []
+        class FakeLogger(object):
+            def log(self, *args, **kwargs):
+                writes.append(1)
+        
+        # check the request
+        app = TestApp(make_app(RootController(), debug=True, 
+                               logging={'logger': FakeLogger()}))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert len(writes) == 1
 
 
 class TestEngines(object):

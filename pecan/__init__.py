@@ -4,6 +4,7 @@
 from paste.cascade import Cascade
 from paste.errordocument import make_errordocument
 from paste.recursive import RecursiveMiddleware
+from paste.translogger import TransLogger
 from paste.urlparser import StaticURLParser
 from weberror.errormiddleware import ErrorMiddleware
 from weberror.evalexception import EvalException
@@ -19,7 +20,7 @@ __all__ = [
     'make_app', 'Pecan', 'request', 'response', 'override_template', 'expose', 'conf', 'set_config' 
 ]
 
-def make_app(root, static_root=None, debug=False, errorcfg={}, wrap_app=None, **kw):
+def make_app(root, static_root=None, debug=False, errorcfg={}, wrap_app=None, logging=False, **kw):
     '''
     
     '''
@@ -35,4 +36,6 @@ def make_app(root, static_root=None, debug=False, errorcfg={}, wrap_app=None, **
     app = make_errordocument(app, conf, **conf.app.errors)
     if static_root:
         app = Cascade([StaticURLParser(static_root), app])
+    if isinstance(logging, dict) or logging == True:
+        app = TransLogger(app, **(isinstance(logging, dict) and logging or {}))
     return app
