@@ -6,7 +6,7 @@ https://github.com/Pylons/pylons/blob/master/pylons/test.py
 
 Handling of multiprocessing inspired by pytest-cov.
 """
-from pecan import conf, set_config
+from configuration import set_config, _runtime_conf as conf
 from tempfile import mkdtemp
 
 import py
