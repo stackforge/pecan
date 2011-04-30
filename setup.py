@@ -52,7 +52,7 @@ setup(
     keywords             = '',
     author               = 'Jonathan LaCour',
     author_email         = 'jonathan@cleverdevil.org',
-    url                  = 'http://github.com/cleverdevil/pecan',
+    url                  = 'http://github.com/pecan/pecan',
     license              = 'BSD',
     packages             = find_packages(exclude=['ez_setup', 'examples', 'tests']),
     include_package_data = True,
