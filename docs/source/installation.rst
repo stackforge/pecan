@@ -34,7 +34,7 @@ Development (Unstable) Version
 If you want to run the development version of Pecan you will
 need GIT installed and clone the repo from github::
 
-    git clone https://github.com/cleverdevil/pecan.git
+    git clone https://github.com/pecan/pecan.git
 
 If you are still in the *pecan-dev* virtual environment that we created before,
 you should call ``setup.py`` to install::
