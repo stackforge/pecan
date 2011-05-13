@@ -5,7 +5,7 @@ from util               import _cfg, splitext
 from webob              import Request, Response, exc
 from threading          import local
 from itertools          import chain
-from mimetypes          import guess_type
+from mimetypes          import guess_type, add_type
 from formencode         import htmlfill, Invalid, variabledecode
 from formencode.schema  import merge_dicts
 from paste.recursive    import ForwardRequestException
@@ -17,6 +17,8 @@ except ImportError: # pragma: no cover
 
 import os
 
+# make sure that json is defined in mimetypes
+add_type('application/json', '.json', True)
 
 state = local()
 
