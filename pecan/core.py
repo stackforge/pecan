@@ -457,7 +457,7 @@ class Pecan(object):
             params = request.environ.pop('pecan.params')
         if request.pecan['validation_errors'] and _htmlfill is not None and request.pecan['content_type'] == 'text/html':
             errors = request.pecan['validation_errors']
-            result = htmlfill.render(result, defaults=params, errors=errors, **_htmlfill)
+            result = htmlfill.render(result, defaults=params, errors=errors, text_as_default=True, **_htmlfill)
         
         # If we are in a test request put the namespace where it can be
         # accessed directly
