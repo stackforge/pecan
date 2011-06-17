@@ -1,7 +1,7 @@
 from inspect    import getmembers
 from webob.exc  import HTTPFound
 
-from util    import iscontroller
+from util    import iscontroller, _cfg
 
 
 __all__ = ['PecanHook', 'TransactionHook', 'HookController']
@@ -117,7 +117,7 @@ class TransactionHook(PecanHook):
         
         controller = getattr(state, 'controller', None)
         if controller:
-            force_transactional = getattr(state.controller, '__transactional__', False)
+            force_transactional = _cfg(controller).get('transactional', False)
         else:
             force_transactional = False
 
@@ -146,11 +146,9 @@ class TransactionHook(PecanHook):
         # (e.g., shouldn't consider them rollback-worthy)
         # don't set `state.request.error = True`.
         #
-        transactional_ignore_redirects = getattr(
-            getattr(state, 'controller', None), 
-            '__transactional_ignore_redirects__',
-            state.request.method not in ('GET', 'HEAD')
-        )
+        transactional_ignore_redirects = state.request.method not in ('GET', 'HEAD')
+        if hasattr(state, 'controller'):
+            transactional_ignore_redirects = _cfg(state.controller).get('transactional_ignore_redirects', transactional_ignore_redirects)
         if type(e) is HTTPFound and transactional_ignore_redirects is True:
             return
         state.request.error = True
@@ -161,4 +159,8 @@ class TransactionHook(PecanHook):
                 self.rollback()
             else:
                 self.commit()
+                controller = getattr(state, 'controller', None)
+                actions = _cfg(controller).get('after_commit', [])
+                for action in actions:
+                    action()
         self.clear()

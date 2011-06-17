@@ -97,12 +97,20 @@ def transactional(ignore_redirects=True):
     '''
     
     def deco(f):
-        def wrap(*args, **kwargs):
-            return f(*args, **kwargs)
-        wrap.__transactional__ = True
-        wrap.__transactional_ignore_redirects__ = ignore_redirects
-        return wrap
+        _cfg(f)['transactional'] = True
+        _cfg(f)['transactional_ignore_redirects'] = ignore_redirects
+        return f
     return deco
+
+
+def after_commit(action):
+    '''
+    '''
+    def deco(func):
+        _cfg(func).setdefault('after_commit', []).append(action)
+        return func
+    return deco
+
 
 def accept_noncanonical(func):
     '''
