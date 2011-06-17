@@ -15,7 +15,7 @@ try:
 except ImportError: # pragma: no cover
     from json import loads
 
-import os
+import urllib
 
 # make sure that json is defined in mimetypes
 add_type('application/json', '.json', True)
@@ -296,7 +296,20 @@ class Pecan(object):
                 if name not in argspec[0]:
                     kwargs[name] = value
         
-        return args, kwargs
+        # urldecode() the args and kwargs and return them
+        return (
+            map(lambda x: 
+                urllib.unquote_plus(x) if isinstance(x, basestring) else x,
+                args
+            ),
+            dict(map(
+                lambda x: (
+                    x[0],
+                    urllib.unquote_plus(x[1]) if isinstance(x[1], basestring) else x[1]
+                ),
+                kwargs.items()
+            ))
+        )
     
     def render(self, template, namespace):
         renderer = self.renderers.get(self.default_renderer, self.template_path)
