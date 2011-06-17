@@ -250,10 +250,14 @@ class Pecan(object):
         Determines the arguments for a controller based upon parameters
         passed the argument specification for the controller.
         '''
-        
         args = []
         kwargs = dict()
         valid_args = argspec[0][1:]
+
+        def _decode(x):
+            return urllib.unquote_plus(x) if isinstance(x, basestring) else x
+    
+        remainder = [_decode(x) for x in remainder]
         
         if im_self is not None:
             args.append(im_self)
@@ -296,20 +300,7 @@ class Pecan(object):
                 if name not in argspec[0]:
                     kwargs[name] = value
         
-        # urldecode() the args and kwargs and return them
-        return (
-            map(lambda x: 
-                urllib.unquote_plus(x) if isinstance(x, basestring) else x,
-                args
-            ),
-            dict(map(
-                lambda x: (
-                    x[0],
-                    urllib.unquote_plus(x[1]) if isinstance(x[1], basestring) else x[1]
-                ),
-                kwargs.items()
-            ))
-        )
+        return args, kwargs
     
     def render(self, template, namespace):
         renderer = self.renderers.get(self.default_renderer, self.template_path)

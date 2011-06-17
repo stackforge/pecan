@@ -237,7 +237,7 @@ class TestBase(TestCase):
 
         r = app.post('/multiple', {'one': 'Five%20', 'two': 'Six%20%21'})
         assert r.status_int == 200
-        assert r.body == 'multiple: Five , Six !'
+        assert r.body == 'multiple: Five%20, Six%20%21'
         
         # optional arg
         
@@ -278,7 +278,7 @@ class TestBase(TestCase):
 
         r = app.post('/optional', {'id': 'Some%20Number'})
         assert r.status_int == 200
-        assert r.body == 'optional: Some Number'
+        assert r.body == 'optional: Some%20Number'
         
         r = app.post('/optional/5', {'id': 'five'})
         assert r.status_int == 200
@@ -302,7 +302,7 @@ class TestBase(TestCase):
 
         r = app.post('/optional', {'id': 'Some%20Number', 'dummy': 'dummy'})
         assert r.status_int == 200
-        assert r.body == 'optional: Some Number'
+        assert r.body == 'optional: Some%20Number'
         
         # multiple optional args
         
@@ -351,7 +351,7 @@ class TestBase(TestCase):
 
         r = app.post('/multiple_optional', {'one': 'One%21'})
         assert r.status_int == 200
-        assert r.body == 'multiple_optional: One!, None, None'
+        assert r.body == 'multiple_optional: One%21, None, None'
         
         r = app.post('/multiple_optional/1', {'one': 'one'})
         assert r.status_int == 200
@@ -375,7 +375,7 @@ class TestBase(TestCase):
 
         r = app.post('/multiple_optional', {'one': 'One%21', 'two': 'Two%21', 'three': 'Three%21', 'four': '4'})
         assert r.status_int == 200
-        assert r.body == 'multiple_optional: One!, Two!, Three!'
+        assert r.body == 'multiple_optional: One%21, Two%21, Three%21'
         
         r = app.get('/multiple_optional?three=3')
         assert r.status_int == 200
@@ -388,10 +388,6 @@ class TestBase(TestCase):
         r = app.get('/multiple_optional', {'two': '2'})
         assert r.status_int == 200
         assert r.body == 'multiple_optional: None, 2, None'
-
-        r = app.get('/multiple_optional', {'two': 'Two%21'})
-        assert r.status_int == 200
-        assert r.body == 'multiple_optional: None, Two!, None'
         
         # variable args
         
@@ -438,7 +434,7 @@ class TestBase(TestCase):
 
         r = app.post('/variable_kwargs', {'id': 'Three%21', 'dummy': 'This%20is%20a%20test'})
         assert r.status_int == 200
-        assert r.body == 'variable_kwargs: dummy=This is a test, id=Three!'
+        assert r.body == 'variable_kwargs: dummy=This%20is%20a%20test, id=Three%21'
         
         # variable args & keyword args
         
