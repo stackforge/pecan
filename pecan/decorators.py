@@ -105,6 +105,11 @@ def transactional(ignore_redirects=True):
 
 def after_commit(action):
     '''
+    If utilizing the :mod:`pecan.hooks` ``TransactionHook``, allows you
+    to flag a controller method to perform a callable action after the
+    commit is successfully issued.
+
+    :param action: The callable to call after the commit is successfully issued.
     '''
     def deco(func):
         _cfg(func).setdefault('after_commit', []).append(action)
