@@ -15,7 +15,7 @@ try:
 except ImportError: # pragma: no cover
     from json import loads
 
-import os
+import urllib
 
 # make sure that json is defined in mimetypes
 add_type('application/json', '.json', True)
@@ -250,10 +250,14 @@ class Pecan(object):
         Determines the arguments for a controller based upon parameters
         passed the argument specification for the controller.
         '''
-        
         args = []
         kwargs = dict()
         valid_args = argspec[0][1:]
+
+        def _decode(x):
+            return urllib.unquote_plus(x) if isinstance(x, basestring) else x
+    
+        remainder = [_decode(x) for x in remainder]
         
         if im_self is not None:
             args.append(im_self)

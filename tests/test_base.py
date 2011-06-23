@@ -173,6 +173,10 @@ class TestBase(TestCase):
         r = app.get('/1')
         assert r.status_int == 200
         assert r.body == 'index: 1'
+
+        r = app.get('/This%20is%20a%20test%21')
+        assert r.status_int == 200
+        assert r.body == 'index: This is a test!'
         
         r = app.get('/1/dummy', status=404)
         assert r.status_int == 404
@@ -180,10 +184,18 @@ class TestBase(TestCase):
         r = app.get('/?id=2')
         assert r.status_int == 200
         assert r.body == 'index: 2'
+
+        r = app.get('/?id=This%20is%20a%20test%21')
+        assert r.status_int == 200
+        assert r.body == 'index: This is a test!'
         
         r = app.get('/3?id=three')
         assert r.status_int == 200
         assert r.body == 'index: 3'
+
+        r = app.get('/This%20is%20a%20test%21?id=three')
+        assert r.status_int == 200
+        assert r.body == 'index: This is a test!'
         
         r = app.post('/', {'id': '4'})
         assert r.status_int == 200
@@ -206,14 +218,26 @@ class TestBase(TestCase):
         r = app.get('/multiple/one/two')
         assert r.status_int == 200
         assert r.body == 'multiple: one, two'
+
+        r = app.get('/multiple/One%20/Two%21')
+        assert r.status_int == 200
+        assert r.body == 'multiple: One , Two!'
         
         r = app.get('/multiple?one=three&two=four')
         assert r.status_int == 200
         assert r.body == 'multiple: three, four'
+
+        r = app.get('/multiple?one=Three%20&two=Four%20%21')
+        assert r.status_int == 200
+        assert r.body == 'multiple: Three , Four !'
         
         r = app.post('/multiple', {'one': 'five', 'two': 'six'})
         assert r.status_int == 200
         assert r.body == 'multiple: five, six'
+
+        r = app.post('/multiple', {'one': 'Five%20', 'two': 'Six%20%21'})
+        assert r.status_int == 200
+        assert r.body == 'multiple: Five%20, Six%20%21'
         
         # optional arg
         
@@ -224,6 +248,10 @@ class TestBase(TestCase):
         r = app.get('/optional/1')
         assert r.status_int == 200
         assert r.body == 'optional: 1'
+
+        r = app.get('/optional/Some%20Number')
+        assert r.status_int == 200
+        assert r.body == 'optional: Some Number'
         
         r = app.get('/optional/2/dummy', status=404)
         assert r.status_int == 404
@@ -231,26 +259,50 @@ class TestBase(TestCase):
         r = app.get('/optional?id=2')
         assert r.status_int == 200
         assert r.body == 'optional: 2'
+
+        r = app.get('/optional?id=Some%20Number')
+        assert r.status_int == 200
+        assert r.body == 'optional: Some Number'
         
         r = app.get('/optional/3?id=three')
         assert r.status_int == 200
         assert r.body == 'optional: 3'
+
+        r = app.get('/optional/Some%20Number?id=three')
+        assert r.status_int == 200
+        assert r.body == 'optional: Some Number'
         
         r = app.post('/optional', {'id': '4'})
         assert r.status_int == 200
         assert r.body == 'optional: 4'
+
+        r = app.post('/optional', {'id': 'Some%20Number'})
+        assert r.status_int == 200
+        assert r.body == 'optional: Some%20Number'
         
         r = app.post('/optional/5', {'id': 'five'})
         assert r.status_int == 200
         assert r.body == 'optional: 5'
+
+        r = app.post('/optional/Some%20Number', {'id': 'five'})
+        assert r.status_int == 200
+        assert r.body == 'optional: Some Number'
         
         r = app.get('/optional?id=6&dummy=dummy')
         assert r.status_int == 200
         assert r.body == 'optional: 6'
+
+        r = app.get('/optional?id=Some%20Number&dummy=dummy')
+        assert r.status_int == 200
+        assert r.body == 'optional: Some Number'
         
         r = app.post('/optional', {'id': '7', 'dummy': 'dummy'})
         assert r.status_int == 200
         assert r.body == 'optional: 7'
+
+        r = app.post('/optional', {'id': 'Some%20Number', 'dummy': 'dummy'})
+        assert r.status_int == 200
+        assert r.body == 'optional: Some%20Number'
         
         # multiple optional args
         
@@ -261,10 +313,18 @@ class TestBase(TestCase):
         r = app.get('/multiple_optional/1')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, None, None'
+
+        r = app.get('/multiple_optional/One%21')
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: One!, None, None'
         
         r = app.get('/multiple_optional/1/2/3')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, 2, 3'
+
+        r = app.get('/multiple_optional/One%21/Two%21/Three%21')
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: One!, Two!, Three!'
         
         r = app.get('/multiple_optional/1/2/3/dummy', status=404)
         assert r.status_int == 404
@@ -272,30 +332,58 @@ class TestBase(TestCase):
         r = app.get('/multiple_optional?one=1')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, None, None'
+
+        r = app.get('/multiple_optional?one=One%21')
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: One!, None, None'
         
         r = app.get('/multiple_optional/1?one=one')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, None, None'
+
+        r = app.get('/multiple_optional/One%21?one=one')
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: One!, None, None'
         
         r = app.post('/multiple_optional', {'one': '1'})
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, None, None'
+
+        r = app.post('/multiple_optional', {'one': 'One%21'})
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: One%21, None, None'
         
         r = app.post('/multiple_optional/1', {'one': 'one'})
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, None, None'
+
+        r = app.post('/multiple_optional/One%21', {'one': 'one'})
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: One!, None, None'
         
         r = app.get('/multiple_optional?one=1&two=2&three=3&four=4')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, 2, 3'
+
+        r = app.get('/multiple_optional?one=One%21&two=Two%21&three=Three%21&four=4')
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: One!, Two!, Three!'
         
         r = app.post('/multiple_optional', {'one': '1', 'two': '2', 'three': '3', 'four': '4'})
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, 2, 3'
+
+        r = app.post('/multiple_optional', {'one': 'One%21', 'two': 'Two%21', 'three': 'Three%21', 'four': '4'})
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: One%21, Two%21, Three%21'
         
         r = app.get('/multiple_optional?three=3')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: None, None, 3'
+
+        r = app.get('/multiple_optional?three=Three%21')
+        assert r.status_int == 200
+        assert r.body == 'multiple_optional: None, None, Three!'
         
         r = app.get('/multiple_optional', {'two': '2'})
         assert r.status_int == 200
@@ -310,6 +398,10 @@ class TestBase(TestCase):
         r = app.get('/variable_args/1/dummy')
         assert r.status_int == 200
         assert r.body == 'variable_args: 1, dummy'
+
+        r = app.get('/variable_args/Testing%20One%20Two/Three%21')
+        assert r.status_int == 200
+        assert r.body == 'variable_args: Testing One Two, Three!'
         
         r = app.get('/variable_args?id=2&dummy=dummy')
         assert r.status_int == 200
@@ -331,10 +423,18 @@ class TestBase(TestCase):
         r = app.get('/variable_kwargs?id=2&dummy=dummy')
         assert r.status_int == 200
         assert r.body == 'variable_kwargs: dummy=dummy, id=2'
+
+        r = app.get('/variable_kwargs?id=Two%21&dummy=This%20is%20a%20test')
+        assert r.status_int == 200
+        assert r.body == 'variable_kwargs: dummy=This is a test, id=Two!'
         
         r = app.post('/variable_kwargs', {'id': '3', 'dummy': 'dummy'})
         assert r.status_int == 200
         assert r.body == 'variable_kwargs: dummy=dummy, id=3'
+
+        r = app.post('/variable_kwargs', {'id': 'Three%21', 'dummy': 'This%20is%20a%20test'})
+        assert r.status_int == 200
+        assert r.body == 'variable_kwargs: dummy=This%20is%20a%20test, id=Three%21'
         
         # variable args & keyword args
         
