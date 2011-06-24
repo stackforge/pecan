@@ -1,9 +1,11 @@
-from pecan import make_app, expose, request, redirect
-from pecan.core import state
-from pecan.hooks import PecanHook, TransactionHook, HookController
+import sys
+from cStringIO        import StringIO
+from pecan            import make_app, expose, request, redirect
+from pecan.core       import state
+from pecan.hooks      import PecanHook, TransactionHook, HookController, RequestViewerHook
 from pecan.decorators import transactional, after_commit
-from formencode import Schema, validators
-from webtest import TestApp
+from formencode       import Schema, validators
+from webtest          import TestApp
 
 
 class TestHooks(object):
@@ -845,3 +847,126 @@ class TestTransactionHook(object):
         assert run_hook[0] == 'start'
         assert run_hook[1] == 'rollback'
         assert run_hook[2] == 'clear'
+
+
+class TestRequestViewerHook(object):
+    
+    def test_basic_single_default_hook(self):
+        
+        _stdout = StringIO()
+
+        class RootController(object):
+            @expose()
+            def index(self):
+                return 'Hello, World!'
+        
+        app        = TestApp(make_app(RootController(), hooks=[RequestViewerHook(writer=_stdout)]))
+        response   = app.get('/')
+
+        out = _stdout.getvalue()
+
+        assert response.status_int == 200
+        assert response.body       == 'Hello, World!'
+        assert 'url'                   in out
+        assert 'method'                in out
+        assert 'response'              in out
+        assert 'method'                in out
+        assert 'context'               in out
+        assert 'params'                in out
+        assert 'hooks'                 in out
+        assert '200 OK'                in out
+        assert "['RequestViewerHook']" in out
+        assert '/'                     in out
+
+    def test_single_item(self):
+        
+        _stdout = StringIO()
+
+        class RootController(object):
+            @expose()
+            def index(self):
+                return 'Hello, World!'
+        
+        app        = TestApp(
+                        make_app(RootController(), 
+                        hooks=[
+                            RequestViewerHook(config={'items':['url']}, writer=_stdout)
+                        ]
+                    )
+                )
+        response   = app.get('/')
+
+        out = _stdout.getvalue()
+
+        assert response.status_int == 200
+        assert response.body       == 'Hello, World!'
+        assert 'url'                  in out
+        assert '/'                    in out
+        assert 'method'               not in out
+        assert 'response'             not in out
+        assert 'method'               not in out
+        assert 'context'              not in out
+        assert 'params'               not in out
+        assert 'hooks'                not in out
+        assert '200 OK'               not in out
+        assert "['RequestViewerHook']"not in out
+
+    def test_single_blacklist_item(self):
+        
+        _stdout = StringIO()
+
+        class RootController(object):
+            @expose()
+            def index(self):
+                return 'Hello, World!'
+        
+        app        = TestApp(
+                        make_app(RootController(), 
+                        hooks=[
+                            RequestViewerHook(config={'blacklist':['/']}, writer=_stdout)
+                        ]
+                    )
+                )
+        response   = app.get('/')
+
+        out = _stdout.getvalue()
+
+        assert response.status_int == 200
+        assert response.body       == 'Hello, World!'
+        assert out == ''
+
+    def test_item_not_in_defaults(self):
+        
+        _stdout = StringIO()
+
+        class RootController(object):
+            @expose()
+            def index(self):
+                return 'Hello, World!'
+        
+        app        = TestApp(
+                        make_app(RootController(), 
+                        hooks=[
+                            RequestViewerHook(config={'items':['date']}, writer=_stdout)
+                        ]
+                    )
+                )
+        response   = app.get('/')
+
+        out = _stdout.getvalue()
+
+        assert response.status_int == 200
+        assert response.body       == 'Hello, World!'
+        assert 'date'                  in out
+        assert 'url'                   not in out
+        assert 'method'                not in out
+        assert 'response'              not in out
+        assert 'method'                not in out
+        assert 'context'               not in out
+        assert 'params'                not in out
+        assert 'hooks'                 not in out
+        assert '200 OK'                not in out
+        assert "['RequestViewerHook']" not in out
+        assert '/'                     not in out
+
+
