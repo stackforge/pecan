@@ -969,4 +969,10 @@ class TestRequestViewerHook(object):
         assert "['RequestViewerHook']" not in out
         assert '/'                     not in out
 
+    def test_hook_formatting(self):
+        hooks     = ['<pecan.hooks.RequestViewerHook object at 0x103a5f910>']
+        viewer    = RequestViewerHook()
+        formatted = viewer.format_hooks(hooks)
+
+        assert formatted == ['RequestViewerHook']
 
