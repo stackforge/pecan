@@ -185,7 +185,6 @@ class RequestViewerHook(PecanHook):
     * url
     * method
     * response
-    * method
     * context
     * params
     * hooks
@@ -213,7 +212,6 @@ class RequestViewerHook(PecanHook):
             'url',
             'method',
             'response',
-            'method',
             'context',
             'params',
             'hooks',
