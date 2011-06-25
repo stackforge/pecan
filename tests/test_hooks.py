@@ -1,11 +1,11 @@
-import sys
-from cStringIO        import StringIO
-from pecan            import make_app, expose, request, redirect
-from pecan.core       import state
-from pecan.hooks      import PecanHook, TransactionHook, HookController, RequestViewerHook
-from pecan.decorators import transactional, after_commit
-from formencode       import Schema, validators
-from webtest          import TestApp
+from cStringIO           import StringIO
+from pecan               import make_app, expose, request, redirect
+from pecan.core          import state
+from pecan.hooks         import PecanHook, TransactionHook, HookController, RequestViewerHook
+from pecan.configuration import Config
+from pecan.decorators    import transactional, after_commit
+from formencode          import Schema, validators
+from webtest             import TestApp
 
 
 class TestHooks(object):
@@ -877,6 +877,33 @@ class TestRequestViewerHook(object):
         assert "['RequestViewerHook']" in out
         assert '/'                     in out
 
+    def test_bad_response_from_app(self):
+        """When exceptions are raised the hook deals with them properly"""
+        
+        _stdout = StringIO()
+
+        class RootController(object):
+            @expose()
+            def index(self):
+                return 'Hello, World!'
+        
+        app        = TestApp(make_app(RootController(), hooks=[RequestViewerHook(writer=_stdout)]))
+        response   = app.get('/404', expect_errors=True)
+
+        out = _stdout.getvalue()
+
+        assert response.status_int == 404
+        assert 'path'                  in out
+        assert 'method'                in out
+        assert 'status'                in out
+        assert 'method'                in out
+        assert 'params'                in out
+        assert 'hooks'                 in out
+        assert '404 Not Found'         in out
+        assert "['RequestViewerHook']" in out
+        assert '/'                     in out
+
+
     def test_single_item(self):
         
         _stdout = StringIO()
@@ -972,3 +999,9 @@ class TestRequestViewerHook(object):
 
         assert formatted == ['RequestViewerHook']
 
+    def test_deal_with_pecan_configs(self):
+        """If config comes from pecan.conf convert it to dict"""
+        conf   = Config(conf_dict={'items':['url']})
+        viewer = RequestViewerHook(conf)
+
+        assert viewer.items == ['url']
