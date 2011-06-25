@@ -11,6 +11,7 @@ from weberror.evalexception import EvalException
 
 from core import abort, error_for, override_template, Pecan, redirect, render, request, response, ValidationException
 from decorators import expose
+from hooks import RequestViewerHook
 from templating import error_formatters
 
 from configuration import set_config
@@ -38,4 +39,9 @@ def make_app(root, static_root=None, debug=False, errorcfg={}, wrap_app=None, lo
         app = Cascade([StaticURLParser(static_root), app])
     if isinstance(logging, dict) or logging == True:
         app = TransLogger(app, **(isinstance(logging, dict) and logging or {}))
+    if conf.requestviewer:
+        existing_hooks = kw.get('hooks', [])
+        if RequestViewerHook not in existing_hooks:
+            existing_hooks.append(RequestViewerHook(conf.requestviewer.as_dict()))
+            kw['hooks'] = existing_hooks
     return app
