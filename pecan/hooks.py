@@ -5,7 +5,7 @@ from webob.exc import HTTPFound
 from util      import iscontroller, _cfg
 from routing   import lookup_controller
 
-__all__ = ['PecanHook', 'TransactionHook', 'HookController']
+__all__ = ['PecanHook', 'TransactionHook', 'HookController', 'RequestViewerHook']
 
 
 def walk_controller(root_class, controller, hooks):

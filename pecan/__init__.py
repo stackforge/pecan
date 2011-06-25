@@ -41,6 +41,6 @@ def make_app(root, static_root=None, debug=False, errorcfg={}, wrap_app=None, lo
         app = TransLogger(app, **(isinstance(logging, dict) and logging or {}))
     if hasattr(conf, 'requestviewer'):
         existing_hooks = kw.get('hooks', [])
-        existing_hooks.append(RequestViewerHook(conf.requestviewer.as_dict()))
+        existing_hooks.append(RequestViewerHook(conf.requestviewer))
         kw['hooks'] = existing_hooks
     return app
