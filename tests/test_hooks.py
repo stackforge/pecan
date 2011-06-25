@@ -867,11 +867,10 @@ class TestRequestViewerHook(object):
 
         assert response.status_int == 200
         assert response.body       == 'Hello, World!'
-        assert 'url'                   in out
+        assert 'path'                  in out
         assert 'method'                in out
-        assert 'response'              in out
+        assert 'status'                in out
         assert 'method'                in out
-        assert 'context'               in out
         assert 'params'                in out
         assert 'hooks'                 in out
         assert '200 OK'                in out
@@ -890,7 +889,7 @@ class TestRequestViewerHook(object):
         app        = TestApp(
                         make_app(RootController(), 
                         hooks=[
-                            RequestViewerHook(config={'items':['url']}, writer=_stdout)
+                            RequestViewerHook(config={'items':['path']}, writer=_stdout)
                         ]
                     )
                 )
@@ -900,16 +899,15 @@ class TestRequestViewerHook(object):
 
         assert response.status_int == 200
         assert response.body       == 'Hello, World!'
-        assert 'url'                  in out
-        assert '/'                    in out
-        assert 'method'               not in out
-        assert 'response'             not in out
-        assert 'method'               not in out
-        assert 'context'              not in out
-        assert 'params'               not in out
-        assert 'hooks'                not in out
-        assert '200 OK'               not in out
-        assert "['RequestViewerHook']"not in out
+        assert '/'                     in out
+        assert 'path'                  in out
+        assert 'method'                not in out
+        assert 'status'                not in out
+        assert 'method'                not in out
+        assert 'params'                not in out
+        assert 'hooks'                 not in out
+        assert '200 OK'                not in out
+        assert "['RequestViewerHook']" not in out
 
     def test_single_blacklist_item(self):
         
@@ -958,11 +956,9 @@ class TestRequestViewerHook(object):
         assert response.status_int == 200
         assert response.body       == 'Hello, World!'
         assert 'date'                  in out
-        assert 'url'                   not in out
         assert 'method'                not in out
-        assert 'response'              not in out
+        assert 'status'                not in out
         assert 'method'                not in out
-        assert 'context'               not in out
         assert 'params'                not in out
         assert 'hooks'                 not in out
         assert '200 OK'                not in out
