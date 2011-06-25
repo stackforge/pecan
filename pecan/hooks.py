@@ -228,7 +228,10 @@ class RequestViewerHook(PecanHook):
         if not config:
             self.config = {'items' : self.available}
         else:
-            self.config = config
+            if config.__class__.__name__ == 'Config':
+                self.config = config.as_dict()
+            else:
+                self.config = config
         self.writer     = writer
         self.items      = self.config.get('items', self.available)
         self.blacklist  = self.config.get('blacklist', [])
