@@ -1,10 +1,11 @@
-from inspect    import getmembers
-from webob.exc  import HTTPFound
+import sys
+from inspect   import getmembers
+from webob.exc import HTTPFound
 
-from util    import iscontroller, _cfg
+from util      import iscontroller, _cfg
+from routing   import lookup_controller
 
-
-__all__ = ['PecanHook', 'TransactionHook', 'HookController']
+__all__ = ['PecanHook', 'TransactionHook', 'HookController', 'RequestViewerHook']
 
 
 def walk_controller(root_class, controller, hooks):
@@ -164,3 +165,137 @@ class TransactionHook(PecanHook):
                 for action in actions:
                     action()
         self.clear()
+
+class RequestViewerHook(PecanHook):
+    '''
+    Returns some information about what is going on in a single request.  It
+    accepts specific items to report on but uses a default list of items when
+    none are passed in.  Based on the requested ``url``, items can also be
+    blacklisted.
+    Configuration is flexible, can be passed in (or not) and can contain some or
+    all the keys supported.
+
+    ``items``
+    ---------
+    This key holds the items that this hook will display. When this key is passed 
+    only the items in the list will be used.
+    Valid items are *any* item that the ``request`` object holds, by default it uses
+    the following:
+
+    * url
+    * method
+    * response
+    * context
+    * params
+    * hooks
+
+    .. :note::
+        This key should always use a ``list`` of items to use.
+
+    ``blacklist``
+    -------------
+    This key holds items that will be blacklisted based on ``url``. If there is a need
+    to ommit urls that start with `/javascript`, then this key would look like::
+
+        'blacklist': ['/javascript']
+        
+    As many blacklisting items as needed can be contained in the list. The hook
+    will verify that the url is not starting with items in this list to display
+    results, otherwise it will get ommited.
+
+    .. :note::
+        This key should always use a ``list`` of items to use.
+
+    '''
+
+    available = ['path', 'status', 'method', 'controller', 'params', 'hooks']
+
+    def __init__(self, config=None, writer=sys.stdout, terminal=True, headers=True):
+        '''
+        :param config:   A (optional) dictionary that can hold ``items`` and/or
+                         ``blacklist`` keys.  
+        :param writer:   The stream writer to use. Can redirect output to other 
+                         streams as long as the passed in stream has a ``write`` 
+                         callable method.
+        :param terminal: Outputs to the chosen stream writer (usually the terminal)
+        :param headers:  Sets values to the X-HTTP headers
+        '''
+        if not config:
+            self.config = {'items' : self.available}
+        else:
+            if config.__class__.__name__ == 'Config':
+                self.config = config.as_dict()
+            else:
+                self.config = config
+        self.writer     = writer
+        self.items      = self.config.get('items', self.available)
+        self.blacklist  = self.config.get('blacklist', [])
+        self.terminal   = terminal
+        self.headers    = headers
+
+    def after(self, state):
+
+        # Default and/or custom response information
+        responses = {
+             'controller' : lambda self, state: self.get_controller(state),
+             'method'     : lambda self, state: state.request.method,
+             'path'       : lambda self, state: state.request.path,
+             'params'     : lambda self, state: state.request.str_params.items(),
+             'status'     : lambda self, state: state.response.status,
+             'hooks'      : lambda self, state: self.format_hooks(state.app.hooks),
+         }
+
+        is_available = [
+                i for i in self.items
+                if i in self.available or hasattr(state.request, i)
+        ]
+
+        terminal  = []
+        headers   = []
+        will_skip = [i for i in self.blacklist if state.request.path.startswith(i)]
+
+        if will_skip:
+            return
+        
+        for request_info in is_available:
+            try:
+                value = responses.get(request_info) 
+                if not value:
+                    value = getattr(state.request, request_info)
+                else:
+                    value = value(self, state)
+            except Exception, e:
+                value = e
+
+            terminal.append('%-12s - %s\n' % (request_info, value))
+            headers.append((request_info, value))
+
+        if self.terminal:
+            self.writer.write(''.join(terminal))
+            self.writer.write('\n\n')
+
+        if self.headers:
+            for h in headers:
+                key   = str(h[0])
+                value = str(h[1])
+                name  = 'X-Pecan-%s' % key
+                state.response.headers[name] = value
+
+    def get_controller(self, state):
+        '''
+        Retrieves the actual controller name from the application
+        Specific to Pecan (not available in the request object)
+        '''
+        path = state.request.pecan['routing_path'].split('/')[1:]
+        controller, reminder = lookup_controller(state.app.root, path)
+        return controller.__str__().split()[2]
+
+    def format_hooks(self, hooks):
+        '''
+        Tries to format the hook objects to be more readable
+        Specific to Pecan (not available in the request object)
+        '''
+        str_hooks = [str(i).split()[0].strip('<') for i in hooks]
+        return [i.split('.')[-1] for i in str_hooks if '.' in i]
+
+
