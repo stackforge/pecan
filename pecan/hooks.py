@@ -276,8 +276,8 @@ class RequestViewerHook(PecanHook):
 
         if self.headers:
             for h in headers:
-                key   = h[0]
-                value = h[1]
+                key   = str(h[0])
+                value = str(h[1])
                 name  = 'X-Pecan-%s' % key
                 state.response.headers[name] = value
 
