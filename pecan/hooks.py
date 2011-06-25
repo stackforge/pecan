@@ -217,13 +217,15 @@ class RequestViewerHook(PecanHook):
             'hooks',
     ]
 
-    def __init__(self, config=None, writer=sys.stdout):
+    def __init__(self, config=None, writer=sys.stdout, terminal=True, headers=True):
         '''
-        :param config: A (optional) dictionary that can hold ``items`` and/or
-                       ``blacklist`` keys.  
-        :param writer: The stream writer to use. Can redirect output to other 
-                       streams as long as the passed in stream has a ``write`` 
-                       callable method.
+        :param config:   A (optional) dictionary that can hold ``items`` and/or
+                         ``blacklist`` keys.  
+        :param writer:   The stream writer to use. Can redirect output to other 
+                         streams as long as the passed in stream has a ``write`` 
+                         callable method.
+        :param terminal: Outputs to the chosen stream writer (usually the terminal)
+        :param headers:  Sets values to the X-HTTP headers
         '''
         if not config:
             self.config = {'items' : self.available}
@@ -235,6 +237,8 @@ class RequestViewerHook(PecanHook):
         self.writer     = writer
         self.items      = self.config.get('items', self.available)
         self.blacklist  = self.config.get('blacklist', [])
+        self.terminal   = terminal
+        self.headers    = headers
 
     def after(self, state):
         responses = {
@@ -251,8 +255,9 @@ class RequestViewerHook(PecanHook):
                 i for i in self.items
                 if i in self.available or hasattr(state.request, i)
         ]
-        out          = []
-        will_skip    = [i for i in self.blacklist if state.request.path.startswith(i)]
+        terminal  = []
+        headers   = []
+        will_skip = [i for i in self.blacklist if state.request.path.startswith(i)]
 
         if will_skip:
             return
@@ -264,12 +269,23 @@ class RequestViewerHook(PecanHook):
                     value = getattr(state.request, request_info)
                 else:
                     value = value(self, state)
-                out.append("%-12s - %s\n" % (request_info, value))
-            except Exception, e:
-                out.append("%-12s - %s\n" % (request_info, e))
 
-        self.writer.write(''.join(out))
-        self.writer.write('\n\n')
+            except Exception, e:
+                value = e
+
+            terminal.append('%-12s - %s\n' % (request_info, value))
+            headers.append((request_info, value))
+
+        if self.terminal:
+            self.writer.write(''.join(terminal))
+            self.writer.write('\n\n')
+
+        if self.headers:
+            for h in headers:
+                key   = h[0]
+                value = h[1]
+                name   = 'X-Pecan-%s' % key
+                state.response.headers[name] = value
 
     def get_controller(self, state):
         '''
