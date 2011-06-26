@@ -84,3 +84,183 @@ the app and browse the application from our web browser::
     response: 	 200 OK
 
 
+Included Pecan Hooks
+====================
+Pecan includes some hooks in its core and are very simple to start using them
+away. This section will describe their different uses, how to configure them
+and examples of common scenarios.
+
+.. _requestviewerhook:
+
+RequestViewerHook
+=================
+This hooks is very useful for debugging purposes. It has access to every
+attribute the ``response`` object has plus a few others that are specific to
+the framework.
+
+There are two main ways that this hook can provide information about a request:
+
+#. Terminal or logging output (via an file-like stream like `stdout`)
+#. Custom header keys in the actual response.
+
+By default, both outputs are on if they are not configured.
+
+For the actual object reference, please see :ref:`pecan_hooks`.
+
+Automatically Enabled
+---------------------
+This hook can be automatically added to the application itself if a certain key
+exists in the configuration used for the app. This key is::
+
+    requestviewer
+
+It does not need to contain anything (could be an empty dictionary), and this
+is enough to force Pecan to load this hook when the WSGI application is
+created.
+
+Configuration
+-------------
+There are a few ways to get this hook properly configured and running. However,
+it is useful to know that no actual configuration is needed to have it up and
+running. 
+
+By default it will output information about these items:
+
+* path       : Displays the url that was used to generate this response
+* status     : The response from the server (e.g. '200 OK')
+* method     : The method for the request (e.g. 'GET', 'POST', 'PUT or 'DELETE')
+* controller : The actual controller method in Pecan responsible for the response
+* params     : A list of tuples for the params passed in at request time
+* hooks      : Any hooks that are used in the app will be listed here.
+
+No configuration will show those values in the terminal via `stdout` and it
+will also add them to the response headers (in the form of
+`X-Pecan-item_name`).
+
+This is how the terminal output look for a `/favicon.ico` request ::
+
+    path         - /favicon.ico
+    status       - 404 Not Found
+    method       - GET
+    controller   - The resource could not be found.
+    params       - []
+    hooks        - ['RequestViewerHook']
+
+In the above case, the file was not found, and the information was properly
+gathered and returned via `stdout`.
+
+And this is how those same values would be seen in the response headers::
+
+    X-Pecan-path	/favicon.ico
+    X-Pecan-status	404 Not Found
+    X-Pecan-method	GET
+    X-Pecan-controller	The resource could not be found.
+    X-Pecan-params	[]
+    X-Pecan-hooks	['RequestViewerHook']
+
+The hook can be configured via a dictionary (or Config object from Pecan) when
+adding it to the application or via the `requestviewer` key in the actual
+configuration being passed to the application.
+
+The configuration dictionary is flexible (none of the keys are required) and
+can hold two keys: `items` and `blacklist`.
+
+This is how the hook would look if configured directly when using `make_app`
+(shortened for brevity)::
+
+    ...
+    hooks = [
+        RequestViewerHook({'items':['path']})
+    ]
+
+And the same configuration could be set in the config file like::
+
+    requestviewer = {'items:['path']}
+
+Specifying items
+----------------
+Items are the actual information objects that the hook will use to return
+information. Sometimes you will need a specific piece of information or
+a certain bunch of them according to the development need so the defaults will
+need to be changed and a list of items specified.
+
+.. :note:
+    When specifying a list of items, this list overrides completely the
+    defaults, so if a single item is listed, only that item will be returned by
+    the hook.
+
+Remember, the hook has access to every single attribute the request object has
+and not only to the default ones that are displayed, so you can fine tune the
+information displayed.
+
+These is a list containing all the possible attributes the hook has access to
+(directly from `webob`):
+
+accept                       make_body_seekable 
+accept_charset               make_tempfile      
+accept_encoding              max_forwards       
+accept_language              method             
+application_url              params             
+as_string                    path               
+authorization                path_info          
+blank                        path_info_peek     
+body                         path_info_pop         
+body_file                    path_qs                      
+body_file_raw                path_url                     
+body_file_seekable           postvars                     
+cache_control                pragma                       
+call_application             query_string                 
+charset                      queryvars                    
+content_length               range                        
+content_type                 referer                      
+cookies                      referrer                     
+copy                         relative_url                 
+copy_body                    remote_addr                  
+copy_get                     remote_user                  
+date                         remove_conditional_headers   
+decode_param_names           request_body_tempfile_limit  
+environ                      scheme                       
+from_file                    script_name                  
+from_string                  server_name                  
+get_response                 server_port                  
+headers                      str_GET                      
+host                         str_POST                     
+host_url                     str_cookies                  
+http_version                 str_params                   
+if_match                     str_postvars                 
+if_modified_since            str_queryvars                
+if_none_match                unicode_errors               
+if_range                     upath_info                   
+if_unmodified_since          url                          
+is_body_readable             urlargs                      
+is_body_seekable             urlvars                      
+is_xhr                       uscript_name                 
+                             user_agent                 
+
+And these are the specific ones from Pecan and the hook:
+
+ * controller
+ * hooks 
+ * params (params is actually available from `webob` but it is parsed 
+   by the hook for redability)
+
+Blacklisting
+------------
+Sometimes is annoying to get information about *every* single request. For this
+purpose, there is a matching list of url paths that you can pass into the hook
+so that paths that do not match are returned.
+
+The matching is done at the start of the url path, so be careful when using
+this feature. For example, if you pass a configuration like this one::
+
+    { 'blacklist': ['/f'] }
+
+It would not show *any* url that starts with `f`, effectively behaving like
+a globbing regular expression (but not quite as powerful).
+
+For any number of blocking you may need, just add as many items as wanted::
+
+    { 'blacklist' : ['/favicon.ico', '/javascript', '/images'] }
+
+Again, the `blacklist` key can be used along with the `items` key or not (it is
+not required).

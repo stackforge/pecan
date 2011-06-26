@@ -182,10 +182,10 @@ class RequestViewerHook(PecanHook):
     Valid items are *any* item that the ``request`` object holds, by default it uses
     the following:
 
-    * url
+    * path
+    * status
     * method
-    * response
-    * context
+    * controller
     * params
     * hooks
 
@@ -206,6 +206,7 @@ class RequestViewerHook(PecanHook):
     .. :note::
         This key should always use a ``list`` of items to use.
 
+    For more detailed documentation about this hook, please see :ref:`requestviewerhook`
     '''
 
     available = ['path', 'status', 'method', 'controller', 'params', 'hooks']
