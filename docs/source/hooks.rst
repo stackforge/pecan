@@ -196,46 +196,50 @@ information displayed.
 These is a list containing all the possible attributes the hook has access to
 (directly from `webob`):
 
-accept                       make_body_seekable 
-accept_charset               make_tempfile      
-accept_encoding              max_forwards       
-accept_language              method             
-application_url              params             
-as_string                    path               
-authorization                path_info          
-blank                        path_info_peek     
-body                         path_info_pop         
-body_file                    path_qs                      
-body_file_raw                path_url                     
-body_file_seekable           postvars                     
-cache_control                pragma                       
-call_application             query_string                 
-charset                      queryvars                    
-content_length               range                        
-content_type                 referer                      
-cookies                      referrer                     
-copy                         relative_url                 
-copy_body                    remote_addr                  
-copy_get                     remote_user                  
-date                         remove_conditional_headers   
-decode_param_names           request_body_tempfile_limit  
-environ                      scheme                       
-from_file                    script_name                  
-from_string                  server_name                  
-get_response                 server_port                  
-headers                      str_GET                      
-host                         str_POST                     
-host_url                     str_cookies                  
-http_version                 str_params                   
-if_match                     str_postvars                 
-if_modified_since            str_queryvars                
-if_none_match                unicode_errors               
-if_range                     upath_info                   
-if_unmodified_since          url                          
-is_body_readable             urlargs                      
-is_body_seekable             urlvars                      
-is_xhr                       uscript_name                 
-                             user_agent                 
+======================  ==========================
+======================  ==========================
+accept                       make_tempfile              
+accept_charset               max_forwards               
+accept_encoding              method                     
+accept_language              params                     
+application_url              path                       
+as_string                    path_info                  
+authorization                path_info_peek             
+blank                        path_info_pop              
+body                         path_qs                    
+body_file                    path_url                     
+body_file_raw                postvars                     
+body_file_seekable           pragma                       
+cache_control                query_string                 
+call_application             queryvars                    
+charset                      range                        
+content_length               referer                      
+content_type                 referrer                     
+cookies                      relative_url                 
+copy                         remote_addr                  
+copy_body                    remote_user                  
+copy_get                     remove_conditional_headers   
+date                         request_body_tempfile_limit  
+decode_param_names           scheme                       
+environ                      script_name                  
+from_file                    server_name                  
+from_string                  server_port                  
+get_response                 str_GET                      
+headers                      str_POST                     
+host                         str_cookies                  
+host_url                     str_params                   
+http_version                 str_postvars                 
+if_match                     str_queryvars                
+if_modified_since            unicode_errors               
+if_none_match                upath_info                   
+if_range                     url                          
+if_unmodified_since          urlargs                      
+is_body_readable             urlvars                      
+is_body_seekable             uscript_name                 
+is_xhr                       user_agent                   
+make_body_seekable           
+
+======================  ==========================
 
 And these are the specific ones from Pecan and the hook:
 
