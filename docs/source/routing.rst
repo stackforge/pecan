@@ -3,9 +3,6 @@
 Routing
 =======
 
-.. note::
-    This portion of the documentation is still a work in progress.
-
 When a user requests a Pecan-powered page how does Pecan know which
 controller to use? Pecan uses a method known as Object-dispatch to map a
 HTTP request to a controller. Obejct-dispatch begins by splitting the
@@ -54,10 +51,30 @@ example above, you may have noticed the ``expose`` decorator.
 Routing Algorithm
 -----------------
 
+Sometimes, the standard object-dispatch routing isn't adquate to properly
+route a URL to a controller. Pecan provides several ways to short-circuit 
+the object-dispatch system to process URLs with more control, including the
+``_lookup``, ``_default``, and ``_route`` special methods. Defining these
+methods on your controller objects provide several additional ways to 
+process all or part of a URL.
 
 
 ``_lookup``
 -----------
+
+The ``_lookup`` special method provides a way to process part of a URL, 
+and then return a new controller object to route on for the remainder.
+
+A ``_lookup`` method will accept one or more arguments representing chunks
+of the URL to be processed, split on `/`, and then a `*remainder` list which
+will be processed by the returned controller via object-dispatch.
+
+The ``_lookup`` method must return a two-tuple including the controller to
+process the remainder of the URL, and the remainder of the URL itself.
+
+The ``_lookup`` method on a controller is called when no other controller 
+matches the URL via standard object-dispatch.
+
 
 Example 
 
@@ -86,6 +103,10 @@ Example
 ``_default``
 ------------
 
+The ``_default`` controller is called when no other controller methods
+match the URL vis standard object-dispatch.
+
+
 Example 
 
 ::
@@ -109,15 +130,20 @@ Example
 Overriding ``_route``
 ---------------------
 
-Example  
+The ``_route`` method allows a controller to completely override the routing 
+mechanism of Pecan. Pecan itself uses the ``_route`` method to implement its
+``RestController``. If you want to design an alternative routing system on 
+top of Pecan, defining a base controller class that defines a ``_route`` method
+will enable you to have total control.
 
-::
 
-    from pecan import expose
+Controller Arguments
+--------------------
 
-
-Controller Args
----------------
+A controller can receive arguments in a variety of ways, including ``GET`` and 
+``POST`` variables, and even chunks of the URL itself. ``GET`` and ``POST`` 
+arguments simply map to arguments on the controller method, while unprocessed
+chunks of the URL can be passed as positional arguments to the controller method.
 
 Example  
 
@@ -131,7 +157,11 @@ Example
             return msg
 
 
-Client requests ``/say/hi`` the controller returns "hi".
+In this example, if a ``GET`` request is sent to ``/say/hello``, the controller
+returns "hello". On the other hand, if a ``GET`` request is sent to 
+``/say?msg=World``, then the controller returns "World".
+
+Keyword arguments are also supported for defaults.
 
 kwargs    
 
@@ -141,18 +171,26 @@ kwargs
     
     class RootController(object):
         @expose()
-        def say(self, msg=None):
-            if msg is None:
-                return "I not sure what to say"
-            else:
-                return msg
+        def say(self, msg="No message"):
+            return msg
 
-Client requests ``/say?msg=hello`` the controller returns "hello".
+In this example, if the client requests ``/say?msg=hello`` the controller returns 
+"hello". However, if the client requests ``/say`` without any arguments, the 
+controller returns "No message".
+
 
 Generic Functions
 -----------------
 
-Example  
+Pecan also provides a unique and useful way to dispatch from a controller to other
+methods based upon the ``HTTP`` method (``GET``, ``POST``, ``PUT``, etc.) using
+a system called "generic functions." A controller can be flagged as generic via a
+keyword argument on the ``@expose`` decorator. This makes it possible to utilize
+the ``@when`` decorator on the controller itself to define controllers to be called
+instead when certain ``HTTP`` methods are sent.
+
+
+Example
 
 ::
 
@@ -161,22 +199,24 @@ Example
     class RootController(object):
         @expose(generic=True)
         def index(self):
-            pass
+            return 'Default case'
 
         @index.when(method='POST')
         def index_post(self):
-            pass
+            return 'You POSTed to me!'
 
         @index.when(method='GET')
         def index_get(self):
-            pass
+            return 'You GET me!'
 
 
 Helper Functions
 ----------------
 
-redirect
-abort
+Pecan also provides several useful helper functions. The ``redirect``
+function allows you to issue internal or ``HTTP 302`` The ``redirect``
+utility, along with several other useful helpers, are documented in 
+the :ref:`pecan_core`.
 
 
 ``@expose``
@@ -218,3 +258,5 @@ requests ``/hello.json``. The second tells the templating engine to use
 tells Pecan to use the html_template.mako when the client requests
 ``/hello.html``. If the client requests ``/hello``, Pecan will use the
 text/html template.
+
+Please see :ref:`pecan_decorators` for more information on ``@expose``.
