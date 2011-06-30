@@ -819,10 +819,12 @@ class TestTransactionHook(object):
         except IndexError:
             pass
 
-        assert len(run_hook) == 3
-        assert run_hook[0] == 'start'
-        assert run_hook[1] == 'rollback'
-        assert run_hook[2] == 'clear'
+        assert len(run_hook) == 5
+        assert run_hook[0] == 'start_ro'
+        assert run_hook[1] == 'clear'
+        assert run_hook[2] == 'start'
+        assert run_hook[3] == 'rollback'
+        assert run_hook[4] == 'clear'
         
         run_hook = []        
         
@@ -843,10 +845,12 @@ class TestTransactionHook(object):
         except IndexError:
             pass
 
-        assert len(run_hook) == 3
-        assert run_hook[0] == 'start'
-        assert run_hook[1] == 'rollback'
-        assert run_hook[2] == 'clear'
+        assert len(run_hook) == 5
+        assert run_hook[0] == 'start_ro'
+        assert run_hook[1] == 'clear'
+        assert run_hook[2] == 'start'
+        assert run_hook[3] == 'rollback'
+        assert run_hook[4] == 'clear'
 
 
 class TestRequestViewerHook(object):

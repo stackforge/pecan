@@ -138,7 +138,7 @@ class ValidationException(ForwardRequestException):
     '''
     
     def __init__(self, location=None, errors={}):
-        if hasattr(state, 'controller'):
+        if state.controller is not None:
             cfg = _cfg(state.controller)
         else:
             cfg = {}
@@ -491,6 +491,7 @@ class Pecan(object):
         state.response     = Response()
         state.hooks        = []
         state.app          = self
+        state.controller   = None
         
         # handle the request
         try:
