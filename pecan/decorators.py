@@ -1,4 +1,4 @@
-from inspect import getargspec
+from inspect import getargspec, getmembers, isclass, ismethod
 from util import _cfg
 
 __all__ = [
@@ -90,15 +90,21 @@ def expose(template        = None,
 def transactional(ignore_redirects=True):
     '''
     If utilizing the :mod:`pecan.hooks` ``TransactionHook``, allows you
-    to flag a controller method as being wrapped in a transaction,
+    to flag a controller method or class as being wrapped in a transaction,
     regardless of HTTP method.
     
     :param ignore_redirects: Indicates if the hook should ignore redirects for this controller or not.
     '''
-    
+
     def deco(f):
-        _cfg(f)['transactional'] = True
-        _cfg(f)['transactional_ignore_redirects'] = ignore_redirects
+        if isclass(f):
+            for method in [m[1] for m in getmembers(f) if ismethod(m[1])]:
+                if getattr(method, 'exposed', False):
+                    _cfg(method)['transactional'] = True
+                    _cfg(method)['transactional_ignore_redirects'] = _cfg(method).get('transactional_ignore_redirects', ignore_redirects)
+        else:
+            _cfg(f)['transactional'] = True
+            _cfg(f)['transactional_ignore_redirects'] = ignore_redirects
         return f
     return deco
 
