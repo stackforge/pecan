@@ -523,5 +523,4 @@ class Pecan(object):
             del state.hooks
             del state.request
             del state.response
-            if hasattr(state, 'controller'):
-                del state.controller
+            del state.controller
