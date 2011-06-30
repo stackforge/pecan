@@ -148,7 +148,7 @@ class TransactionHook(PecanHook):
         # don't set `state.request.error = True`.
         #
         transactional_ignore_redirects = state.request.method not in ('GET', 'HEAD')
-        if hasattr(state, 'controller'):
+        if state.controller is not None:
             transactional_ignore_redirects = _cfg(state.controller).get('transactional_ignore_redirects', transactional_ignore_redirects)
         if type(e) is HTTPFound and transactional_ignore_redirects is True:
             return
