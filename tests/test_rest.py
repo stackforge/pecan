@@ -725,3 +725,107 @@ class TestRestController(object):
         r = app.get('/foos/0/bars/0/bazs/0')
         assert r.status_int == 200
         assert r.body == 'zero-zero-zero'
+
+    def test_sub_nested_rest_with_overwrites(self):
+
+        class FinalController(object):
+
+            @expose()
+            def index(self):
+                return 'FINAL'
+
+            @expose()
+            def named(self):
+                return 'NAMED'
+        
+        class BazsController(RestController):
+            
+            data = [[['zero-zero-zero']]]
+
+            final = FinalController()
+            
+            @expose()
+            def get_one(self, foo_id, bar_id, id):
+                return self.data[int(foo_id)][int(bar_id)][int(id)]
+
+            @expose()
+            def post(self):
+                return 'POST-GRAND-CHILD'
+
+            @expose()
+            def put(self, id):
+                return 'PUT-GRAND-CHILD'
+        
+        class BarsController(RestController):
+            
+            data = [['zero-zero']]
+            
+            bazs = BazsController()
+            
+            @expose()
+            def get_one(self, foo_id, id):
+                return self.data[int(foo_id)][int(id)]
+
+            @expose()
+            def post(self):
+                return 'POST-CHILD'
+
+            @expose()
+            def put(self, id):
+                return 'PUT-CHILD'
+
+        class FoosController(RestController):
+            
+            data = ['zero']
+            
+            bars = BarsController()
+            
+            @expose()
+            def get_one(self, id):
+                return self.data[int(id)]
+
+            @expose()
+            def post(self):
+                return 'POST'
+
+            @expose()
+            def put(self, id):
+                return 'PUT'
+        
+        class RootController(object):
+            foos = FoosController()
+        
+        # create the app
+        app = TestApp(make_app(RootController()))
+        
+        r = app.post('/foos')
+        assert r.status_int == 200
+        assert r.body == 'POST'
+
+        r = app.put('/foos/0')
+        assert r.status_int == 200
+        assert r.body == 'PUT'
+
+        r = app.post('/foos/bars')
+        assert r.status_int == 200
+        assert r.body == 'POST-CHILD'
+
+        r = app.put('/foos/bars/0')
+        assert r.status_int == 200
+        assert r.body == 'PUT-CHILD'
+
+        r = app.post('/foos/bars/bazs')
+        assert r.status_int == 200
+        assert r.body == 'POST-GRAND-CHILD'
+
+        r = app.put('/foos/bars/bazs/0')
+        assert r.status_int == 200
+        assert r.body == 'PUT-GRAND-CHILD'
+
+        r = app.get('/foos/bars/bazs/final/')
+        assert r.status_int == 200
+        assert r.body == 'FINAL'
+
+        r = app.get('/foos/bars/bazs/final/named')
+        assert r.status_int == 200
+        assert r.body == 'NAMED'
