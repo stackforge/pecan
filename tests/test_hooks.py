@@ -609,6 +609,15 @@ class TestTransactionHook(object):
         assert run_hook[5] == 'action-two'
         assert run_hook[6] == 'clear'
 
+        run_hook = []
+
+        response = app.get('/fourohfour', status=404)
+        assert response.status_int == 404
+
+        assert len(run_hook) == 2
+        assert run_hook[0] == 'start_ro'
+        assert run_hook[1] == 'clear'
+
     def test_transaction_hook_with_transactional_decorator(self):
         run_hook = []
 

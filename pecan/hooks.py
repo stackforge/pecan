@@ -160,10 +160,18 @@ class TransactionHook(PecanHook):
                 self.rollback()
             else:
                 self.commit()
+
+                #
+                # If a controller was routed to, find any
+                # after_commit actions it may have registered, and perform
+                # them.
+                #
                 controller = getattr(state, 'controller', None)
-                actions = _cfg(controller).get('after_commit', [])
-                for action in actions:
-                    action()
+                if controller is not None:
+                    actions = _cfg(controller).get('after_commit', [])
+                    for action in actions:
+                        action()
+
         self.clear()
 
 class RequestViewerHook(PecanHook):
