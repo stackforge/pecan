@@ -64,14 +64,18 @@ class PecanPlugin(object):
         """
         self.impl = PecanPluginImpl.create_from_session(session)
         self.impl.sessionstart(session)
-    
+
     def pytest_configure_node(self, node):
         """
         Configures a new slave node.
         """
         if self.impl:
             self.impl.configure_node(node)
-    
+
+    def pytest_runtest_setup(self, item):
+        if self.impl:
+            self.impl.ensure_config_loaded()
+
     def pytest_testnodedown(self, node, error):
         """
         Tears down an exiting node.
@@ -142,11 +146,14 @@ class PecanPluginImpl(object):
         if py.test.temp_dir and os.path.exists(py.test.temp_dir):
             self.log('Removing temporary directory %s' % py.test.temp_dir)
             shutil.rmtree(py.test.temp_dir)
-    
+
     def sessionstart(self, session):
         self.log('Starting session')
-        self._setup_app()
         self._create_temp_directory()
+
+    def ensure_config_loaded(self):
+        if not hasattr(py.test, 'wsgi_app') or py.test.wsgi_app is None:
+            self._setup_app()
     
     def configure_node(self, node):
         pass
@@ -176,9 +183,9 @@ class MasterPecanPluginImpl(PecanPluginImpl):
     
     def sessionstart(self, session):
         self.log('Starting master session')
-        self._setup_app()
         self._create_temp_directory()
-    
+        self._setup_app()
+
     def configure_node(self, node):
         self.log('Configuring slave node %s' % node.gateway.id)
         node.slaveinput['pecan_master_host'] = socket.gethostname()
@@ -204,15 +211,15 @@ class SlavePecanPluginImpl(PecanPluginImpl):
     def _set_temp_directory(self, session):
         self.log('Setting temporary directory to %s' % session.config.slaveinput['pecan_temp_dir'])
         py.test.temp_dir = session.config.slaveinput['pecan_temp_dir']
-    
+
     def sessionstart(self, session):
         self.log('Starting slave session')
-        self._setup_app()
         if self._is_collocated(session):
             self._set_temp_directory(session)
         else:
             self._create_temp_directory()
-    
+        self._setup_app()
+
     def sessionfinish(self, session, exitstatus):
         self.log('Stopping slave session')
         if not self._is_collocated(session):
