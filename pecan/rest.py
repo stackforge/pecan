@@ -19,12 +19,20 @@ class RestController(object):
     def _route(self, args):
         
         # convention uses "_method" to handle browser-unsupported methods
-        method = request.params.get('_method', request.method).lower()
+        if request.environ.get('pecan.validation_redirected', False) == True:
+            #
+            # If the request has been internally redirected due to a validation
+            # exception, we want the request method to be enforced as GET, not
+            # the `_method` param which may have been passed for REST support.
+            #
+            method = request.method.lower()
+        else:
+            method = request.params.get('_method', request.method).lower()
         
         # make sure DELETE/PUT requests don't use GET
         if request.method == 'GET' and method in ('delete', 'put'):
             abort(405)
-        
+
         # check for nested controllers
         result = self._find_sub_controllers(args)
         if result:

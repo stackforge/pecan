@@ -153,6 +153,7 @@ class ValidationException(ForwardRequestException):
         if cfg.get('htmlfill') is not None:
             request.environ['pecan.htmlfill'] = cfg['htmlfill']
         request.environ['REQUEST_METHOD'] = 'GET'
+        request.environ['pecan.validation_redirected'] = True
         ForwardRequestException.__init__(self, location)
 
 
