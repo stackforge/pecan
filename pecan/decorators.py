@@ -2,15 +2,11 @@ from inspect import getargspec, getmembers, isclass, ismethod
 from util import _cfg
 
 __all__ = [
-    'expose', 'transactional', 'accept_noncanonical'
+    'expose', 'transactional', 'accept_noncanonical', 'after_commit'
 ]
 
 
 def when_for(controller):
-    '''
-    
-    '''
-    
     def when(method=None, **kw):
         def decorate(f):
             expose(**kw)(f)

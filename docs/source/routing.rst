@@ -5,8 +5,8 @@ Routing
 
 When a user requests a Pecan-powered page how does Pecan know which
 controller to use? Pecan uses a method known as Object-dispatch to map a
-HTTP request to a controller. Obejct-dispatch begins by splitting the
-path into a list of components and then walking object path starting at
+HTTP request to a controller. Object-dispatch begins by splitting the
+path into a list of components and then walking an object path starting at
 the root controller. Let's look at a simple store application: 
 
 ::
@@ -51,7 +51,7 @@ example above, you may have noticed the ``expose`` decorator.
 Routing Algorithm
 -----------------
 
-Sometimes, the standard object-dispatch routing isn't adquate to properly
+Sometimes, the standard object-dispatch routing isn't adequate to properly
 route a URL to a controller. Pecan provides several ways to short-circuit 
 the object-dispatch system to process URLs with more control, including the
 ``_lookup``, ``_default``, and ``_route`` special methods. Defining these
@@ -214,28 +214,28 @@ Helper Functions
 ----------------
 
 Pecan also provides several useful helper functions. The ``redirect``
-function allows you to issue internal or ``HTTP 302`` The ``redirect``
-utility, along with several other useful helpers, are documented in 
-the :ref:`pecan_core`.
+function allows you to issue internal or ``HTTP 302`` redirects. 
+The ``redirect`` utility, along with several other useful helpers, 
+are documented in :ref:`pecan_core`.
 
 
 ``@expose``
 -----------
 
-At its core, ``expose`` is how you tell Pecan which methods in a class
-are controllers. ``expose`` accepts eight optional parameters some of
+At its core, ``@expose`` is how you tell Pecan which methods in a class
+are controllers. ``@expose`` accepts eight optional parameters some of
 which can impact routing. 
 
 ::
 
-    def expose(template    = None,
+    expose(template        = None,
            content_type    = 'text/html',
            schema          = None,
            json_schema     = None,
            variable_decode = False,
            error_handler   = None,
            htmlfill        = None,
-           generic         = False):
+           generic         = False)
 
 
 Let's look at an example using template and content_type
@@ -252,11 +252,11 @@ Let's look at an example using template and content_type
             return {'msg': 'Hello!'}
 
 You'll notice that we used three expose decorators. The first tells
-Pecan to serialize ``dict`` using JSON serialization when the client
-requests ``/hello.json``. The second tells the templating engine to use
-``text_template.mako`` when the client request ``/hello.txt``. The third
-tells Pecan to use the html_template.mako when the client requests
-``/hello.html``. If the client requests ``/hello``, Pecan will use the
-text/html template.
+Pecan to serialize our response namespace using JSON serialization when 
+the client requests ``/hello.json``. The second tells the templating
+engine to use ``text_template.mako`` when the client request ``/hello.txt``. 
+The third tells Pecan to use the html_template.mako when the client
+requests ``/hello.html``. If the client requests ``/hello``, Pecan will 
+use the text/html template.
 
 Please see :ref:`pecan_decorators` for more information on ``@expose``.

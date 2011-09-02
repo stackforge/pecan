@@ -134,6 +134,8 @@ manner:
 
 #.  If the controller returns successfully, ``model.clear()`` is called.
 
+Also note that there is a useful ``@after_commit`` decorator provided in :ref:`pecan_decorators`.
+
 Splitting Reads and Writes
 ----------------
 Employing the strategy above with ``TransactionHook`` makes it very simple to split database
