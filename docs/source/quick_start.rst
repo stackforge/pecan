@@ -158,12 +158,6 @@ To get up and running in no time the template helps a lot!
     If you fail to pass an argument you will get a small error message asking
     for a configuration file. 
 
-The location for the config file and the argument itself are very flexible. You
-can pass an absolute path or just the name of the file without an extension,
-like::
-
-    $ pecan serve config
-
 
 Simple Configuration
 --------------------
