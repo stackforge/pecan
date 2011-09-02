@@ -85,14 +85,11 @@ def redirect(location=None, internal=False, code=None, headers={}, add_slash=Fal
     new_env = request.environ.copy()
     if add_slash:
         if location is None:
-            check_location = state.request.url
-            split_url = list(urlsplit(check_location))
+            split_url = list(urlsplit(state.request.url))
             new_proto = new_env.get('HTTP_X_FORWARDED_PROTO', split_url[0])
             split_url[0] = new_proto
-            check_location = urlunsplit(split_url)
-        else:
-            check_location = location
-        location = check_location.rstrip('/') + '/'
+            location = urlunsplit(split_url)
+        location = location.rstrip('/') + '/'
     if not headers:
         headers = {}
     if internal:
