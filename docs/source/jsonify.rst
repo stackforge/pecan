@@ -5,14 +5,14 @@ JSON Support
 ============
 Pecan includes a simple, easy-to-use system for generating and serving
 ``JSON``. To get started, create a file in your project called
-``json.py`` which should be imported in your ``app.py``.
+``json.py`` and import it in your project's ``app.py``.
 
 Your ``json`` module will contain a series of rules for generating
 ``JSON`` from objects you return in your controller, utilizing
 "generic" function support from the 
 `simplegeneric <http://pypi.python.org/pypi/simplegeneric>`_ library.
 
-Let us imagine that we have a controller in our Pecan application which
+Let's say that we have a controller in our Pecan application which
 we want to use to return ``JSON`` output for a ``User`` object::
     
     from myproject.lib import get_current_user
