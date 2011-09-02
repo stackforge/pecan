@@ -529,6 +529,16 @@ class TestBase(TestCase):
         r = app.get('/', status=404)
         assert r.status_int == 404
     
+    def test_abort_with_detail(self):
+        class RootController(object):
+            @expose()
+            def index(self):
+                abort(status_code=401, detail='Not Authorized')
+        
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/', status=401)
+        assert r.status_int == 401
+
     def test_redirect(self):
         class RootController(object):
             @expose()
