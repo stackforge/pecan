@@ -9,6 +9,7 @@ from mimetypes          import guess_type, add_type
 from formencode         import htmlfill, Invalid, variabledecode
 from formencode.schema  import merge_dicts
 from paste.recursive    import ForwardRequestException
+from urlparse           import urlsplit, urlunsplit
 
 try:
     from simplejson import loads
@@ -69,7 +70,7 @@ def abort(status_code=None, detail='', headers=None, comment=None, **kw):
     raise exc.status_map[status_code](detail=detail, headers=headers, comment=comment, **kw)
 
 
-def redirect(location, internal=False, code=None, headers={}):
+def redirect(location=None, internal=False, code=None, headers={}, add_slash=False):
     '''
     Perform a redirect, either internal or external. An internal redirect
     performs the redirect server-side, while the external redirect utilizes
@@ -81,6 +82,16 @@ def redirect(location, internal=False, code=None, headers={}):
     :param headers: Any HTTP headers to send with the response, as a dictionary.
     '''
     
+    new_env = request.environ.copy()
+    if add_slash:
+        if location is None:
+            split_url = list(urlsplit(state.request.url))
+            new_proto = new_env.get('HTTP_X_FORWARDED_PROTO', split_url[0])
+            split_url[0] = new_proto
+            location = urlunsplit(split_url)
+        location = location.rstrip('/') + '/'
+    if not headers:
+        headers = {}
     if internal:
         if code is not None:
             raise ValueError('Cannot specify a code for internal redirects')
@@ -210,7 +221,7 @@ class Pecan(object):
                         'POST data when redirected. Please update your code '\
                         'to POST to '%s/' or set force_canonical to False" % \
                         (request.pecan['routing_path'], request.pecan['routing_path'])
-                raise exc.HTTPFound(add_slash=True)
+                redirect(code=302, add_slash=True)
             return e.controller, e.remainder
     
     def determine_hooks(self, controller=None):
