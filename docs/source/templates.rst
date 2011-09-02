@@ -14,7 +14,15 @@ supports the following templating engines:
  * `JSON`
 
 The default template system is `mako`, but can be configured by passing the 
-``default_renderer`` key in your app configuration.
+``default_renderer`` key in your app configuration::
+    
+    app = {
+        'default_renderer' : 'kajiki',
+        # ...
+    }
+
+The available renderer type strings are `mako`, `genshi`, `kajiki`, `jinja`, 
+and `json`.
 
 
 Using Renderers
@@ -46,6 +54,23 @@ The :ref:`pecan_core` module contains two useful helper functions related to
 templating. The first is ``override_template``, which allows you to overrides
 which template is used in your controller, and the second is ``render``, which
 allows you to manually render output using the Pecan templating framework.
+
+To use ``override_template``, simply call it within the body of your controller
+
+::
+
+    class MyController(object):
+        @expose('template_one.html')
+        def index(self):
+            # ...
+            override_template('template_two.html')
+            return dict(message='I will now render with template_two.html')
+
+The ``render`` helper is also quite simple to use::
+
+    @expose()
+    def controller(self):
+        return render('my_template.html', dict(message='I am the namespace'))
 
 
 The JSON Renderer
