@@ -25,6 +25,10 @@ def make_app(root, static_root=None, debug=False, errorcfg={}, wrap_app=None, lo
     '''
     
     '''
+    if hasattr(conf, 'requestviewer'):
+        existing_hooks = kw.get('hooks', [])
+        existing_hooks.append(RequestViewerHook(conf.requestviewer))
+        kw['hooks'] = existing_hooks
 
     app = Pecan(root, **kw)
     if wrap_app:
@@ -39,8 +43,4 @@ def make_app(root, static_root=None, debug=False, errorcfg={}, wrap_app=None, lo
         app = Cascade([StaticURLParser(static_root), app])
     if isinstance(logging, dict) or logging == True:
         app = TransLogger(app, **(isinstance(logging, dict) and logging or {}))
-    if hasattr(conf, 'requestviewer'):
-        existing_hooks = kw.get('hooks', [])
-        existing_hooks.append(RequestViewerHook(conf.requestviewer))
-        kw['hooks'] = existing_hooks
     return app

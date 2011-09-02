@@ -1,7 +1,5 @@
 import cgi
 
-__all__ = ['RendererFactory']
-
 _builtin_renderers = {}
 error_formatters = []
 

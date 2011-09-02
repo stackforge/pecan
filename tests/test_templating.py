@@ -1,6 +1,9 @@
 from unittest import TestCase
 
-from pecan.templating import RendererFactory
+from pecan.templating import RendererFactory, format_line_context
+
+import os
+import tempfile
 
 class TestTemplate(TestCase):
     def setUp(self):
@@ -26,3 +29,19 @@ class TestTemplate(TestCase):
 
         self.assertEqual(extra_vars.make_ns({'bar':2}), {'foo':1, 'bar':2})
         self.assertEqual(extra_vars.make_ns({'foo':2}), {'foo':2})
+
+
+class TestTemplateLineFormat(TestCase):
+
+    def setUp(self):
+        self.f = tempfile.NamedTemporaryFile()
+
+    def tearDown(self):
+        os.remove(self.f.name)
+
+    def test_format_line_context(self):
+        for i in range(11):
+            self.f.write('Testing Line %d\n' % i)
+        self.f.flush()
+
+        assert format_line_context(self.f.name, 0).count('Testing Line') == 10

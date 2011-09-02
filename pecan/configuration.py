@@ -175,9 +175,6 @@ def import_module(conf):
     :param conf: The string to the configuration. Automatically strips off ".py" file extensions.
     '''
     
-    if conf.endswith('.py'):
-        conf = conf[:-3]
-    
     if '.' in conf:
         parts = conf.split('.')
         name = '.'.join(parts[:-1])
