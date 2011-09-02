@@ -63,7 +63,6 @@ tutorial on App Engine.
 
    app_engine.rst
    sessions.rst
-   celery.rst
    databases.rst
    deployment.rst
    
