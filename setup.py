@@ -63,7 +63,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Application Frameworks'
     ],
     keywords             = 'web framework wsgi object-dispatch http',
-    author               = 'Jonathan LaCour',
+    author               = 'Jonathan LaCour, Ryan Petrello, Mark McClain, Yoann Roman, Jeremy Jones, Alfredo Deza, Benjamin W. Smith',
     author_email         = 'jonathan@cleverdevil.org',
     url                  = 'http://github.com/pecan/pecan',
     license              = 'BSD',
