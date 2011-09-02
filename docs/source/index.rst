@@ -55,16 +55,13 @@ lines of code.
 
 Cookbook
 ========
-We provide a couple of easy ways to get started including a short
-tutorial on App Engine.
-
 .. toctree::
    :maxdepth: 2
 
-   app_engine.rst
    sessions.rst
    databases.rst
    deployment.rst
+   app_engine.rst
    
 
 API Documentation
