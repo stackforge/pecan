@@ -26,7 +26,16 @@ By default, this module contains a special method, ``init_model``::
     from pecan import conf
 
     def init_model():
-        # Read and parse database bindings from pecan.conf
+        """
+        This is a stub method which is called at application startup time.
+        
+        If you need to bind to a parse database configuration, set up tables or
+        ORM classes, or perform any database initialization, this is the 
+        recommended place to do it.
+
+        For more information working with databases, and some common recipes,
+        see http://pecan.readthedocs.org/en/latest/databases.html
+        """
         pass
         
 The purpose of this method is to determine bindings from your configuration file and create
@@ -91,7 +100,7 @@ Binding Within the Application
 There are several approaches that can be taken to wrap your application's requests with calls
 to appropriate model function calls.  One approach is WSGI middleware.  We also recommend
 Pecan :ref:`hooks`.  Pecan comes with ``TransactionHook``, a hook which can
-be used to wrap requests in transactions for you.  To use it, simply include it in your
+be used to wrap requests in database transactions for you.  To use it, simply include it in your
 project's ``app.py`` file and pass it a set of functions related to database binding::
 
     from pecan import conf, make_app
@@ -133,6 +142,8 @@ manner:
 #.  Controller code is run and returns.
 
 #.  If the controller returns successfully, ``model.clear()`` is called.
+
+Also note that there is a useful ``@after_commit`` decorator provided in :ref:`pecan_decorators`.
 
 Splitting Reads and Writes
 ----------------

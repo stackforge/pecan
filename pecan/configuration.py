@@ -207,15 +207,12 @@ def initconf():
 
 def set_config(name):
     '''
-    Updates the global configuration from a path or filename.
+    Updates the global configuration a filename.
     
-    :param name: Path or filename, as a string.
+    :param name: filename, as a string.
     '''
-    
-    if '/' in name:
-        _runtime_conf.update(conf_from_file(name))
-    else:
-        _runtime_conf.update_with_module(name)
+
+    _runtime_conf.update(conf_from_file(name))
 
 
 _runtime_conf = initconf()

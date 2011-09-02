@@ -108,14 +108,6 @@ class TestConf(TestCase):
         configuration.set_config(path)
         assert list(_runtime_conf.server) == list(configuration.initconf().server)
 
-    def test_config_set_from_module(self):
-        configuration.set_config('config')
-        self.assertEqual(_runtime_conf.server.host, '1.1.1.1')
-
-    def test_config_set_from_module_with_extension(self):
-        configuration.set_config('config.py')
-        self.assertEqual(_runtime_conf.server.host, '1.1.1.1')
-
     def test_config_dir(self):
         if sys.version_info >= (2, 6):
             conf = configuration.Config({})

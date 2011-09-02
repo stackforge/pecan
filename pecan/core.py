@@ -55,7 +55,7 @@ def override_template(template, content_type=None):
         request.pecan['override_content_type'] = content_type 
 
 
-def abort(status_code=None, detail='', headers=None, comment=None):
+def abort(status_code=None, detail='', headers=None, comment=None, **kw):
     '''
     Raise an HTTP status code, as specified. Useful for returning status
     codes like 401 Unauthorized or 403 Forbidden.
@@ -66,7 +66,7 @@ def abort(status_code=None, detail='', headers=None, comment=None):
     :param comment: A comment to include in the response.
     '''
     
-    raise exc.status_map[status_code](detail=detail, headers=headers, comment=comment)
+    raise exc.status_map[status_code](detail=detail, headers=headers, comment=comment, **kw)
 
 
 def redirect(location, internal=False, code=None, headers={}):
@@ -153,6 +153,7 @@ class ValidationException(ForwardRequestException):
         if cfg.get('htmlfill') is not None:
             request.environ['pecan.htmlfill'] = cfg['htmlfill']
         request.environ['REQUEST_METHOD'] = 'GET'
+        request.environ['pecan.validation_redirected'] = True
         ForwardRequestException.__init__(self, location)
 
 
