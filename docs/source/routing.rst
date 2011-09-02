@@ -104,7 +104,7 @@ Example
 ------------
 
 The ``_default`` controller is called when no other controller methods
-match the URL vis standard object-dispatch.
+match the URL via standard object-dispatch.
 
 
 Example 
