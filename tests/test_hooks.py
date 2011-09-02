@@ -4,6 +4,7 @@ from pecan.core          import state
 from pecan.hooks         import PecanHook, TransactionHook, HookController, RequestViewerHook
 from pecan.configuration import Config
 from pecan.decorators    import transactional, after_commit
+from copy                import copy
 from formencode          import Schema, validators
 from webtest             import TestApp
 
@@ -1065,6 +1066,21 @@ class TestTransactionHook(object):
         
 
 class TestRequestViewerHook(object):
+
+    def test_hook_from_config(self):
+        from pecan.configuration import _runtime_conf as conf
+        conf['requestviewer'] = {
+            'blacklist': ['/favicon.ico']
+        }
+        
+        class RootController(object):
+            pass
+        
+        app = make_app(RootController())
+        while hasattr(app, 'application'):
+            app = app.application
+        del conf.__values__['requestviewer']
+        assert app.hooks
     
     def test_basic_single_default_hook(self):
         
