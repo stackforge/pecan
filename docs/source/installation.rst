@@ -3,40 +3,40 @@
 Installation
 ============
 
-.. warning::
-    This section is out of date. Please do not refer to it directly.
+Stable Version
+------------------------------
 
 We recommend installing Pecan with ``pip`` but you can also try with
 ``easy_install`` and ``virtualenv``. Creating a spot in your environment where
 Pecan can be isolated from other packages is best practice.
 
-To get started with an environment for Pecan, create a virtual environment for
-it without any site-packages that might pollute::
+To get started with an environment for Pecan, create a new
+`virtual environment <http://www.virtualenv.org>`_::
 
     virtualenv --no-site-packages pecan-env
     cd pecan-env 
     source bin/activate
 
-The above commands created a virtual environment and *activated* it. Those
-actions will encapsulate anything that we do with the framework, making it
-easier to debug problems if needed.
+The above commands create a virtual environment and *activate* it. Those
+actions will encapsulate any dependency installations for the framework,
+making it easier to debug problems if needed.
 
-But we do not have Pecan yet, so let's grab it from PYPI::
+Next, let's install Pecan::
 
     pip install pecan 
 
-After a lot of output, you should have Pecan successfully installed and ready
-to use.
+After a lot of output, you should have Pecan successfully installed.
 
 
 Development (Unstable) Version
 ------------------------------
 If you want to run the development version of Pecan you will
-need GIT installed and clone the repo from github::
+need to install git and clone the repo from github::
 
     git clone https://github.com/pecan/pecan.git
 
-If you are still in the *pecan-dev* virtual environment that we created before,
-you should call ``setup.py`` to install::
+If your virtual environment is still activated, call ``setup.py`` to install
+the development version::
 
+    cd pecan
     python setup.py develop
