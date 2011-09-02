@@ -1,2 +1,2 @@
 [run]
-omit = pecan/commands/*.py, pecan/templates/__init__.py
+omit = pecan/commands/*.py, pecan/templates/__init__.py, pecan/testing.py
