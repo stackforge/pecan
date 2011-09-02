@@ -62,91 +62,59 @@ Let's look at each value and what it means:
 **app** is a reserved variable name for the configuration, so make sure you are
 not overriding, otherwise you will get default values.
 
-**root** Needs the Root Controller of your application, this where your main
-class that points to all the spots in your application should be. Rememeber
-that you are passing the actual object so you would need to import it at the
-top of the file. In the example configuration, this would be something like::
+**root** Needs the Root Controller of your application. Remember that you are
+passing an object instance, so you'll need to import it at the top of the file.
+In the example configuration, this would look something like::
 
     from myproject.controllers.root import RootController
 
-**static_root** Points to the directory where your static files live in.
+**static_root** Points to the directory where your static files live.
 
-**template_path** The path where your templates are. 
+**template_path** Points to the directory where your template files live.
 
 **debug** Enables ``WebError`` to have full tracebacks in the browser (this is
 OFF by default).
-
-Any application specifics should go in here in the case that your environment
-required it.
 
 
 .. _server_configuration:
 
 Server Configuration
 --------------------
-Depending on the WSGI server you choose, you will need some values. As shown
-before, Pecan has already some defaults and they would look like this::
+Pecan provides some defaults.  Change these to alter the host and port your
+WSGI app is served on.::
 
     server = {
         'port' : '8080',
         'host' : '0.0.0.0'
     }
 
-There is not too much going on there, it is just specifying the port and the 
-host it should use to serve the application. Any other values that you might
-need can get added as key/values to that same dictionary so the server of your
-choosing can use them.
-
 .. _accessibility:
 
-Accessibility 
---------------
-You can access any configuration values at runtime importing ``conf`` from
-``pecan``. This includes custom, application and server specific values.
-Below is an example on how to access those values for an application::
-
-    >>> from pecan import conf
-    >>> conf.app.root
-    <test_project.controllers.root.RootController object at 0x10292b0d0>
-    >>> conf.app.static_root
-    'public'
-    >>> conf.app.template_path
-    'test_project/templates'
-    >>> conf.app.debug
-    True
-
+Accessing Configuration at Runtime 
+----------------------------------
+You can access any configuration values at runtime via ``pecan.conf``.
+This includes custom, application and server-specific values.
+Below is an example on how to access those values from your application::
 
 
 Custom and Single Values
 ------------------------
-There might be times when you do not need to have a dictionary to specify some
-values because all you need is a simple key that holds a value. For example, if
-you needed to specify a global administrator, you could do so like this within
-the configuration file::
+There might be times when you do not need a dictionary, but instead a simple
+value. For example, if you needed to specify a global administrator, you could
+do so like this within the configuration file::
 
     administrator = 'foo_bar_user'
 
-And it would be accessible like this::
+And it would be accessible in `pecan.conf` like::
 
     >>>> from pecan import conf
     >>>> conf.administrator
     'foo_bar_user'
 
-Similarly, if I had a custom ``foo`` entry on my configuration file once the 
-app is running I can access ``foo`` values like::
-
-    >>> from pecan import conf
-    >>> conf.foo.bar
-    True
-    >>> conf.foo.baz
-    False
-    >>> conf.foo
-    Config({'bar': True, 'baz': False})
-
 
 Fully Valid Dictionaries
 ------------------------
-In certain situations you might want to deal with keys and values but in strict
+In certain situations you might want to deal with keys and values, but in strict
 dictionary form. The ``Config`` object has a helper method for this purpose
 that will return a dictionary representation of itself including nested values.
 
@@ -164,7 +132,7 @@ should return as a result (shortened for brevity):
 
 Prefixing Values
 ----------------
-The ``as_dict`` method allows you to pass an optional argument if you need to
+``Config.as_dict`` allows you to pass an optional argument if you need to
 prefix the keys in the returned dictionary. This is a single argument in string
 form and it works like this (shortened for brevity):
 
