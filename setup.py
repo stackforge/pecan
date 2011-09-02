@@ -1,6 +1,6 @@
 from setuptools import setup, Command, find_packages
 
-version = '0.1'
+version = '0.1.0'
 
 #
 # integration with py.test for `python setup.py test`
@@ -46,7 +46,7 @@ except:
 setup(
     name                 = 'pecan',
     version              = version,
-    description          = "A WSGI object-dispatching web framework, in the spirit of TurboGears, only much much smaller, with many fewer dependencies.",
+    description          = "A WSGI object-dispatching web framework, designed to be lean and fast, with few dependancies.",
     long_description     = None,
     classifiers          = [],
     keywords             = '',
