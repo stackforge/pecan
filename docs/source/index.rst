@@ -66,7 +66,6 @@ tutorial on App Engine.
    celery.rst
    databases.rst
    deployment.rst
-   reporting.rst
    
 
 API Documentation
