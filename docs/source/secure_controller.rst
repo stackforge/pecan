@@ -8,15 +8,15 @@ necessary tools to handle authentication and authorization as you see fit.
 In Pecan, you can wrap entire controller subtrees *or* individual method calls with 
 function calls to determine access and secure portions of your application.
 
-Pecan's ``secure`` method secures a method or class depending on invocation.
+Pecan's ``secure`` decorator secures a method or class depending on invocation.
 
 To decorate a method, use one argument::
 
-    @secure('<check_permissions_method>')
+    secure('<check_permissions_method>')
 
 To secure a class, invoke with two arguments::
 
-    secure(<object instance>, '<check_permissions_method>')
+    secure(object_instance, '<check_permissions_method>')
 
 ::
 
@@ -97,6 +97,12 @@ or ``False`` value (depending on whether or not the user has permissions to the 
     
         highly_classified = HighlyClassifiedController()
         unclassified = unlocked(UnclassifiedController())
+
+
+Also note the use of the ``@unlocked`` decorator in the above example, which can be used similarly
+to explicitly unlock a controller for public access without any security checks.
+
+
 Writing Authentication/Authorization Methods
 ----------------
 The ``check_permissions`` method should be used to determine user authentication and authorization.  The
@@ -185,6 +191,7 @@ You can also use the ``secure`` method to change the behavior of a SecureControl
         api = secure(ApiController(), 'check_api_permissions')
 
 In the example above, pecan will *only* call ``admin_user`` when a request is made for ``/api/``.
+
 
 Multiple Secure Controllers
 ---------------------------
