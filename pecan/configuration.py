@@ -175,9 +175,6 @@ def import_module(conf):
     :param conf: The string to the configuration. Automatically strips off ".py" file extensions.
     '''
     
-    if conf.endswith('.py'):
-        conf = conf[:-3]
-    
     if '.' in conf:
         parts = conf.split('.')
         name = '.'.join(parts[:-1])
@@ -207,15 +204,12 @@ def initconf():
 
 def set_config(name):
     '''
-    Updates the global configuration from a path or filename.
+    Updates the global configuration a filename.
     
-    :param name: Path or filename, as a string.
+    :param name: filename, as a string.
     '''
-    
-    if '/' in name:
-        _runtime_conf.update(conf_from_file(name))
-    else:
-        _runtime_conf.update_with_module(name)
+
+    _runtime_conf.update(conf_from_file(name))
 
 
 _runtime_conf = initconf()
