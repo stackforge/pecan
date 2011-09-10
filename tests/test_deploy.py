@@ -39,9 +39,8 @@ class TestDeploy(TestCase):
         2. The module has no `app.py` file.
         """
         test_config_file = os.path.join(os.path.dirname(__file__), 'test_config', 'sample_apps', 'sample_app_config_missing.py')
-        self.assertRaisesRegexp(
+        self.assertRaises(
             Exception, 
-            'No app.setup_app found in any of the configured app.modules',
             deploy, 
             test_config_file
         )
@@ -53,9 +52,8 @@ class TestDeploy(TestCase):
         2.  The module, `valid_module` has an `app.py` that contains no `def setup_app`
         """
         test_config_file = os.path.join(os.path.dirname(__file__), 'test_config', 'sample_apps', 'sample_app_config_missing_app.py')
-        self.assertRaisesRegexp(
+        self.assertRaises(
             Exception, 
-            'No app.setup_app found in any of the configured app.modules',
             deploy, 
             test_config_file
         )
