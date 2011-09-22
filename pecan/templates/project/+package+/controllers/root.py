@@ -1,4 +1,4 @@
-from pecan import expose, request
+from pecan import expose
 from formencode import Schema, validators as v
 from webob.exc import status_map
 
@@ -9,13 +9,23 @@ class SampleForm(Schema):
 
 
 class RootController(object):
-    @expose('index.html')
-    def index(self, name='', age=''):
-        return dict(errors=request.pecan['validation_errors'], name=name, age=age)
+
+    @expose(
+        generic     = True, 
+        template    = 'index.html'
+    )
+    def index(self):
+        return dict()
     
-    @expose('success.html', schema=SampleForm(), error_handler='/index')
-    def handle_form(self, name, age):
-        return dict(name=name, age=age)
+    @index.when(
+        method          = 'POST',
+        template        = 'success.html',
+        schema          = SampleForm(),
+        error_handler   = '/index',
+        htmlfill        = dict(auto_insert_errors = True, prefix_error = False)
+    )
+    def index_post(self, name, age):
+        return dict(name=name)
     
     @expose('error.html')
     def error(self, status):
