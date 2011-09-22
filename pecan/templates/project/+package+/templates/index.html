@@ -7,41 +7,36 @@
 
 ## now define the body of the template
     <header>
-      <h1>Welcome to Pecan</h1>
+      <h1><img src="/images/logo.png" /></h1>
     </header>
-    <p>This is the default Pecan project, which includes:</p>
-    
-    <ul>
-      <li>The ability to serve static files.</li>
-      <li>Templating using the <a href="http://www.makotemplates.org">Mako template engine</a>.</li>
-      <li>Built-in error management using <a href="http://pypi.python.org/pypi/WebError">WebError</a>.</li>
-    </ul>
-    
-    <p>
-      Note that most functionality is enabled/disabled in your <code>app.py</code>,
-      which can be edited to suit your needs, and to add additional WSGI middleware.
-    </p>
-    
-    <p>
-      To get an idea of how to develop applications with Pecan, 
-      here is a simple form:
-    </p>
-    
-    <form method="POST" action="/handle_form" class="${'invalid' if errors else ''}">
-      <table>
-        <tr>
-          <td><label for="name">What is your name</label></td>
-          <td><input name="name" value="${name}" class="${'invalid' if error_for('name') else ''}" /></td>
-          <td>${error_for('name')}</td>
-        </tr>
-        <tr>
-          <td><label for="age">How old are you?</label></td>
-          <td><input name="age" value="${age}" class="${'invalid' if error_for('age') else ''}" /></td>
-          <td>${error_for('age')}</td>
-        </tr>
-      </table>
+
+    <div id="content">
+
+      <p>This is a sample Pecan project.</p>
+
+      <p>
+        Instructions for getting started can be found online at <a
+          href="http://pecanpy.org" target="window">pecanpy.org</a>
+      </p>
       
-      <input type="submit" value="Submit" />
-    </form>
+      <p>
+        To get an idea of how to develop applications with Pecan, 
+        here is a simple form:
+      </p>
+      
+      <form method="POST" action="/">
+        <table>
+          <tr>
+            <td><label for="name">Your Name:</label></td>
+            <td><input name="name" /></td>
+          </tr>
+          <tr>
+            <td><label for="age">Your Age:</label></td>
+            <td><input name="age" /></td>
+          </tr>
+        </table>
+        
+        <input type="submit" value="Submit" />
+      </form>
 
-
+    </div>
