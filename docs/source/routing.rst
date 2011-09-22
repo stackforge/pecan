@@ -4,10 +4,10 @@ Routing
 =======
 
 When a user requests a Pecan-powered page how does Pecan know which
-controller to use? Pecan uses a method known as Object-dispatch to map a
+controller to use? Pecan uses a method known as object-dispatch to map an
 HTTP request to a controller. Object-dispatch begins by splitting the
-path into a list of components and then walking an object path starting at
-the root controller. Let's look at a simple store application: 
+path into a list of components and then walking an object path, starting at
+the root controller. Let's look at a simple bookstore application: 
 
 ::
 
@@ -41,12 +41,11 @@ the root controller. Let's look at a simple store application:
         catalog = CatalogController()
 
 A request for ``/catalog/books/bestsellers`` from the online store would
-begin by Pecan breaking the request up into ``catalog``, ``books``, and
-``bestsellers``. Next, Pecan would then lookup ``catalog`` on the root
+begin with Pecan breaking the request up into ``catalog``, ``books``, and
+``bestsellers``. Next, Pecan would lookup ``catalog`` on the root
 controller. Using the ``catalog`` object, Pecan would then lookup
-``books`` followed by ``bestsellers``. What if the URL ends in a slash?
-Pecan will check for an ``index`` method on the current object. In the
-example above, you may have noticed the ``expose`` decorator.
+``books``, followed by ``bestsellers``. What if the URL ends in a slash?
+Pecan will check for an ``index`` method on the current object. 
 
 Routing Algorithm
 -----------------
@@ -54,29 +53,23 @@ Routing Algorithm
 Sometimes, the standard object-dispatch routing isn't adequate to properly
 route a URL to a controller. Pecan provides several ways to short-circuit 
 the object-dispatch system to process URLs with more control, including the
-``_lookup``, ``_default``, and ``_route`` special methods. Defining these
-methods on your controller objects provide several additional ways to 
-process all or part of a URL.
+special ``_lookup``, ``_default``, and ``_route`` methods. Defining these
+methods on your controller objects provides additional flexibility for 
+processing all or part of a URL.
 
 
 ``_lookup``
 -----------
 
-The ``_lookup`` special method provides a way to process part of a URL, 
-and then return a new controller object to route on for the remainder.
+The ``_lookup`` special method provides a way to process a portion of a URL, 
+and then return a new controller object to route to for the remainder.
 
-A ``_lookup`` method will accept one or more arguments representing chunks
-of the URL to be processed, split on `/`, and then a `*remainder` list which
-will be processed by the returned controller via object-dispatch.
+A ``_lookup`` method will accept one or more arguments, representing chunks
+of the URL to be processed, split on `/`, and then provide a `*remainder` list
+which will be processed by the returned controller via object-dispatch.
 
-The ``_lookup`` method must return a two-tuple including the controller to
-process the remainder of the URL, and the remainder of the URL itself.
-
-The ``_lookup`` method on a controller is called when no other controller 
-matches the URL via standard object-dispatch.
-
-
-Example 
+Additionally, the ``_lookup`` method on a controller is called as a last
+resort, when no other controller matches the URL via standard object-dispatch.
 
 ::
 
@@ -91,23 +84,23 @@ Example
         def name(self):
             return self.student.name
 
-    class ClassController(object):
+    class RootController(object):
         @expose()
-        def _lookup(self, name, *remainder):
-            student = get_student_by_name(name)
+        def _lookup(self, primary_key, *remainder):
+            student = get_student_by_primary_key(primary_key)
             if student:
                 return StudentController(student), remainder
             else:
                 abort(404)
 
+An HTTP GET request to `/8/name` would return the name of the student
+where `primary_key == 8`.
+
 ``_default``
 ------------
 
 The ``_default`` controller is called when no other controller methods
-match the URL vis standard object-dispatch.
-
-
-Example 
+match the URL via standard object-dispatch.
 
 ::
 
@@ -145,53 +138,6 @@ A controller can receive arguments in a variety of ways, including ``GET`` and
 arguments simply map to arguments on the controller method, while unprocessed
 chunks of the URL can be passed as positional arguments to the controller method.
 
-Example  
-
-::
-
-    from pecan import expose
-
-    class RootController(object):
-        @expose()
-        def say(self, msg):
-            return msg
-
-
-In this example, if a ``GET`` request is sent to ``/say/hello``, the controller
-returns "hello". On the other hand, if a ``GET`` request is sent to 
-``/say?msg=World``, then the controller returns "World".
-
-Keyword arguments are also supported for defaults.
-
-kwargs    
-
-::
-
-    from pecan import expose
-    
-    class RootController(object):
-        @expose()
-        def say(self, msg="No message"):
-            return msg
-
-In this example, if the client requests ``/say?msg=hello`` the controller returns 
-"hello". However, if the client requests ``/say`` without any arguments, the 
-controller returns "No message".
-
-
-Generic Functions
------------------
-
-Pecan also provides a unique and useful way to dispatch from a controller to other
-methods based upon the ``HTTP`` method (``GET``, ``POST``, ``PUT``, etc.) using
-a system called "generic functions." A controller can be flagged as generic via a
-keyword argument on the ``@expose`` decorator. This makes it possible to utilize
-the ``@when`` decorator on the controller itself to define controllers to be called
-instead when certain ``HTTP`` methods are sent.
-
-
-Example
-
 ::
 
     from pecan import expose
@@ -223,8 +169,8 @@ are documented in :ref:`pecan_core`.
 -----------
 
 At its core, ``@expose`` is how you tell Pecan which methods in a class
-are controllers. ``@expose`` accepts eight optional parameters some of
-which can impact routing. 
+are publically-visible controllers. ``@expose`` accepts eight optional
+parameters, some of which can impact routing. 
 
 ::
 

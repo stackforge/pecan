@@ -529,6 +529,16 @@ class TestBase(TestCase):
         r = app.get('/', status=404)
         assert r.status_int == 404
     
+    def test_abort_with_detail(self):
+        class RootController(object):
+            @expose()
+            def index(self):
+                abort(status_code=401, detail='Not Authorized')
+        
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/', status=401)
+        assert r.status_int == 401
+
     def test_redirect(self):
         class RootController(object):
             @expose()
@@ -546,10 +556,11 @@ class TestBase(TestCase):
             @expose()
             def permanent(self):
                 redirect('/testing', code=301)
-            
+
             @expose()
             def testing(self):
                 return 'it worked!'
+
         
         app = TestApp(make_app(RootController(), debug=True))
         r = app.get('/')
@@ -569,6 +580,29 @@ class TestBase(TestCase):
         r = r.follow()
         assert r.status_int == 200
         assert r.body == 'it worked!'
+
+
+    def test_x_forward_proto(self):
+        class ChildController(object):
+            @expose()
+            def index(self):
+                redirect('/testing')
+        class RootController(object):
+            @expose()
+            def index(self):
+                redirect('/testing')
+            @expose()
+            def testing(self):
+                return 'it worked!'
+            child = ChildController()
+        
+        app = TestApp(make_app(RootController(), debug=True))
+        response = app.get('/child', extra_environ=dict(HTTP_X_FORWARDED_PROTO='https'))
+        ##non-canonical url will redirect, so we won't get a 301
+        assert response.status_int == 302
+        ##should add trailing / and changes location to https
+        assert response.location == 'https://localhost/child/'
+        assert response.environ['HTTP_X_FORWARDED_PROTO'] == 'https'
         
     def test_streaming_response(self):
         import StringIO

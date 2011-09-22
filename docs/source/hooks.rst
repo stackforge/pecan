@@ -85,7 +85,7 @@ the app and browse the application from our web browser::
 
 
 Included Pecan Hooks
-====================
+--------------------
 Pecan includes some hooks in its core and are very simple to start using them
 away. This section will describe their different uses, how to configure them
 and examples of common scenarios.
@@ -93,7 +93,7 @@ and examples of common scenarios.
 .. _requestviewerhook:
 
 RequestViewerHook
-=================
+-----------------
 This hooks is very useful for debugging purposes. It has access to every
 attribute the ``response`` object has plus a few others that are specific to
 the framework.
@@ -250,7 +250,7 @@ And these are the specific ones from Pecan and the hook:
 
 Blacklisting
 ------------
-Sometimes is annoying to get information about *every* single request. For this
+Sometimes it's annoying to get information about *every* single request. For this
 purpose, there is a matching list of url paths that you can pass into the hook
 so that paths that do not match are returned.
 
