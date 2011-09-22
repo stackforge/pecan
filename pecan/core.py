@@ -82,11 +82,10 @@ def redirect(location=None, internal=False, code=None, headers={}, add_slash=Fal
     :param headers: Any HTTP headers to send with the response, as a dictionary.
     '''
     
-    new_env = request.environ.copy()
     if add_slash:
         if location is None:
             split_url = list(urlsplit(state.request.url))
-            new_proto = new_env.get('HTTP_X_FORWARDED_PROTO', split_url[0])
+            new_proto = state.request.environ.get('HTTP_X_FORWARDED_PROTO', split_url[0])
             split_url[0] = new_proto
             location = urlunsplit(split_url)
         location = location.rstrip('/') + '/'
