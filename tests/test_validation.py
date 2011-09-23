@@ -39,6 +39,8 @@ class TestValidation(object):
                             password,
                             password_confirm,
                             age):
+                assert isinstance(last_name, unicode)
+                assert isinstance(first_name, unicode)
                 assert age == 31
                 assert isinstance(age, int)
                 return 'Success!'

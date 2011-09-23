@@ -1,6 +1,6 @@
 from templating         import RendererFactory
 from routing            import lookup_controller, NonCanonicalPath
-from util               import _cfg, splitext
+from util               import _cfg, splitext, encode_if_needed
 
 from webob              import Request, Response, exc
 from threading          import local
@@ -123,7 +123,7 @@ def static(name, value):
     '''
     
     if 'pecan.params' not in request.environ:
-        request.environ['pecan.params'] = dict(request.str_params)    
+        request.environ['pecan.params'] = dict(request.params)    
     request.environ['pecan.params'][name] = value
     return value
 
@@ -158,7 +158,7 @@ class ValidationException(ForwardRequestException):
                 location = location()
         merge_dicts(request.pecan['validation_errors'], errors)
         if 'pecan.params' not in request.environ:
-            request.environ['pecan.params'] = dict(request.str_params)
+            request.environ['pecan.params'] = dict(request.params)
         request.environ['pecan.validation_errors'] = request.pecan['validation_errors']
         if cfg.get('htmlfill') is not None:
             request.environ['pecan.htmlfill'] = cfg['htmlfill']
@@ -309,7 +309,7 @@ class Pecan(object):
         if argspec[2]:
             for name, value in all_params.iteritems():
                 if name not in argspec[0]:
-                    kwargs[name] = value
+                    kwargs[encode_if_needed(name)] = value
         
         return args, kwargs
     
@@ -419,7 +419,7 @@ class Pecan(object):
         self.handle_hooks('before', state)
         
         # fetch and validate any parameters
-        params = dict(request.str_params)
+        params = dict(request.params)
         if 'schema' in cfg:
             params = self.validate(
                         cfg['schema'], 

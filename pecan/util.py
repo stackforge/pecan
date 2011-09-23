@@ -29,3 +29,9 @@ else:                             #pragma no cover
     splitext = compat_splitext
 
 
+if sys.version_info >=(2,6,5):
+    def encode_if_needed(s):
+        return s
+else:
+    def encode_if_needed(s):
+        return s.encode('utf-8')
