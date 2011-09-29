@@ -249,7 +249,7 @@ class RequestViewerHook(PecanHook):
              'controller' : lambda self, state: self.get_controller(state),
              'method'     : lambda self, state: state.request.method,
              'path'       : lambda self, state: state.request.path,
-             'params'     : lambda self, state: state.request.str_params.items(),
+             'params'     : lambda self, state: [p.encode('utf-8') for p in state.request.params.items()],
              'status'     : lambda self, state: state.response.status,
              'hooks'      : lambda self, state: self.format_hooks(state.app.hooks),
          }
