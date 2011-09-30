@@ -356,7 +356,7 @@ class Pecan(object):
                 raise ValidationException()
         if json:
             params = dict(data=params)
-        return params
+        return params or {}
     
     def handle_request(self):
         '''
@@ -429,8 +429,6 @@ class Pecan(object):
                         htmlfill=cfg.get('htmlfill'),
                         variable_decode=cfg.get('variable_decode')
                     )
-            if type(params) is not dict:
-                params = {}
         elif 'pecan.validation_errors' in request.environ:
             request.pecan['validation_errors'] = request.environ.pop('pecan.validation_errors')
         
