@@ -356,7 +356,7 @@ class Pecan(object):
                 raise ValidationException()
         if json:
             params = dict(data=params)
-        return params
+        return params or {}
     
     def handle_request(self):
         '''

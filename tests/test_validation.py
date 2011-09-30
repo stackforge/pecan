@@ -78,6 +78,31 @@ class TestValidation(object):
         )), [('content-type', 'application/json')])
         assert r.status_int == 200
         assert r.body == 'Success!'
+
+    def test_validation_with_none_type(self):
+        """
+        formencode schemas can be configured to return NoneType in some
+        circumstances.  We use the output of formencode's validate() to
+        determine wildcard arguments, so we should protect ourselves
+        from this scenario.
+        """
+        class RegistrationSchema(Schema):
+            if_empty        = None
+            first_name      = validators.String(not_empty=True)
+            last_name       = validators.String(not_empty=True)
+
+        class RootController(object):
+            @expose(schema=RegistrationSchema())
+            def index(self, **kw):
+                assert 'first_name' not in kw
+                assert 'last_name' not in kw
+                return 'Success!'
+
+        # test form submissions
+        app = TestApp(make_app(RootController()))
+        r = app.post('/', dict())
+        assert r.status_int == 200
+        assert r.body == 'Success!'
         
     def test_simple_failure(self):
         class RegistrationSchema(Schema):
