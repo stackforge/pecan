@@ -718,7 +718,7 @@ class TestBase(TestCase):
                 return 'accept'
         class SubController(object):
             @expose()
-            def index(self):
+            def index(self, **kw):
                 return 'subindex'
         class RootController(object):
             @expose()
@@ -742,6 +742,7 @@ class TestBase(TestCase):
         # for broken clients
         r = app.get('', status=302)
         assert r.status_int == 302
+        assert r.location == 'http://localhost/'
 
         r = app.get('/sub/')
         assert r.status_int == 200
@@ -749,6 +750,12 @@ class TestBase(TestCase):
 
         r = app.get('/sub', status=302)
         assert r.status_int == 302
+        assert r.location == 'http://localhost/sub/'
+
+        # try with query string
+        r = app.get('/sub?foo=bar', status=302)
+        assert r.status_int == 302
+        assert r.location == 'http://localhost/sub/?foo=bar'
 
         try:
             r = app.post('/sub', dict(foo=1))

@@ -87,8 +87,12 @@ def redirect(location=None, internal=False, code=None, headers={}, add_slash=Fal
             split_url = list(urlsplit(state.request.url))
             new_proto = state.request.environ.get('HTTP_X_FORWARDED_PROTO', split_url[0])
             split_url[0] = new_proto
-            location = urlunsplit(split_url)
-        location = location.rstrip('/') + '/'
+        else:
+            split_url = urlsplit(location)
+
+        split_url[2] = split_url[2].rstrip('/') + '/'
+        location = urlunsplit(split_url)
+
     if not headers:
         headers = {}
     if internal:
