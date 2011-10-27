@@ -1,9 +1,9 @@
 from cStringIO           import StringIO
-from pecan               import make_app, expose, request, redirect
+from pecan               import make_app, expose, request, redirect, abort
 from pecan.core          import state
 from pecan.hooks         import PecanHook, TransactionHook, HookController, RequestViewerHook
 from pecan.configuration import Config
-from pecan.decorators    import transactional, after_commit
+from pecan.decorators    import transactional, after_commit, after_rollback
 from copy                import copy
 from formencode          import Schema, validators
 from webtest             import TestApp
@@ -559,6 +559,17 @@ class TestTransactionHook(object):
             def decorated(self):
                 run_hook.append('inside')
                 return 'Decorated Method!'
+
+            @expose()
+            @after_rollback(action('action-three'))
+            def rollback(self):
+                abort(500)
+
+            @expose()
+            @transactional()
+            @after_rollback(action('action-four'))
+            def rollback_decorated(self):
+                abort(500)
         
         def gen(event):
             return lambda: run_hook.append(event)
@@ -609,6 +620,39 @@ class TestTransactionHook(object):
         assert run_hook[4] == 'commit'
         assert run_hook[5] == 'action-two'
         assert run_hook[6] == 'clear'
+
+        run_hook = []
+
+        response = app.get('/rollback', expect_errors=True)
+        assert response.status_int == 500
+
+        assert len(run_hook) == 2
+        assert run_hook[0] == 'start_ro'
+        assert run_hook[1] == 'clear'
+
+        run_hook = []
+
+        response = app.post('/rollback', expect_errors=True)
+        assert response.status_int == 500
+
+        assert len(run_hook) == 4 
+        assert run_hook[0] == 'start'
+        assert run_hook[1] == 'rollback'
+        assert run_hook[2] == 'action-three'
+        assert run_hook[3] == 'clear'
+        
+        run_hook = []
+    
+        response = app.get('/rollback_decorated', expect_errors=True)
+        assert response.status_int == 500
+        
+        assert len(run_hook) == 6 
+        assert run_hook[0] == 'start_ro'
+        assert run_hook[1] == 'clear'
+        assert run_hook[2] == 'start'
+        assert run_hook[3] == 'rollback'
+        assert run_hook[4] == 'action-four'
+        assert run_hook[5] == 'clear'
 
         run_hook = []
 

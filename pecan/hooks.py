@@ -156,19 +156,23 @@ class TransactionHook(PecanHook):
     
     def after(self, state):
         if state.request.transactional:
+            action_name = None
             if state.request.error:
+                action_name = 'after_rollback'
                 self.rollback()
             else:
+                action_name = 'after_commit'
                 self.commit()
 
-                #
-                # If a controller was routed to, find any
-                # after_commit actions it may have registered, and perform
-                # them.
-                #
+            #
+            # If a controller was routed to, find any
+            # after_* actions it may have registered, and perform
+            # them.
+            #
+            if action_name:
                 controller = getattr(state, 'controller', None)
                 if controller is not None:
-                    actions = _cfg(controller).get('after_commit', [])
+                    actions = _cfg(controller).get(action_name, [])
                     for action in actions:
                         action()
 

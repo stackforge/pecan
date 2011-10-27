@@ -2,7 +2,7 @@ from inspect import getargspec, getmembers, isclass, ismethod
 from util import _cfg
 
 __all__ = [
-    'expose', 'transactional', 'accept_noncanonical', 'after_commit'
+    'expose', 'transactional', 'accept_noncanonical', 'after_commit', 'after_rollback'
 ]
 
 
@@ -105,6 +105,24 @@ def transactional(ignore_redirects=True):
     return deco
 
 
+def after_action(action_type, action):
+    '''
+    If utilizing the :mod:`pecan.hooks` ``TransactionHook``, allows you
+    to flag a controller method to perform a callable action after the
+    action_type is successfully issued.
+
+    :param action: The callable to call after the commit is successfully issued.
+    '''
+
+    if action_type not in ('commit', 'rollback'):
+        raise Exception, 'action_type (%s) is not valid' % action_type
+
+
+    def deco(func):
+        _cfg(func).setdefault('after_%s' % action_type, []).append(action)
+        return func
+    return deco
+
 def after_commit(action):
     '''
     If utilizing the :mod:`pecan.hooks` ``TransactionHook``, allows you
@@ -113,10 +131,18 @@ def after_commit(action):
 
     :param action: The callable to call after the commit is successfully issued.
     '''
-    def deco(func):
-        _cfg(func).setdefault('after_commit', []).append(action)
-        return func
-    return deco
+    return  after_action('commit', action)
+
+
+def after_rollback(action):
+    '''
+    If utilizing the :mod:`pecan.hooks` ``TransactionHook``, allows you
+    to flag a controller method to perform a callable action after the
+    rollback is successfully issued.
+
+    :param action: The callable to call after the rollback is successfully issued.
+    '''
+    return  after_action('rollback', action)
 
 
 def accept_noncanonical(func):
