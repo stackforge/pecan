@@ -5,7 +5,16 @@ except ImportError: # pragma: no cover
 
 from datetime               import datetime, date
 from decimal                import Decimal
-from webob.multidict        import MultiDict, UnicodeMultiDict
+# depending on the version WebOb might have 2 types of dicts
+try:
+    # WebOb <= 1.1.1
+    from webob.multidict        import MultiDict, UnicodeMultiDict
+    webob_dicts = (MultiDict, UnicodeMultiDict)
+except ImportError:         # pragma no cover
+    # WebOb >= 1.2
+    from webob.multidict        import MultiDict
+    webob_dicts = (MultiDict,)
+
 from simplegeneric          import generic
 
 try:
@@ -55,7 +64,7 @@ class GenericJSON(JSONEncoder):
             return props
         elif isinstance(obj, RowProxy):
             return dict(obj)
-        elif isinstance(obj, (MultiDict, UnicodeMultiDict)):
+        elif isinstance(obj, webob_dicts):
             return obj.mixed()
         else:
             return JSONEncoder.default(self, obj)
