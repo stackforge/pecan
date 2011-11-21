@@ -49,11 +49,11 @@ class Config(object):
             else:
                 self[k] = conf_dict[k]
 
-    def get(self, attribute):
+    def get(self, attribute, default=None):
         try:
             return self[attribute]
         except KeyError:
-            return None
+            return default
 
     def __dictify__(self, obj, prefix):
         '''
