@@ -120,6 +120,18 @@ class TestConf(TestCase):
         assert conf.a == 1
         self.assertRaises(AttributeError, getattr, conf, 'b')
 
+    def test_config_get_valid_key(self):
+        conf = configuration.Config({'a': 1})
+        assert conf.get('a') == 1
+
+    def test_config_get_invalid_key(self):
+        conf = configuration.Config({'a': 1})
+        assert conf.get('b') is None
+
+    def test_config_get_invalid_key_return_default(self):
+        conf = configuration.Config({'a': 1})
+        assert conf.get('b', True) is True
+
     def test_config_as_dict(self):
         conf = configuration.initconf()
 
