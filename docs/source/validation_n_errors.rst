@@ -142,14 +142,14 @@ includes a built-in function, ``static``, which allows you to enforce a static v
 preventing ``htmlfill`` from filling in submitted form variables::
 
     <form method="POST">
-      <dl>
-        <dt>Username:</dt>
-          <dd><input type="text" name="username" /></dd>
-        <dt>Password:</dt>        
-          <dd><input type="password" name="password" value="${static('password', '')}" /></dd>
+      <fieldset>
+        <label>Username:</label>
+          <input type="text" name="username" />
+        <label>Password:</label>        
+          <input type="password" name="password" value="${static('password', '')}" />
         <input type="hidden" name="ticket" value="${static('ticket', 'RANDOM_PER_REQUEST_VALUE')}" />
-      </dl>
-      <button>Login</button>
+        <button>Login</button>
+      </fieldset>
     </form>
 
 Working with ``variabledecode``
