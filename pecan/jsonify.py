@@ -5,6 +5,7 @@ except ImportError: # pragma: no cover
 
 from datetime               import datetime, date
 from decimal                import Decimal
+
 # depending on the version WebOb might have 2 types of dicts
 try:
     # WebOb <= 1.1.1

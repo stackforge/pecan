@@ -1,20 +1,6 @@
-from setuptools import setup, Command, find_packages
+from setuptools import setup, find_packages
 
 version = '0.1.0'
-
-#
-# integration with py.test for `python setup.py test`
-#
-class PyTest(Command):
-    user_options = []
-    def initialize_options(self):
-        pass
-    def finalize_options(self):
-        pass
-    def run(self):
-        import py
-        py.cmdline.pytest(py.std.sys.argv[2:])
-
 
 #
 # determine requirements
@@ -27,8 +13,7 @@ requirements = [
   "Paste >= 1.7.5.1",
   "PasteScript >= 1.7.3",
   "formencode >= 1.2.2",
-  "WebTest >= 1.2.2",
-  "pytest >= 2.0.3"
+  "WebTest >= 1.2.2"
 ]
 
 try:
@@ -38,6 +23,14 @@ except:
         import simplejson
     except:
         requirements.append("simplejson >= 2.1.1")
+
+test_suite = 'pecan.tests.collector'
+try:
+    from unittest import TestLoader
+    assert hasattr(TestLoader, 'discover')
+    tests_require = []
+except:
+    tests_require = ['unittest2']
 
 
 #
@@ -71,8 +64,9 @@ setup(
     include_package_data = True,
     scripts              = ['bin/pecan'],
     zip_safe             = False,
-    cmdclass             = {'test': PyTest},
     install_requires     = requirements,
+    tests_require        = tests_require,
+    test_suite           = test_suite,
     entry_points         = """
     [paste.paster_command]
     pecan-serve = pecan.commands:ServeCommand
