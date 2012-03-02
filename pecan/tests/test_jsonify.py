@@ -15,13 +15,7 @@ from pecan.jsonify         import jsonify, encode, ResultProxy, RowProxy
 from pecan                 import Pecan, expose, request
 from webtest               import TestApp
 
-# depending on the version WebOb might have 2 types of dicts
-try:
-    # WebOb <= 1.1.1
-    from webob.multidict        import MultiDict, UnicodeMultiDict
-except ImportError:         # pragma no cover
-    # WebOb >= 1.2
-    from webob.multidict        import MultiDict
+from webob.multidict       import MultiDict
 
 def make_person():
     class Person(object):
