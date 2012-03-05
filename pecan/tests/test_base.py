@@ -11,6 +11,9 @@ from pecan.decorators import accept_noncanonical
 import os
 
 
+class SampleRootController(object): pass
+
+
 class TestBase(TestCase):
     
     def test_simple_app(self):    
@@ -31,6 +34,10 @@ class TestBase(TestCase):
         r = app.get('/index.html')
         assert r.status_int == 200
         assert r.body == 'Hello, World!'
+
+    def test_controller_lookup_by_string_path(self):
+        app = Pecan('pecan.tests.test_base.SampleRootController')
+        assert app.root and isinstance(app.root, SampleRootController)
     
     def test_object_dispatch(self):
         class SubSubController(object):

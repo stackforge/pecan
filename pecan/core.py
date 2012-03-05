@@ -188,7 +188,8 @@ class Pecan(object):
         '''
         Creates a Pecan application instance, which is a WSGI application.
         
-        :param root: The root controller object.
+        :param root: A string representing a root controller object (e.g.,
+                    "myapp.controller.root.RootController")
         :param default_renderer: The default rendering engine to use. Defaults to mako.
         :param template_path: The default relative path to use for templates. Defaults to 'templates'.
         :param hooks: A list of Pecan hook objects to use for this application.
@@ -197,12 +198,40 @@ class Pecan(object):
         :param force_canonical: A boolean indicating if this project should require canonical URLs.
         '''
 
+        if isinstance(root, basestring):
+            root = self.__translate_root__(root)
+
         self.root             = root
         self.renderers        = RendererFactory(custom_renderers, extra_template_vars)
         self.default_renderer = default_renderer
         self.hooks            = hooks
         self.template_path    = template_path
         self.force_canonical  = force_canonical
+
+    def __translate_root__(self, item):
+        '''
+        Creates a root controller instance from a string root, e.g.,
+
+        > __translate_root__("myproject.controllers.RootController")
+        myproject.controllers.RootController()
+        
+        :param item: The string to the item 
+        '''
+
+        if '.' in item:
+            parts = item.split('.')
+            name = '.'.join(parts[:-1])
+            fromlist = parts[-1:]
+
+            try:
+                module = __import__(name, fromlist=fromlist)
+                kallable = getattr(module, parts[-1])
+                assert hasattr(kallable, '__call__'), "%s does not represent a callable class or function." % item
+                return kallable()
+            except AttributeError, e:
+                raise ImportError('No item named %s' % item)
+
+        raise ImportError('No item named %s' % item)
         
     def route(self, node, path):
         '''

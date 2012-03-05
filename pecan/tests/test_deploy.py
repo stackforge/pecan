@@ -16,7 +16,7 @@ class TestDeploy(TestCase):
     def test_module_lookup(self):
         """
         1.  A config file has:
-            app { 'modules': [valid_module] }
+            app { 'modules': ['valid_module'] }
         2.  The module, `valid_module` has an app.py that defines a `def setup.py`
         """
         test_config_file = os.path.join(os.path.dirname(__file__), 'test_config', 'sample_apps', 'sample_app_config.py')
@@ -25,7 +25,7 @@ class TestDeploy(TestCase):
     def test_module_lookup_find_best_match(self):
         """
         1.  A config file has:
-            app { 'modules': [invalid_module, valid_module] }
+            app { 'modules': ['invalid_module', 'valid_module'] }
         2.  The module, `valid_module` has an app.py that defines a `def setup_app`
         """
         test_config_file = os.path.join(os.path.dirname(__file__), 'test_config', 'sample_apps', 'sample_app_config.py')
@@ -34,7 +34,7 @@ class TestDeploy(TestCase):
     def test_missing_app_file_lookup(self):
         """
         1. A config file has:
-            app { 'modules': [valid_module] }
+            app { 'modules': ['valid_module'] }
         2. The module has no `app.py` file.
         """
         test_config_file = os.path.join(os.path.dirname(__file__), 'test_config', 'sample_apps', 'sample_app_config_missing.py')
@@ -47,7 +47,7 @@ class TestDeploy(TestCase):
     def test_missing_setup_app(self):
         """
         1.  A config file has:
-            app { 'modules': [valid_module] }
+            app { 'modules': ['valid_module'] }
         2.  The module, `valid_module` has an `app.py` that contains no `def setup_app`
         """
         test_config_file = os.path.join(os.path.dirname(__file__), 'test_config', 'sample_apps', 'sample_app_config_missing_app.py')

@@ -1,7 +1,3 @@
-from ${package}.controllers.root import RootController
-
-import ${package}
-
 # Server Specific Configurations
 server = {
     'port' : '8080',
@@ -10,8 +6,8 @@ server = {
 
 # Pecan Application Configurations
 app = {
-    'root'          : RootController(),
-    'modules'       : [${package}],
+    'root'          : '${package}.controllers.root.RootController',
+    'modules'       : ['${package}'],
     'static_root'   : '%(confdir)s/public', 
     'template_path' : '%(confdir)s/${package}/templates',
     'reload'        : True,
