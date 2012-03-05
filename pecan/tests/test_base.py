@@ -602,7 +602,7 @@ class TestBase(TestCase):
         assert response.status_int == 302
         ##should add trailing / and changes location to https
         assert response.location == 'https://localhost/child/'
-        assert response.environ['HTTP_X_FORWARDED_PROTO'] == 'https'
+        assert response.request.environ['HTTP_X_FORWARDED_PROTO'] == 'https'
         
     def test_streaming_response(self):
         import StringIO

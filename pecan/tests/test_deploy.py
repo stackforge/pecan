@@ -1,7 +1,6 @@
 from pecan.deploy import deploy
 from unittest import TestCase
 
-import pytest
 import os
 import sys
 

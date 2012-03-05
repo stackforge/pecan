@@ -14,7 +14,8 @@ from unittest              import TestCase
 from pecan.jsonify         import jsonify, encode, ResultProxy, RowProxy
 from pecan                 import Pecan, expose, request
 from webtest               import TestApp
-from webob.multidict       import MultiDict, UnicodeMultiDict
+
+from webob.multidict       import MultiDict
 
 def make_person():
     class Person(object):

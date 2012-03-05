@@ -37,7 +37,7 @@ class TestTemplateLineFormat(TestCase):
         self.f = tempfile.NamedTemporaryFile()
 
     def tearDown(self):
-        os.remove(self.f.name)
+        del self.f
 
     def test_format_line_context(self):
         for i in range(11):
