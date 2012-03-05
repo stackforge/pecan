@@ -3,11 +3,13 @@
 Routing
 =======
 
-When a user requests a Pecan-powered page how does Pecan know which
-controller to use? Pecan uses a method known as object-dispatch to map an
+When a user requests a certain URL in your app, how does Pecan know which
+controller to route to? Pecan uses a method known as **object-dispatch** to map an
 HTTP request to a controller. Object-dispatch begins by splitting the
 path into a list of components and then walking an object path, starting at
-the root controller. Let's look at a simple bookstore application: 
+the root controller. You can imagine your application's controllers as a tree
+of objects (branches of the object tree map directly to URL paths). Let's look 
+at a simple bookstore application: 
 
 ::
 
