@@ -1,7 +1,7 @@
 import sample_app_missing
 
 app = {
-    'modules': [sample_app_missing]
+    'modules': ['sample_app_missing']
 }
 
 foo = {

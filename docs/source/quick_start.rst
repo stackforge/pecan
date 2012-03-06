@@ -114,11 +114,7 @@ Simple Configuration
 --------------------
 For ease of use, Pecan configuration files are pure Python.
 
-This is how your default configuration file should look::
-
-    from test_project.controllers.root import RootController
-
-    import test_project
+This is how your default (generated) configuration file should look::
 
     # Server Specific Configurations
     server = {
@@ -128,8 +124,8 @@ This is how your default configuration file should look::
 
     # Pecan Application Configurations
     app = {
-        'root' : RootController(),
-        'modules' : [test_project],
+        'root' : 'test_project.controllers.root.RootController',
+        'modules' : ['test_project'],
         'static_root' : '%(confdir)s/public', 
         'template_path' : '%(confdir)s/test_project/templates',
         'reload': True,
@@ -162,9 +158,10 @@ Root Controller
 ---------------
 The Root Controller is the root of your application.
 
-This is how it looks in the project template::
+This is how it looks in the project template
+(``test_project.controllers.root.RootController``)::
 
-    from pecan import expose, request
+    from pecan import expose
     from formencode import Schema, validators as v
     from webob.exc import status_map
 
@@ -175,13 +172,23 @@ This is how it looks in the project template::
 
 
     class RootController(object):
-        @expose('index.html')
-        def index(self, name='', age=''):
-            return dict(errors=request.validation_errors, name=name, age=age)
+
+        @expose(
+            generic     = True, 
+            template    = 'index.html'
+        )
+        def index(self):
+            return dict()
         
-        @expose('success.html', schema=SampleForm(), error_handler='index')
-        def handle_form(self, name, age):
-            return dict(name=name, age=age)
+        @index.when(
+            method          = 'POST',
+            template        = 'success.html',
+            schema          = SampleForm(),
+            error_handler   = '/index',
+            htmlfill        = dict(auto_insert_errors = True, prefix_error = False)
+        )
+        def index_post(self, name, age):
+            return dict(name=name)
         
         @expose('error.html')
         def error(self, status):
@@ -193,34 +200,32 @@ This is how it looks in the project template::
             return dict(status=status, message=message)
 
 
+You can specify additional classes and methods if you need to do so, but for 
+now we have an *index* and *index_post* method.
 
-You can specify additional classes if you need to do so, but for now we have an
-*index* and *handle_form* method.
-
-**index**: is *exposed* via the decorator ``@expose`` (which in turn uses the
+**def index**: is *exposed* via the decorator ``@expose`` (which in turn uses the
 ``index.html`` template) at the root of the application (http://127.0.0.1:8080/),
-so anything that hits the root of your application will touch this method.
+so any HTTP GET that hits the root of your application (/) will be routed to
+this method.
 
 Notice that the index method returns a dictionary - this dictionary is used as
 a namespace to render the specified template (``index.html``) into HTML.
 
-Since we are performing form validation and want to pass any errors we might
-get to the template, we set ``errors`` to receive form validation errors that
-may exist in ``request.validation_errors``.
-
-
-**handle_form**: receives 2 arguments (*name* and *age*) that are validated
+**def index_post**: receives 2 arguments (*name* and *age*) that are validated
 through the *SampleForm* schema.
+
+``method`` has been set to 'POST', so HTTP POSTs to the application root (in
+our example, form submissions) will be routed to this method.
 
 The ``error_handler`` has been set to index.  This means that when errors are
 raised, they will be sent to the index controller and rendered through its
 template.
 
-**error**: Finally, we have the error controller that allows your application to 
+**def error**: Finally, we have the error controller that allows your application to 
 display custom pages for certain HTTP errors (404, etc...).
 
 Application Interaction
 -----------------------
 If you still have your application running and you visit it in your browser,
-you should see a page with some information about Pecan and a form so you can
+you should see a page with some information about Pecan and the form so you can
 play a bit.

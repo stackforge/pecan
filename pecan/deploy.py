@@ -4,7 +4,7 @@ def deploy(config_module_or_path):
     set_config(config_module_or_path)
     for module in getattr(conf.app, 'modules'):
         try:
-            module_app = import_module('%s.app' % module.__name__)
+            module_app = import_module('%s.app' % module)
             if hasattr(module_app, 'setup_app'):
                 return module_app.setup_app(conf)
         except ImportError:

@@ -35,7 +35,7 @@ class Command(paste_command.Command):
     def get_package_names(self, config):
         if not hasattr(config.app, 'modules'):
             return []
-        return [module.__name__ for module in config.app.modules if hasattr(module, '__name__')]
+        return config.app.modules
     
     def import_module(self, package, name):
         parent = __import__(package, fromlist=[name])
