@@ -9,7 +9,7 @@ from paste.urlparser import StaticURLParser
 from weberror.errormiddleware import ErrorMiddleware
 from weberror.evalexception import EvalException
 
-from core import abort, error_for, override_template, Pecan, redirect, render, request, response, ValidationException
+from core import abort, error_for, override_template, Pecan, load_app, redirect, render, request, response, ValidationException
 from decorators import expose
 from hooks import RequestViewerHook
 from templating import error_formatters
@@ -18,7 +18,7 @@ from configuration import set_config
 from configuration import _runtime_conf as conf
 
 __all__ = [
-    'make_app', 'Pecan', 'request', 'response', 'override_template', 'expose', 'conf', 'set_config' 
+    'make_app', 'load_app', 'Pecan', 'request', 'response', 'override_template', 'expose', 'conf', 'set_config' 
 ]
 
 def make_app(root, static_root=None, debug=False, errorcfg={}, wrap_app=None, logging=False, **kw):

@@ -5,6 +5,27 @@ import os
 
 IDENTIFIER = re.compile(r'[a-z_](\w)*$', re.IGNORECASE)
 
+DEFAULT = {
+    # Server Specific Configurations
+    'server' : {
+        'port' : '8080',
+        'host' : '0.0.0.0'
+    },
+
+    # Pecan Application Configurations
+    'app' : {
+        'root' : None,
+        'modules' : [],
+        'static_root' : 'public', 
+        'template_path' : '',
+        'debug' : False,
+        'force_canonical' : True,
+        'errors' : {
+            '__force_dict__' : True
+        }
+    }
+}
+
 class ConfigDict(dict):
     pass
 
@@ -80,15 +101,6 @@ class Config(object):
         conf_obj = dict(self)
         return self.__dictify__(conf_obj, prefix)
 
-    def update_with_module(self, module):
-        '''
-        Updates this configuration with a module.
-        
-        :param module: The module to update this configuration with. Either a string or the module itself.
-        '''
-        
-        self.update(conf_from_module(module))
-
     def __getattr__(self, name):
         try:
             return self.__values__[name]
@@ -122,20 +134,6 @@ class Config(object):
 
     def __repr__(self):
         return 'Config(%s)' % str(self.__values__)
-
-def conf_from_module(module):
-    '''
-    Creates a configuration dictionary from a module.
-    
-    :param module: The module, either as a string or the module itself.
-    '''
-    
-    if isinstance(module, str):
-        module = import_module(module)
-
-    module_dict = dict(inspect.getmembers(module))
-
-    return conf_from_dict(module_dict)
 
 
 def conf_from_file(filepath):
@@ -173,48 +171,31 @@ def conf_from_dict(conf_dict):
     return conf
 
 
-def import_module(conf):
-    '''
-    Imports the a configuration as a module.
-    
-    :param conf: The string to the configuration. Automatically strips off ".py" file extensions.
-    '''
-    
-    if '.' in conf:
-        parts = conf.split('.')
-        name = '.'.join(parts[:-1])
-        fromlist = parts[-1:]
-
-        try:
-            module = __import__(name, fromlist=fromlist)
-            conf_mod = getattr(module, parts[-1])
-        except AttributeError, e:
-            raise ImportError('No module named %s' % conf)
-    else:
-        conf_mod =  __import__(conf)
-
-    return conf_mod
-
-
 def initconf():
     '''
     Initializes the default configuration and exposes it at ``pecan.configuration.conf``,
     which is also exposed at ``pecan.conf``.
     '''
-    
-    import default_config
-    conf = conf_from_module(default_config)
-    return conf
+    return conf_from_dict(DEFAULT)
 
 
-def set_config(name):
+def set_config(config, overwrite=False):
     '''
     Updates the global configuration a filename.
     
-    :param name: filename, as a string.
+    :param config: Can be a dictionary containing configuration, or a string which
+    represents a (relative) configuration filename.
     '''
 
-    _runtime_conf.update(conf_from_file(name))
+    if overwrite is True:
+        _runtime_conf.__values__ == {}
+
+    if isinstance(config, basestring):
+        _runtime_conf.update(conf_from_file(config))
+    elif isinstance(config, dict):
+        _runtime_conf.update(conf_from_dict(config))
+    else:
+        raise TypeError('%s is neither a dictionary of a string.' % config)
 
 
 _runtime_conf = initconf()

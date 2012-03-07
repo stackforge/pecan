@@ -1,5 +1,6 @@
 from formencode import ForEach, Schema, validators
 from webtest import TestApp
+from unittest import TestCase
 
 import os.path
 
@@ -12,7 +13,7 @@ except ImportError:
     from json import dumps
 
 
-class TestValidation(object):
+class TestValidation(TestCase):
     
     template_path = os.path.join(os.path.dirname(__file__), 'templates')
     

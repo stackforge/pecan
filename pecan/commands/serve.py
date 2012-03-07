@@ -45,25 +45,11 @@ class ServeCommand(_ServeCommand, Command):
         setattr(self.options, 'server', None)
         setattr(self.options, 'server_name', None)
 
-        config_file = self.validate_file(self.args)
-
-        # for file-watching to work, we need a filename, not a module
-        if self.requires_config_file and self.args:
-            self.config = self.load_configuration(config_file)
-            self.args[0] = self.config.__file__
-            if self.options.reload is None:
-                self.options.reload = getattr(self.config.app, 'reload', False)
-        
         # run the base command
         _ServeCommand.command(self)
     
     def loadserver(self, server_spec, name, relative_to, **kw):
-        return (lambda app: httpserver.serve(app, self.config.server.host, self.config.server.port))
+        return (lambda app: httpserver.serve(app, app.config.server.host, app.config.server.port))
     
     def loadapp(self, app_spec, name, relative_to, **kw):
-        return self.load_app(self.config)
-
-    def validate_file(self, argv):
-        if not argv or not os.path.isfile(argv[0]):
-            raise paste_command.BadCommand('This command needs a valid config file.')
-        return argv[0]
+        return self.load_app()

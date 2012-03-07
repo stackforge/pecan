@@ -1,6 +1,7 @@
 """
 PasteScript base command for Pecan.
 """
+from pecan import load_app
 from pecan.configuration import _runtime_conf, set_config
 from paste.script import command as paste_command
 
@@ -31,37 +32,18 @@ class Command(paste_command.Command):
         except paste_command.BadCommand, ex:
             ex.args[0] = self.parser.error(ex.args[0])
             raise
-    
-    def get_package_names(self, config):
-        if not hasattr(config.app, 'modules'):
-            return []
-        return config.app.modules
-    
-    def import_module(self, package, name):
-        parent = __import__(package, fromlist=[name])
-        return getattr(parent, name, None)
-    
-    def load_configuration(self, name):
-        set_config(name)
-        return _runtime_conf
-    
-    def load_app(self, config):
-        for package_name in self.get_package_names(config):
-            module = self.import_module(package_name, 'app')
-            if hasattr(module, 'setup_app'):
-                return module.setup_app(config)
-        raise paste_command.BadCommand('No app.setup_app found in any app modules')
-    
-    def load_model(self, config):
-        for package_name in self.get_package_names(config):
-            module = self.import_module(package_name, 'model')
-            if module:
-                return module
-        return None
+
+    def load_app(self):
+        return load_app(self.validate_file(self.args))
     
     def logging_file_config(self, config_file):
         if os.path.splitext(config_file)[1].lower() == '.ini':
             paste_command.Command.logging_file_config(self, config_file)
+
+    def validate_file(self, argv):
+        if not argv or not os.path.isfile(argv[0]):
+            raise paste_command.BadCommand('This command needs a valid config file.')
+        return argv[0]
     
     def command(self):
         pass

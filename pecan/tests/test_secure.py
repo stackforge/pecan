@@ -9,7 +9,7 @@ try:
 except:
     from sets import Set as set
 
-class TestSecure(object):
+class TestSecure(TestCase):
     def test_simple_secure(self):
         authorized = False
 

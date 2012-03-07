@@ -1,5 +1,6 @@
 from pecan import abort, expose, make_app, request, response
 from pecan.rest import RestController
+from unittest import TestCase
 from webtest import TestApp
 try:
     from simplejson import dumps, loads
@@ -9,7 +10,7 @@ except:
 import formencode
 
 
-class TestRestController(object):
+class TestRestController(TestCase):
     
     def test_basic_rest(self):
         

@@ -1,4 +1,5 @@
 from pecan import Pecan, expose, request, response, redirect
+from unittest import TestCase
 from webtest import TestApp
 try:
     from simplejson import dumps
@@ -6,7 +7,7 @@ except:
     from json import dumps
 
 
-class TestGeneric(object):
+class TestGeneric(TestCase):
     
     def test_simple_generic(self):    
         class RootController(object):

@@ -1,3 +1,4 @@
+from configuration      import _runtime_conf, set_config
 from templating         import RendererFactory
 from routing            import lookup_controller, NonCanonicalPath
 from util               import _cfg, splitext, encode_if_needed
@@ -169,6 +170,26 @@ class ValidationException(ForwardRequestException):
         request.environ['REQUEST_METHOD'] = 'GET'
         request.environ['pecan.validation_redirected'] = True
         ForwardRequestException.__init__(self, location)
+
+
+def load_app(config):
+    '''
+    Used to load a ``Pecan`` application and its environment based on passed
+    configuration.
+
+    :param config: Can be a dictionary containing configuration, or a string which
+    represents a (relative) configuration filename.
+    :returns a pecan.Pecan object
+    '''
+    set_config(config, overwrite=True)
+
+    for package_name in getattr(_runtime_conf.app, 'modules', []):
+        module = __import__(package_name, fromlist=['app'])
+        if hasattr(module, 'app') and hasattr(module.app, 'setup_app'):
+            app = module.app.setup_app(_runtime_conf)
+            app.config = _runtime_conf
+            return app
+    raise RuntimeError('No app.setup_app found in any of the configured app.modules')
 
 
 class Pecan(object):
@@ -438,11 +459,14 @@ class Pecan(object):
         elif cfg.get('content_type') is not None and \
             request.pecan['content_type'] not in cfg.get('content_types', {}):
 
-            print "Controller '%s' defined does not support content_type '%s'. Supported type(s): %s" % (
+            import warnings
+            warnings.warn("Controller '%s' defined does not support content_type '%s'. Supported type(s): %s" % (
                 controller.__name__,
                 request.pecan['content_type'],
                 cfg.get('content_types', {}).keys()
-                )
+                ),
+                RuntimeWarning
+            )
             raise exc.HTTPNotFound
         
         # get a sorted list of hooks, by priority

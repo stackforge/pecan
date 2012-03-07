@@ -1,8 +1,9 @@
 import os
 from pecan import expose, make_app
+from unittest import TestCase
 from webtest import TestApp
 
-class TestStatic(object):
+class TestStatic(TestCase):
     
     def test_simple_static(self):    
         class RootController(object):
