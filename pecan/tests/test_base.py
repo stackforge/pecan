@@ -943,7 +943,7 @@ class TestLogging(TestCase):
         assert len(writes) == 1
 
 
-class TestEngines(object):
+class TestEngines(TestCase):
     
     template_path = os.path.join(os.path.dirname(__file__), 'templates')
 

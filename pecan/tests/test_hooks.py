@@ -5,11 +5,12 @@ from pecan.hooks         import PecanHook, TransactionHook, HookController, Requ
 from pecan.configuration import Config
 from pecan.decorators    import transactional, after_commit, after_rollback
 from copy                import copy
+from unittest            import TestCase
 from formencode          import Schema, validators
 from webtest             import TestApp
 
 
-class TestHooks(object):
+class TestHooks(TestCase):
     
     def test_basic_single_hook(self):
         run_hook = []
@@ -446,7 +447,7 @@ class TestHooks(object):
         assert run_hook[5] == 'inside'
         assert run_hook[6] == 'after'
 
-class TestTransactionHook(object):
+class TestTransactionHook(TestCase):
     def test_transaction_hook(self):
         run_hook = []
         
@@ -1109,7 +1110,7 @@ class TestTransactionHook(object):
         assert run_hook[3] == 'clear'
         
 
-class TestRequestViewerHook(object):
+class TestRequestViewerHook(TestCase):
 
     def test_hook_from_config(self):
         from pecan.configuration import _runtime_conf as conf

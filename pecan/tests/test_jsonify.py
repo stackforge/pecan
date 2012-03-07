@@ -48,7 +48,7 @@ def test_simple_rule():
     assert len(result) == 1
 
 
-class TestJsonify(object):
+class TestJsonify(TestCase):
     
     def test_simple_jsonify(self):
         Person = make_person()
