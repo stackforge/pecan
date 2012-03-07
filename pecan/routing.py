@@ -39,7 +39,11 @@ def lookup_controller(obj, url_path):
                             cross_boundary(prev_obj, obj)
                             break
                     except TypeError, te:
-                        print 'Got exception calling lookup(): %s (%s)' % (te, te.args)
+                        import warnings
+                        warnings.warn(
+                            'Got exception calling lookup(): %s (%s)' % (te, te.args),
+                            RuntimeWarning
+                        )
             else:
                 raise exc.HTTPNotFound
 

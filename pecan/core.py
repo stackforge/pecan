@@ -459,11 +459,14 @@ class Pecan(object):
         elif cfg.get('content_type') is not None and \
             request.pecan['content_type'] not in cfg.get('content_types', {}):
 
-            print "Controller '%s' defined does not support content_type '%s'. Supported type(s): %s" % (
+            import warnings
+            warnings.warn("Controller '%s' defined does not support content_type '%s'. Supported type(s): %s" % (
                 controller.__name__,
                 request.pecan['content_type'],
                 cfg.get('content_types', {}).keys()
-                )
+                ),
+                RuntimeWarning
+            )
             raise exc.HTTPNotFound
         
         # get a sorted list of hooks, by priority
