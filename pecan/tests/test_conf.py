@@ -100,46 +100,41 @@ class TestConf(TestCase):
     def test_config_missing_file(self):
         path = ('doesnotexist.py',)
         conf = configuration.Config({})
-
-        call_ = lambda path: conf.update(configuration.conf_from_file(os.path.join(
+        self.assertRaises(IOError, configuration.conf_from_file, os.path.join(
             __here__,
             'test_config',
             *path
-        )))
-        self.assertRaises(IOError, call_, path)
+        ))
 
     def test_config_missing_file_on_path(self):
         path = ('bad', 'bad', 'doesnotexist.py',)
         conf = configuration.Config({})
 
-        call_ = lambda path: conf.update(configuration.conf_from_file(os.path.join(
+        self.assertRaises(IOError, configuration.conf_from_file, os.path.join(
             __here__,
             'test_config',
             *path
-        )))
-        self.assertRaises(IOError, call_, path)
+        ))
 
     def test_config_with_syntax_error(self):
         path = ('bad', 'syntaxerror.py')
         conf = configuration.Config({})
 
-        call_ = lambda path: conf.update(configuration.conf_from_file(os.path.join(
+        self.assertRaises(SyntaxError, configuration.conf_from_file, os.path.join(
             __here__,
             'test_config',
             *path
-        )))
-        self.assertRaises(SyntaxError, call_, path)
+        ))
 
     def test_config_with_bad_import(self):
         path = ('bad', 'importerror.py')
         conf = configuration.Config({})
 
-        call_ = lambda path: conf.update(configuration.conf_from_file(os.path.join(
+        self.assertRaises(ImportError, configuration.conf_from_file, os.path.join(
             __here__,
             'test_config',
             *path
-        )))
-        self.assertRaises(ImportError, call_, path)
+        ))
 
     def test_config_set_from_file(self):
         path = os.path.join(os.path.dirname(__file__), 'test_config', 'empty.py')
