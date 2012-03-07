@@ -179,15 +179,23 @@ def initconf():
     return conf_from_dict(DEFAULT)
 
 
-def set_config(name, overwrite=False):
+def set_config(config, overwrite=False):
     '''
     Updates the global configuration a filename.
     
-    :param name: filename, as a string.
+    :param config: Can be a dictionary containing configuration, or a string which
+    represents a (relative) configuration filename.
     '''
 
-    conf = conf_from_file(name)
-    _runtime_conf.update(conf)
+    if overwrite is True:
+        _runtime_conf.__values__ == {}
+
+    if isinstance(config, basestring):
+        _runtime_conf.update(conf_from_file(config))
+    elif isinstance(config, dict):
+        _runtime_conf.update(conf_from_dict(config))
+    else:
+        raise TypeError('%s is neither a dictionary of a string.' % config)
 
 
 _runtime_conf = initconf()
