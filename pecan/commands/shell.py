@@ -31,8 +31,7 @@ class ShellCommand(Command):
         locs['wsgiapp'] = app
         locs['app'] = TestApp(app)
         
-        # find the model for the app
-        model = getattr(app, 'model', None)
+        model = self.load_model(app.config)
         if model:
             locs['model'] = model
         
@@ -65,3 +64,10 @@ class ShellCommand(Command):
             except ImportError:
                 pass
             shell.interact(shell_banner + banner)
+
+    def load_model(self, config):
+        for package_name in getattr(config.app, 'modules', []):
+            module = __import__(package_name, fromlist=['model'])
+            if hasattr(module, 'model'):
+                return module.model
+        return None
