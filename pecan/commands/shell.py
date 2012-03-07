@@ -24,9 +24,7 @@ class ShellCommand(Command):
     def command(self):
         
         # load the application
-        config = self.load_configuration(self.args[0])
-        setattr(config.app, 'reload', False)
-        app = self.load_app(config)
+        app = self.load_app()
         
         # prepare the locals
         locs = dict(__name__='pecan-admin')
@@ -34,7 +32,7 @@ class ShellCommand(Command):
         locs['app'] = TestApp(app)
         
         # find the model for the app
-        model = self.load_model(config)
+        model = getattr(app, 'model', None)
         if model:
             locs['model'] = model
         
