@@ -19,6 +19,7 @@ DEFAULT = {
         'static_root' : 'public', 
         'template_path' : '',
         'debug' : False,
+        'logging' : False,
         'force_canonical' : True,
         'errors' : {
             '__force_dict__' : True

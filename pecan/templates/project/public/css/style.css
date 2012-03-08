@@ -20,9 +20,13 @@ div#content  {
 }
 
 form {
-  margin: 0 1em;
-  padding: 1em;
-  border: 5px transparent;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+fieldset {
+  border: 0;
 }
 
 input.error {

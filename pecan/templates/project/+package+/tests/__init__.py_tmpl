@@ -1,0 +1,18 @@
+from unittest import TestCase
+from pecan.configuration import set_config
+from pecan.testing import load_test_app
+
+__all__ = ['EnvironmentTest']
+
+
+class EnvironmentTest(TestCase):
+    """
+    Used for integration or functional tests where you need to test your
+    literal application of its integration with the framework.
+    """
+    
+    def setUp(self):
+        self.app = load_test_app('config.py')
+
+    def tearDown(self):
+        set_config({}, overwrite=True)
