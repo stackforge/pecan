@@ -8,7 +8,7 @@ __all__ = ['FunctionalTest']
 
 class FunctionalTest(TestCase):
     """
-    Used functional tests where you need to test your
+    Used for functional tests where you need to test your
     literal application and its integration with the framework.
     """
     
