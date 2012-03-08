@@ -2,13 +2,13 @@ from unittest import TestCase
 from pecan.configuration import set_config
 from pecan.testing import load_test_app
 
-__all__ = ['EnvironmentTest']
+__all__ = ['FunctionalTest']
 
 
-class EnvironmentTest(TestCase):
+class FunctionalTest(TestCase):
     """
-    Used for integration or functional tests where you need to test your
-    literal application of its integration with the framework.
+    Used functional tests where you need to test your
+    literal application and its integration with the framework.
     """
     
     def setUp(self):
