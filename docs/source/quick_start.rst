@@ -82,11 +82,6 @@ code here to define tables, ORM definitions, and parse bindings from your
 configuration file.
 
 
-.. note::
-    The base project contains some ready-to-run tests. Try running
-    ``py.test`` (the recommended test runner for Pecan) and watch them pass!
-
-
 .. _running_application:
 
 Running the application

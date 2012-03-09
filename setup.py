@@ -65,8 +65,7 @@ setup(
     scripts              = ['bin/pecan'],
     zip_safe             = False,
     install_requires     = requirements,
-    tests_require        = tests_require,
-    test_suite           = test_suite,
+    test_suite           = 'pecan',
     entry_points         = """
     [paste.paster_command]
     pecan-serve = pecan.commands:ServeCommand
