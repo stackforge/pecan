@@ -10,7 +10,7 @@ from decimal                import Decimal
 try:
     # WebOb <= 1.1.1
     from webob.multidict        import MultiDict, UnicodeMultiDict
-    webob_dicts = (MultiDict, UnicodeMultiDict)
+    webob_dicts = (MultiDict, UnicodeMultiDict) # pragma: no cover
 except ImportError:         # pragma no cover
     # WebOb >= 1.2
     from webob.multidict        import MultiDict

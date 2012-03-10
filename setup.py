@@ -24,14 +24,7 @@ except:
     except:
         requirements.append("simplejson >= 2.1.1")
 
-test_suite = 'pecan.tests.collector'
-try:
-    from unittest import TestLoader
-    assert hasattr(TestLoader, 'discover')
-    tests_require = []
-except:
-    tests_require = ['unittest2']
-
+tests_require = requirements + ['virtualenv']
 
 #
 # call setup
@@ -65,6 +58,7 @@ setup(
     scripts              = ['bin/pecan'],
     zip_safe             = False,
     install_requires     = requirements,
+    tests_require        = tests_require,
     test_suite           = 'pecan',
     entry_points         = """
     [paste.paster_command]
