@@ -10,7 +10,7 @@ class TestConf(TestCase):
     def test_update_config_fail_identifier(self):
         """Fail when naming does not pass correctness"""
         from pecan import configuration
-        bad_dict = {'bad name' : 'value'}
+        bad_dict = {'bad name': 'value'}
         self.assertRaises(ValueError, configuration.Config, bad_dict)
 
     def test_update_set_config(self):
@@ -255,14 +255,14 @@ class Foo(TestCase):
 
     def test_paint_from_dict(self):
         from pecan import configuration
-        configuration.set_config({'foo' : 'bar'})
-        assert dict(configuration._runtime_conf) != {'foo' : 'bar'}
+        configuration.set_config({'foo': 'bar'})
+        assert dict(configuration._runtime_conf) != {'foo': 'bar'}
         self.assertEqual(configuration._runtime_conf.foo, 'bar')
 
     def test_overwrite_from_dict(self):
         from pecan import configuration
-        configuration.set_config({'foo' : 'bar'}, overwrite=True)
-        assert dict(configuration._runtime_conf) == {'foo' : 'bar'}
+        configuration.set_config({'foo': 'bar'}, overwrite=True)
+        assert dict(configuration._runtime_conf) == {'foo': 'bar'}
 
     def test_paint_from_file(self):
         from pecan import configuration
@@ -270,7 +270,7 @@ class Foo(TestCase):
             __here__,
             'test_config/foobar.py'
         ))
-        assert dict(configuration._runtime_conf) != {'foo' : 'bar'}
+        assert dict(configuration._runtime_conf) != {'foo': 'bar'}
         assert configuration._runtime_conf.foo == 'bar'
 
     def test_overwrite_from_file(self):
@@ -279,9 +279,9 @@ class Foo(TestCase):
                 __here__,
                 'test_config/foobar.py',
             ),
-            overwrite = True
+            overwrite=True
         )
-        assert dict(configuration._runtime_conf) == {'foo' : 'bar'}
+        assert dict(configuration._runtime_conf) == {'foo': 'bar'}
 
     def test_set_config_invalid_type(self):
         from pecan import configuration

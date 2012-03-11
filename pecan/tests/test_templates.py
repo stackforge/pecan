@@ -9,11 +9,13 @@ import urllib2
 import time
 import pecan
 
+
 def has_internet():
     try:
         response = urllib2.urlopen('http://google.com', timeout=1)
         return True
-    except urllib2.URLError as err: pass # pragma: no cover
+    except urllib2.URLError:
+        pass  # pragma: no cover
     return False
 
 
@@ -45,7 +47,7 @@ class TestTemplateBuilds(unittest.TestCase):
         import virtualenv
         virtualenv.create_environment(
             cls.install_dir,
-            site_packages = False
+            site_packages=False
         )
         # chdir into the pecan source
         os.chdir(pkg_resources.get_distribution('pecan').location)
@@ -62,7 +64,7 @@ class TestTemplateBuilds(unittest.TestCase):
         # create the templated project
         os.chdir(cls.install_dir)
         subprocess.check_call([pecan_exe, 'create', 'Testing123'])
-    
+
         # move into the new project directory and install
         os.chdir('Testing123')
         subprocess.check_call([
@@ -80,7 +82,7 @@ class TestTemplateBuilds(unittest.TestCase):
             # Make sure it's running
             if proc.returncode is None:
                 break
-            elif i == limit: # pragma: no cover
+            elif i == limit:  # pragma: no cover
                 raise RuntimeError("pecan serve config.py didn't start.")
 
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
@@ -104,7 +106,7 @@ class TestTemplateBuilds(unittest.TestCase):
             assert resp.status == 200
             assert 'This is a sample Pecan project.' in resp.read()
         finally:
-            proc.terminate() 
+            proc.terminate()
 
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
     def test_project_pecan_shell_command(self):
@@ -116,10 +118,10 @@ class TestTemplateBuilds(unittest.TestCase):
             pecan_exe,
             'shell',
             'config.py'
-        ], 
-            stdout = subprocess.PIPE, 
-            stderr = subprocess.PIPE,
-            stdin = subprocess.PIPE
+        ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            stdin=subprocess.PIPE
         )
 
         self.poll(proc)
@@ -132,7 +134,8 @@ class TestTemplateBuilds(unittest.TestCase):
         try:
             # just in case stdin doesn't close
             proc.terminate()
-        except: pass
+        except:
+            pass
 
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
     def test_project_tests_command(self):
@@ -143,9 +146,9 @@ class TestTemplateBuilds(unittest.TestCase):
             py_exe,
             'setup.py',
             'test'
-        ], 
-            stdout = subprocess.PIPE, 
-            stderr = subprocess.PIPE
+        ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
         )
         proc.wait()
 

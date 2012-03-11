@@ -3,12 +3,12 @@ from decimal import Decimal
 try:
     from simplejson import loads
 except:
-    from json import loads # noqa
+    from json import loads  # noqa
 try:
     from sqlalchemy import orm, schema, types
     from sqlalchemy.engine import create_engine
 except ImportError:
-    create_engine = None # noqa
+    create_engine = None  # noqa
 from unittest import TestCase
 
 from pecan.jsonify import jsonify, encode, ResultProxy, RowProxy
