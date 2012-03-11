@@ -7,10 +7,11 @@ error_formatters = []
 # JSON rendering engine
 #
 
+
 class JsonRenderer(object):
     def __init__(self, path, extra_vars):
         pass
-    
+
     def render(self, template_path, namespace):
         from jsonify import encode
         return encode(namespace)
@@ -20,7 +21,7 @@ _builtin_renderers['json'] = JsonRenderer
 
 #
 # Genshi rendering engine
-# 
+#
 
 try:
     from genshi.template import (TemplateLoader,
@@ -30,21 +31,21 @@ try:
         def __init__(self, path, extra_vars):
             self.loader = TemplateLoader([path], auto_reload=True)
             self.extra_vars = extra_vars
-    
+
         def render(self, template_path, namespace):
             tmpl = self.loader.load(template_path)
             stream = tmpl.generate(**self.extra_vars.make_ns(namespace))
             return stream.render('html')
 
     _builtin_renderers['genshi'] = GenshiRenderer
- 
+
     def format_genshi_error(exc_value):
         if isinstance(exc_value, (gTemplateError)):
             retval = '<h4>Genshi error %s</h4>' % cgi.escape(exc_value.message)
             retval += format_line_context(exc_value.filename, exc_value.lineno)
             return retval
     error_formatters.append(format_genshi_error)
-except ImportError:                                 #pragma no cover
+except ImportError:                                 # pragma no cover
     pass
 
 
@@ -59,9 +60,12 @@ try:
 
     class MakoRenderer(object):
         def __init__(self, path, extra_vars):
-            self.loader = TemplateLookup(directories=[path], output_encoding='utf-8')
+            self.loader = TemplateLookup(
+                directories=[path],
+                output_encoding='utf-8'
+            )
             self.extra_vars = extra_vars
-    
+
         def render(self, template_path, namespace):
             tmpl = self.loader.get_template(template_path)
             return tmpl.render(**self.extra_vars.make_ns(namespace))
@@ -116,13 +120,19 @@ try:
     _builtin_renderers['jinja'] = JinjaRenderer
 
     def format_jinja_error(exc_value):
+        retval = '<h4>Jinja2 error in \'%s\' on line %d</h4><div>%s</div>'
         if isinstance(exc_value, (jTemplateSyntaxError)):
-            retval = '<h4>Jinja2 template syntax error in \'%s\' on line %d</h4><div>%s</div>' % (exc_value.name, exc_value.lineno, exc_value.message)
+            retval = retval % (
+                exc_value.name,
+                exc_value.lineno,
+                exc_value.message
+            )
             retval += format_line_context(exc_value.filename, exc_value.lineno)
             return retval
     error_formatters.append(format_jinja_error)
 except ImportError:                                 # pragma no cover
     pass
+
 
 #
 # format helper function
@@ -130,22 +140,23 @@ except ImportError:                                 # pragma no cover
 def format_line_context(filename, lineno, context=10):
     lines = open(filename).readlines()
 
-    lineno = lineno - 1 # files are indexed by 1 not 0
+    lineno = lineno - 1  # files are indexed by 1 not 0
     if lineno > 0:
-        start_lineno = max(lineno-context, 0)
-        end_lineno = lineno+context
+        start_lineno = max(lineno - context, 0)
+        end_lineno = lineno + context
 
         lines = [cgi.escape(l) for l in lines[start_lineno:end_lineno]]
-        i = lineno-start_lineno
+        i = lineno - start_lineno
         lines[i] = '<strong>%s</strong>' % lines[i]
 
     else:
         lines = [cgi.escape(l) for l in lines[:context]]
+    msg = '<pre style="background-color:#ccc;padding:2em;">%s</pre>'
+    return msg % ''.join(lines)
 
-    return '<pre style="background-color:#ccc;padding:2em;">%s</pre>' % ''.join(lines)
 
 #
-# Extra Vars Rendering 
+# Extra Vars Rendering
 #
 class ExtraNamespace(object):
     def __init__(self, extras={}):
@@ -162,6 +173,7 @@ class ExtraNamespace(object):
             return val
         else:
             return ns
+
 
 #
 # Rendering Factory

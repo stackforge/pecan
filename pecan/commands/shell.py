@@ -12,41 +12,47 @@ class ShellCommand(Command):
     """
     Open an interactive shell with the Pecan app loaded.
     """
-    
+
     # command information
     usage = 'CONFIG_NAME'
     summary = __doc__.strip().splitlines()[0].rstrip('.')
-    
+
     # command options/arguments
     min_args = 1
     max_args = 1
-    
+
     def command(self):
-        
+
         # load the application
         app = self.load_app()
-        
+
         # prepare the locals
         locs = dict(__name__='pecan-admin')
         locs['wsgiapp'] = app
         locs['app'] = TestApp(app)
-        
+
         model = self.load_model(app.config)
         if model:
             locs['model'] = model
-        
+
         # insert the pecan locals
-        exec('from pecan import abort, conf, redirect, request, response') in locs
-        
+        exec(
+            'from pecan import abort, conf, redirect, request, response'
+        ) in locs
+
         # prepare the banner
         banner = '  The following objects are available:\n'
         banner += '  %-10s - This project\'s WSGI App instance\n' % 'wsgiapp'
         banner += '  %-10s - The current configuration\n' % 'conf'
         banner += '  %-10s - webtest.TestApp wrapped around wsgiapp\n' % 'app'
         if model:
-            model_name = getattr(model, '__module__', getattr(model, '__name__', 'model'))
+            model_name = getattr(
+                model,
+                '__module__',
+                getattr(model, '__name__', 'model')
+            )
             banner += '  %-10s - Models from %s\n' % ('model', model_name)
-        
+
         # launch the shell, using IPython if available
         try:
             from IPython.Shell import IPShellEmbed
@@ -60,7 +66,7 @@ class ShellCommand(Command):
                 (py_prefix, sys.version)
             shell = code.InteractiveConsole(locals=locs)
             try:
-                import readline
+                import readline  # noqa
             except ImportError:
                 pass
             shell.interact(shell_banner + banner)

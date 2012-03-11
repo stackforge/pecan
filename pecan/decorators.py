@@ -2,7 +2,8 @@ from inspect import getargspec, getmembers, isclass, ismethod
 from util import _cfg
 
 __all__ = [
-    'expose', 'transactional', 'accept_noncanonical', 'after_commit', 'after_rollback'
+    'expose', 'transactional', 'accept_noncanonical', 'after_commit',
+    'after_rollback'
 ]
 
 
@@ -16,88 +17,107 @@ def when_for(controller):
         return decorate
     return when
 
-def expose(template        = None, 
-           content_type    = 'text/html', 
-           schema          = None, 
-           json_schema     = None, 
-           variable_decode = False,
-           error_handler   = None,
-           htmlfill        = None,
-           generic         = False):
-    
+
+def expose(template=None,
+           content_type='text/html',
+           schema=None,
+           json_schema=None,
+           variable_decode=False,
+           error_handler=None,
+           htmlfill=None,
+           generic=False):
+
     '''
     Decorator used to flag controller methods as being "exposed" for
     access via HTTP, and to configure that access.
-    
-    :param template: The path to a template, relative to the base template directory.
+
+    :param template: The path to a template, relative to the base template
+    directory.
     :param content_type: The content-type to use for this template.
     :param schema: A ``formencode`` ``Schema`` object to use for validation.
-    :param json_schema: A ``formencode`` ``Schema`` object to use for validation of JSON POST/PUT content.
-    :param variable_decode: A boolean indicating if you want to use ``htmlfill``'s variable decode capability of transforming flat HTML form structures into nested ones.
-    :param htmlfill: Indicates whether or not you want to use ``htmlfill`` for this controller.
-    :param generic: A boolean which flags this as a "generic" controller, which uses generic functions based upon ``simplegeneric`` generic functions. Allows you to split a single controller into multiple paths based upon HTTP method.
+    :param json_schema: A ``formencode`` ``Schema`` object to use for
+    validation of JSON POST/PUT content.
+    :param variable_decode: A boolean indicating if you want to use
+    ``htmlfill``'s variable decode capability of transforming flat HTML form
+    structures into nested ones.
+    :param htmlfill: Indicates whether or not you want to use ``htmlfill`` for
+    this controller.
+    :param generic: A boolean which flags this as a "generic" controller, which
+    uses generic functions based upon ``simplegeneric`` generic functions.
+    Allows you to split a single controller into multiple paths based upon HTTP
+    method.
     '''
-    
-    if template == 'json': content_type = 'application/json'
+
+    if template == 'json':
+        content_type = 'application/json'
+
     def decorate(f):
         # flag the method as exposed
         f.exposed = True
-        
+
         # set a "pecan" attribute, where we will store details
         cfg = _cfg(f)
         cfg['content_type'] = content_type
         cfg.setdefault('template', []).append(template)
         cfg.setdefault('content_types', {})[content_type] = template
-        
+
         # handle generic controllers
         if generic:
             cfg['generic'] = True
             cfg['generic_handlers'] = dict(DEFAULT=f)
             f.when = when_for(f)
-            
+
         # store the arguments for this controller method
         cfg['argspec'] = getargspec(f)
-        
+
         # store the schema
         cfg['error_handler'] = error_handler
-        if schema is not None: 
+        if schema is not None:
             cfg['schema'] = schema
             cfg['validate_json'] = False
-        elif json_schema is not None: 
+        elif json_schema is not None:
             cfg['schema'] = json_schema
             cfg['validate_json'] = True
-        
+
         # store the variable decode configuration
         if isinstance(variable_decode, dict) or variable_decode == True:
             _variable_decode = dict(dict_char='.', list_char='-')
             if isinstance(variable_decode, dict):
                 _variable_decode.update(variable_decode)
             cfg['variable_decode'] = _variable_decode
-        
+
         # store the htmlfill configuration
-        if isinstance(htmlfill, dict) or htmlfill == True or schema is not None:
+        if isinstance(htmlfill, dict) or htmlfill == True or \
+            schema is not None:
             _htmlfill = dict(auto_insert_errors=False)
             if isinstance(htmlfill, dict):
                 _htmlfill.update(htmlfill)
             cfg['htmlfill'] = _htmlfill
         return f
     return decorate
-    
+
+
 def transactional(ignore_redirects=True):
     '''
     If utilizing the :mod:`pecan.hooks` ``TransactionHook``, allows you
     to flag a controller method or class as being wrapped in a transaction,
     regardless of HTTP method.
-    
-    :param ignore_redirects: Indicates if the hook should ignore redirects for this controller or not.
+
+    :param ignore_redirects: Indicates if the hook should ignore redirects
+    for this controller or not.
     '''
 
     def deco(f):
         if isclass(f):
-            for method in [m[1] for m in getmembers(f) if ismethod(m[1])]:
-                if getattr(method, 'exposed', False):
-                    _cfg(method)['transactional'] = True
-                    _cfg(method)['transactional_ignore_redirects'] = _cfg(method).get('transactional_ignore_redirects', ignore_redirects)
+            for meth in [m[1] for m in getmembers(f) if ismethod(m[1])]:
+                if getattr(meth, 'exposed', False):
+                    _cfg(meth)['transactional'] = True
+                    _cfg(meth)['transactional_ignore_redirects'] = _cfg(
+                        meth
+                    ).get(
+                        'transactional_ignore_redirects',
+                        ignore_redirects
+                    )
         else:
             _cfg(f)['transactional'] = True
             _cfg(f)['transactional_ignore_redirects'] = ignore_redirects
@@ -111,17 +131,17 @@ def after_action(action_type, action):
     to flag a controller method to perform a callable action after the
     action_type is successfully issued.
 
-    :param action: The callable to call after the commit is successfully issued.
-    '''
+    :param action: The callable to call after the commit is successfully
+    issued.  '''
 
     if action_type not in ('commit', 'rollback'):
-        raise Exception, 'action_type (%s) is not valid' % action_type
-
+        raise Exception('action_type (%s) is not valid' % action_type)
 
     def deco(func):
         _cfg(func).setdefault('after_%s' % action_type, []).append(action)
         return func
     return deco
+
 
 def after_commit(action):
     '''
@@ -129,7 +149,8 @@ def after_commit(action):
     to flag a controller method to perform a callable action after the
     commit is successfully issued.
 
-    :param action: The callable to call after the commit is successfully issued.
+    :param action: The callable to call after the commit is successfully
+    issued.
     '''
     return  after_action('commit', action)
 
@@ -140,7 +161,8 @@ def after_rollback(action):
     to flag a controller method to perform a callable action after the
     rollback is successfully issued.
 
-    :param action: The callable to call after the rollback is successfully issued.
+    :param action: The callable to call after the rollback is successfully
+    issued.
     '''
     return  after_action('rollback', action)
 
@@ -149,6 +171,6 @@ def accept_noncanonical(func):
     '''
     Flags a controller method as accepting non-canoncial URLs.
     '''
-    
+
     _cfg(func)['accept_noncanonical'] = True
     return func
