@@ -8,10 +8,11 @@ import virtualenv
 import httplib
 import urllib2
 import time
+import pecan
 
 def has_internet():
     try:
-        response = urllib2.urlopen('http://74.125.113.99', timeout=1) # Google
+        response = urllib2.urlopen('http://google.com', timeout=1)
         return True
     except urllib2.URLError as err: pass # pragma: no cover
     return False
@@ -23,6 +24,11 @@ class TestTemplateBuilds(unittest.TestCase):
     """
 
     @classmethod
+    @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
+    @unittest.skipUnless(
+        getattr(pecan, '__run_all_tests__', False) is True,
+        'Skipping (really slow).  To run, `$ python setup.py test --slow.`'
+    )
     def setUpClass(cls):
         # Make a temp install location and record the cwd
         cls.install_dir = tempfile.mkdtemp()
