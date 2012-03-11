@@ -50,6 +50,9 @@ class Config(object):
         self.__file__ = filename
         self.update(conf_dict)
 
+    def empty(self):
+        self.__values__ = {}
+
     def update(self, conf_dict):
         '''
         Updates this configuration with a dictionary.
@@ -195,14 +198,14 @@ def set_config(config, overwrite=False):
     '''
 
     if overwrite is True:
-        _runtime_conf.__values__ == {}
+        _runtime_conf.empty()
 
     if isinstance(config, basestring):
         _runtime_conf.update(conf_from_file(config))
     elif isinstance(config, dict):
         _runtime_conf.update(conf_from_dict(config))
     else:
-        raise TypeError('%s is neither a dictionary of a string.' % config)
+        raise TypeError('%s is neither a dictionary or a string.' % config)
 
 
 _runtime_conf = initconf()

@@ -1,3 +1,2 @@
 if false
-    var = 3
-
+var = 3

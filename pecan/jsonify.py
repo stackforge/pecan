@@ -10,7 +10,7 @@ from decimal                import Decimal
 try:
     # WebOb <= 1.1.1
     from webob.multidict        import MultiDict, UnicodeMultiDict
-    webob_dicts = (MultiDict, UnicodeMultiDict) # pragma: no cover
+    webob_dicts = (MultiDict, UnicodeMultiDict)  # pragma: no cover
 except ImportError:         # pragma no cover
     # WebOb >= 1.2
     from webob.multidict        import MultiDict
@@ -22,8 +22,12 @@ try:
     from sqlalchemy.engine.base import ResultProxy, RowProxy
 except ImportError:         # pragma no cover
     # dummy classes since we don't have SQLAlchemy installed
-    class ResultProxy: pass # noqa
-    class RowProxy: pass    # noqa
+
+    class ResultProxy:
+        pass
+
+    class RowProxy:
+        pass
 
 #
 # exceptions
