@@ -1,13 +1,14 @@
 from unittest import TestCase
 
 from pecan import expose, make_app
-from pecan.secure import secure, unlocked, SecureController, Protected
+from pecan.secure import secure, unlocked, SecureController
 from webtest import TestApp
 
 try:
     set()
 except:
     from sets import Set as set
+
 
 class TestSecure(TestCase):
     def test_simple_secure(self):
@@ -17,49 +18,48 @@ class TestSecure(TestCase):
             @expose()
             def index(self):
                 return 'Index'
-            
+
             @expose()
             @unlocked
             def allowed(self):
                 return 'Allowed!'
-            
+
             @classmethod
             def check_permissions(cls):
                 return authorized
-        
+
         class RootController(object):
             @expose()
             def index(self):
                 return 'Hello, World!'
-            
+
             @expose()
             @secure(lambda: False)
             def locked(self):
                 return 'No dice!'
-            
+
             @expose()
             @secure(lambda: True)
             def unlocked(self):
                 return 'Sure thing'
-            
+
             secret = SecretController()
 
-        
         app = TestApp(make_app(RootController(), static_root='tests/static'))
         response = app.get('/')
         assert response.status_int == 200
         assert response.body == 'Hello, World!'
-        
+
         response = app.get('/unlocked')
         assert response.status_int == 200
         assert response.body == 'Sure thing'
-        
+
         response = app.get('/locked', expect_errors=True)
         assert response.status_int == 401
-        
+
         response = app.get('/secret/', expect_errors=True)
         assert response.status_int == 401
-        
+
         response = app.get('/secret/allowed')
         assert response.status_int == 200
         assert response.body == 'Allowed!'
@@ -70,7 +70,7 @@ class TestSecure(TestCase):
             def index(self):
                 return 'Index'
 
-            @expose()                
+            @expose()
             def allowed(self):
                 return 'Allowed!'
 
@@ -103,7 +103,6 @@ class TestSecure(TestCase):
 
             secret = SecretController()
 
-
         app = TestApp(make_app(RootController(), static_root='tests/static'))
         response = app.get('/')
         assert response.status_int == 200
@@ -122,11 +121,11 @@ class TestSecure(TestCase):
         response = app.get('/secret/allowed')
         assert response.status_int == 200
         assert response.body == 'Allowed!'
-        
+
         response = app.get('/secret/authorized/')
         assert response.status_int == 200
-        assert response.body == 'Index'    
-        
+        assert response.body == 'Index'
+
         response = app.get('/secret/authorized/allowed')
         assert response.status_int == 200
         assert response.body == 'Allowed!'
@@ -168,12 +167,14 @@ class TestSecure(TestCase):
         assert bool(Protected) is True
 
     def test_secure_obj_only_failure(self):
-        class Foo(object): pass
+        class Foo(object):
+            pass
 
         try:
             secure(Foo())
         except Exception, e:
             assert isinstance(e, TypeError)
+
 
 class TestObjectPathSecurity(TestCase):
     def setUp(self):
@@ -181,13 +182,14 @@ class TestObjectPathSecurity(TestCase):
 
         class DeepSecretController(SecureController):
             authorized = False
+
             @expose()
             @unlocked
             def _lookup(self, someID, *remainder):
                 if someID == 'notfound':
                     return None
                 return SubController(someID), remainder
-            
+
             @expose()
             def index(self):
                 return 'Deep Secret'
@@ -224,7 +226,10 @@ class TestObjectPathSecurity(TestCase):
             def independent(self):
                 return 'Independent Security'
 
-            wrapped = secure(SubController('wrapped'), 'independent_check_permissions')
+            wrapped = secure(
+                SubController('wrapped'), 'independent_check_permissions'
+            )
+
             @classmethod
             def check_permissions(cls):
                 permissions_checked.add('secretcontroller')
@@ -244,7 +249,6 @@ class TestObjectPathSecurity(TestCase):
 
             unlocked = unlocked(SubController('unlocked'))
 
-
         class RootController(object):
             secret = SecretController()
             notsecret = NotSecretController()
@@ -253,7 +257,9 @@ class TestObjectPathSecurity(TestCase):
         self.secret_cls = SecretController
 
         self.permissions_checked = permissions_checked
-        self.app = TestApp(make_app(RootController(), static_root='tests/static'))
+        self.app = TestApp(
+            make_app(RootController(), static_root='tests/static')
+        )
 
     def tearDown(self):
         self.permissions_checked.clear()
@@ -280,7 +286,9 @@ class TestObjectPathSecurity(TestCase):
         assert response.status_int == 404
 
     def test_secret_through_lookup(self):
-        response = self.app.get('/notsecret/hi/deepsecret/', expect_errors=True)
+        response = self.app.get(
+            '/notsecret/hi/deepsecret/', expect_errors=True
+        )
         assert response.status_int == 401
 
     def test_layered_protection(self):
@@ -316,13 +324,17 @@ class TestObjectPathSecurity(TestCase):
         assert response.body == 'Index 2'
         assert 'deepsecret' not in self.permissions_checked
 
-        response = self.app.get('/notsecret/1/deepsecret/notfound/', expect_errors=True)
+        response = self.app.get(
+            '/notsecret/1/deepsecret/notfound/', expect_errors=True
+        )
         assert response.status_int == 404
         assert 'deepsecret' not in self.permissions_checked
 
     def test_mixed_protection(self):
         self.secret_cls.authorized = True
-        response = self.app.get('/secret/1/deepsecret/notfound/', expect_errors=True)
+        response = self.app.get(
+            '/secret/1/deepsecret/notfound/', expect_errors=True
+        )
         assert response.status_int == 404
         assert 'secretcontroller' in self.permissions_checked
         assert 'deepsecret' not in self.permissions_checked

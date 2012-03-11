@@ -2,8 +2,8 @@ from unittest import TestCase
 
 from pecan.templating import RendererFactory, format_line_context
 
-import os
 import tempfile
+
 
 class TestTemplate(TestCase):
     def setUp(self):
@@ -21,14 +21,14 @@ class TestTemplate(TestCase):
         self.assertEqual(extra_vars.make_ns({}), {})
 
         extra_vars.update({'foo': 1})
-        self.assertEqual(extra_vars.make_ns({}), {'foo':1})
+        self.assertEqual(extra_vars.make_ns({}), {'foo': 1})
 
     def test_update_extra_vars(self):
         extra_vars = self.rf.extra_vars
         extra_vars.update({'foo': 1})
 
-        self.assertEqual(extra_vars.make_ns({'bar':2}), {'foo':1, 'bar':2})
-        self.assertEqual(extra_vars.make_ns({'foo':2}), {'foo':2})
+        self.assertEqual(extra_vars.make_ns({'bar': 2}), {'foo': 1, 'bar': 2})
+        self.assertEqual(extra_vars.make_ns({'foo': 2}), {'foo': 2})
 
 
 class TestTemplateLineFormat(TestCase):

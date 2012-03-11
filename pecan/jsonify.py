@@ -1,7 +1,7 @@
 try:
     from simplejson import JSONEncoder
-except ImportError: # pragma: no cover
-    from json import JSONEncoder
+except ImportError:                     # pragma: no cover
+    from json import JSONEncoder        # noqa
 
 from datetime               import datetime, date
 from decimal                import Decimal
@@ -20,14 +20,15 @@ from simplegeneric          import generic
 
 try:
     from sqlalchemy.engine.base import ResultProxy, RowProxy
-except ImportError:         #pragma no cover
+except ImportError:         # pragma no cover
     # dummy classes since we don't have SQLAlchemy installed
-    class ResultProxy: pass
-    class RowProxy: pass
+    class ResultProxy: pass # noqa
+    class RowProxy: pass    # noqa
 
 #
 # exceptions
 #
+
 
 class JsonEncodeError(Exception):
     pass
@@ -73,16 +74,18 @@ class GenericJSON(JSONEncoder):
 
 _default = GenericJSON()
 
+
 @generic
 def jsonify(obj):
     return _default.default(obj)
+
 
 class GenericFunctionJSON(GenericJSON):
     def default(self, obj):
         return jsonify(obj)
 
 _instance = GenericFunctionJSON()
-    
+
 
 def encode(obj):
     return _instance.encode(obj)

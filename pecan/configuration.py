@@ -7,43 +7,45 @@ IDENTIFIER = re.compile(r'[a-z_](\w)*$', re.IGNORECASE)
 
 DEFAULT = {
     # Server Specific Configurations
-    'server' : {
-        'port' : '8080',
-        'host' : '0.0.0.0'
+    'server': {
+        'port': '8080',
+        'host': '0.0.0.0'
     },
 
     # Pecan Application Configurations
-    'app' : {
-        'root' : None,
-        'modules' : [],
-        'static_root' : 'public', 
-        'template_path' : '',
-        'debug' : False,
-        'logging' : False,
-        'force_canonical' : True,
-        'errors' : {
-            '__force_dict__' : True
+    'app': {
+        'root': None,
+        'modules': [],
+        'static_root': 'public',
+        'template_path': '',
+        'debug': False,
+        'logging': False,
+        'force_canonical': True,
+        'errors': {
+            '__force_dict__': True
         }
     }
 }
 
+
 class ConfigDict(dict):
     pass
+
 
 class Config(object):
     '''
     Base class for Pecan configurations.
     '''
-    
+
     def __init__(self, conf_dict={}, filename=''):
         '''
-        Create a Pecan configuration object from a dictionary or a 
+        Create a Pecan configuration object from a dictionary or a
         filename.
-        
+
         :param conf_dict: A python dictionary to use for the configuration.
         :param filename: A filename to use for the configuration.
         '''
-        
+
         self.__values__ = {}
         self.__file__ = filename
         self.update(conf_dict)
@@ -51,16 +53,17 @@ class Config(object):
     def update(self, conf_dict):
         '''
         Updates this configuration with a dictionary.
-        
-        :param conf_dict: A python dictionary to update this configuration with.
+
+        :param conf_dict: A python dictionary to update this configuration
+        with.
         '''
-        
+
         if isinstance(conf_dict, dict):
             iterator = conf_dict.iteritems()
         else:
             iterator = iter(conf_dict)
-            
-        for k,v in iterator:
+
+        for k, v in iterator:
             if not IDENTIFIER.match(k):
                 raise ValueError('\'%s\' is not a valid indentifier' % k)
 
@@ -94,11 +97,11 @@ class Config(object):
     def as_dict(self, prefix=None):
         '''
         Converts recursively the Config object into a valid dictionary.
-        
-        :param prefix: A string to optionally prefix all key elements in the 
+
+        :param prefix: A string to optionally prefix all key elements in the
         returned dictonary.
         '''
-        
+
         conf_obj = dict(self)
         return self.__dictify__(conf_obj, prefix)
 
@@ -106,7 +109,8 @@ class Config(object):
         try:
             return self.__values__[name]
         except KeyError:
-            raise AttributeError, "'pecan.conf' object has no attribute '%s'" % name
+            msg = "'pecan.conf' object has no attribute '%s'" % name
+            raise AttributeError(msg)
 
     def __getitem__(self, key):
         return self.__values__[key]
@@ -129,7 +133,8 @@ class Config(object):
 
     def __dir__(self):
         """
-        When using dir() returns a list of the values in the config.  Note: This function only works in Python2.6 or later.
+        When using dir() returns a list of the values in the config.  Note:
+        This function only works in Python2.6 or later.
         """
         return self.__values__.keys()
 
@@ -140,10 +145,10 @@ class Config(object):
 def conf_from_file(filepath):
     '''
     Creates a configuration dictionary from a file.
-    
+
     :param filepath: The path to the file.
     '''
-    
+
     abspath = os.path.abspath(os.path.expanduser(filepath))
     conf_dict = {}
 
@@ -156,26 +161,26 @@ def conf_from_file(filepath):
 def conf_from_dict(conf_dict):
     '''
     Creates a configuration dictionary from a dictionary.
-    
+
     :param conf_dict: The configuration dictionary.
     '''
-    
+
     conf = Config(filename=conf_dict.get('__file__', ''))
 
-    for k,v in conf_dict.iteritems():
+    for k, v in conf_dict.iteritems():
         if k.startswith('__'):
             continue
         elif inspect.ismodule(v):
             continue
-        
+
         conf[k] = v
     return conf
 
 
 def initconf():
     '''
-    Initializes the default configuration and exposes it at ``pecan.configuration.conf``,
-    which is also exposed at ``pecan.conf``.
+    Initializes the default configuration and exposes it at
+    ``pecan.configuration.conf``, which is also exposed at ``pecan.conf``.
     '''
     return conf_from_dict(DEFAULT)
 
@@ -183,8 +188,9 @@ def initconf():
 def set_config(config, overwrite=False):
     '''
     Updates the global configuration a filename.
-    
-    :param config: Can be a dictionary containing configuration, or a string which
+
+    :param config: Can be a dictionary containing configuration, or a string
+    which
     represents a (relative) configuration filename.
     '''
 
@@ -200,4 +206,3 @@ def set_config(config, overwrite=False):
 
 
 _runtime_conf = initconf()
-

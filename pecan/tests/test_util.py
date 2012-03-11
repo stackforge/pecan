@@ -1,5 +1,6 @@
 from pecan.util import compat_splitext
 
+
 def test_compat_splitext():
     assert ('foo', '.bar') == compat_splitext('foo.bar')
     assert ('/foo/bar', '.txt') == compat_splitext('/foo/bar.txt')
