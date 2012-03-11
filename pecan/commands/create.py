@@ -13,16 +13,16 @@ import sys
 class CreateCommand(CreateDistroCommand, Command):
     """
     Creates the file layout for a new Pecan distribution.
-    
-    For a template to show up when using this command, its name must begin 
-    with "pecan-". Although not required, it should also include the "Pecan" 
+
+    For a template to show up when using this command, its name must begin
+    with "pecan-". Although not required, it should also include the "Pecan"
     egg plugin for user convenience.
     """
-    
+
     # command information
     summary = __doc__.strip().splitlines()[0].rstrip('.')
     description = None
-    
+
     def command(self):
         if not self.options.list_templates:
             if not self.options.templates:
@@ -33,7 +33,7 @@ class CreateCommand(CreateDistroCommand, Command):
             sys.stderr.write('%s\n\n' % ex)
             CreateDistroCommand.list_templates(self)
             return 2
-    
+
     def all_entry_points(self):
         entry_points = []
         for entry in CreateDistroCommand.all_entry_points(self):

@@ -5,32 +5,38 @@ from webob.exc import HTTPFound
 from util      import iscontroller, _cfg
 from routing   import lookup_controller
 
-__all__ = ['PecanHook', 'TransactionHook', 'HookController', 'RequestViewerHook']
+__all__ = [
+    'PecanHook', 'TransactionHook', 'HookController',
+    'RequestViewerHook'
+]
 
 
 def walk_controller(root_class, controller, hooks):
     if not isinstance(controller, (int, dict)):
         for name, value in getmembers(controller):
-            if name == 'controller': continue
-            if name.startswith('__') and name.endswith('__'): continue
-            
+            if name == 'controller':
+                continue
+            if name.startswith('__') and name.endswith('__'):
+                continue
+
             if iscontroller(value):
                 for hook in hooks:
                     value._pecan.setdefault('hooks', []).append(hook)
             elif hasattr(value, '__class__'):
-                if name.startswith('__') and name.endswith('__'): continue
+                if name.startswith('__') and name.endswith('__'):
+                    continue
                 walk_controller(root_class, value, hooks)
 
 
 class HookController(object):
     '''
     A base class for controllers that would like to specify hooks on
-    their controller methods. Simply create a list of hook objects 
+    their controller methods. Simply create a list of hook objects
     called ``__hooks__`` as a member of the controller's namespace.
     '''
-    
+
     __hooks__ = []
-    
+
     class __metaclass__(type):
         def __init__(cls, name, bases, dict_):
             walk_controller(cls, cls, dict_['__hooks__'])
@@ -42,41 +48,41 @@ class PecanHook(object):
     own hooks. Set a priority on a hook by setting the ``priority``
     attribute for the hook, which defaults to 100.
     '''
-    
+
     priority = 100
-    
+
     def on_route(self, state):
         '''
         Override this method to create a hook that gets called upon
         the start of routing.
-        
+
         :param state: The Pecan ``state`` object for the current request.
         '''
         return
-    
+
     def before(self, state):
         '''
         Override this method to create a hook that gets called after
         routing, but before the request gets passed to your controller.
-        
+
         :param state: The Pecan ``state`` object for the current request.
         '''
         return
-    
+
     def after(self, state):
         '''
         Override this method to create a hook that gets called after
         the request has been handled by the controller.
-        
+
         :param state: The Pecan ``state`` object for the current request.
         '''
         return
-    
+
     def on_error(self, state, e):
         '''
         Override this method to create a hook that gets called upon
         an exception being raised in your controller.
-        
+
         :param state: The Pecan ``state`` object for the current request.
         :param e: The ``Exception`` object that was raised.
         '''
@@ -90,21 +96,23 @@ class TransactionHook(PecanHook):
     requests in a transaction. Override the ``is_transactional`` method
     to define your own rules for what requests should be transactional.
     '''
-    
+
     def __init__(self, start, start_ro, commit, rollback, clear):
         '''
-        :param start: A callable that will bind to a writable database and start a transaction.
+        :param start: A callable that will bind to a writable database and
+        start a transaction.
         :param start_ro: A callable that will bind to a readable database.
         :param commit: A callable that will commit the active transaction.
-        :param rollback: A callable that will roll back the active transaction.
+        :param rollback: A callable that will roll back the active
+        transaction.
         :param clear: A callable that will clear your current context.
         '''
-        
-        self.start    = start
+
+        self.start = start
         self.start_ro = start_ro
-        self.commit   = commit
+        self.commit = commit
         self.rollback = rollback
-        self.clear    = clear
+        self.clear = clear
 
     def is_transactional(self, state):
         '''
@@ -112,10 +120,10 @@ class TransactionHook(PecanHook):
         upon the state of the request. By default, wraps all but ``GET``
         and ``HEAD`` requests in a transaction, along with respecting
         the ``transactional`` decorator from :mod:pecan.decorators.
-        
+
         :param state: The Pecan state object for the current request.
         '''
-        
+
         controller = getattr(state, 'controller', None)
         if controller:
             force_transactional = _cfg(controller).get('transactional', False)
@@ -147,13 +155,20 @@ class TransactionHook(PecanHook):
         # (e.g., shouldn't consider them rollback-worthy)
         # don't set `state.request.error = True`.
         #
-        transactional_ignore_redirects = state.request.method not in ('GET', 'HEAD')
+        trans_ignore_redirects = (
+            state.request.method not in ('GET', 'HEAD')
+        )
         if state.controller is not None:
-            transactional_ignore_redirects = _cfg(state.controller).get('transactional_ignore_redirects', transactional_ignore_redirects)
-        if type(e) is HTTPFound and transactional_ignore_redirects is True:
+            trans_ignore_redirects = (
+                _cfg(state.controller).get(
+                    'transactional_ignore_redirects',
+                    trans_ignore_redirects
+                )
+            )
+        if type(e) is HTTPFound and trans_ignore_redirects is True:
             return
         state.request.error = True
-    
+
     def after(self, state):
         if state.request.transactional:
             action_name = None
@@ -178,21 +193,22 @@ class TransactionHook(PecanHook):
 
         self.clear()
 
+
 class RequestViewerHook(PecanHook):
     '''
     Returns some information about what is going on in a single request.  It
     accepts specific items to report on but uses a default list of items when
     none are passed in.  Based on the requested ``url``, items can also be
     blacklisted.
-    Configuration is flexible, can be passed in (or not) and can contain some or
-    all the keys supported.
+    Configuration is flexible, can be passed in (or not) and can contain
+    some or all the keys supported.
 
     ``items``
     ---------
-    This key holds the items that this hook will display. When this key is passed 
-    only the items in the list will be used.
-    Valid items are *any* item that the ``request`` object holds, by default it uses
-    the following:
+    This key holds the items that this hook will display. When this key is
+    passed only the items in the list will be used.  Valid items are *any*
+    item that the ``request`` object holds, by default it uses the
+    following:
 
     * path
     * status
@@ -206,11 +222,12 @@ class RequestViewerHook(PecanHook):
 
     ``blacklist``
     -------------
-    This key holds items that will be blacklisted based on ``url``. If there is a need
-    to ommit urls that start with `/javascript`, then this key would look like::
+    This key holds items that will be blacklisted based on ``url``. If
+    there is a need to ommit urls that start with `/javascript`, then this
+    key would look like::
 
         'blacklist': ['/javascript']
-        
+
     As many blacklisting items as needed can be contained in the list. The hook
     will verify that the url is not starting with items in this list to display
     results, otherwise it will get ommited.
@@ -218,44 +235,50 @@ class RequestViewerHook(PecanHook):
     .. :note::
         This key should always use a ``list`` of items to use.
 
-    For more detailed documentation about this hook, please see :ref:`requestviewerhook`
+    For more detailed documentation about this hook, please see
+    :ref:`requestviewerhook`
     '''
 
     available = ['path', 'status', 'method', 'controller', 'params', 'hooks']
 
-    def __init__(self, config=None, writer=sys.stdout, terminal=True, headers=True):
+    def __init__(self, config=None, writer=sys.stdout, terminal=True,
+        headers=True):
         '''
         :param config:   A (optional) dictionary that can hold ``items`` and/or
-                         ``blacklist`` keys.  
-        :param writer:   The stream writer to use. Can redirect output to other 
-                         streams as long as the passed in stream has a ``write`` 
-                         callable method.
-        :param terminal: Outputs to the chosen stream writer (usually the terminal)
+                         ``blacklist`` keys.
+        :param writer:   The stream writer to use. Can redirect output to other
+                         streams as long as the passed in stream has a
+                         ``write`` callable method.
+        :param terminal: Outputs to the chosen stream writer (usually
+                         the terminal)
         :param headers:  Sets values to the X-HTTP headers
         '''
         if not config:
-            self.config = {'items' : self.available}
+            self.config = {'items': self.available}
         else:
             if config.__class__.__name__ == 'Config':
                 self.config = config.as_dict()
             else:
                 self.config = config
-        self.writer     = writer
-        self.items      = self.config.get('items', self.available)
-        self.blacklist  = self.config.get('blacklist', [])
-        self.terminal   = terminal
-        self.headers    = headers
+        self.writer = writer
+        self.items = self.config.get('items', self.available)
+        self.blacklist = self.config.get('blacklist', [])
+        self.terminal = terminal
+        self.headers = headers
 
     def after(self, state):
 
         # Default and/or custom response information
         responses = {
-             'controller' : lambda self, state: self.get_controller(state),
-             'method'     : lambda self, state: state.request.method,
-             'path'       : lambda self, state: state.request.path,
-             'params'     : lambda self, state: [(p[0].encode('utf-8'), p[1].encode('utf-8')) for p in state.request.params.items()],
-             'status'     : lambda self, state: state.response.status,
-             'hooks'      : lambda self, state: self.format_hooks(state.app.hooks),
+             'controller': lambda self, state: self.get_controller(state),
+             'method': lambda self, state: state.request.method,
+             'path': lambda self, state: state.request.path,
+             'params': lambda self, state: [
+                 (p[0].encode('utf-8'), p[1].encode('utf-8'))
+                 for p in state.request.params.items()
+             ],
+             'status': lambda self, state: state.response.status,
+             'hooks': lambda self, state: self.format_hooks(state.app.hooks),
          }
 
         is_available = [
@@ -263,16 +286,19 @@ class RequestViewerHook(PecanHook):
                 if i in self.available or hasattr(state.request, i)
         ]
 
-        terminal  = []
-        headers   = []
-        will_skip = [i for i in self.blacklist if state.request.path.startswith(i)]
+        terminal = []
+        headers = []
+        will_skip = [
+            i for i in self.blacklist
+            if state.request.path.startswith(i)
+        ]
 
         if will_skip:
             return
-        
+
         for request_info in is_available:
             try:
-                value = responses.get(request_info) 
+                value = responses.get(request_info)
                 if not value:
                     value = getattr(state.request, request_info)
                 else:
@@ -289,9 +315,9 @@ class RequestViewerHook(PecanHook):
 
         if self.headers:
             for h in headers:
-                key   = str(h[0])
+                key = str(h[0])
                 value = str(h[1])
-                name  = 'X-Pecan-%s' % key
+                name = 'X-Pecan-%s' % key
                 state.response.headers[name] = value
 
     def get_controller(self, state):
@@ -310,5 +336,3 @@ class RequestViewerHook(PecanHook):
         '''
         str_hooks = [str(i).split()[0].strip('<') for i in hooks]
         return [i.split('.')[-1] for i in str_hooks if '.' in i]
-
-

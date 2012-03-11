@@ -1,15 +1,16 @@
 from webob import exc
-from inspect import ismethod
 
 from secure import handle_security, cross_boundary
 from util import iscontroller
 
 __all__ = ['lookup_controller', 'find_object']
 
+
 class NonCanonicalPath(Exception):
     def __init__(self, controller, remainder):
         self.controller = controller
         self.remainder = remainder
+
 
 def lookup_controller(obj, url_path):
     remainder = url_path
@@ -40,8 +41,9 @@ def lookup_controller(obj, url_path):
                             break
                     except TypeError, te:
                         import warnings
+                        msg = 'Got exception calling lookup(): %s (%s)'
                         warnings.warn(
-                            'Got exception calling lookup(): %s (%s)' % (te, te.args),
+                            msg % (te, te.args),
                             RuntimeWarning
                         )
             else:
@@ -51,19 +53,22 @@ def lookup_controller(obj, url_path):
 def find_object(obj, remainder, notfound_handlers):
     prev_obj = None
     while True:
-        if obj is None: raise exc.HTTPNotFound
-        if iscontroller(obj): return obj, remainder
+        if obj is None:
+            raise exc.HTTPNotFound
+        if iscontroller(obj):
+            return obj, remainder
 
         # are we traversing to another controller
         cross_boundary(prev_obj, obj)
-        
+
         if remainder and remainder[0] == '':
             index = getattr(obj, 'index', None)
-            if iscontroller(index): return index, remainder[1:]
+            if iscontroller(index):
+                return index, remainder[1:]
         elif not remainder:
             # the URL has hit an index method without a trailing slash
             index = getattr(obj, 'index', None)
-            if iscontroller(index): 
+            if iscontroller(index):
                 raise NonCanonicalPath(index, remainder[1:])
         default = getattr(obj, '_default', None)
         if iscontroller(default):
@@ -72,14 +77,15 @@ def find_object(obj, remainder, notfound_handlers):
         lookup = getattr(obj, '_lookup', None)
         if iscontroller(lookup):
             notfound_handlers.append(('_lookup', lookup, remainder))
-        
+
         route = getattr(obj, '_route', None)
         if iscontroller(route):
             next, next_remainder = route(remainder)
             cross_boundary(route, next)
             return next, next_remainder
-        
-        if not remainder: raise exc.HTTPNotFound
+
+        if not remainder:
+            raise exc.HTTPNotFound
         next, remainder = remainder[0], remainder[1:]
         prev_obj = obj
         obj = getattr(obj, next, None)
