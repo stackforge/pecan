@@ -31,15 +31,15 @@ tests_require = requirements + ['virtualenv']
 class test(TestCommand):
 
     user_options = TestCommand.user_options + [
-        ('slow', None, 'Run all tests (even the really slow functional ones)')
+        ('functional', None, 'Run all tests (even the really slow functional ones)')
     ]
 
     def initialize_options(self):
-        self.slow = None
+        self.functional = None
         return TestCommand.initialize_options(self)
 
     def finalize_options(self):
-        if self.slow:
+        if self.functional:
             import pecan; setattr(pecan, '__run_all_tests__', True)
         return TestCommand.finalize_options(self)
 

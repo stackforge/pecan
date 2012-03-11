@@ -27,7 +27,7 @@ class TestTemplateBuilds(unittest.TestCase):
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
     @unittest.skipUnless(
         getattr(pecan, '__run_all_tests__', False) is True,
-        'Skipping (really slow).  To run, `$ python setup.py test --slow.`'
+        'Skipping (really slow).  To run, `$ python setup.py test --functional.`'
     )
     def setUpClass(cls):
         # Make a temp install location and record the cwd
@@ -50,23 +50,23 @@ class TestTemplateBuilds(unittest.TestCase):
         # chdir into the pecan source
         os.chdir(pkg_resources.get_distribution('pecan').location)
 
-        py = os.path.join(cls.install_dir, 'bin', 'python')
-        pecan_ = os.path.join(cls.install_dir, 'bin', 'pecan')
+        py_exe = os.path.join(cls.install_dir, 'bin', 'python')
+        pecan_exe = os.path.join(cls.install_dir, 'bin', 'pecan')
 
         # env/bin/python setup.py develop (pecan)
         subprocess.check_call([
-            py,
+            py_exe,
             'setup.py',
             'develop'
         ])
         # create the templated project
         os.chdir(cls.install_dir)
-        subprocess.check_call([pecan_, 'create', 'Testing123'])
+        subprocess.check_call([pecan_exe, 'create', 'Testing123'])
     
         # move into the new project directory and install
         os.chdir('Testing123')
         subprocess.check_call([
-            py,
+            py_exe,
             'setup.py',
             'develop'
         ])
@@ -85,11 +85,11 @@ class TestTemplateBuilds(unittest.TestCase):
 
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
     def test_project_pecan_serve_command(self):
-        pecan_ = os.path.join(self.__class__.install_dir, 'bin', 'pecan')
+        pecan_exe = os.path.join(self.__class__.install_dir, 'bin', 'pecan')
 
         # Start the server
         proc = subprocess.Popen([
-            pecan_,
+            pecan_exe,
             'serve',
             'config.py'
         ])
@@ -109,11 +109,11 @@ class TestTemplateBuilds(unittest.TestCase):
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
     def test_project_pecan_shell_command(self):
         from pecan.testing import load_test_app
-        pecan_ = os.path.join(self.__class__.install_dir, 'bin', 'pecan')
+        pecan_exe = os.path.join(self.__class__.install_dir, 'bin', 'pecan')
 
         # Start the server
         proc = subprocess.Popen([
-            pecan_,
+            pecan_exe,
             'shell',
             'config.py'
         ], 
@@ -136,11 +136,11 @@ class TestTemplateBuilds(unittest.TestCase):
 
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
     def test_project_tests_command(self):
-        py = os.path.join(self.__class__.install_dir, 'bin', 'python')
+        py_exe = os.path.join(self.__class__.install_dir, 'bin', 'python')
 
         # Run the tests
         proc = subprocess.Popen([
-            py,
+            py_exe,
             'setup.py',
             'test'
         ], 
