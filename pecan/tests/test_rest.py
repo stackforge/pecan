@@ -260,6 +260,27 @@ class TestRestController(TestCase):
         assert r.status_int == 200
         assert r.body == 'test'
 
+    def test_getall_with_trailing_slash(self):
+
+        class ThingsController(RestController):
+
+            data = ['zero', 'one', 'two', 'three']
+
+            @expose('json')
+            def get_all(self):
+                return dict(items=self.data)
+
+        class RootController(object):
+            things = ThingsController()
+
+        # create the app
+        app = TestApp(make_app(RootController()))
+
+        # test get_all
+        r = app.get('/things/')
+        assert r.status_int == 200
+        assert r.body == dumps(dict(items=ThingsController.data))
+
     def test_nested_rest(self):
 
         class BarsController(RestController):

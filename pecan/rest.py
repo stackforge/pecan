@@ -109,14 +109,14 @@ class RestController(object):
     def _handle_get(self, method, remainder):
 
         # route to a get_all or get if no additional parts are available
-        if not remainder:
+        if not remainder or remainder == ['']:
             controller = self._find_controller('get_all', 'get')
             if controller:
                 return controller, []
             abort(404)
 
-        # check for new/edit/delete GET requests
         method_name = remainder[-1]
+        # check for new/edit/delete GET requests
         if method_name in ('new', 'edit', 'delete'):
             if method_name == 'delete':
                 method_name = 'get_delete'
