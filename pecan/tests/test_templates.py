@@ -24,6 +24,9 @@ class TestTemplateBuilds(unittest.TestCase):
     Used to build and test the templated quickstart project(s).
     """
 
+    install_dir = tempfile.mkdtemp()
+    cwd = os.getcwd()
+
     @classmethod
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
     @unittest.skipUnless(
@@ -32,8 +35,6 @@ class TestTemplateBuilds(unittest.TestCase):
     )
     def setUpClass(cls):
         # Make a temp install location and record the cwd
-        cls.install_dir = tempfile.mkdtemp()
-        cls.cwd = os.getcwd()
         cls.install()
 
     @classmethod

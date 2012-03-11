@@ -247,7 +247,7 @@ class TestConf(TestCase):
         assert as_dict['prefix_app']['prefix_template_path'] == ''
 
 
-class Foo(TestCase):
+class TestGlobalConfig(TestCase):
 
     def tearDown(self):
         from pecan import configuration
