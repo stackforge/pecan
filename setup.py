@@ -1,4 +1,5 @@
-from setuptools import setup, find_packages
+from setuptools import setup, command, find_packages
+from setuptools.command.test import test as TestCommand
 
 version = '0.1.0'
 
@@ -24,14 +25,23 @@ except:
     except:
         requirements.append("simplejson >= 2.1.1")
 
-test_suite = 'pecan.tests.collector'
-try:
-    from unittest import TestLoader
-    assert hasattr(TestLoader, 'discover')
-    tests_require = []
-except:
-    tests_require = ['unittest2']
+tests_require = requirements + ['virtualenv']
 
+
+class test(TestCommand):
+
+    user_options = TestCommand.user_options + [
+        ('functional', None, 'Run all tests (even the really slow functional ones)')
+    ]
+
+    def initialize_options(self):
+        self.functional = None
+        return TestCommand.initialize_options(self)
+
+    def finalize_options(self):
+        if self.functional:
+            import pecan; setattr(pecan, '__run_all_tests__', True)
+        return TestCommand.finalize_options(self)
 
 #
 # call setup
@@ -65,7 +75,9 @@ setup(
     scripts              = ['bin/pecan'],
     zip_safe             = False,
     install_requires     = requirements,
+    tests_require        = tests_require,
     test_suite           = 'pecan',
+    cmdclass             = {'test' : test},
     entry_points         = """
     [paste.paster_command]
     pecan-serve = pecan.commands:ServeCommand
