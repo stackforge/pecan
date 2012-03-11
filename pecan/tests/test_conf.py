@@ -1,8 +1,6 @@
 import os
 import sys
 from unittest import TestCase
-from pecan import configuration
-from pecan import conf as _runtime_conf
 
 __here__ = os.path.dirname(__file__)
 
@@ -10,11 +8,13 @@ class TestConf(TestCase):
 
     def test_update_config_fail_identifier(self):
         """Fail when naming does not pass correctness"""
+        from pecan import configuration
         bad_dict = {'bad name':'value'}
         self.assertRaises(ValueError, configuration.Config, bad_dict)
 
     def test_update_set_config(self):
         """Update an empty configuration with the default values"""
+        from pecan import configuration
 
         conf = configuration.initconf()
         conf.update(configuration.conf_from_file(os.path.join(
@@ -32,6 +32,7 @@ class TestConf(TestCase):
 
     def test_update_set_default_config(self):
         """Update an empty configuration with the default values"""
+        from pecan import configuration
 
         conf = configuration.initconf()
         conf.update(configuration.conf_from_file(os.path.join(
@@ -49,6 +50,7 @@ class TestConf(TestCase):
         
     def test_update_force_dict(self):
         """Update an empty configuration with the default values"""
+        from pecan import configuration
         conf = configuration.initconf()
         conf.update(configuration.conf_from_file(os.path.join(
             __here__,
@@ -70,26 +72,31 @@ class TestConf(TestCase):
         self.assertEqual(conf.beaker.get('__force_dict__'), None)
 
     def test_update_config_with_dict(self):
+        from pecan import configuration
         conf = configuration.initconf()
         d = {'attr':True}
         conf['attr'] = d
         self.assertTrue(conf.attr.attr)
 
     def test_config_repr(self):
+        from pecan import configuration
         conf = configuration.Config({'a':1})
         self.assertEqual(repr(conf),"Config({'a': 1})")
 
     def test_config_from_dict(self):
+        from pecan import configuration
         conf = configuration.conf_from_dict({})
         conf['path'] = '%(confdir)s'
         self.assertTrue(os.path.samefile(conf['path'], os.getcwd()))
 
     def test_config_from_file(self):
+        from pecan import configuration
         path = os.path.join(os.path.dirname(__file__), 'test_config', 'config.py')
         conf = configuration.conf_from_file(path)
         self.assertTrue(conf.app.debug)
 
     def test_config_illegal_ids(self):
+        from pecan import configuration
         conf = configuration.Config({})
         conf.update(configuration.conf_from_file(os.path.join(
             __here__,
@@ -98,6 +105,7 @@ class TestConf(TestCase):
         self.assertEqual([], list(conf))
 
     def test_config_missing_file(self):
+        from pecan import configuration
         path = ('doesnotexist.py',)
         conf = configuration.Config({})
         self.assertRaises(IOError, configuration.conf_from_file, os.path.join(
@@ -107,6 +115,7 @@ class TestConf(TestCase):
         ))
 
     def test_config_missing_file_on_path(self):
+        from pecan import configuration
         path = ('bad', 'bad', 'doesnotexist.py',)
         conf = configuration.Config({})
 
@@ -117,6 +126,7 @@ class TestConf(TestCase):
         ))
 
     def test_config_with_syntax_error(self):
+        from pecan import configuration
         path = ('bad', 'syntaxerror.py')
         conf = configuration.Config({})
 
@@ -127,6 +137,7 @@ class TestConf(TestCase):
         ))
 
     def test_config_with_bad_import(self):
+        from pecan import configuration
         path = ('bad', 'importerror.py')
         conf = configuration.Config({})
 
@@ -136,12 +147,8 @@ class TestConf(TestCase):
             *path
         ))
 
-    def test_config_set_from_file(self):
-        path = os.path.join(os.path.dirname(__file__), 'test_config', 'empty.py')
-        configuration.set_config(path)
-        assert list(_runtime_conf.server) == list(configuration.initconf().server)
-
     def test_config_dir(self):
+        from pecan import configuration
         if sys.version_info >= (2, 6):
             conf = configuration.Config({})
             self.assertEqual([], dir(conf))
@@ -149,23 +156,28 @@ class TestConf(TestCase):
             self.assertEqual(['a'], dir(conf))
 
     def test_config_bad_key(self):
+        from pecan import configuration
         conf = configuration.Config({'a': 1})
         assert conf.a == 1
         self.assertRaises(AttributeError, getattr, conf, 'b')
 
     def test_config_get_valid_key(self):
+        from pecan import configuration
         conf = configuration.Config({'a': 1})
         assert conf.get('a') == 1
 
     def test_config_get_invalid_key(self):
+        from pecan import configuration
         conf = configuration.Config({'a': 1})
         assert conf.get('b') is None
 
     def test_config_get_invalid_key_return_default(self):
+        from pecan import configuration
         conf = configuration.Config({'a': 1})
         assert conf.get('b', True) is True
 
     def test_config_as_dict(self):
+        from pecan import configuration
         conf = configuration.initconf()
 
         assert isinstance(conf, configuration.Config)
@@ -184,6 +196,7 @@ class TestConf(TestCase):
         assert as_dict['app']['template_path']   == ''
 
     def test_config_as_dict_nested(self):
+        from pecan import configuration
         """have more than one level nesting and convert to dict"""
         conf = configuration.initconf()
         nested = {'one':{'two':2}}
@@ -205,6 +218,7 @@ class TestConf(TestCase):
 
 
     def test_config_as_dict_prefixed(self):
+        from pecan import configuration
         """Add a prefix for keys"""
         conf = configuration.initconf()
 
@@ -223,3 +237,43 @@ class TestConf(TestCase):
         assert as_dict['prefix_app']['prefix_static_root']     == 'public'
         assert as_dict['prefix_app']['prefix_template_path']   == ''
 
+
+class Foo(TestCase):
+
+    def tearDown(self):
+        from pecan import configuration
+        configuration.set_config(dict(configuration.initconf()), overwrite=True)
+
+    def test_paint_from_dict(self):
+        from pecan import configuration
+        configuration.set_config({'foo' : 'bar'})
+        assert dict(configuration._runtime_conf) != {'foo' : 'bar'}
+        self.assertEqual(configuration._runtime_conf.foo, 'bar')
+
+    def test_overwrite_from_dict(self):
+        from pecan import configuration
+        configuration.set_config({'foo' : 'bar'}, overwrite=True)
+        assert dict(configuration._runtime_conf) == {'foo' : 'bar'}
+
+    def test_paint_from_file(self):
+        from pecan import configuration
+        configuration.set_config(os.path.join(
+            __here__,
+            'test_config/foobar.py'
+        ))
+        assert dict(configuration._runtime_conf) != {'foo' : 'bar'}
+        assert configuration._runtime_conf.foo == 'bar'
+
+    def test_overwrite_from_file(self):
+        from pecan import configuration
+        configuration.set_config(os.path.join(
+                __here__,
+                'test_config/foobar.py',
+            ),
+            overwrite = True
+        )
+        assert dict(configuration._runtime_conf) == {'foo' : 'bar'}
+
+    def test_set_config_invalid_type(self):
+        from pecan import configuration
+        self.assertRaises(TypeError, configuration.set_config, None)

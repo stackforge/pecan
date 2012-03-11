@@ -4,7 +4,6 @@ import shutil
 import subprocess
 import unittest
 import pkg_resources
-import virtualenv
 import httplib
 import urllib2
 import time
@@ -43,6 +42,7 @@ class TestTemplateBuilds(unittest.TestCase):
     @classmethod
     def install(cls):
         # Create a new virtualenv in the temp install location
+        import virtualenv
         virtualenv.create_environment(
             cls.install_dir,
             site_packages = False

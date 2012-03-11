@@ -38,7 +38,7 @@ def make_app(root, static_root=None, debug=False, errorcfg={}, wrap_app=None, lo
         app = EvalException(app, templating_formatters=error_formatters, **errorcfg)
     else:
         app = ErrorMiddleware(app, **errorcfg)
-    app = make_errordocument(app, conf, **conf.app.errors)
+    app = make_errordocument(app, conf, **dict(conf.app.errors))
     if static_root:
         app = Cascade([StaticURLParser(static_root), app])
     if isinstance(logging, dict) or logging == True:
