@@ -1,13 +1,18 @@
 import os
+import sys
 import tempfile
 import shutil
 import subprocess
-import unittest
 import pkg_resources
 import httplib
 import urllib2
 import time
 import pecan
+
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest
 
 
 def has_internet():
@@ -27,34 +32,26 @@ class TestTemplateBuilds(unittest.TestCase):
     install_dir = tempfile.mkdtemp()
     cwd = os.getcwd()
 
-    @classmethod
-    @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
-    @unittest.skipUnless(
-        getattr(pecan, '__run_all_tests__', False) is True,
-        'Skipping (really slow).  To run, `$ python setup.py test --functional.`'
-    )
-    def setUpClass(cls):
+    def setUp(self):
         # Make a temp install location and record the cwd
-        cls.install()
+        self.install()
 
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.install_dir)
-        os.chdir(cls.cwd)
+    def tearDown(self):
+        shutil.rmtree(self.install_dir)
+        os.chdir(self.cwd)
 
-    @classmethod
-    def install(cls):
+    def install(self):
         # Create a new virtualenv in the temp install location
         import virtualenv
         virtualenv.create_environment(
-            cls.install_dir,
+            self.install_dir,
             site_packages=False
         )
         # chdir into the pecan source
         os.chdir(pkg_resources.get_distribution('pecan').location)
 
-        py_exe = os.path.join(cls.install_dir, 'bin', 'python')
-        pecan_exe = os.path.join(cls.install_dir, 'bin', 'pecan')
+        py_exe = os.path.join(self.install_dir, 'bin', 'python')
+        pecan_exe = os.path.join(self.install_dir, 'bin', 'pecan')
 
         # env/bin/python setup.py develop (pecan)
         subprocess.check_call([
@@ -63,7 +60,7 @@ class TestTemplateBuilds(unittest.TestCase):
             'develop'
         ])
         # create the templated project
-        os.chdir(cls.install_dir)
+        os.chdir(self.install_dir)
         subprocess.check_call([pecan_exe, 'create', 'Testing123'])
 
         # move into the new project directory and install
@@ -87,8 +84,12 @@ class TestTemplateBuilds(unittest.TestCase):
                 raise RuntimeError("pecan serve config.py didn't start.")
 
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
+    @unittest.skipUnless(
+        getattr(pecan, '__run_all_tests__', False) is True,
+        'Skipping (really slow).  To run, `$ python setup.py test --functional.`'
+    )
     def test_project_pecan_serve_command(self):
-        pecan_exe = os.path.join(self.__class__.install_dir, 'bin', 'pecan')
+        pecan_exe = os.path.join(self.install_dir, 'bin', 'pecan')
 
         # Start the server
         proc = subprocess.Popen([
@@ -110,9 +111,13 @@ class TestTemplateBuilds(unittest.TestCase):
             proc.terminate()
 
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
+    @unittest.skipUnless(
+        getattr(pecan, '__run_all_tests__', False) is True,
+        'Skipping (really slow).  To run, `$ python setup.py test --functional.`'
+    )
     def test_project_pecan_shell_command(self):
         from pecan.testing import load_test_app
-        pecan_exe = os.path.join(self.__class__.install_dir, 'bin', 'pecan')
+        pecan_exe = os.path.join(self.install_dir, 'bin', 'pecan')
 
         # Start the server
         proc = subprocess.Popen([
@@ -139,8 +144,12 @@ class TestTemplateBuilds(unittest.TestCase):
             pass
 
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
+    @unittest.skipUnless(
+        getattr(pecan, '__run_all_tests__', False) is True,
+        'Skipping (really slow).  To run, `$ python setup.py test --functional.`'
+    )
     def test_project_tests_command(self):
-        py_exe = os.path.join(self.__class__.install_dir, 'bin', 'python')
+        py_exe = os.path.join(self.install_dir, 'bin', 'python')
 
         # Run the tests
         proc = subprocess.Popen([

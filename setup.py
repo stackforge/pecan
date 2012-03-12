@@ -1,3 +1,4 @@
+import sys
 from setuptools import setup, command, find_packages
 from setuptools.command.test import test as TestCommand
 
@@ -26,6 +27,8 @@ except:
         requirements.append("simplejson >= 2.1.1")
 
 tests_require = requirements + ['virtualenv']
+if sys.version_info < (2, 7):
+    tests_require += ['unittest2']
 
 
 class test(TestCommand):
