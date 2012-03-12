@@ -18,32 +18,44 @@ class SampleRootController(object):
     pass
 
 
-class TestBase(TestCase):
-
-    def test_simple_app(self):
-        class RootController(object):
-            @expose()
-            def index(self):
-                return 'Hello, World!'
-
-        app = TestApp(Pecan(RootController()))
-        r = app.get('/')
-        assert r.status_int == 200
-        assert r.body == 'Hello, World!'
-
-        r = app.get('/index')
-        assert r.status_int == 200
-        assert r.body == 'Hello, World!'
-
-        r = app.get('/index.html')
-        assert r.status_int == 200
-        assert r.body == 'Hello, World!'
+class TestAppRoot(TestCase):
 
     def test_controller_lookup_by_string_path(self):
         app = Pecan('pecan.tests.test_base.SampleRootController')
         assert app.root and isinstance(app.root, SampleRootController)
 
-    def test_object_dispatch(self):
+
+class TestIndexRouting(TestCase):
+
+    @property
+    def app_(self):
+        class RootController(object):
+            @expose()
+            def index(self):
+                return 'Hello, World!'
+
+        return TestApp(Pecan(RootController()))
+
+    def test_empty_root(self):
+        r = self.app_.get('/')
+        assert r.status_int == 200
+        assert r.body == 'Hello, World!'
+
+    def test_index(self):
+        r = self.app_.get('/index')
+        assert r.status_int == 200
+        assert r.body == 'Hello, World!'
+
+    def test_index_html(self):
+        r = self.app_.get('/index.html')
+        assert r.status_int == 200
+        assert r.body == 'Hello, World!'
+
+
+class TestObjectDispatch(TestCase):
+
+    @property
+    def app_(self):
         class SubSubController(object):
             @expose()
             def index(self):
@@ -75,12 +87,39 @@ class TestBase(TestCase):
 
             sub = SubController()
 
-        app = TestApp(Pecan(RootController()))
-        for path in ('/', '/deeper', '/sub/', '/sub/deeper', '/sub/sub/',
-                     '/sub/sub/deeper'):
-            r = app.get(path)
-            assert r.status_int == 200
-            assert r.body == path
+        return TestApp(Pecan(RootController()))
+
+    def test_index(self):
+        r = self.app_.get('/')
+        assert r.status_int == 200
+        assert r.body == '/'
+
+    def test_one_level(self):
+        r = self.app_.get('/deeper')
+        assert r.status_int == 200
+        assert r.body == '/deeper'
+
+    def test_one_level_with_trailing(self):
+        r = self.app_.get('/sub/')
+        assert r.status_int == 200
+        assert r.body == '/sub/'
+
+    def test_two_levels(self):
+        r = self.app_.get('/sub/deeper')
+        assert r.status_int == 200
+        assert r.body == '/sub/deeper'
+
+    def test_two_levels_with_trailing(self):
+        r = self.app_.get('/sub/sub/')
+        assert r.status_int == 200
+
+    def test_three_levels(self):
+        r = self.app_.get('/sub/sub/deeper')
+        assert r.status_int == 200
+        assert r.body == '/sub/sub/deeper'
+
+
+class TestLookups(TestCase):
 
     def test_lookup(self):
         class LookupController(object):
