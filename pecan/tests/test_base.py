@@ -1,6 +1,5 @@
 import sys
 from paste.translogger import TransLogger
-from unittest import TestCase
 from webtest import TestApp
 
 if sys.version_info < (2, 7):
@@ -24,14 +23,14 @@ class SampleRootController(object):
     pass
 
 
-class TestAppRoot(TestCase):
+class TestAppRoot(unittest.TestCase):
 
     def test_controller_lookup_by_string_path(self):
         app = Pecan('pecan.tests.test_base.SampleRootController')
         assert app.root and isinstance(app.root, SampleRootController)
 
 
-class TestIndexRouting(TestCase):
+class TestIndexRouting(unittest.TestCase):
 
     @property
     def app_(self):
@@ -58,7 +57,7 @@ class TestIndexRouting(TestCase):
         assert r.body == 'Hello, World!'
 
 
-class TestObjectDispatch(TestCase):
+class TestObjectDispatch(unittest.TestCase):
 
     @property
     def app_(self):
@@ -125,7 +124,7 @@ class TestObjectDispatch(TestCase):
         assert r.body == '/sub/sub/deeper'
 
 
-class TestLookups(TestCase):
+class TestLookups(unittest.TestCase):
 
     @property
     def app_(self):
@@ -178,7 +177,7 @@ class TestLookups(TestCase):
         assert r.status_int == 404
 
 
-class TestControllerArguments(TestCase):
+class TestControllerArguments(unittest.TestCase):
 
     @property
     def app_(self):
@@ -696,7 +695,7 @@ class TestControllerArguments(TestCase):
         assert r.body == 'eater: 10, dummy, day=12, month=1'
 
 
-class TestAbort(TestCase):
+class TestAbort(unittest.TestCase):
 
     def test_abort(self):
         class RootController(object):
@@ -719,7 +718,7 @@ class TestAbort(TestCase):
         assert r.status_int == 401
 
 
-class TestRedirect(TestCase):
+class TestRedirect(unittest.TestCase):
 
     @property
     def app_(self):
@@ -795,7 +794,7 @@ class TestRedirect(TestCase):
         assert res.request.environ['HTTP_X_FORWARDED_PROTO'] == 'https'
 
 
-class TestStreamedResponse(TestCase):
+class TestStreamedResponse(unittest.TestCase):
 
     def test_streaming_response(self):
         import StringIO
@@ -825,7 +824,7 @@ class TestStreamedResponse(TestCase):
         assert r.body == 'plain text'
 
 
-class TestStateCleanup(TestCase):
+class TestStateCleanup(unittest.TestCase):
 
     def test_request_state_cleanup(self):
         """
@@ -847,7 +846,7 @@ class TestStateCleanup(TestCase):
         assert state.__dict__.keys() == ['app']
 
 
-class TestFileTypeExtensions(TestCase):
+class TestFileTypeExtensions(unittest.TestCase):
 
     @property
     def app_(self):
@@ -900,7 +899,7 @@ class TestFileTypeExtensions(TestCase):
         assert r.status_int == 404
 
 
-class TestCanonicalRouting(TestCase):
+class TestCanonicalRouting(unittest.TestCase):
 
     @property
     def app_(self):
@@ -986,7 +985,7 @@ class TestCanonicalRouting(TestCase):
         assert 'accept' == r.body
 
 
-class TestNonCanonical(TestCase):
+class TestNonCanonical(unittest.TestCase):
 
     @property
     def app_(self):
@@ -1065,7 +1064,7 @@ class TestNonCanonical(TestCase):
         assert len(wrapped_apps) == 1
 
 
-class TestLogging(TestCase):
+class TestLogging(unittest.TestCase):
     """
     Mocks logging calls so we can make sure they get called. We could use
     Fudge for this, but it would add an additional dependency to Pecan for
@@ -1203,7 +1202,7 @@ class TestLogging(TestCase):
         assert len(writes) == 1
 
 
-class TestEngines(TestCase):
+class TestEngines(unittest.TestCase):
 
     template_path = os.path.join(os.path.dirname(__file__), 'templates')
 
