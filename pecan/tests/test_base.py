@@ -1,6 +1,12 @@
+import sys
 from paste.translogger import TransLogger
 from unittest import TestCase
 from webtest import TestApp
+
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest
 
 from pecan import (
     Pecan, expose, request, response, redirect, abort, make_app,
@@ -689,6 +695,9 @@ class TestControllerArguments(TestCase):
         assert r.status_int == 200
         assert r.body == 'eater: 10, dummy, day=12, month=1'
 
+
+class TestAbort(TestCase):
+
     def test_abort(self):
         class RootController(object):
             @expose()
@@ -709,7 +718,11 @@ class TestControllerArguments(TestCase):
         r = app.get('/', status=401)
         assert r.status_int == 401
 
-    def test_redirect(self):
+
+class TestRedirect(TestCase):
+
+    @property
+    def app_(self):
         class RootController(object):
             @expose()
             def index(self):
@@ -731,20 +744,25 @@ class TestControllerArguments(TestCase):
             def testing(self):
                 return 'it worked!'
 
-        app = TestApp(make_app(RootController(), debug=True))
-        r = app.get('/')
+        return TestApp(make_app(RootController(), debug=True))
+
+    def test_index(self):
+        r = self.app_.get('/')
         assert r.status_int == 302
         r = r.follow()
         assert r.status_int == 200
         assert r.body == 'it worked!'
 
-        r = app.get('/internal')
+    def test_internal(self):
+        r = self.app_.get('/internal')
         assert r.status_int == 200
         assert r.body == 'it worked!'
 
-        self.assertRaises(ValueError, app.get, '/bad_internal')
+    def test_internal_with_301(self):
+        self.assertRaises(ValueError, self.app_.get, '/bad_internal')
 
-        r = app.get('/permanent')
+    def test_permanent_redirect(self):
+        r = self.app_.get('/permanent')
         assert r.status_int == 301
         r = r.follow()
         assert r.status_int == 200
@@ -776,6 +794,9 @@ class TestControllerArguments(TestCase):
         assert res.location == 'https://localhost/child/'
         assert res.request.environ['HTTP_X_FORWARDED_PROTO'] == 'https'
 
+
+class TestStreamedResponse(TestCase):
+
     def test_streaming_response(self):
         import StringIO
 
@@ -803,6 +824,9 @@ class TestControllerArguments(TestCase):
         assert r.content_type == 'text/plain'
         assert r.body == 'plain text'
 
+
+class TestStateCleanup(TestCase):
+
     def test_request_state_cleanup(self):
         """
         After a request, the state local() should be totally clean
@@ -822,7 +846,11 @@ class TestControllerArguments(TestCase):
 
         assert state.__dict__.keys() == ['app']
 
-    def test_extension(self):
+
+class TestFileTypeExtensions(TestCase):
+
+    @property
+    def app_(self):
         """
         Test extension splits
         """
@@ -831,35 +859,27 @@ class TestControllerArguments(TestCase):
             def _default(self, *args):
                 return request.pecan['extension']
 
-        app = TestApp(Pecan(RootController()))
-        r = app.get('/index.html')
+        return TestApp(Pecan(RootController()))
+
+    def test_html_extension(self):
+        r = self.app_.get('/index.html')
         assert r.status_int == 200
         assert r.body == '.html'
 
-        r = app.get('/image.png')
+    def test_image_extension(self):
+        r = self.app_.get('/image.png')
         assert r.status_int == 200
         assert r.body == '.png'
 
-        r = app.get('/.vimrc')
+    def test_hidden_file(self):
+        r = self.app_.get('/.vimrc')
         assert r.status_int == 200
         assert r.body == ''
 
-        r = app.get('/gradient.js.js')
+    def test_multi_dot_extension(self):
+        r = self.app_.get('/gradient.js.js')
         assert r.status_int == 200
         assert r.body == '.js'
-
-    def test_app_wrap(self):
-        class RootController(object):
-            pass
-
-        wrapped_apps = []
-
-        def wrap(app):
-            wrapped_apps.append(app)
-            return app
-
-        make_app(RootController(), wrap_app=wrap, debug=True)
-        assert len(wrapped_apps) == 1
 
     def test_bad_content_type(self):
         class RootController(object):
@@ -879,7 +899,11 @@ class TestControllerArguments(TestCase):
         r = app.get('/index.txt', expect_errors=True)
         assert r.status_int == 404
 
-    def test_canonical_index(self):
+
+class TestCanonicalRouting(TestCase):
+
+    @property
+    def app_(self):
         class ArgSubController(object):
             @expose()
             def index(self, arg):
@@ -905,66 +929,111 @@ class TestControllerArguments(TestCase):
             arg = ArgSubController()
             accept = AcceptController()
 
-        app = TestApp(Pecan(RootController()))
+        return TestApp(Pecan(RootController()))
 
-        r = app.get('/')
+    def test_root(self):
+        r = self.app_.get('/')
         assert r.status_int == 200
         assert 'index' in r.body
 
-        r = app.get('/index')
+    def test_index(self):
+        r = self.app_.get('/index')
         assert r.status_int == 200
         assert 'index' in r.body
 
+    def test_broken_clients(self):
         # for broken clients
-        r = app.get('', status=302)
+        r = self.app_.get('', status=302)
         assert r.status_int == 302
         assert r.location == 'http://localhost/'
 
-        r = app.get('/sub/')
+    def test_sub_controller_with_trailing(self):
+        r = self.app_.get('/sub/')
         assert r.status_int == 200
         assert 'subindex' in r.body
 
-        r = app.get('/sub', status=302)
+    def test_sub_controller_redirect(self):
+        r = self.app_.get('/sub', status=302)
         assert r.status_int == 302
         assert r.location == 'http://localhost/sub/'
 
+    def test_with_query_string(self):
         # try with query string
-        r = app.get('/sub?foo=bar', status=302)
+        r = self.app_.get('/sub?foo=bar', status=302)
         assert r.status_int == 302
         assert r.location == 'http://localhost/sub/?foo=bar'
 
+    def test_posts_fail(self):
         try:
-            r = app.post('/sub', dict(foo=1))
+            r = self.app_.post('/sub', dict(foo=1))
             raise Exception("Post should fail")
         except Exception, e:
             assert isinstance(e, RuntimeError)
 
-        r = app.get('/arg/index/foo')
+    def test_with_args(self):
+        r = self.app_.get('/arg/index/foo')
         assert r.status_int == 200
         assert r.body == 'foo'
 
-        r = app.get('/accept/')
+    def test_accept_noncanonical(self):
+        r = self.app_.get('/accept/')
         assert r.status_int == 200
         assert 'accept' == r.body
 
-        r = app.get('/accept')
+    def test_accept_noncanonical_no_trailing_slash(self):
+        r = self.app_.get('/accept')
         assert r.status_int == 200
         assert 'accept' == r.body
 
-        app = TestApp(Pecan(RootController(), force_canonical=False))
-        r = app.get('/')
+
+class TestNonCanonical(TestCase):
+
+    @property
+    def app_(self):
+        class ArgSubController(object):
+            @expose()
+            def index(self, arg):
+                return arg
+
+        class AcceptController(object):
+            @accept_noncanonical
+            @expose()
+            def index(self):
+                return 'accept'
+
+        class SubController(object):
+            @expose()
+            def index(self, **kw):
+                return 'subindex'
+
+        class RootController(object):
+            @expose()
+            def index(self):
+                return 'index'
+
+            sub = SubController()
+            arg = ArgSubController()
+            accept = AcceptController()
+
+        return TestApp(Pecan(RootController(), force_canonical=False))
+
+    def test_index(self):
+        r = self.app_.get('/')
         assert r.status_int == 200
         assert 'index' in r.body
 
-        r = app.get('/sub')
+    def test_subcontroller(self):
+        r = self.app_.get('/sub')
         assert r.status_int == 200
         assert 'subindex' in r.body
 
-        r = app.post('/sub', dict(foo=1))
+    def test_subcontroller_with_kwargs(self):
+        r = self.app_.post('/sub', dict(foo=1))
         assert r.status_int == 200
         assert 'subindex' in r.body
 
-        r = app.get('/sub/')
+    def test_sub_controller_with_trailing(self):
+        r = self.app_.get('/sub/')
         assert r.status_int == 200
         assert 'subindex' in r.body
 
@@ -981,6 +1050,19 @@ class TestControllerArguments(TestCase):
         app = TestApp(make_app(RootController(), debug=True))
         r = app.get('/')
         assert r.status_int == 200
+
+    def test_app_wrap(self):
+        class RootController(object):
+            pass
+
+        wrapped_apps = []
+
+        def wrap(app):
+            wrapped_apps.append(app)
+            return app
+
+        make_app(RootController(), wrap_app=wrap, debug=True)
+        assert len(wrapped_apps) == 1
 
 
 class TestLogging(TestCase):
@@ -1125,9 +1207,8 @@ class TestEngines(TestCase):
 
     template_path = os.path.join(os.path.dirname(__file__), 'templates')
 
+    @unittest.skipIf('genshi' not in builtin_renderers, 'Genshi not installed')
     def test_genshi(self):
-        if 'genshi' not in builtin_renderers:
-            return
 
         class RootController(object):
             @expose('genshi:genshi.html')
@@ -1159,9 +1240,8 @@ class TestEngines(TestCase):
                     break
         assert error_msg is not None
 
+    @unittest.skipIf('kajiki' not in builtin_renderers, 'Kajiki not installed')
     def test_kajiki(self):
-        if 'kajiki' not in builtin_renderers:
-            return
 
         class RootController(object):
             @expose('kajiki:kajiki.html')
@@ -1179,9 +1259,8 @@ class TestEngines(TestCase):
         assert r.status_int == 200
         assert "<h1>Hello, World!</h1>" in r.body
 
+    @unittest.skipIf('jinja' not in builtin_renderers, 'Jinja not installed')
     def test_jinja(self):
-        if 'jinja' not in builtin_renderers:
-            return
 
         class RootController(object):
             @expose('jinja:jinja.html')
@@ -1209,9 +1288,8 @@ class TestEngines(TestCase):
                     break
         assert error_msg is not None
 
+    @unittest.skipIf('mako' not in builtin_renderers, 'Mako not installed')
     def test_mako(self):
-        if 'mako' not in builtin_renderers:
-            return
 
         class RootController(object):
             @expose('mako:mako.html')
@@ -1279,10 +1357,6 @@ class TestEngines(TestCase):
         assert r.content_type == 'text/plain'
 
     def test_render(self):
-
-        #if 'mako' not in builtin_renderers:
-        #    return
-
         class RootController(object):
             @expose()
             def index(self, name='Jonathan'):
