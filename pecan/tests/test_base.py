@@ -121,7 +121,8 @@ class TestObjectDispatch(TestCase):
 
 class TestLookups(TestCase):
 
-    def test_lookup(self):
+    @property
+    def app_(self):
         class LookupController(object):
             def __init__(self, someID):
                 self.someID = someID
@@ -143,16 +144,20 @@ class TestLookups(TestCase):
             def _lookup(self, someID, *remainder):
                 return LookupController(someID), remainder
 
-        app = TestApp(Pecan(RootController()))
-        r = app.get('/')
+        return TestApp(Pecan(RootController()))
+
+    def test_index(self):
+        r = self.app_.get('/')
         assert r.status_int == 200
         assert r.body == '/'
 
-        r = app.get('/100/')
+    def test_lookup(self):
+        r = self.app_.get('/100/')
         assert r.status_int == 200
         assert r.body == '/100'
 
-        r = app.get('/100/name')
+    def test_lookup_with_method(self):
+        r = self.app_.get('/100/name')
         assert r.status_int == 200
         assert r.body == '/100/name'
 
@@ -164,9 +169,13 @@ class TestLookups(TestCase):
 
         app = TestApp(Pecan(RootController()))
         r = app.get('/foo/bar', expect_errors=True)
-        r.status_int == 404
+        assert r.status_int == 404
 
-    def test_controller_args(self):
+
+class TestControllerArguments(TestCase):
+
+    @property
+    def app_(self):
         class RootController(object):
             @expose()
             def index(self, id):
@@ -223,226 +232,275 @@ class TestLookups(TestCase):
                 else:
                     return self.index, args
 
-        app = TestApp(Pecan(RootController()))
+        return TestApp(Pecan(RootController()))
 
-        # required arg
-
+    def test_required_argument(self):
         try:
-            r = app.get('/')
+            r = self.app_.get('/')
             assert r.status_int != 200
         except Exception, ex:
             assert type(ex) == TypeError
             assert ex.args[0] == 'index() takes exactly 2 arguments (1 given)'
 
-        r = app.get('/1')
+    def test_single_argument(self):
+        r = self.app_.get('/1')
         assert r.status_int == 200
         assert r.body == 'index: 1'
 
-        r = app.get('/This%20is%20a%20test%21')
+    def test_single_argument_with_encoded_url(self):
+        r = self.app_.get('/This%20is%20a%20test%21')
         assert r.status_int == 200
         assert r.body == 'index: This is a test!'
 
-        r = app.get('/1/dummy', status=404)
+    def test_two_arguments(self):
+        r = self.app_.get('/1/dummy', status=404)
         assert r.status_int == 404
 
-        r = app.get('/?id=2')
+    def test_keyword_argument(self):
+        r = self.app_.get('/?id=2')
         assert r.status_int == 200
         assert r.body == 'index: 2'
 
-        r = app.get('/?id=This%20is%20a%20test%21')
+    def test_keyword_argument_with_encoded_url(self):
+        r = self.app_.get('/?id=This%20is%20a%20test%21')
         assert r.status_int == 200
         assert r.body == 'index: This is a test!'
 
-        r = app.get('/3?id=three')
+    def test_argument_and_keyword_argument(self):
+        r = self.app_.get('/3?id=three')
         assert r.status_int == 200
         assert r.body == 'index: 3'
 
-        r = app.get('/This%20is%20a%20test%21?id=three')
+    def test_encoded_argument_and_keyword_argument(self):
+        r = self.app_.get('/This%20is%20a%20test%21?id=three')
         assert r.status_int == 200
         assert r.body == 'index: This is a test!'
 
-        r = app.post('/', {'id': '4'})
+    def test_explicit_kwargs(self):
+        r = self.app_.post('/', {'id': '4'})
         assert r.status_int == 200
         assert r.body == 'index: 4'
 
-        r = app.post('/4', {'id': 'four'})
+    def test_path_with_explicit_kwargs(self):
+        r = self.app_.post('/4', {'id': 'four'})
         assert r.status_int == 200
         assert r.body == 'index: 4'
 
-        r = app.get('/?id=5&dummy=dummy')
+    def test_multiple_kwargs(self):
+        r = self.app_.get('/?id=5&dummy=dummy')
         assert r.status_int == 200
         assert r.body == 'index: 5'
 
-        r = app.post('/', {'id': '6', 'dummy': 'dummy'})
+    def test_kwargs_from_root(self):
+        r = self.app_.post('/', {'id': '6', 'dummy': 'dummy'})
         assert r.status_int == 200
         assert r.body == 'index: 6'
 
         # multiple args
 
-        r = app.get('/multiple/one/two')
+    def test_multiple_positional_arguments(self):
+        r = self.app_.get('/multiple/one/two')
         assert r.status_int == 200
         assert r.body == 'multiple: one, two'
 
-        r = app.get('/multiple/One%20/Two%21')
+    def test_multiple_positional_arguments_with_url_encode(self):
+        r = self.app_.get('/multiple/One%20/Two%21')
         assert r.status_int == 200
         assert r.body == 'multiple: One , Two!'
 
-        r = app.get('/multiple?one=three&two=four')
+    def test_multiple_positional_arguments_with_kwargs(self):
+        r = self.app_.get('/multiple?one=three&two=four')
         assert r.status_int == 200
         assert r.body == 'multiple: three, four'
 
-        r = app.get('/multiple?one=Three%20&two=Four%20%21')
+    def test_multiple_positional_arguments_with_url_encoded_kwargs(self):
+        r = self.app_.get('/multiple?one=Three%20&two=Four%20%21')
         assert r.status_int == 200
         assert r.body == 'multiple: Three , Four !'
 
-        r = app.post('/multiple', {'one': 'five', 'two': 'six'})
+    def test_positional_args_with_dictionary_kwargs(self):
+        r = self.app_.post('/multiple', {'one': 'five', 'two': 'six'})
         assert r.status_int == 200
         assert r.body == 'multiple: five, six'
 
-        r = app.post('/multiple', {'one': 'Five%20', 'two': 'Six%20%21'})
+    def test_positional_args_with_url_encoded_dictionary_kwargs(self):
+        r = self.app_.post('/multiple', {'one': 'Five%20', 'two': 'Six%20%21'})
         assert r.status_int == 200
         assert r.body == 'multiple: Five%20, Six%20%21'
 
         # optional arg
-
-        r = app.get('/optional')
+    def test_optional_arg(self):
+        r = self.app_.get('/optional')
         assert r.status_int == 200
         assert r.body == 'optional: None'
 
-        r = app.get('/optional/1')
+    def test_multiple_optional(self):
+        r = self.app_.get('/optional/1')
         assert r.status_int == 200
         assert r.body == 'optional: 1'
 
-        r = app.get('/optional/Some%20Number')
+    def test_multiple_optional_url_encoded(self):
+        r = self.app_.get('/optional/Some%20Number')
         assert r.status_int == 200
         assert r.body == 'optional: Some Number'
 
-        r = app.get('/optional/2/dummy', status=404)
+    def test_multiple_optional_missing(self):
+        r = self.app_.get('/optional/2/dummy', status=404)
         assert r.status_int == 404
 
-        r = app.get('/optional?id=2')
+    def test_multiple_with_kwargs(self):
+        r = self.app_.get('/optional?id=2')
         assert r.status_int == 200
         assert r.body == 'optional: 2'
 
-        r = app.get('/optional?id=Some%20Number')
+    def test_multiple_with_url_encoded_kwargs(self):
+        r = self.app_.get('/optional?id=Some%20Number')
         assert r.status_int == 200
         assert r.body == 'optional: Some Number'
 
-        r = app.get('/optional/3?id=three')
+    def test_multiple_args_with_url_encoded_kwargs(self):
+        r = self.app_.get('/optional/3?id=three')
         assert r.status_int == 200
         assert r.body == 'optional: 3'
 
-        r = app.get('/optional/Some%20Number?id=three')
+    def test_url_encoded_positional_args(self):
+        r = self.app_.get('/optional/Some%20Number?id=three')
         assert r.status_int == 200
         assert r.body == 'optional: Some Number'
 
-        r = app.post('/optional', {'id': '4'})
+    def test_optional_arg_with_kwargs(self):
+        r = self.app_.post('/optional', {'id': '4'})
         assert r.status_int == 200
         assert r.body == 'optional: 4'
 
-        r = app.post('/optional', {'id': 'Some%20Number'})
+    def test_optional_arg_with_url_encoded_kwargs(self):
+        r = self.app_.post('/optional', {'id': 'Some%20Number'})
         assert r.status_int == 200
         assert r.body == 'optional: Some%20Number'
 
-        r = app.post('/optional/5', {'id': 'five'})
+    def test_multiple_positional_arguments_with_dictionary_kwargs(self):
+        r = self.app_.post('/optional/5', {'id': 'five'})
         assert r.status_int == 200
         assert r.body == 'optional: 5'
 
-        r = app.post('/optional/Some%20Number', {'id': 'five'})
+    def test_multiple_positional_url_encoded_arguments_with_kwargs(self):
+        r = self.app_.post('/optional/Some%20Number', {'id': 'five'})
         assert r.status_int == 200
         assert r.body == 'optional: Some Number'
 
-        r = app.get('/optional?id=6&dummy=dummy')
+    def test_optional_arg_with_multiple_kwargs(self):
+        r = self.app_.get('/optional?id=6&dummy=dummy')
         assert r.status_int == 200
         assert r.body == 'optional: 6'
 
-        r = app.get('/optional?id=Some%20Number&dummy=dummy')
+    def test_optional_arg_with_multiple_url_encoded_kwargs(self):
+        r = self.app_.get('/optional?id=Some%20Number&dummy=dummy')
         assert r.status_int == 200
         assert r.body == 'optional: Some Number'
 
-        r = app.post('/optional', {'id': '7', 'dummy': 'dummy'})
+    def test_optional_arg_with_multiple_dictionary_kwargs(self):
+        r = self.app_.post('/optional', {'id': '7', 'dummy': 'dummy'})
         assert r.status_int == 200
         assert r.body == 'optional: 7'
 
-        r = app.post('/optional', {'id': 'Some%20Number', 'dummy': 'dummy'})
+    def test_optional_arg_with_multiple_url_encoded_dictionary_kwargs(self):
+        r = self.app_.post('/optional', {'id': 'Some%20Number', 'dummy': 'dummy'})
         assert r.status_int == 200
         assert r.body == 'optional: Some%20Number'
 
         # multiple optional args
 
-        r = app.get('/multiple_optional')
+    def test_multiple_optional_positional_args(self):
+        r = self.app_.get('/multiple_optional')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: None, None, None'
 
-        r = app.get('/multiple_optional/1')
+    def test_multiple_optional_positional_args_one_arg(self):
+        r = self.app_.get('/multiple_optional/1')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, None, None'
 
-        r = app.get('/multiple_optional/One%21')
+    def test_multiple_optional_positional_args_one_url_encoded_arg(self):
+        r = self.app_.get('/multiple_optional/One%21')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: One!, None, None'
 
-        r = app.get('/multiple_optional/1/2/3')
+    def test_multiple_optional_positional_args_all_args(self):
+        r = self.app_.get('/multiple_optional/1/2/3')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, 2, 3'
 
-        r = app.get('/multiple_optional/One%21/Two%21/Three%21')
+    def test_multiple_optional_positional_args_all_url_encoded_args(self):
+        r = self.app_.get('/multiple_optional/One%21/Two%21/Three%21')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: One!, Two!, Three!'
 
-        r = app.get('/multiple_optional/1/2/3/dummy', status=404)
+    def test_multiple_optional_positional_args_too_many_args(self):
+        r = self.app_.get('/multiple_optional/1/2/3/dummy', status=404)
         assert r.status_int == 404
 
-        r = app.get('/multiple_optional?one=1')
+    def test_multiple_optional_positional_args_with_kwargs(self):
+        r = self.app_.get('/multiple_optional?one=1')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, None, None'
 
-        r = app.get('/multiple_optional?one=One%21')
+    def test_multiple_optional_positional_args_with_url_encoded_kwargs(self):
+        r = self.app_.get('/multiple_optional?one=One%21')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: One!, None, None'
 
-        r = app.get('/multiple_optional/1?one=one')
+    def test_multiple_optional_positional_args_with_string_kwargs(self):
+        r = self.app_.get('/multiple_optional/1?one=one')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, None, None'
 
-        r = app.get('/multiple_optional/One%21?one=one')
+    def test_multiple_optional_positional_args_with_encoded_str_kwargs(self):
+        r = self.app_.get('/multiple_optional/One%21?one=one')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: One!, None, None'
 
-        r = app.post('/multiple_optional', {'one': '1'})
+    def test_multiple_optional_positional_args_with_dict_kwargs(self):
+        r = self.app_.post('/multiple_optional', {'one': '1'})
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, None, None'
 
-        r = app.post('/multiple_optional', {'one': 'One%21'})
+    def test_multiple_optional_positional_args_with_encoded_dict_kwargs(self):
+        r = self.app_.post('/multiple_optional', {'one': 'One%21'})
         assert r.status_int == 200
         assert r.body == 'multiple_optional: One%21, None, None'
 
-        r = app.post('/multiple_optional/1', {'one': 'one'})
+    def test_multiple_optional_positional_args_and_dict_kwargs(self):
+        r = self.app_.post('/multiple_optional/1', {'one': 'one'})
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, None, None'
 
-        r = app.post('/multiple_optional/One%21', {'one': 'one'})
+    def test_multiple_optional_encoded_positional_args_and_dict_kwargs(self):
+        r = self.app_.post('/multiple_optional/One%21', {'one': 'one'})
         assert r.status_int == 200
         assert r.body == 'multiple_optional: One!, None, None'
 
-        r = app.get('/multiple_optional?one=1&two=2&three=3&four=4')
+    def test_multiple_optional_args_with_multiple_kwargs(self):
+        r = self.app_.get('/multiple_optional?one=1&two=2&three=3&four=4')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, 2, 3'
 
-        r = app.get(
+    def test_multiple_optional_args_with_multiple_encoded_kwargs(self):
+        r = self.app_.get(
             '/multiple_optional?one=One%21&two=Two%21&three=Three%21&four=4'
         )
         assert r.status_int == 200
         assert r.body == 'multiple_optional: One!, Two!, Three!'
 
-        r = app.post(
+    def test_multiple_optional_args_with_multiple_dict_kwargs(self):
+        r = self.app_.post(
             '/multiple_optional',
             {'one': '1', 'two': '2', 'three': '3', 'four': '4'}
         )
         assert r.status_int == 200
         assert r.body == 'multiple_optional: 1, 2, 3'
 
-        r = app.post(
+    def test_multiple_optional_args_with_multiple_encoded_dict_kwargs(self):
+        r = self.app_.post(
             '/multiple_optional',
             {
                 'one': 'One%21',
@@ -454,62 +512,72 @@ class TestLookups(TestCase):
         assert r.status_int == 200
         assert r.body == 'multiple_optional: One%21, Two%21, Three%21'
 
-        r = app.get('/multiple_optional?three=3')
+    def test_multiple_optional_args_with_last_kwarg(self):
+        r = self.app_.get('/multiple_optional?three=3')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: None, None, 3'
 
-        r = app.get('/multiple_optional?three=Three%21')
+    def test_multiple_optional_args_with_last_encoded_kwarg(self):
+        r = self.app_.get('/multiple_optional?three=Three%21')
         assert r.status_int == 200
         assert r.body == 'multiple_optional: None, None, Three!'
 
-        r = app.get('/multiple_optional', {'two': '2'})
+    def test_multiple_optional_args_with_middle_arg(self):
+        r = self.app_.get('/multiple_optional', {'two': '2'})
         assert r.status_int == 200
         assert r.body == 'multiple_optional: None, 2, None'
 
-        # variable args
-
-        r = app.get('/variable_args')
+    def test_variable_args(self):
+        r = self.app_.get('/variable_args')
         assert r.status_int == 200
         assert r.body == 'variable_args: '
 
-        r = app.get('/variable_args/1/dummy')
+    def test_multiple_variable_args(self):
+        r = self.app_.get('/variable_args/1/dummy')
         assert r.status_int == 200
         assert r.body == 'variable_args: 1, dummy'
 
-        r = app.get('/variable_args/Testing%20One%20Two/Three%21')
+    def test_multiple_encoded_variable_args(self):
+        r = self.app_.get('/variable_args/Testing%20One%20Two/Three%21')
         assert r.status_int == 200
         assert r.body == 'variable_args: Testing One Two, Three!'
 
-        r = app.get('/variable_args?id=2&dummy=dummy')
+    def test_variable_args_with_kwargs(self):
+        r = self.app_.get('/variable_args?id=2&dummy=dummy')
         assert r.status_int == 200
         assert r.body == 'variable_args: '
 
-        r = app.post('/variable_args', {'id': '3', 'dummy': 'dummy'})
+    def test_variable_args_with_dict_kwargs(self):
+        r = self.app_.post('/variable_args', {'id': '3', 'dummy': 'dummy'})
         assert r.status_int == 200
         assert r.body == 'variable_args: '
 
-        # variable keyword args
-
-        r = app.get('/variable_kwargs')
+    def test_variable_kwargs(self):
+        r = self.app_.get('/variable_kwargs')
         assert r.status_int == 200
         assert r.body == 'variable_kwargs: '
 
-        r = app.get('/variable_kwargs/1/dummy', status=404)
+    def test_multiple_variable_kwargs(self):
+        r = self.app_.get('/variable_kwargs/1/dummy', status=404)
         assert r.status_int == 404
 
-        r = app.get('/variable_kwargs?id=2&dummy=dummy')
+    def test_multiple_variable_kwargs_with_explicit_kwargs(self):
+        r = self.app_.get('/variable_kwargs?id=2&dummy=dummy')
         assert r.status_int == 200
         assert r.body == 'variable_kwargs: dummy=dummy, id=2'
 
-        r = app.get('/variable_kwargs?id=Two%21&dummy=This%20is%20a%20test')
+    def test_multiple_variable_kwargs_with_explicit_encoded_kwargs(self):
+        r = self.app_.get('/variable_kwargs?id=Two%21&dummy=This%20is%20a%20test')
         assert r.status_int == 200
         assert r.body == 'variable_kwargs: dummy=This is a test, id=Two!'
 
-        r = app.post('/variable_kwargs', {'id': '3', 'dummy': 'dummy'})
+    def test_multiple_variable_kwargs_with_dict_kwargs(self):
+        r = self.app_.post('/variable_kwargs', {'id': '3', 'dummy': 'dummy'})
         assert r.status_int == 200
         assert r.body == 'variable_kwargs: dummy=dummy, id=3'
 
-        r = app.post(
+    def test_multiple_variable_kwargs_with_encoded_dict_kwargs(self):
+        r = self.app_.post(
             '/variable_kwargs',
             {'id': 'Three%21', 'dummy': 'This%20is%20a%20test'}
         )
@@ -517,89 +585,104 @@ class TestLookups(TestCase):
         result = 'variable_kwargs: dummy=This%20is%20a%20test, id=Three%21'
         assert r.body == result
 
-        # variable args & keyword args
-
-        r = app.get('/variable_all')
+    def test_variable_all(self):
+        r = self.app_.get('/variable_all')
         assert r.status_int == 200
         assert r.body == 'variable_all: '
 
-        r = app.get('/variable_all/1')
+    def test_variable_all_with_one_extra(self):
+        r = self.app_.get('/variable_all/1')
         assert r.status_int == 200
         assert r.body == 'variable_all: 1'
 
-        r = app.get('/variable_all/2/dummy')
+    def test_variable_all_with_two_extras(self):
+        r = self.app_.get('/variable_all/2/dummy')
         assert r.status_int == 200
         assert r.body == 'variable_all: 2, dummy'
 
-        r = app.get('/variable_all/3?month=1&day=12')
+    def test_variable_mixed(self):
+        r = self.app_.get('/variable_all/3?month=1&day=12')
         assert r.status_int == 200
         assert r.body == 'variable_all: 3, day=12, month=1'
 
-        r = app.get('/variable_all/4?id=four&month=1&day=12')
+    def test_variable_mixed_explicit(self):
+        r = self.app_.get('/variable_all/4?id=four&month=1&day=12')
         assert r.status_int == 200
         assert r.body == 'variable_all: 4, day=12, id=four, month=1'
 
-        r = app.post('/variable_all/5/dummy')
+    def test_variable_post(self):
+        r = self.app_.post('/variable_all/5/dummy')
         assert r.status_int == 200
         assert r.body == 'variable_all: 5, dummy'
 
-        r = app.post('/variable_all/6', {'month': '1', 'day': '12'})
+    def test_variable_post_with_kwargs(self):
+        r = self.app_.post('/variable_all/6', {'month': '1', 'day': '12'})
         assert r.status_int == 200
         assert r.body == 'variable_all: 6, day=12, month=1'
 
-        r = app.post(
+    def test_variable_post_mixed(self):
+        r = self.app_.post(
             '/variable_all/7',
             {'id': 'seven', 'month': '1', 'day': '12'}
         )
         assert r.status_int == 200
         assert r.body == 'variable_all: 7, day=12, id=seven, month=1'
 
-        # the "everything" controller
-
+    def test_no_remainder(self):
         try:
-            r = app.get('/eater')
+            r = self.app_.get('/eater')
             assert r.status_int != 200
         except Exception, ex:
             assert type(ex) == TypeError
             assert ex.args[0] == 'eater() takes at least 2 arguments (1 given)'
 
-        r = app.get('/eater/1')
+    def test_one_remainder(self):
+        r = self.app_.get('/eater/1')
         assert r.status_int == 200
         assert r.body == 'eater: 1, None, '
 
-        r = app.get('/eater/2/dummy')
+    def test_two_remainders(self):
+        r = self.app_.get('/eater/2/dummy')
         assert r.status_int == 200
         assert r.body == 'eater: 2, dummy, '
 
-        r = app.get('/eater/3/dummy/foo/bar')
+    def test_many_remainders(self):
+        r = self.app_.get('/eater/3/dummy/foo/bar')
         assert r.status_int == 200
         assert r.body == 'eater: 3, dummy, foo, bar'
 
-        r = app.get('/eater/4?month=1&day=12')
+    def test_remainder_with_kwargs(self):
+        r = self.app_.get('/eater/4?month=1&day=12')
         assert r.status_int == 200
         assert r.body == 'eater: 4, None, day=12, month=1'
 
-        r = app.get('/eater/5?id=five&month=1&day=12&dummy=dummy')
+    def test_remainder_with_many_kwargs(self):
+        r = self.app_.get('/eater/5?id=five&month=1&day=12&dummy=dummy')
         assert r.status_int == 200
         assert r.body == 'eater: 5, dummy, day=12, month=1'
 
-        r = app.post('/eater/6')
+    def test_post_remainder(self):
+        r = self.app_.post('/eater/6')
         assert r.status_int == 200
         assert r.body == 'eater: 6, None, '
 
-        r = app.post('/eater/7/dummy')
+    def test_post_three_remainders(self):
+        r = self.app_.post('/eater/7/dummy')
         assert r.status_int == 200
         assert r.body == 'eater: 7, dummy, '
 
-        r = app.post('/eater/8/dummy/foo/bar')
+    def test_post_many_remainders(self):
+        r = self.app_.post('/eater/8/dummy/foo/bar')
         assert r.status_int == 200
         assert r.body == 'eater: 8, dummy, foo, bar'
 
-        r = app.post('/eater/9', {'month': '1', 'day': '12'})
+    def test_post_remainder_with_kwargs(self):
+        r = self.app_.post('/eater/9', {'month': '1', 'day': '12'})
         assert r.status_int == 200
         assert r.body == 'eater: 9, None, day=12, month=1'
 
-        r = app.post(
+    def test_post_many_remainders_with_many_kwargs(self):
+        r = self.app_.post(
             '/eater/10',
             {'id': 'ten', 'month': '1', 'day': '12', 'dummy': 'dummy'}
         )
