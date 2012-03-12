@@ -1,6 +1,12 @@
+import sys
 from paste.translogger import TransLogger
 from unittest import TestCase
 from webtest import TestApp
+
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest
 
 from pecan import (
     Pecan, expose, request, response, redirect, abort, make_app,
@@ -1059,7 +1065,6 @@ class TestNonCanonical(TestCase):
         assert len(wrapped_apps) == 1
 
 
-
 class TestLogging(TestCase):
     """
     Mocks logging calls so we can make sure they get called. We could use
@@ -1202,9 +1207,8 @@ class TestEngines(TestCase):
 
     template_path = os.path.join(os.path.dirname(__file__), 'templates')
 
+    @unittest.skipIf('genshi' not in builtin_renderers, 'Genshi not installed')
     def test_genshi(self):
-        if 'genshi' not in builtin_renderers:
-            return
 
         class RootController(object):
             @expose('genshi:genshi.html')
@@ -1236,9 +1240,8 @@ class TestEngines(TestCase):
                     break
         assert error_msg is not None
 
+    @unittest.skipIf('kajiki' not in builtin_renderers, 'Kajiki not installed')
     def test_kajiki(self):
-        if 'kajiki' not in builtin_renderers:
-            return
 
         class RootController(object):
             @expose('kajiki:kajiki.html')
@@ -1256,9 +1259,8 @@ class TestEngines(TestCase):
         assert r.status_int == 200
         assert "<h1>Hello, World!</h1>" in r.body
 
+    @unittest.skipIf('jinja' not in builtin_renderers, 'Jinja not installed')
     def test_jinja(self):
-        if 'jinja' not in builtin_renderers:
-            return
 
         class RootController(object):
             @expose('jinja:jinja.html')
@@ -1286,9 +1288,8 @@ class TestEngines(TestCase):
                     break
         assert error_msg is not None
 
+    @unittest.skipIf('mako' not in builtin_renderers, 'Mako not installed')
     def test_mako(self):
-        if 'mako' not in builtin_renderers:
-            return
 
         class RootController(object):
             @expose('mako:mako.html')
