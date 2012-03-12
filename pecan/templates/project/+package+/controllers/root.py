@@ -1,10 +1,5 @@
 from pecan import expose, redirect
-from formencode import Schema, validators as v
 from webob.exc import status_map
-
-
-class SearchForm(Schema):
-    q = v.String(not_empty=True)
 
 
 class RootController(object):
@@ -13,12 +8,7 @@ class RootController(object):
     def index(self):
         return dict()
 
-    @index.when(
-        method='POST',
-        schema=SearchForm(),
-        error_handler='/index',
-        htmlfill=dict(auto_insert_errors=True)
-    )
+    @index.when(method='POST')
     def index_post(self, q):
         redirect('http://pecan.readthedocs.org/en/latest/search.html?q=%s' % q)
 

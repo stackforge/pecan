@@ -157,13 +157,7 @@ This is how it looks in the project template
 (``test_project.controllers.root.RootController``)::
 
     from pecan import expose
-    from formencode import Schema, validators as v
     from webob.exc import status_map
-
-
-    class SampleForm(Schema):
-        name = v.String(not_empty=True)
-        age = v.Int(not_empty=True)
 
 
     class RootController(object):
@@ -175,13 +169,7 @@ This is how it looks in the project template
         def index(self):
             return dict()
         
-        @index.when(
-            method          = 'POST',
-            template        = 'success.html',
-            schema          = SampleForm(),
-            error_handler   = '/index',
-            htmlfill        = dict(auto_insert_errors = True, prefix_error = False)
-        )
+        @index.when(method='POST')
         def index_post(self, name, age):
             return dict(name=name)
         

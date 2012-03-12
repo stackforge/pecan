@@ -20,11 +20,6 @@ def when_for(controller):
 
 def expose(template=None,
            content_type='text/html',
-           schema=None,
-           json_schema=None,
-           variable_decode=False,
-           error_handler=None,
-           htmlfill=None,
            generic=False):
 
     '''
@@ -34,14 +29,6 @@ def expose(template=None,
     :param template: The path to a template, relative to the base template
     directory.
     :param content_type: The content-type to use for this template.
-    :param schema: A ``formencode`` ``Schema`` object to use for validation.
-    :param json_schema: A ``formencode`` ``Schema`` object to use for
-    validation of JSON POST/PUT content.
-    :param variable_decode: A boolean indicating if you want to use
-    ``htmlfill``'s variable decode capability of transforming flat HTML form
-    structures into nested ones.
-    :param htmlfill: Indicates whether or not you want to use ``htmlfill`` for
-    this controller.
     :param generic: A boolean which flags this as a "generic" controller, which
     uses generic functions based upon ``simplegeneric`` generic functions.
     Allows you to split a single controller into multiple paths based upon HTTP
@@ -70,30 +57,8 @@ def expose(template=None,
         # store the arguments for this controller method
         cfg['argspec'] = getargspec(f)
 
-        # store the schema
-        cfg['error_handler'] = error_handler
-        if schema is not None:
-            cfg['schema'] = schema
-            cfg['validate_json'] = False
-        elif json_schema is not None:
-            cfg['schema'] = json_schema
-            cfg['validate_json'] = True
-
-        # store the variable decode configuration
-        if isinstance(variable_decode, dict) or variable_decode == True:
-            _variable_decode = dict(dict_char='.', list_char='-')
-            if isinstance(variable_decode, dict):
-                _variable_decode.update(variable_decode)
-            cfg['variable_decode'] = _variable_decode
-
-        # store the htmlfill configuration
-        if isinstance(htmlfill, dict) or htmlfill == True or \
-            schema is not None:
-            _htmlfill = dict(auto_insert_errors=False)
-            if isinstance(htmlfill, dict):
-                _htmlfill.update(htmlfill)
-            cfg['htmlfill'] = _htmlfill
         return f
+
     return decorate
 
 

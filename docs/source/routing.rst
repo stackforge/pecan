@@ -178,11 +178,6 @@ parameters, some of which can impact routing.
 
     expose(template        = None,
            content_type    = 'text/html',
-           schema          = None,
-           json_schema     = None,
-           variable_decode = False,
-           error_handler   = None,
-           htmlfill        = None,
            generic         = False)
 
 
