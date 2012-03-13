@@ -12,10 +12,9 @@ Contents:
    
    installation.rst
    quick_start.rst   
-   routing.rst
-   validation_n_errors.rst
-   configuration.rst
    commands.rst
+   routing.rst
+   configuration.rst
    templates.rst
    rest.rst
    secure_controller.rst
@@ -42,7 +41,6 @@ for building HTTP-based applications, including:
 
  * Object-dispatch for easy routing
  * Full support for REST-style controllers
- * Validation and error handling
  * Extensible security framework
  * Extensible template language support
  * Extensible JSON support
@@ -75,13 +73,14 @@ docstrings here:
    pecan_core.rst
    pecan_configuration.rst
    pecan_decorators.rst
-   pecan_default_config.rst
+   pecan_deploy.rst
    pecan_hooks.rst
    pecan_jsonify.rst
    pecan_rest.rst
    pecan_routing.rst
    pecan_secure.rst
    pecan_templating.rst
+   pecan_testing.rst
    pecan_util.rst
 
 

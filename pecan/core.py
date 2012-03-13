@@ -1,7 +1,7 @@
 from configuration      import _runtime_conf, set_config
 from templating         import RendererFactory
 from routing            import lookup_controller, NonCanonicalPath
-from util               import _cfg, splitext, encode_if_needed
+from util               import _cfg, encode_if_needed
 
 from webob              import Request, Response, exc
 from threading          import local
@@ -9,6 +9,7 @@ from itertools          import chain
 from mimetypes          import guess_type, add_type
 from paste.recursive    import ForwardRequestException
 from urlparse           import urlsplit, urlunsplit
+from os.path            import splitext
 
 try:
     from simplejson import loads
@@ -116,17 +117,6 @@ def redirect(location=None, internal=False, code=None, headers={},
     raise exc.status_map[code](location=location, headers=headers)
 
 
-def error_for(field):
-    '''
-    A convenience function for fetching the validation error for a
-    particular field in a form.
-
-    :param field: The name of the field to get the error for.
-    '''
-
-    return request.pecan['validation_errors'].get(field, '')
-
-
 def render(template, namespace):
     '''
     Render the specified template using the Pecan rendering framework
@@ -140,31 +130,6 @@ def render(template, namespace):
     '''
 
     return state.app.render(template, namespace)
-
-
-class ValidationException(ForwardRequestException):
-    '''
-    This exception is raised when a validation error occurs using Pecan's
-    built-in validation framework.
-    '''
-
-    def __init__(self, location=None, errors={}):
-        if state.controller is not None:
-            cfg = _cfg(state.controller)
-        else:
-            cfg = {}
-        if location is None and 'error_handler' in cfg:
-            location = cfg['error_handler']
-            if callable(location):
-                location = location()
-        if 'pecan.params' not in request.environ:
-            request.environ['pecan.params'] = dict(request.params)
-        request.environ[
-            'pecan.validation_errors'
-        ] = request.pecan['validation_errors']
-        request.environ['REQUEST_METHOD'] = 'GET'
-        request.environ['pecan.validation_redirected'] = True
-        ForwardRequestException.__init__(self, location)
 
 
 def load_app(config):
@@ -383,8 +348,6 @@ class Pecan(object):
         )
         if template == 'json':
             renderer = self.renderers.get('json', self.template_path)
-        else:
-            namespace['error_for'] = error_for
         if ':' in template:
             renderer = self.renderers.get(
                 template.split(':')[0],

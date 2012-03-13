@@ -18,9 +18,9 @@ your shell, type::
 
     $ pecan create
 
-The above command will prompt you for a project name. I chose *test_project*,
-but you can also provided as an argument at the end of the example command
-above, like::
+The above command will prompt you for a project name. This example uses
+*test_project*, but you can also provide an argument at the end of the
+example command above, like::
 
     $ pecan create test_project
 
@@ -36,8 +36,7 @@ This is how the layout of your new project should look::
     ├── public
     │   ├── css
     │   │   └── style.css
-    │   └── javascript
-    │       └── shared.js
+    │   └── images
     ├── setup.cfg
     ├── setup.py
     └── test_project
@@ -51,12 +50,12 @@ This is how the layout of your new project should look::
         ├── templates
         │   ├── error.html
         │   ├── index.html
-        │   ├── layout.html
-        │   └── success.html
+        │   └── layout.html
         └── tests
             ├── __init__.py
-            ├── test_config.py
-            └── test_root.py
+            ├── config.py
+            ├── test_functional.py
+            └── test_units.py
 
 The amount of files and directories may vary, but the above structure should
 give you an idea of what you should expect.
@@ -64,7 +63,7 @@ give you an idea of what you should expect.
 A few things have been created for you, so let's review them one by one:
 
 * **public**: All your static files (like CSS and Javascript) live here. If you
-  have any images (this example app doesn't) they would live here too.
+  have any images they would live here too.
 
 
 The remaining directories encompass your models, controllers and templates, and
@@ -162,17 +161,14 @@ This is how it looks in the project template
 
     class RootController(object):
 
-        @expose(
-            generic     = True, 
-            template    = 'index.html'
-        )
+        @expose(generic=True, template='index.html')
         def index(self):
             return dict()
-        
+
         @index.when(method='POST')
-        def index_post(self, name, age):
-            return dict(name=name)
-        
+        def index_post(self, q):
+            redirect('http://pecan.readthedocs.org/en/latest/search.html?q=%s' % q)
+
         @expose('error.html')
         def error(self, status):
             try:
@@ -194,21 +190,10 @@ this method.
 Notice that the index method returns a dictionary - this dictionary is used as
 a namespace to render the specified template (``index.html``) into HTML.
 
-**def index_post**: receives 2 arguments (*name* and *age*) that are validated
-through the *SampleForm* schema.
+**def index_post**: receives one HTTP POST argument (``q``).
 
 ``method`` has been set to 'POST', so HTTP POSTs to the application root (in
 our example, form submissions) will be routed to this method.
 
-The ``error_handler`` has been set to index.  This means that when errors are
-raised, they will be sent to the index controller and rendered through its
-template.
-
 **def error**: Finally, we have the error controller that allows your application to 
 display custom pages for certain HTTP errors (404, etc...).
-
-Application Interaction
------------------------
-If you still have your application running and you visit it in your browser,
-you should see a page with some information about Pecan and the form so you can
-play a bit.

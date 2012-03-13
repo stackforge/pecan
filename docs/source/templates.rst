@@ -76,7 +76,7 @@ The ``render`` helper is also quite simple to use::
 The JSON Renderer
 -----------------
 
-Pecan provides a `JSON` renderer by simple passing ``@expose('json')``. For 
+Pecan also provides a `JSON` renderer, e.g.,  ``@expose('json')``. For 
 more information on using `JSON` in Pecan, please refer to :ref:`jsonify` and
 :ref:`pecan_jsonify`.
 
@@ -84,7 +84,7 @@ more information on using `JSON` in Pecan, please refer to :ref:`jsonify` and
 Custom Renderers
 ----------------
 
-To define a custom renderer, you simply create a class that follows a simple
+To define a custom renderer, you can create a class that follows a simple
 protocol::
 
     class MyRenderer(object):
@@ -105,7 +105,7 @@ protocol::
             return str(namespace)
 
 
-To enable your custom renderer, you can define a ``custom_renderers`` key In
+To enable your custom renderer, you can define a ``custom_renderers`` key in
 your application's configuration::
 
     app = {
