@@ -1,7 +1,6 @@
 """
 PasteScript serve command for Pecan.
 """
-from paste import httpserver
 from paste.script.serve import ServeCommand as _ServeCommand
 
 from base               import Command
@@ -49,9 +48,14 @@ class ServeCommand(_ServeCommand, Command):
         _ServeCommand.command(self)
 
     def loadserver(self, server_spec, name, relative_to, **kw):
-        return (lambda app: httpserver.serve(
-            app, app.config.server.host, app.config.server.port
-        ))
-
+        return (lambda app: WSGIRefServer(self.config.server.host, self.config.server.port, app))
+    
     def loadapp(self, app_spec, name, relative_to, **kw):
-        return self.load_app()
+        return self.load_app(self.config)
+
+
+def WSGIRefServer(host, port, app, **options):
+    from wsgiref.simple_server import make_server
+    port = int(port)
+    srv = make_server(host, port, app, **options)
+    srv.serve_forever()
