@@ -1,5 +1,4 @@
 from paste.errordocument import make_errordocument
-from paste.recursive import RecursiveMiddleware
 from paste.translogger import TransLogger
 from weberror.errormiddleware import ErrorMiddleware
 from weberror.evalexception import EvalException
@@ -8,6 +7,7 @@ from core import (
     abort, override_template, Pecan, load_app, redirect, render,
     request, response
 )
+from recursive import RecursiveMiddleware
 from decorators import expose
 from hooks import RequestViewerHook
 from templating import error_formatters
@@ -15,8 +15,6 @@ from static import SharedDataMiddleware
 
 from configuration import set_config
 from configuration import _runtime_conf as conf
-
-import os
 
 
 __all__ = [
