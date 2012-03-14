@@ -48,13 +48,16 @@ class ServeCommand(_ServeCommand, Command):
         _ServeCommand.command(self)
 
     def loadserver(self, server_spec, name, relative_to, **kw):
-        return (lambda app: WSGIRefServer(self.config.server.host, self.config.server.port, app))
+        return (lambda app: WSGIRefServer(app.config.server.host, app.config.server.port, app))
     
     def loadapp(self, app_spec, name, relative_to, **kw):
-        return self.load_app(self.config)
+        return self.load_app()
 
 
 def WSGIRefServer(host, port, app, **options):
+    """
+    A very simple approach for a WSGI server.
+    """
     from wsgiref.simple_server import make_server
     port = int(port)
     srv = make_server(host, port, app, **options)
