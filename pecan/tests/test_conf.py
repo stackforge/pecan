@@ -23,7 +23,6 @@ class TestConf(TestCase):
             'test_config/config.py'
         )))
 
-        self.assertTrue(conf.app.debug)
         self.assertEqual(conf.app.root, None)
         self.assertEqual(conf.app.template_path, 'myproject/templates')
         self.assertEqual(conf.app.static_root, 'public')
@@ -41,7 +40,6 @@ class TestConf(TestCase):
             'test_config/empty.py'
         )))
 
-        self.assertFalse(conf.app.debug)
         self.assertEqual(conf.app.root, None)
         self.assertEqual(conf.app.template_path, '')
         self.assertEqual(conf.app.static_root, 'public')
@@ -58,7 +56,6 @@ class TestConf(TestCase):
             'test_config/forcedict.py'
         )))
 
-        self.assertFalse(conf.app.debug)
         self.assertEqual(conf.app.root, None)
         self.assertEqual(conf.app.template_path, '')
         self.assertEqual(conf.app.static_root, 'public')
@@ -99,7 +96,6 @@ class TestConf(TestCase):
             os.path.dirname(__file__), 'test_config', 'config.py'
         )
         conf = configuration.conf_from_file(path)
-        self.assertTrue(conf.app.debug)
 
     def test_config_illegal_ids(self):
         from pecan import configuration
@@ -197,9 +193,6 @@ class TestConf(TestCase):
         assert isinstance(as_dict, dict)
         assert as_dict['server']['host'] == '0.0.0.0'
         assert as_dict['server']['port'] == '8080'
-        assert as_dict['app']['debug'] == False
-        assert as_dict['app']['errors'] == {}
-        assert as_dict['app']['force_canonical'] == True
         assert as_dict['app']['modules'] == []
         assert as_dict['app']['root'] == None
         assert as_dict['app']['static_root'] == 'public'
@@ -217,9 +210,6 @@ class TestConf(TestCase):
         assert isinstance(as_dict, dict)
         assert as_dict['server']['host'] == '0.0.0.0'
         assert as_dict['server']['port'] == '8080'
-        assert as_dict['app']['debug'] == False
-        assert as_dict['app']['errors'] == {}
-        assert as_dict['app']['force_canonical'] == True
         assert as_dict['app']['modules'] == []
         assert as_dict['app']['root'] == None
         assert as_dict['app']['static_root'] == 'public'
@@ -238,9 +228,6 @@ class TestConf(TestCase):
         assert isinstance(as_dict, dict)
         assert as_dict['prefix_server']['prefix_host'] == '0.0.0.0'
         assert as_dict['prefix_server']['prefix_port'] == '8080'
-        assert as_dict['prefix_app']['prefix_debug'] == False
-        assert as_dict['prefix_app']['prefix_errors'] == {}
-        assert as_dict['prefix_app']['prefix_force_canonical'] == True
         assert as_dict['prefix_app']['prefix_modules'] == []
         assert as_dict['prefix_app']['prefix_root'] == None
         assert as_dict['prefix_app']['prefix_static_root'] == 'public'

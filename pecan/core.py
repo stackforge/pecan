@@ -1,16 +1,15 @@
 from configuration      import _runtime_conf, set_config
 from templating         import RendererFactory
 from routing            import lookup_controller, NonCanonicalPath
-from util               import _cfg, splitext, encode_if_needed
+from util               import _cfg, encode_if_needed
 
 from webob              import Request, Response, exc
 from threading          import local
 from itertools          import chain
 from mimetypes          import guess_type, add_type
-from formencode         import htmlfill, Invalid, variabledecode
-from formencode.schema  import merge_dicts
 from paste.recursive    import ForwardRequestException
 from urlparse           import urlsplit, urlunsplit
+from os.path            import splitext
 
 try:
     from simplejson import loads
@@ -118,34 +117,6 @@ def redirect(location=None, internal=False, code=None, headers={},
     raise exc.status_map[code](location=location, headers=headers)
 
 
-def error_for(field):
-    '''
-    A convenience function for fetching the validation error for a
-    particular field in a form. Useful within templates when not using
-    ``htmlfill`` for forms.
-
-    :param field: The name of the field to get the error for.
-    '''
-
-    return request.pecan['validation_errors'].get(field, '')
-
-
-def static(name, value):
-    '''
-    When using ``htmlfill`` validation support, this function indicates
-    that ``htmlfill`` should not fill in a value for this field, and
-    should instead use the value specified.
-
-    :param name: The name of the field.
-    :param value: The value to specify.
-    '''
-
-    if 'pecan.params' not in request.environ:
-        request.environ['pecan.params'] = dict(request.params)
-    request.environ['pecan.params'][name] = value
-    return value
-
-
 def render(template, namespace):
     '''
     Render the specified template using the Pecan rendering framework
@@ -159,34 +130,6 @@ def render(template, namespace):
     '''
 
     return state.app.render(template, namespace)
-
-
-class ValidationException(ForwardRequestException):
-    '''
-    This exception is raised when a validation error occurs using Pecan's
-    built-in validation framework.
-    '''
-
-    def __init__(self, location=None, errors={}):
-        if state.controller is not None:
-            cfg = _cfg(state.controller)
-        else:
-            cfg = {}
-        if location is None and 'error_handler' in cfg:
-            location = cfg['error_handler']
-            if callable(location):
-                location = location()
-        merge_dicts(request.pecan['validation_errors'], errors)
-        if 'pecan.params' not in request.environ:
-            request.environ['pecan.params'] = dict(request.params)
-        request.environ[
-            'pecan.validation_errors'
-        ] = request.pecan['validation_errors']
-        if cfg.get('htmlfill') is not None:
-            request.environ['pecan.htmlfill'] = cfg['htmlfill']
-        request.environ['REQUEST_METHOD'] = 'GET'
-        request.environ['pecan.validation_redirected'] = True
-        ForwardRequestException.__init__(self, location)
 
 
 def load_app(config):
@@ -405,9 +348,6 @@ class Pecan(object):
         )
         if template == 'json':
             renderer = self.renderers.get('json', self.template_path)
-        else:
-            namespace['error_for'] = error_for
-            namespace['static'] = static
         if ':' in template:
             renderer = self.renderers.get(
                 template.split(':')[0],
@@ -415,45 +355,6 @@ class Pecan(object):
             )
             template = template.split(':')[1]
         return renderer.render(template, namespace)
-
-    def validate(self, schema, params, json=False, error_handler=None,
-                 htmlfill=None, variable_decode=None):
-        '''
-        Performs validation against a schema for any passed params,
-        including support for ``JSON``.
-
-        :param schema: A ``formencode`` ``Schema`` object to validate against.
-        :param params: The dictionary of parameters to validate.
-        :param json: A boolean, indicating whether or not the validation should
-        validate against JSON content.
-        :param error_handler: The path to a controller which will handle
-        errors. If not specified, validation errors will raise a
-        ``ValidationException``.
-        :param htmlfill: Specifies whether or not to use htmlfill.
-        :param variable_decode: Indicates whether or not to decode variables
-        when using htmlfill.
-        '''
-
-        try:
-            to_validate = params
-            if json:
-                to_validate = loads(request.body)
-            if variable_decode is not None:
-                to_validate = variabledecode.variable_decode(
-                    to_validate, **variable_decode
-                )
-            params = schema.to_python(to_validate)
-        except Invalid, e:
-            kwargs = {}
-            if variable_decode is not None:
-                kwargs['encode_variables'] = True
-                kwargs.update(variable_decode)
-            request.pecan['validation_errors'] = e.unpack_errors(**kwargs)
-            if error_handler is not None:
-                raise ValidationException()
-        if json:
-            params = dict(data=params)
-        return params or {}
 
     def handle_request(self):
         '''
@@ -524,20 +425,8 @@ class Pecan(object):
         # handle "before" hooks
         self.handle_hooks('before', state)
 
-        # fetch and validate any parameters
+        # fetch any parameters
         params = dict(request.params)
-        if 'schema' in cfg:
-            params = self.validate(
-                        cfg['schema'],
-                        params,
-                        json=cfg['validate_json'],
-                        error_handler=cfg.get('error_handler'),
-                        htmlfill=cfg.get('htmlfill'),
-                        variable_decode=cfg.get('variable_decode')
-                    )
-        elif 'pecan.validation_errors' in request.environ:
-            errors = request.environ.pop('pecan.validation_errors')
-            request.pecan['validation_errors'] = errors
 
         # fetch the arguments for the controller
         args, kwargs = self.get_args(
@@ -575,23 +464,8 @@ class Pecan(object):
                 request.pecan['content_type'] = 'application/json'
             result = self.render(template, result)
 
-        # pass the response through htmlfill (items are popped out of the
-        # environment even if htmlfill won't run for proper cleanup)
-        _htmlfill = cfg.get('htmlfill')
-        if _htmlfill is None and 'pecan.htmlfill' in request.environ:
-            _htmlfill = request.environ.pop('pecan.htmlfill')
         if 'pecan.params' in request.environ:
             params = request.environ.pop('pecan.params')
-        if request.pecan['validation_errors'] and _htmlfill is not None and \
-            request.pecan['content_type'] == 'text/html':
-            errors = request.pecan['validation_errors']
-            result = htmlfill.render(
-                result,
-                defaults=params,
-                errors=errors,
-                text_as_default=True,
-                **_htmlfill
-            )
 
         # If we are in a test request put the namespace where it can be
         # accessed directly

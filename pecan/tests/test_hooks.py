@@ -7,7 +7,6 @@ from pecan.hooks import (
 from pecan.configuration import Config
 from pecan.decorators import transactional, after_commit, after_rollback
 from unittest import TestCase
-from formencode import Schema, validators
 from webtest import TestApp
 
 
@@ -328,125 +327,6 @@ class TestHooks(TestCase):
         assert run_hook[3] == 'inside_sub'
         assert run_hook[4] == 'after1'
         assert run_hook[5] == 'after2'
-
-    def test_hooks_with_validation(self):
-        run_hook = []
-
-        class RegistrationSchema(Schema):
-            first_name = validators.String(not_empty=True)
-            last_name = validators.String(not_empty=True)
-            email = validators.Email()
-            username = validators.PlainText()
-            password = validators.String()
-            password_confirm = validators.String()
-            age = validators.Int()
-            chained_validators = [
-                validators.FieldsMatch('password', 'password_confirm')
-            ]
-
-        class SimpleHook(PecanHook):
-            def on_route(self, state):
-                run_hook.append('on_route')
-
-            def before(self, state):
-                run_hook.append('before')
-
-            def after(self, state):
-                run_hook.append('after')
-
-            def on_error(self, state, e):
-                run_hook.append('error')
-
-        class RootController(object):
-            @expose()
-            def errors(self, *args, **kwargs):
-                run_hook.append('inside')
-                return 'errors'
-
-            @expose(schema=RegistrationSchema())
-            def index(self, first_name,
-                            last_name,
-                            email,
-                            username,
-                            password,
-                            password_confirm,
-                            age):
-                run_hook.append('inside')
-                return str(len(request.pecan['validation_errors']) > 0)
-
-            @expose(schema=RegistrationSchema(), error_handler='/errors')
-            def with_handler(self, first_name,
-                            last_name,
-                            email,
-                            username,
-                            password,
-                            password_confirm,
-                            age):
-                run_hook.append('inside')
-                return str(len(request.pecan['validation_errors']) > 0)
-
-        # test that the hooks get properly run with no validation errors
-        app = TestApp(make_app(RootController(), hooks=[SimpleHook()]))
-        r = app.post('/', dict(
-            first_name='Jonathan',
-            last_name='LaCour',
-            email='jonathan@cleverdevil.org',
-            username='jlacour',
-            password='123456',
-            password_confirm='123456',
-            age='31'
-        ))
-        assert r.status_int == 200
-        assert r.body == 'False'
-        assert len(run_hook) == 4
-        assert run_hook[0] == 'on_route'
-        assert run_hook[1] == 'before'
-        assert run_hook[2] == 'inside'
-        assert run_hook[3] == 'after'
-        run_hook = []
-
-        # test that the hooks get properly run with validation errors
-        app = TestApp(make_app(RootController(), hooks=[SimpleHook()]))
-        r = app.post('/', dict(
-            first_name='Jonathan',
-            last_name='LaCour',
-            email='jonathan@cleverdevil.org',
-            username='jlacour',
-            password='654321',
-            password_confirm='123456',
-            age='31'
-        ))
-        assert r.status_int == 200
-        assert r.body == 'True'
-        assert len(run_hook) == 4
-        assert run_hook[0] == 'on_route'
-        assert run_hook[1] == 'before'
-        assert run_hook[2] == 'inside'
-        assert run_hook[3] == 'after'
-        run_hook = []
-
-        # test that the hooks get properly run with validation errors
-        # and an error handler
-        app = TestApp(make_app(RootController(), hooks=[SimpleHook()]))
-        r = app.post('/with_handler', dict(
-            first_name='Jonathan',
-            last_name='LaCour',
-            email='jonathan@cleverdevil.org',
-            username='jlacour',
-            password='654321',
-            password_confirm='123456',
-            age='31'
-        ))
-        assert r.status_int == 200
-        assert r.body == 'errors'
-        assert len(run_hook) == 7
-        assert run_hook[0] == 'on_route'
-        assert run_hook[1] == 'before'
-        assert run_hook[2] == 'after'
-        assert run_hook[3] == 'on_route'
-        assert run_hook[4] == 'before'
-        assert run_hook[5] == 'inside'
-        assert run_hook[6] == 'after'
 
 
 class TestTransactionHook(TestCase):

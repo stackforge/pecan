@@ -1,6 +1,3 @@
-'''
-'''
-
 from paste.cascade import Cascade
 from paste.errordocument import make_errordocument
 from paste.recursive import RecursiveMiddleware
@@ -11,7 +8,7 @@ from weberror.evalexception import EvalException
 
 from core import (
     abort, override_template, Pecan, load_app, redirect, render,
-    request, response, ValidationException
+    request, response
 )
 from decorators import expose
 from hooks import RequestViewerHook
@@ -29,18 +26,21 @@ __all__ = [
 
 def make_app(root, static_root=None, debug=False, errorcfg={},
              wrap_app=None, logging=False, **kw):
-    '''
 
-    '''
+    # A shortcut for the RequestViewerHook middleware.
     if hasattr(conf, 'requestviewer'):
         existing_hooks = kw.get('hooks', [])
         existing_hooks.append(RequestViewerHook(conf.requestviewer))
         kw['hooks'] = existing_hooks
 
+    # Instantiate the WSGI app by passing **kw onward
     app = Pecan(root, **kw)
+    # Optionally wrap the app in another WSGI app
     if wrap_app:
         app = wrap_app(app)
+    # Included for internal redirect support
     app = RecursiveMiddleware(app)
+    # Support for interactive debugging (and error reporting)
     if debug:
         app = EvalException(
             app,
@@ -49,9 +49,13 @@ def make_app(root, static_root=None, debug=False, errorcfg={},
         )
     else:
         app = ErrorMiddleware(app, **errorcfg)
-    app = make_errordocument(app, conf, **dict(conf.app.errors))
+    # Configuration for serving custom error messages
+    if hasattr(conf.app, 'errors'):
+        app = make_errordocument(app, conf, **dict(conf.app.errors))
+    # Support for serving static files (for development convenience)
     if static_root:
         app = Cascade([StaticURLParser(static_root), app])
+    # Support for simple Apache-style logs
     if isinstance(logging, dict) or logging == True:
         app = TransLogger(app, **(isinstance(logging, dict) and logging or {}))
     return app

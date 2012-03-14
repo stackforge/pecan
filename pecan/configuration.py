@@ -17,13 +17,7 @@ DEFAULT = {
         'root': None,
         'modules': [],
         'static_root': 'public',
-        'template_path': '',
-        'debug': False,
-        'logging': False,
-        'force_canonical': True,
-        'errors': {
-            '__force_dict__': True
-        }
+        'template_path': ''
     }
 }
 
@@ -190,7 +184,7 @@ def initconf():
 
 def set_config(config, overwrite=False):
     '''
-    Updates the global configuration a filename.
+    Updates the global configuration.
 
     :param config: Can be a dictionary containing configuration, or a string
     which

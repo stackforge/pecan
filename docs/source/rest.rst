@@ -1,7 +1,7 @@
 .. _rest:
 
-REST Controller
-===============
+Writing RESTful Web Services with Pecan
+=======================================
 
 If you need to write controllers to interact with objects, using the 
 ``RestController`` may help speed things up. It follows the Representational 
@@ -63,8 +63,8 @@ The ``RestController`` still supports the ``index``, ``_default``, and
 make sure to call ``RestController._route`` at the end of your custom 
 ``_route`` method so that the REST routing described above still occurs.
 
-Nesting
--------
+Nesting ``RestController``
+---------------------------
 
 ``RestController`` instances can be nested so that child resources get the 
 parameters necessary to look up parent resources. For example::
@@ -110,8 +110,8 @@ parent controller. If the parent resource takes a variable number of arguments,
 Pecan will hand it everything up to the child resource controller name (e.g., 
 ``books`` in the above example).
 
-Custom Actions
---------------
+Defining Custom Actions
+-----------------------
 
 In addition to the default methods defined above, you can add additional 
 behaviors to a ``RestController`` by defining a special ``_custom_actions`` 

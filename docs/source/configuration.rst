@@ -3,25 +3,13 @@
 Configuration
 =============
 Pecan is very easy to configure. As long as you follow certain conventions,
-using, setting and dealing with configuration should be very intuitive.
+using, setting and dealing with configuration should be very intuitive.  
 
-Pecan configuration files are pure Python.  These files need to specify the values in a key/value way (Python
-dictionaries) or if you need simple one-way values you can also specify them as
-direct variables (more on that below).
+Pecan configuration files are pure Python.
 
-Even if you want custom configuration values, you need to get them in the
-configuration file as dictionaries.
-
-No Configuration
-----------------
-What happens when no configuration is passed? Or if you are missing some values?
-Pecan fills in anything that you might have left behind, like specific values or  
-even if you leave them out completely. This includes
-**app** and **server** but will not, however, include any custom configurations.
-
-Defaults
---------
-Below is the complete default values the framework uses::
+Default Values
+---------------
+Below is the complete list of default values the framework uses::
 
 
     server = {
@@ -31,9 +19,9 @@ Below is the complete default values the framework uses::
 
     app = {
         'root' : None,
+        'modules' : [],
         'static_root' : 'public', 
-        'template_path' : '',
-        'debug' : False
+        'template_path' : ''
     }
 
 
@@ -42,10 +30,9 @@ Below is the complete default values the framework uses::
 
 Application Configuration
 -------------------------
-This is the part of the configuration that is specific to your application.
-Things like debug mode, Root Controller and possible Hooks, should be specified
-here. This is what is used when the framework is wrapping your application into
-a valid WSGI app.
+This is the part of the configuration that is specific to your application -
+the framework uses it to wrap your application into a valid 
+`WSGI app <http://www.wsgi.org/en/latest/what.html>`_.
 
 A typical application configuration might look like this::
 
@@ -60,23 +47,24 @@ A typical application configuration might look like this::
 
 Let's look at each value and what it means:
 
-**app** is a reserved variable name for the configuration, so make sure you are
-not overriding, otherwise you will get default values.
+**app** is a reserved variable name for the configuration, so make sure you
+don't override it.
 
 **root** The root controller of your application. Remember to provide
 a string representing a Python path to some callable (e.g.,
-`yourapp.controllers.root.RootController`).
+``"yourapp.controllers.root.RootController"``).
 
 **static_root** Points to the directory where your static files live (relative
-to the project root).
+to the project root).  By default, Pecan comes with middleware that can be
+used to serve static files (like CSS and Javascript files) during development.
 
 **template_path** Points to the directory where your template files live
 (relative to the project root).
 
 **reload** - When ``True``, ``pecan serve`` will listen for file changes and
-restare your app (especially useful for development).
+restart your app (especially useful for development).
 
-**debug** Enables ``WebError`` to have display tracebacks in the browser 
+**debug** Enables ``WebError`` to display tracebacks in the browser 
 (**IMPORTANT**: Make sure this is *always* set to ``False`` in production
 environments).
 
@@ -85,12 +73,23 @@ environments).
 
 Server Configuration
 --------------------
-Pecan provides some defaults.  Change these to alter the host and port your
+Pecan provides some sane defaults.  Change these to alter the host and port your
 WSGI app is served on::
 
     server = {
         'port' : '8080',
         'host' : '0.0.0.0'
+    }
+
+Additional Configuration
+------------------------
+Your application may need access to other configuration values at runtime 
+(like third-party API credentials).  These types of configuration can be
+defined in their own blocks in your configuration file::
+
+    twitter = {
+        'api_key' : 'FOO',
+        'api_secret' : 'SECRET'
     }
 
 .. _accessibility:
@@ -112,11 +111,11 @@ And it would be accessible in `pecan.conf` as::
     'foo_bar_user'
 
 
-Fully Valid Dictionaries
-------------------------
+Dictionary Conversion
+---------------------
 In certain situations you might want to deal with keys and values, but in strict
 dictionary form. The ``Config`` object has a helper method for this purpose
-that will return a dictionary representation of itself including nested values.
+that will return a dictionary representation of itself, including nested values.
 
 Below is a representation of how you can access the ``as_dict`` method and what
 should return as a result (shortened for brevity):
@@ -130,8 +129,8 @@ should return as a result (shortened for brevity):
     {'app': {'errors': {}, 'template_path': '', 'static_root': 'public', [...]
     
 
-Prefixing Values
-----------------
+Prefixing Dictionary Keys
+-------------------------
 ``Config.as_dict`` allows you to pass an optional argument if you need to
 prefix the keys in the returned dictionary. This is a single argument in string
 form and it works like this (shortened for brevity):

@@ -25,8 +25,8 @@ The available renderer type strings are `mako`, `genshi`, `kajiki`, `jinja`,
 and `json`.
 
 
-Using Renderers
----------------
+Using Template Renderers
+------------------------
 
 :ref:`pecan_decorators` defines a decorator called ``@expose``, which is used
 to flag a method as a controller. The ``@expose`` decorator takes a variety of
@@ -76,15 +76,15 @@ The ``render`` helper is also quite simple to use::
 The JSON Renderer
 -----------------
 
-Pecan provides a `JSON` renderer by simple passing ``@expose('json')``. For 
+Pecan also provides a `JSON` renderer, e.g.,  ``@expose('json')``. For 
 more information on using `JSON` in Pecan, please refer to :ref:`jsonify` and
 :ref:`pecan_jsonify`.
 
 
-Custom Renderers
-----------------
+Defining Custom Renderers
+-------------------------
 
-To define a custom renderer, you simply create a class that follows a simple
+To define a custom renderer, you can create a class that follows a simple
 protocol::
 
     class MyRenderer(object):
@@ -105,7 +105,7 @@ protocol::
             return str(namespace)
 
 
-To enable your custom renderer, you can define a ``custom_renderers`` key In
+To enable your custom renderer, you can define a ``custom_renderers`` key in
 your application's configuration::
 
     app = {

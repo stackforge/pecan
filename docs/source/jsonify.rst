@@ -19,7 +19,6 @@ we want to use to return ``JSON`` output for a ``User`` object::
     
     class UsersController(object):
         @expose('json')
-        @validate()
         def current_user(self):
             '''
             return an instance of myproject.model.User which represents

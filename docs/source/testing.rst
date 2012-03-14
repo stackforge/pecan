@@ -1,5 +1,5 @@
 .. _testing:
 
-Unit Testing 
-=============
+Writing Tests For Pecan Apps
+============================
 TODO

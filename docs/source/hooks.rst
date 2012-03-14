@@ -19,8 +19,8 @@ Hooks allow you to execute code at key points throughout the life cycle of your 
 
 * ``on_error``: called when a request generates an exception
 
-Implementation
---------------
+Implementating a Pecan Hook
+---------------------------
 In the below example, we will write a simple hook that will gather
 some information about the request and print it to ``stdout``.
 
@@ -84,8 +84,8 @@ the app and browse the application from our web browser::
     response: 	 200 OK
 
 
-Included Pecan Hooks
---------------------
+Hooks That Come with Pecan
+--------------------------
 Pecan includes some hooks in its core and are very simple to start using them
 away. This section will describe their different uses, how to configure them
 and examples of common scenarios.
@@ -93,8 +93,8 @@ and examples of common scenarios.
 .. _requestviewerhook:
 
 RequestViewerHook
------------------
-This hooks is very useful for debugging purposes. It has access to every
+'''''''''''''''''
+This hook is useful for debugging purposes. It has access to every
 attribute the ``response`` object has plus a few others that are specific to
 the framework.
 
@@ -103,23 +103,25 @@ There are two main ways that this hook can provide information about a request:
 #. Terminal or logging output (via an file-like stream like `stdout`)
 #. Custom header keys in the actual response.
 
-By default, both outputs are on if they are not configured.
+By default, both outputs are enabled.
 
 For the actual object reference, please see :ref:`pecan_hooks`.
 
-Automatically Enabled
----------------------
-This hook can be automatically added to the application itself if a certain key
-exists in the configuration used for the app. This key is::
+Enabling RequestViewerHook
+..........................
+This hook can be automatically added to the application itself if a certain
+key, ``requestviewer``, exists in the configuration used for the app, e.g.::
 
-    requestviewer
+    app = {}
+    server = {}
+    requestviewer = {}
 
 It does not need to contain anything (could be an empty dictionary), and this
 is enough to force Pecan to load this hook when the WSGI application is
 created.
 
-Configuration
--------------
+Configuring RequestViewerHook
+.............................
 There are a few ways to get this hook properly configured and running. However,
 it is useful to know that no actual configuration is needed to have it up and
 running. 
@@ -137,7 +139,7 @@ No configuration will show those values in the terminal via `stdout` and it
 will also add them to the response headers (in the form of
 `X-Pecan-item_name`).
 
-This is how the terminal output look for a `/favicon.ico` request ::
+This is how the terminal output might look for a `/favicon.ico` request ::
 
     path         - /favicon.ico
     status       - 404 Not Found
@@ -146,10 +148,9 @@ This is how the terminal output look for a `/favicon.ico` request ::
     params       - []
     hooks        - ['RequestViewerHook']
 
-In the above case, the file was not found, and the information was properly
-gathered and returned via `stdout`.
-
-And this is how those same values would be seen in the response headers::
+In the above case, the file was not found, and the information was printed to
+`stdout`.  Additionally, the following headers would be present in the HTTP
+response::
 
     X-Pecan-path	/favicon.ico
     X-Pecan-status	404 Not Found
@@ -177,8 +178,8 @@ And the same configuration could be set in the config file like::
 
     requestviewer = {'items:['path']}
 
-Specifying items
-----------------
+Modifying Output Format
+.......................
 Items are the actual information objects that the hook will use to return
 information. Sometimes you will need a specific piece of information or
 a certain bunch of them according to the development need so the defaults will
@@ -248,8 +249,8 @@ And these are the specific ones from Pecan and the hook:
  * params (params is actually available from `webob` but it is parsed 
    by the hook for redability)
 
-Blacklisting
-------------
+Blacklisting Certain Paths
+..........................
 Sometimes it's annoying to get information about *every* single request. For this
 purpose, there is a matching list of url paths that you can pass into the hook
 so that paths that do not match are returned.

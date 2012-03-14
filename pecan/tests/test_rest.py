@@ -7,8 +7,6 @@ try:
 except:
     from json import dumps, loads  # noqa
 
-import formencode
-
 
 class TestRestController(TestCase):
 
@@ -856,58 +854,3 @@ class TestRestController(TestCase):
         r = app.get('/foos/bars/bazs/final/named')
         assert r.status_int == 200
         assert r.body == 'NAMED'
-
-    def test_rest_with_validation_redirects(self):
-        """
-        Fixing a bug:
-
-        When schema validation fails, pecan can use an internal redirect
-        (paste.recursive.ForwardRequestException) to send you to another
-        controller to "handle" the display of error messages.  Additionally,
-        pecan overwrites the request method as GET.
-
-        In some circumstances, RestController's special `_method` parameter
-        prevents the redirected request from routing to the appropriate
-        `error_handler` controller.
-        """
-
-        class SampleSchema(formencode.Schema):
-            name = formencode.validators.String()
-
-        class UserController(RestController):
-
-            @expose()
-            def get_one(self, id):
-                return "FORM VALIDATION FAILED"
-
-            @expose(
-                schema=SampleSchema(),
-                error_handler=lambda: request.path
-            )
-            def put(self, id):
-                raise AssertionError("Schema validation should fail.")
-
-            @expose(
-                schema=SampleSchema(),
-                error_handler=lambda: request.path
-            )
-            def delete(self, id):
-                raise AssertionError("Schema validation should fail.")
-
-        class RootController(object):
-            users = UserController()
-
-        # create the app
-        app = TestApp(make_app(RootController()))
-
-        # create the app
-        app = TestApp(make_app(RootController()))
-
-        # test proper internal redirection
-        r = app.post('/users/1?_method=put')
-        assert r.status_int == 200
-        assert r.body == "FORM VALIDATION FAILED"
-
-        r = app.post('/users/1?_method=delete')
-        assert r.status_int == 200
-        assert r.body == "FORM VALIDATION FAILED"
