@@ -1,28 +1,3 @@
-Pecan Documentation
-===================
-
-A WSGI object-dispatching web framework, designed to be lean and fast,
-with few dependancies.
-
-
-Contents:
-
-.. toctree::
-   :maxdepth: 2
-   
-   installation.rst
-   quick_start.rst   
-   commands.rst
-   routing.rst
-   configuration.rst
-   templates.rst
-   rest.rst
-   secure_controller.rst
-   jsonify.rst
-   hooks.rst
-   testing.rst
-
-
 Introduction and History
 ========================
 Welcome to Pecan, a lean Python web framework inspired by CherryPy,
@@ -51,11 +26,31 @@ box, tutorials are included for integrating these yourself in just a few
 lines of code.
 
 
-Cookbook
-========
+Narrative Documentation
+=======================
+
+.. toctree::
+   :maxdepth: 2
+   
+   installation.rst
+   quick_start.rst   
+   commands.rst
+   routing.rst
+   templates.rst
+   rest.rst
+   configuration.rst
+   secure_controller.rst
+   jsonify.rst
+   hooks.rst
+   testing.rst
+
+
+Cookbook and Common Patterns
+============================
 .. toctree::
    :maxdepth: 2
 
+   forms.rst
    sessions.rst
    databases.rst
    deployment.rst

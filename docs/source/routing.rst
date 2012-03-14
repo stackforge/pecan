@@ -122,8 +122,8 @@ Please see :ref:`pecan_decorators` for more information on ``@expose``.
 
 
 
-Routing Algorithm
------------------
+Pecan's Routing Algorithm
+-------------------------
 
 Sometimes, the standard object-dispatch routing isn't adequate to properly
 route a URL to a controller. Pecan provides several ways to short-circuit 
@@ -209,8 +209,8 @@ top of Pecan, defining a base controller class that defines a ``_route`` method
 will enable you to have total control.
 
 
-Controller Arguments
---------------------
+Mapping Controller Arguments
+----------------------------
 
 In Pecan, HTTP ``GET`` and ``POST`` variables that are `not` consumed 
 during the routing process can be passed onto the controller as arguments.

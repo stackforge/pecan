@@ -3,8 +3,6 @@
 Deployment Recipes
 ==================
 
-Deploying Pecan projects
-========================
 Deploying a pecan project can be accomplished in several ways. You may
 already be familiar with deployment methodologies for other Python
 projects, in which case, try that! Pecan doesn't deviate from the

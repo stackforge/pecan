@@ -1,7 +1,7 @@
 .. _quick_start:
 
-Quick Start
-===========
+Creating Your First Pecan Application
+=====================================
 
 Let's create a small sample project with Pecan.
 
@@ -83,7 +83,7 @@ configuration file.
 
 .. _running_application:
 
-Running the application
+Running the Application
 -----------------------
 Before starting up your Pecan app, you'll need a configuration file.  The
 base project template should have created one for you already, ``config.py``.
@@ -148,8 +148,8 @@ For more specific documentation on configuration, see the :ref:`Configuration`
 section.
 
     
-Root Controller
----------------
+The Application Root
+--------------------
 The Root Controller is the root of your application.
 
 This is how it looks in the project template
