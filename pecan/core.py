@@ -7,7 +7,7 @@ from webob              import Request, Response, exc
 from threading          import local
 from itertools          import chain
 from mimetypes          import guess_type, add_type
-from paste.recursive    import ForwardRequestException
+from pecan.recursive    import ForwardRequestException
 from urlparse           import urlsplit, urlunsplit
 from os.path            import splitext
 
