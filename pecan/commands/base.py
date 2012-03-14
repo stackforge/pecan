@@ -9,11 +9,27 @@ from pecan import load_app
 log = logging.getLogger(__name__)
 
 
+class HelpfulArgumentParser(argparse.ArgumentParser):
+
+    def error(self, message):
+        """error(message: string)
+
+        Prints a usage message incorporating the message to stderr and
+        exits.
+
+        If you override this in a subclass, it should not return -- it
+        should either exit or raise an exception.
+        """
+        self.print_help(sys.stderr)
+        self._print_message('\n')
+        self.exit(2, '%s: %s\n' % (self.prog, message))
+
+
 class CommandManager(object):
     """ Used to discover `pecan.command` entry points. """
 
     def __init__(self):
-        self.commands_ = {}
+        self.commands = {}
         self.load_commands()
 
     def load_commands(self):
@@ -28,11 +44,7 @@ class CommandManager(object):
             self.add({ep.name: cmd})
 
     def add(self, cmd):
-        self.commands_.update(cmd)
-
-    @property
-    def commands(self):
-        return self.commands_
+        self.commands.update(cmd)
 
 
 class CommandRunner(object):
@@ -40,13 +52,13 @@ class CommandRunner(object):
 
     def __init__(self):
         self.manager = CommandManager()
-        self.parser = argparse.ArgumentParser(
+        self.parser = HelpfulArgumentParser(
             version='Pecan %s' % self.version,
             add_help=True
         )
-        self.parse_commands()
+        self.parse_sub_commands()
 
-    def parse_commands(self):
+    def parse_sub_commands(self):
         subparsers = self.parser.add_subparsers(
             dest='command_name',
             metavar='command'
@@ -67,8 +79,7 @@ class CommandRunner(object):
     @classmethod
     def handle_command_line(cls):
         runner = CommandRunner()
-        exit_code = runner.run(sys.argv[1:])
-        sys.exit(exit_code)
+        runner.run(sys.argv[1:])
 
     @property
     def version(self):
@@ -83,7 +94,7 @@ class CommandRunner(object):
 
     @property
     def commands(self):
-        return self.manager.commands_
+        return self.manager.commands
 
 
 class BaseCommand(object):
