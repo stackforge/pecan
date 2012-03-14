@@ -9,10 +9,6 @@ Raise ``ForwardRequestException(new_path_info)`` to do a forward
 (aborting the current request).
 """
 
-from cStringIO import StringIO
-
-import warnings
-
 __all__ = ['RecursiveMiddleware']
 
 
@@ -48,19 +44,12 @@ class RecursiveMiddleware(object):
     All these calls go to the same 'application', but presumably that
     application acts differently with different URLs.  The forwarded
     URLs must be relative to this container.
-
-    Interface is entirely through the ``pecan.recursive.forward``
-    environmental key.
     """
 
     def __init__(self, application, global_conf=None):
         self.application = application
 
     def __call__(self, environ, start_response):
-        environ['pecan.recursive.forward'] = Forwarder(
-            self.application,
-            environ,
-            start_response)
         my_script_name = environ.get('SCRIPT_NAME', '')
         environ['pecan.recursive.script_name'] = my_script_name
         try:
@@ -147,15 +136,6 @@ class ForwardRequestException(Exception):
 
         # set the path_info or warn about its use.
         if path_info:
-            if not url:
-                warnings.warn(
-                    ("ForwardRequestException(path_info=...) "
-                     "has been deprecated; please "
-                     "use ForwardRequestException(url=...)"),
-                    DeprecationWarning, 2)
-            else:
-                raise TypeError(('You cannot use url and path_info '
-                    'in ForwardRequestException'))  # pragma: no cover
             self.path_info = path_info
 
         # If the url can be treated as a path_info do that
@@ -199,73 +179,3 @@ class ForwardRequestException(Exception):
             self.factory = factory_env
         else:
             self.factory = factory
-
-
-class Recursive(object):
-
-    def __init__(self, application, environ, start_response):
-        self.application = application
-        self.original_environ = environ.copy()
-        self.previous_environ = environ
-        self.start_response = start_response
-
-    def __call__(self, path, extra_environ=None):
-        """
-        `extra_environ` is an optional dictionary that is also added
-        to the forwarded request.  E.g., ``{'HTTP_HOST': 'new.host'}``
-        could be used to forward to a different virtual host.
-        """
-        environ = self.original_environ.copy()
-        if extra_environ:
-            environ.update(extra_environ)
-        environ['pecan.recursive.previous_environ'] = self.previous_environ
-        base_path = self.original_environ.get('SCRIPT_NAME')
-        if path.startswith('/'):
-            assert path.startswith(base_path), (
-                "You can only forward requests to resources under the "
-                "path %r (not %r)" % (base_path, path))
-            path = path[len(base_path) + 1:]
-        assert not path.startswith('/')
-        path_info = '/' + path
-        environ['PATH_INFO'] = path_info
-        environ['REQUEST_METHOD'] = 'GET'
-        environ['CONTENT_LENGTH'] = '0'
-        environ['CONTENT_TYPE'] = ''
-        environ['wsgi.input'] = StringIO('')
-        return self.activate(environ)
-
-    def activate(self, environ):
-        raise NotImplementedError  # pragma: no cover
-
-    def __repr__(self):
-        return '<%s.%s from %s>' % (
-            self.__class__.__module__,
-            self.__class__.__name__,
-            self.original_environ.get('SCRIPT_NAME') or '/')
-
-
-class Forwarder(Recursive):
-
-    """
-    The forwarder will try to restart the request, except with
-    the new `path` (replacing ``PATH_INFO`` in the request).
-
-    It must not be called after and headers have been returned.
-    It returns an iterator that must be returned back up the call
-    stack, so it must be used like:
-
-    .. code-block:: python
-
-        return environ['pecan.recursive.forward'](path)
-
-    Meaningful transformations cannot be done, since headers are
-    sent directly to the server and cannot be inspected or
-    rewritten.
-    """
-
-    def activate(self, environ):
-        warnings.warn(
-            "recursive.Forwarder has been deprecated; please use "
-            "ForwardRequestException",
-            DeprecationWarning, 2)
-        return self.application(environ, self.start_response)

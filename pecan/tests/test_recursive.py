@@ -35,9 +35,6 @@ def forward(app):
     app = TestApp(RecursiveMiddleware(app))
     res = app.get('')
 
-    result = res.request.environ['pecan.recursive.forward']('/', {'k': 'v'})
-    assert result == ['requested page returned']
-
     assert res.headers['content-type'] == 'text/plain'
     assert res.status == '200 OK'
     assert 'requested page returned' in res
