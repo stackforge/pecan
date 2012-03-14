@@ -1,16 +1,14 @@
 """
-PasteScript create command for Pecan.
+Create command for Pecan
 """
-from paste.script.create_distro import CreateDistroCommand
-
-from base import Command
+from pecan.commands import BaseCommand
 from pecan.templates import DEFAULT_TEMPLATE
 
 import copy
 import sys
 
 
-class CreateCommand(CreateDistroCommand, Command):
+class CreateCommand(BaseCommand):
     """
     Creates the file layout for a new Pecan distribution.
 
@@ -19,26 +17,14 @@ class CreateCommand(CreateDistroCommand, Command):
     egg plugin for user convenience.
     """
 
-    # command information
-    summary = __doc__.strip().splitlines()[0].rstrip('.')
-    description = None
+    arguments = ({
+        'command': 'template_name',
+        'help': 'a registered Pecan template',
+        'nargs': '?',
+        'default': DEFAULT_TEMPLATE
+    },)
 
-    def command(self):
-        if not self.options.list_templates:
-            if not self.options.templates:
-                self.options.templates = [DEFAULT_TEMPLATE]
-        try:
-            return CreateDistroCommand.command(self)
-        except LookupError, ex:
-            sys.stderr.write('%s\n\n' % ex)
-            CreateDistroCommand.list_templates(self)
-            return 2
-
-    def all_entry_points(self):
-        entry_points = []
-        for entry in CreateDistroCommand.all_entry_points(self):
-            if entry.name.startswith('pecan-'):
-                entry = copy.copy(entry)
-                entry_points.append(entry)
-                entry.name = entry.name[6:]
-        return entry_points
+    def run(self, args):
+        super(CreateCommand, self).run(args)
+        print "NOT IMPLEMENTED"
+        print args.template_name

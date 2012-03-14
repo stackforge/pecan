@@ -13,7 +13,6 @@ requirements = [
   "simplegeneric >= 0.7",
   "Mako >= 0.4.0",
   "Paste >= 1.7.5.1",
-  "PasteScript >= 1.7.3",
   "WebTest >= 1.2.2"
 ]
 
@@ -24,6 +23,11 @@ except:
         import simplejson
     except:
         requirements.append("simplejson >= 2.1.1")
+
+try:
+    import argparse
+except:
+    requirements.append('argparse')
 
 tests_require = requirements + ['virtualenv']
 if sys.version_info < (2, 7):
@@ -91,12 +95,10 @@ setup(
     test_suite='pecan',
     cmdclass={'test': test},
     entry_points="""
-    [paste.paster_command]
-    pecan-serve = pecan.commands:ServeCommand
-    pecan-shell = pecan.commands:ShellCommand
-    pecan-create = pecan.commands:CreateCommand
-    [paste.paster_create_template]
-    pecan-base = pecan.templates:BaseTemplate
+    [pecan.command]
+    serve = pecan.commands:ServeCommand
+    shell = pecan.commands:ShellCommand
+    create = pecan.commands:CreateCommand
     [console_scripts]
     pecan = pecan.commands:CommandRunner.handle_command_line
     """,
