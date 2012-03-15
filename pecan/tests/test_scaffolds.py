@@ -132,7 +132,9 @@ class TestTemplateBuilds(unittest.TestCase):
 
         self.poll(proc)
 
-        out, _ = proc.communicate('{"model" : model, "conf" : conf, "app" : app}')
+        out, _ = proc.communicate(
+            '{"model" : model, "conf" : conf, "app" : app}'
+        )
         assert 'testing123.model' in out
         assert 'Config(' in out
         assert 'webtest.app.TestApp' in out

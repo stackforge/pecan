@@ -11,8 +11,8 @@ class CreateCommand(BaseCommand):
     """
 
     arguments = ({
-        'command': 'destination',
-        'help': 'the destination to create the new project'
+        'command': 'project_name',
+        'help': 'the (package) name of the new project'
     }, {
         'command': 'template_name',
         'help': 'a registered Pecan template',
@@ -22,4 +22,4 @@ class CreateCommand(BaseCommand):
 
     def run(self, args):
         super(CreateCommand, self).run(args)
-        BaseScaffold().copy_to(args.destination)
+        BaseScaffold().copy_to(args.project_name)
