@@ -1,10 +1,12 @@
 import sys
 import os
+import re
 import pkg_resources
 from string import Template
 from pecan.compat import native_, bytes_
 
 DEFAULT_SCAFFOLD = 'base'
+_bad_chars_re = re.compile('[^a-zA-Z0-9_]')
 
 
 class PecanScaffold(object):
@@ -21,15 +23,10 @@ class PecanScaffold(object):
         mod = sys.modules[self.__class__.__module__]
         return os.path.dirname(mod.__file__)
 
-    @property
-    def variables(self):
-        return {
-            'package': self.dest
-        }
-
     def copy_to(self, dest, **kwargs):
-        self.dest = dest
-        copy_dir(self.template_dir, self.dest, self.variables)
+        output_dir = os.path.abspath(os.path.normpath(dest))
+        pkg_name = _bad_chars_re.sub('', dest.lower())
+        copy_dir(self.template_dir, output_dir, {'package': pkg_name})
 
 
 class BaseScaffold(PecanScaffold):
