@@ -1,49 +1,119 @@
-"""
-PasteScript base command for Pecan.
-"""
-from pecan import load_app
-from paste.script import command as paste_command
-
+import pkg_resources
 import os.path
+import argparse
+import logging
+import sys
+from warnings import warn
+
+log = logging.getLogger(__name__)
 
 
-class Command(paste_command.Command):
-    """
-    Base class for Pecan commands.
+class HelpfulArgumentParser(argparse.ArgumentParser):
 
-    This provides some standard functionality for interacting with Pecan
-    applications and handles some of the basic PasteScript command cruft.
+    def error(self, message):  # pragma: nocover
+        """error(message: string)
 
-    See ``paste.script.command.Command`` for more information.
-    """
+        Prints a usage message incorporating the message to stderr and
+        exits.
 
-    # command information
-    group_name = 'Pecan'
-    summary = ''
+        If you override this in a subclass, it should not return -- it
+        should either exit or raise an exception.
+        """
+        self.print_help(sys.stderr)
+        self._print_message('\n')
+        self.exit(2, '%s: %s\n' % (self.prog, message))
 
-    # command parser
-    parser = paste_command.Command.standard_parser()
+
+class CommandManager(object):
+    """ Used to discover `pecan.command` entry points. """
+
+    def __init__(self):
+        self.commands = {}
+        self.load_commands()
+
+    def load_commands(self):
+        for ep in pkg_resources.iter_entry_points('pecan.command'):
+            log.debug('%s loading plugin %s', self.__class__.__name__, ep)
+            try:
+                cmd = ep.load()
+                assert hasattr(cmd, 'run')
+            except Exception, e:  # pragma: nocover
+                warn("Unable to load plugin %s: %s" % (ep, e), RuntimeWarning)
+                continue
+            self.add({ep.name: cmd})
+
+    def add(self, cmd):
+        self.commands.update(cmd)
+
+
+class CommandRunner(object):
+    """ Dispatches `pecan` command execution requests. """
+
+    def __init__(self):
+        self.manager = CommandManager()
+        self.parser = HelpfulArgumentParser(
+            version='Pecan %s' % self.version,
+            add_help=True
+        )
+        self.parse_sub_commands()
+
+    def parse_sub_commands(self):
+        subparsers = self.parser.add_subparsers(
+            dest='command_name',
+            metavar='command'
+        )
+        for name, cmd in self.commands.items():
+            sub = subparsers.add_parser(
+                name,
+                help=cmd.summary
+            )
+            for arg in getattr(cmd, 'arguments', tuple()):
+                arg = arg.copy()
+                sub.add_argument(arg.pop('command'), **arg)
 
     def run(self, args):
+        ns = self.parser.parse_args(args)
+        self.commands[ns.command_name]().run(ns)
+
+    @classmethod
+    def handle_command_line(cls):  # pragma: nocover
+        runner = CommandRunner()
+        runner.run(sys.argv[1:])
+
+    @property
+    def version(self):
         try:
-            return paste_command.Command.run(self, args)
-        except paste_command.BadCommand, ex:
-            ex.args[0] = self.parser.error(ex.args[0])
-            raise
+            dist = pkg_resources.get_distribution('Pecan')
+            if os.path.dirname(os.path.dirname(__file__)) == dist.location:
+                return dist.version  # pragma: nocover
+            else:
+                return '(development)'
+        except:  # pragma: nocover
+            return '(development)'
+
+    @property
+    def commands(self):
+        return self.manager.commands
+
+
+class BaseCommand(object):
+    """ Base class for Pecan commands. """
+
+    class __metaclass__(type):
+        @property
+        def summary(cls):
+            return cls.__doc__.strip().splitlines()[0].rstrip('.')
+
+    arguments = ({
+        'command': 'config_file',
+        'help': 'a Pecan configuration file'
+    },)
+
+    def run(self, args):
+        self.args = args
 
     def load_app(self):
-        return load_app(self.validate_file(self.args))
-
-    def logging_file_config(self, config_file):
-        if os.path.splitext(config_file)[1].lower() == '.ini':
-            paste_command.Command.logging_file_config(self, config_file)
-
-    def validate_file(self, argv):
-        if not argv or not os.path.isfile(argv[0]):
-            raise paste_command.BadCommand(
-                'This command needs a valid config file.'
-            )
-        return argv[0]
-
-    def command(self):
-        pass
+        from pecan import load_app
+        if not os.path.isfile(self.args.config_file):
+            raise RuntimeError('`%s` is not a file.' % self.args.config_file)
+        return load_app(self.args.config_file)

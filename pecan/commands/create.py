@@ -1,44 +1,60 @@
 """
-PasteScript create command for Pecan.
+Create command for Pecan
 """
-from paste.script.create_distro import CreateDistroCommand
+import pkg_resources
+import logging
+from warnings import warn
+from pecan.commands import BaseCommand
+from pecan.scaffolds import DEFAULT_SCAFFOLD
 
-from base import Command
-from pecan.templates import DEFAULT_TEMPLATE
-
-import copy
-import sys
+log = logging.getLogger(__name__)
 
 
-class CreateCommand(CreateDistroCommand, Command):
+class ScaffoldManager(object):
+    """ Used to discover `pecan.scaffold` entry points. """
+
+    def __init__(self):
+        self.scaffolds = {}
+        self.load_scaffolds()
+
+    def load_scaffolds(self):
+        for ep in pkg_resources.iter_entry_points('pecan.scaffold'):
+            log.debug('%s loading scaffold %s', self.__class__.__name__, ep)
+            try:
+                cmd = ep.load()
+                assert hasattr(cmd, 'copy_to')
+            except Exception, e:  # pragma: nocover
+                warn(
+                    "Unable to load scaffold %s: %s" % (ep, e), RuntimeWarning
+                )
+                continue
+            self.add({ep.name: cmd})
+
+    def add(self, cmd):
+        self.scaffolds.update(cmd)
+
+
+class CreateCommand(BaseCommand):
     """
-    Creates the file layout for a new Pecan distribution.
-
-    For a template to show up when using this command, its name must begin
-    with "pecan-". Although not required, it should also include the "Pecan"
-    egg plugin for user convenience.
+    Creates the file layout for a new Pecan scaffolded project.
     """
 
-    # command information
-    summary = __doc__.strip().splitlines()[0].rstrip('.')
-    description = None
+    manager = ScaffoldManager()
 
-    def command(self):
-        if not self.options.list_templates:
-            if not self.options.templates:
-                self.options.templates = [DEFAULT_TEMPLATE]
-        try:
-            return CreateDistroCommand.command(self)
-        except LookupError, ex:
-            sys.stderr.write('%s\n\n' % ex)
-            CreateDistroCommand.list_templates(self)
-            return 2
+    arguments = ({
+        'command': 'project_name',
+        'help': 'the (package) name of the new project'
+    }, {
+        'metavar': 'template_name',
+        'command': 'template_name',
+        'help': 'a registered Pecan template',
+        'nargs': '?',
+        'default': DEFAULT_SCAFFOLD,
+        'choices': manager.scaffolds.keys()
+    })
 
-    def all_entry_points(self):
-        entry_points = []
-        for entry in CreateDistroCommand.all_entry_points(self):
-            if entry.name.startswith('pecan-'):
-                entry = copy.copy(entry)
-                entry_points.append(entry)
-                entry.name = entry.name[6:]
-        return entry_points
+    def run(self, args):
+        super(CreateCommand, self).run(args)
+        self.manager.scaffolds[args.template_name]().copy_to(
+            args.project_name
+        )

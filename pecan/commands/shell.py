@@ -1,27 +1,18 @@
 """
-PasteScript shell command for Pecan.
+Shell command for Pecan.
 """
+from pecan.commands import BaseCommand
 from webtest import TestApp
-
-from base import Command
-
 import sys
 
 
-class ShellCommand(Command):
+class ShellCommand(BaseCommand):
     """
     Open an interactive shell with the Pecan app loaded.
     """
 
-    # command information
-    usage = 'CONFIG_NAME'
-    summary = __doc__.strip().splitlines()[0].rstrip('.')
-
-    # command options/arguments
-    min_args = 1
-    max_args = 1
-
-    def command(self):
+    def run(self, args):
+        super(ShellCommand, self).run(args)
 
         # load the application
         app = self.load_app()
