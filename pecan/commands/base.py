@@ -4,14 +4,13 @@ import argparse
 import logging
 import sys
 from warnings import warn
-from pecan import load_app
 
 log = logging.getLogger(__name__)
 
 
 class HelpfulArgumentParser(argparse.ArgumentParser):
 
-    def error(self, message):
+    def error(self, message):  # pragma: nocover
         """error(message: string)
 
         Prints a usage message incorporating the message to stderr and
@@ -38,7 +37,7 @@ class CommandManager(object):
             try:
                 cmd = ep.load()
                 assert hasattr(cmd, 'run')
-            except Exception, e:
+            except Exception, e:  # pragma: nocover
                 warn("Unable to load plugin %s: %s" % (ep, e), RuntimeWarning)
                 continue
             self.add({ep.name: cmd})
@@ -77,7 +76,7 @@ class CommandRunner(object):
         self.commands[ns.command_name]().run(ns)
 
     @classmethod
-    def handle_command_line(cls):
+    def handle_command_line(cls):  # pragma: nocover
         runner = CommandRunner()
         runner.run(sys.argv[1:])
 
@@ -86,10 +85,10 @@ class CommandRunner(object):
         try:
             dist = pkg_resources.get_distribution('Pecan')
             if os.path.dirname(os.path.dirname(__file__)) == dist.location:
-                return dist.version
+                return dist.version  # pragma: nocover
             else:
                 return '(development)'
-        except:
+        except:  # pragma: nocover
             return '(development)'
 
     @property
@@ -114,6 +113,7 @@ class BaseCommand(object):
         self.args = args
 
     def load_app(self):
+        from pecan import load_app
         if not os.path.isfile(self.args.config_file):
             raise RuntimeError('`%s` is not a file.' % self.args.config_file)
         return load_app(self.args.config_file)

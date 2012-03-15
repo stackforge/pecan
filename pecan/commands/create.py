@@ -23,7 +23,7 @@ class ScaffoldManager(object):
             try:
                 cmd = ep.load()
                 assert hasattr(cmd, 'copy_to')
-            except Exception, e:
+            except Exception, e:  # pragma: nocover
                 warn(
                     "Unable to load scaffold %s: %s" % (ep, e), RuntimeWarning
                 )
@@ -55,6 +55,6 @@ class CreateCommand(BaseCommand):
 
     def run(self, args):
         super(CreateCommand, self).run(args)
-        CreateCommand.manager.scaffolds[args.template_name]().copy_to(
+        self.manager.scaffolds[args.template_name]().copy_to(
             args.project_name
         )
