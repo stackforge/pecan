@@ -1,8 +1,37 @@
 """
 Create command for Pecan
 """
+import pkg_resources
+import logging
+from warnings import warn
 from pecan.commands import BaseCommand
-from pecan.scaffolds import DEFAULT_SCAFFOLD, BaseScaffold
+from pecan.scaffolds import DEFAULT_SCAFFOLD
+
+log = logging.getLogger(__name__)
+
+
+class ScaffoldManager(object):
+    """ Used to discover `pecan.scaffold` entry points. """
+
+    def __init__(self):
+        self.scaffolds = {}
+        self.load_scaffolds()
+
+    def load_scaffolds(self):
+        for ep in pkg_resources.iter_entry_points('pecan.scaffold'):
+            log.debug('%s loading scaffold %s', self.__class__.__name__, ep)
+            try:
+                cmd = ep.load()
+                assert hasattr(cmd, 'copy_to')
+            except Exception, e:
+                warn(
+                    "Unable to load scaffold %s: %s" % (ep, e), RuntimeWarning
+                )
+                continue
+            self.add({ep.name: cmd})
+
+    def add(self, cmd):
+        self.scaffolds.update(cmd)
 
 
 class CreateCommand(BaseCommand):
@@ -10,16 +39,22 @@ class CreateCommand(BaseCommand):
     Creates the file layout for a new Pecan scaffolded project.
     """
 
+    manager = ScaffoldManager()
+
     arguments = ({
         'command': 'project_name',
         'help': 'the (package) name of the new project'
     }, {
+        'metavar': 'template_name',
         'command': 'template_name',
         'help': 'a registered Pecan template',
         'nargs': '?',
-        'default': DEFAULT_SCAFFOLD
+        'default': DEFAULT_SCAFFOLD,
+        'choices': manager.scaffolds.keys()
     })
 
     def run(self, args):
         super(CreateCommand, self).run(args)
-        BaseScaffold().copy_to(args.project_name)
+        CreateCommand.manager.scaffolds[args.template_name]().copy_to(
+            args.project_name
+        )
