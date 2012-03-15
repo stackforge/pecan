@@ -1,2 +1,2 @@
-recursive-include pecan/templates/project *
-include pecan/templates/project/*
+recursive-include pecan/scaffolds/base *
+include pecan/scaffolds/base/*
