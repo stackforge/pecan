@@ -1,11 +1,12 @@
 import sys
+import warnings
 from paste.translogger import TransLogger
 from webtest import TestApp
 
 if sys.version_info < (2, 7):
     import unittest2 as unittest
 else:
-    import unittest
+    import unittest  # noqa
 
 from pecan import (
     Pecan, expose, request, response, redirect, abort, make_app,
@@ -172,9 +173,11 @@ class TestLookups(unittest.TestCase):
             def _lookup(self, someID):
                 return 'Bad arg spec'
 
-        app = TestApp(Pecan(RootController()))
-        r = app.get('/foo/bar', expect_errors=True)
-        assert r.status_int == 404
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            app = TestApp(Pecan(RootController()))
+            r = app.get('/foo/bar', expect_errors=True)
+            assert r.status_int == 404
 
 
 class TestControllerArguments(unittest.TestCase):
@@ -409,7 +412,10 @@ class TestControllerArguments(unittest.TestCase):
         assert r.body == 'optional: 7'
 
     def test_optional_arg_with_multiple_url_encoded_dictionary_kwargs(self):
-        r = self.app_.post('/optional', {'id': 'Some%20Number', 'dummy': 'dummy'})
+        r = self.app_.post('/optional', {
+            'id': 'Some%20Number',
+            'dummy': 'dummy'
+        })
         assert r.status_int == 200
         assert r.body == 'optional: Some%20Number'
 
@@ -572,7 +578,9 @@ class TestControllerArguments(unittest.TestCase):
         assert r.body == 'variable_kwargs: dummy=dummy, id=2'
 
     def test_multiple_variable_kwargs_with_explicit_encoded_kwargs(self):
-        r = self.app_.get('/variable_kwargs?id=Two%21&dummy=This%20is%20a%20test')
+        r = self.app_.get(
+            '/variable_kwargs?id=Two%21&dummy=This%20is%20a%20test'
+        )
         assert r.status_int == 200
         assert r.body == 'variable_kwargs: dummy=This is a test, id=Two!'
 
@@ -895,8 +903,10 @@ class TestFileTypeExtensions(unittest.TestCase):
         assert r.status_int == 200
         assert r.body == '/'
 
-        r = app.get('/index.txt', expect_errors=True)
-        assert r.status_int == 404
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            r = app.get('/index.txt', expect_errors=True)
+            assert r.status_int == 404
 
 
 class TestCanonicalRouting(unittest.TestCase):
@@ -964,7 +974,7 @@ class TestCanonicalRouting(unittest.TestCase):
 
     def test_posts_fail(self):
         try:
-            r = self.app_.post('/sub', dict(foo=1))
+            self.app_.post('/sub', dict(foo=1))
             raise Exception("Post should fail")
         except Exception, e:
             assert isinstance(e, RuntimeError)

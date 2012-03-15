@@ -1,7 +1,8 @@
-from pecan import abort, expose, make_app, request, response
+from pecan import abort, expose, make_app, response
 from pecan.rest import RestController
 from unittest import TestCase
 from webtest import TestApp
+import warnings
 try:
     from simplejson import dumps, loads
 except:
@@ -208,21 +209,27 @@ class TestRestController(TestCase):
         assert r.body == 'OPTIONS'
 
         # test the "other" custom action
-        r = app.request('/things/other', method='MISC', status=405)
-        assert r.status_int == 405
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            r = app.request('/things/other', method='MISC', status=405)
+            assert r.status_int == 405
 
         # test the "other" custom action with the _method parameter
         r = app.post('/things/other', {'_method': 'MISC'}, status=405)
         assert r.status_int == 405
 
         # test the "others" custom action
-        r = app.request('/things/others/', method='MISC')
-        assert r.status_int == 200
-        assert r.body == 'OTHERS'
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            r = app.request('/things/others/', method='MISC')
+            assert r.status_int == 200
+            assert r.body == 'OTHERS'
 
         # test the "others" custom action missing trailing slash
-        r = app.request('/things/others', method='MISC', status=302)
-        assert r.status_int == 302
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            r = app.request('/things/others', method='MISC', status=302)
+            assert r.status_int == 302
 
         # test the "others" custom action with the _method parameter
         r = app.get('/things/others/?_method=MISC')
@@ -609,8 +616,10 @@ class TestRestController(TestCase):
         assert r.status_int == 404
 
         # test "RESET" custom action
-        r = app.request('/things', method='RESET', status=404)
-        assert r.status_int == 404
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            r = app.request('/things', method='RESET', status=404)
+            assert r.status_int == 404
 
     def test_custom_delete(self):
 
