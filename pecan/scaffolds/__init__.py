@@ -18,12 +18,17 @@ class PecanScaffold(object):
 
 
 class BaseScaffold(PecanScaffold):
-    _scaffold_dir = ('pecan', 'scaffolds/base')
+    _scaffold_dir = ('pecan', os.path.join('scaffolds', 'base'))
 
 
 def copy_dir(source, dest, variables, out_=sys.stdout, i=0):
     """
-    Copies the ``source`` directory to the ``dest`` directory.
+    Copies the ``source`` directory to the ``dest`` directory, where
+    ``source`` is some tuple representing an installed package and a
+    subdirectory, e.g.,
+
+    ('pecan', os.path.join('scaffolds', 'base'))
+    ('pecan_sqlalchemy', os.path.join('scaffolds', 'sqlalchemy'))
 
     ``variables``: A dictionary of variables to use in any substitutions.
 
