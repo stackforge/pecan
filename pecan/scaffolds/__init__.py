@@ -10,10 +10,30 @@ _bad_chars_re = re.compile('[^a-zA-Z0-9_]')
 
 
 class PecanScaffold(object):
+    """
+    A base Pecan scaffold.  New scaffolded implementations should extend this
+    class and define a ``_scaffold_dir`` attribute, e.g.,
 
-    def copy_to(self, dest, **kwargs):
-        output_dir = os.path.abspath(os.path.normpath(dest))
-        pkg_name = _bad_chars_re.sub('', dest.lower())
+    class CoolAddOnScaffold(PecanScaffold):
+
+        _scaffold_dir = ('package', os.path.join('scaffolds', 'scaffold_name'))
+
+    ...where...
+
+        pkg_resources.resource_listdir(_scaffold_dir[0], _scaffold_dir[1]))
+
+    ...points to some scaffold directory root.
+    """
+
+    def normalize_output_dir(self, dest):
+        return os.path.abspath(os.path.normpath(dest))
+
+    def normalize_pkg_name(self, dest):
+        return _bad_chars_re.sub('', dest.lower())
+
+    def copy_to(self, dest):
+        output_dir = self.normalize_output_dir(dest)
+        pkg_name = self.normalize_pkg_name(dest)
         copy_dir(self._scaffold_dir, output_dir, {'package': pkg_name})
 
 
@@ -25,14 +45,15 @@ def copy_dir(source, dest, variables, out_=sys.stdout, i=0):
     """
     Copies the ``source`` directory to the ``dest`` directory, where
     ``source`` is some tuple representing an installed package and a
-    subdirectory, e.g.,
+    subdirectory in the package, e.g.,
 
     ('pecan', os.path.join('scaffolds', 'base'))
-    ('pecan_sqlalchemy', os.path.join('scaffolds', 'sqlalchemy'))
+    ('pecan_extension', os.path.join('scaffolds', 'scaffold_name'))
 
     ``variables``: A dictionary of variables to use in any substitutions.
+    Substitution is performed via ``string.Template``.
 
-    ``out_``: File object to write to
+    ``out_``: File object to write to (default is sys.stdout).
     """
     def out(msg):
         out_.write('%s%s' % (' ' * (i * 2), msg))
@@ -77,6 +98,7 @@ def copy_dir(source, dest, variables, out_=sys.stdout, i=0):
 
 
 def makedirs(directory):
+    """ Resursively create a named directory. """
     parent = os.path.dirname(os.path.abspath(directory))
     if not os.path.exists(parent):
         makedirs(parent)
@@ -84,14 +106,17 @@ def makedirs(directory):
 
 
 def substitute_filename(fn, variables):
+    """ Substitute +variables+ in file directory names. """
     for var, value in variables.items():
         fn = fn.replace('+%s+' % var, str(value))
     return fn
 
 
 def render_template(content, variables):
-    """ Return a bytestring representing a templated file based on the
-    input (content) and the variable names defined (vars)."""
+    """
+    Return a bytestring representing a templated file based on the
+    input (content) and the variable names defined (vars).
+    """
     fsenc = sys.getfilesystemencoding()
     content = native_(content, fsenc)
     return bytes_(Template(content).substitute(variables), fsenc)
