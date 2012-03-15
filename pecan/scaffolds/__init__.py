@@ -1,7 +1,7 @@
 import sys
 import os
-import re
 import pkg_resources
+from string import Template
 from pecan.compat import native_, bytes_
 
 DEFAULT_SCAFFOLD = 'base'
@@ -23,10 +23,13 @@ class PecanScaffold(object):
 
     @property
     def variables(self):
-        return {}
+        return {
+            'package': self.dest
+        }
 
     def copy_to(self, dest, **kwargs):
-        copy_dir(self.template_dir, dest, self.variables)
+        self.dest = dest
+        copy_dir(self.template_dir, self.dest, self.variables)
 
 
 class BaseScaffold(PecanScaffold):
@@ -101,6 +104,10 @@ def copy_dir(source, dest, variables, out_=sys.stdout):
                 dest_full)
             )
 
+        f = open(dest_full, 'wb')
+        f.write(content)
+        f.close()
+
 
 def makedirs(directory):
     parent = os.path.dirname(os.path.abspath(directory))
@@ -115,19 +122,9 @@ def substitute_filename(fn, variables):
     return fn
 
 
-def render_template(self, content, variables):
+def render_template(content, variables):
     """ Return a bytestring representing a templated file based on the
     input (content) and the variable names defined (vars)."""
     fsenc = sys.getfilesystemencoding()
     content = native_(content, fsenc)
-    return bytes_(
-        substitute_double_braces(content, variables), fsenc)
-
-
-def substitute_double_braces(content, values):
-    double_brace_pattern = re.compile(r'{{(?P<braced>.*?)}}')
-
-    def double_bracerepl(match):
-        value = match.group('braced').strip()
-        return values[value]
-    return double_brace_pattern.sub(double_bracerepl, content)
+    return bytes_(Template(content).substitute(variables), fsenc)

@@ -11,14 +11,15 @@ class CreateCommand(BaseCommand):
     """
 
     arguments = ({
+        'command': 'destination',
+        'help': 'the destination to create the new project'
+    }, {
         'command': 'template_name',
         'help': 'a registered Pecan template',
         'nargs': '?',
         'default': DEFAULT_SCAFFOLD
-    },)
+    })
 
     def run(self, args):
         super(CreateCommand, self).run(args)
-        print "NOT IMPLEMENTED"
-        print args.template_name
-        BaseScaffold().copy_to(args.template_name)
+        BaseScaffold().copy_to(args.destination)
