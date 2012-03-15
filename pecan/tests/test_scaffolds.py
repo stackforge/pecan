@@ -7,6 +7,7 @@ import pkg_resources
 import httplib
 import urllib2
 import time
+from cStringIO import StringIO
 import pecan
 
 if sys.version_info < (2, 7):
@@ -44,9 +45,13 @@ class TestScaffoldUtils(unittest.TestCase):
 
     def setUp(self):
         self.scaffold_destination = tempfile.mkdtemp()
+        self.out = sys.stdout
+
+        sys.stdout = StringIO()
 
     def tearDown(self):
         shutil.rmtree(self.scaffold_destination)
+        sys.stdout = self.out
 
     def test_copy_dir(self):
         from pecan.scaffolds import PecanScaffold
@@ -59,7 +64,7 @@ class TestScaffoldUtils(unittest.TestCase):
         SimpleScaffold().copy_to(os.path.join(
             self.scaffold_destination,
             'someapp'
-        ))
+        ), out_=StringIO())
 
         assert os.path.isfile(os.path.join(
             self.scaffold_destination, 'someapp', 'foo'
@@ -76,7 +81,6 @@ class TestScaffoldUtils(unittest.TestCase):
 
     def test_destination_directory_levels_deep(self):
         from pecan.scaffolds import copy_dir
-        from cStringIO import StringIO
         f = StringIO()
         copy_dir(('pecan', os.path.join(
                 'tests', 'scaffold_fixtures', 'simple'
@@ -120,7 +124,8 @@ class TestScaffoldUtils(unittest.TestCase):
             os.path.join(
                 self.scaffold_destination, 'someapp'
             ),
-            {'package': 'thingy'}
+            {'package': 'thingy'},
+            out_=StringIO()
         )
 
         assert os.path.isfile(os.path.join(
@@ -144,7 +149,8 @@ class TestScaffoldUtils(unittest.TestCase):
             os.path.join(
                 self.scaffold_destination, 'someapp'
             ),
-            {'package': 'thingy'}
+            {'package': 'thingy'},
+            out_=StringIO()
         )
 
         assert os.path.isfile(os.path.join(

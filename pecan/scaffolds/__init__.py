@@ -31,10 +31,10 @@ class PecanScaffold(object):
     def normalize_pkg_name(self, dest):
         return _bad_chars_re.sub('', dest.lower())
 
-    def copy_to(self, dest):
+    def copy_to(self, dest, **kw):
         output_dir = self.normalize_output_dir(dest)
         pkg_name = self.normalize_pkg_name(dest)
-        copy_dir(self._scaffold_dir, output_dir, {'package': pkg_name})
+        copy_dir(self._scaffold_dir, output_dir, {'package': pkg_name}, **kw)
 
 
 class BaseScaffold(PecanScaffold):
