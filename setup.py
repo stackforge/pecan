@@ -1,5 +1,5 @@
 import sys
-from setuptools import setup, command, find_packages
+from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
 version = '0.1.0'
@@ -17,15 +17,15 @@ requirements = [
 ]
 
 try:
-    import json
+    import json  # noqa
 except:
     try:
-        import simplejson
+        import simplejson  # noqa
     except:
         requirements.append("simplejson >= 2.1.1")
 
 try:
-    import argparse
+    import argparse  # noqa
 except:
     requirements.append('argparse')
 
