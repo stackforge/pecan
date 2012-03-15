@@ -743,7 +743,7 @@ class TestRedirect(unittest.TestCase):
             def testing(self):
                 return 'it worked!'
 
-        return TestApp(make_app(RootController(), debug=True))
+        return TestApp(make_app(RootController(), debug=False))
 
     def test_index(self):
         r = self.app_.get('/')
