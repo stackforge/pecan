@@ -20,7 +20,7 @@ class TestConf(TestCase):
         conf = configuration.initconf()
         conf.update(configuration.conf_from_file(os.path.join(
             __here__,
-            'test_config/config.py'
+            'config_fixtures/config.py'
         )))
 
         self.assertEqual(conf.app.root, None)
@@ -37,7 +37,7 @@ class TestConf(TestCase):
         conf = configuration.initconf()
         conf.update(configuration.conf_from_file(os.path.join(
             __here__,
-            'test_config/empty.py'
+            'config_fixtures/empty.py'
         )))
 
         self.assertEqual(conf.app.root, None)
@@ -53,7 +53,7 @@ class TestConf(TestCase):
         conf = configuration.initconf()
         conf.update(configuration.conf_from_file(os.path.join(
             __here__,
-            'test_config/forcedict.py'
+            'config_fixtures/forcedict.py'
         )))
 
         self.assertEqual(conf.app.root, None)
@@ -93,16 +93,16 @@ class TestConf(TestCase):
     def test_config_from_file(self):
         from pecan import configuration
         path = os.path.join(
-            os.path.dirname(__file__), 'test_config', 'config.py'
+            os.path.dirname(__file__), 'config_fixtures', 'config.py'
         )
-        conf = configuration.conf_from_file(path)
+        configuration.conf_from_file(path)
 
     def test_config_illegal_ids(self):
         from pecan import configuration
         conf = configuration.Config({})
         conf.update(configuration.conf_from_file(os.path.join(
             __here__,
-            'test_config/bad/module_and_underscore.py'
+            'config_fixtures/bad/module_and_underscore.py'
         )))
         self.assertEqual([], list(conf))
 
@@ -112,7 +112,7 @@ class TestConf(TestCase):
         configuration.Config({})
         self.assertRaises(IOError, configuration.conf_from_file, os.path.join(
             __here__,
-            'test_config',
+            'config_fixtures',
             *path
         ))
 
@@ -123,7 +123,7 @@ class TestConf(TestCase):
 
         self.assertRaises(IOError, configuration.conf_from_file, os.path.join(
             __here__,
-            'test_config',
+            'config_fixtures',
             *path
         ))
 
@@ -135,7 +135,7 @@ class TestConf(TestCase):
         self.assertRaises(
             SyntaxError,
             configuration.conf_from_file,
-            os.path.join(__here__, 'test_config', *path)
+            os.path.join(__here__, 'config_fixtures', *path)
         )
 
     def test_config_with_bad_import(self):
@@ -148,7 +148,7 @@ class TestConf(TestCase):
             configuration.conf_from_file,
             os.path.join(
                 __here__,
-                'test_config',
+                'config_fixtures',
                 *path
             )
         )
@@ -238,7 +238,10 @@ class TestGlobalConfig(TestCase):
 
     def tearDown(self):
         from pecan import configuration
-        configuration.set_config(dict(configuration.initconf()), overwrite=True)
+        configuration.set_config(
+            dict(configuration.initconf()),
+            overwrite=True
+        )
 
     def test_paint_from_dict(self):
         from pecan import configuration
@@ -255,7 +258,7 @@ class TestGlobalConfig(TestCase):
         from pecan import configuration
         configuration.set_config(os.path.join(
             __here__,
-            'test_config/foobar.py'
+            'config_fixtures/foobar.py'
         ))
         assert dict(configuration._runtime_conf) != {'foo': 'bar'}
         assert configuration._runtime_conf.foo == 'bar'
@@ -264,7 +267,7 @@ class TestGlobalConfig(TestCase):
         from pecan import configuration
         configuration.set_config(os.path.join(
                 __here__,
-                'test_config/foobar.py',
+                'config_fixtures/foobar.py',
             ),
             overwrite=True
         )
