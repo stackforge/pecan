@@ -1,6 +1,7 @@
 """
 Serve command for Pecan.
 """
+import os
 from pecan.commands import BaseCommand
 
 
@@ -24,6 +25,7 @@ class ServeCommand(BaseCommand):
         from wsgiref.simple_server import make_server
         host, port = conf.server.host, int(conf.server.port)
         srv = make_server(host, port, app)
+        print 'Starting server in PID %s' % os.getpid()
         if host == '0.0.0.0':
             print 'serving on 0.0.0.0:%s, view at http://127.0.0.1:%s' % \
                 (port, port)
