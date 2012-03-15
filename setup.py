@@ -99,6 +99,8 @@ setup(
     serve = pecan.commands:ServeCommand
     shell = pecan.commands:ShellCommand
     create = pecan.commands:CreateCommand
+    [pecan.scaffold]
+    base = pecan.scaffolds:BaseScaffold
     [console_scripts]
     pecan = pecan.commands:CommandRunner.handle_command_line
     """,
