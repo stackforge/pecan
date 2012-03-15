@@ -1,7 +1,7 @@
 .. _session:
 
 Working with Sessions and User Authentication
-=============
+=============================================
 Out of the box, Pecan provides no opinionated support for managing user sessions,
 but it's easy to hook into your session framework of choice with minimal
 effort.
@@ -10,7 +10,7 @@ This article details best practices for integrating the popular session
 framework, `Beaker <http://beaker.groovie.org>`_, into your Pecan project.
 
 Setting up Session Management
-----------------
+-----------------------------
 There are several approaches that can be taken to set up session management.
 One approach is WSGI middleware.  Another is Pecan :ref:`hooks`.
 

@@ -1,14 +1,14 @@
 .. _databases:
 
 Working with Databases, Transactions, and ORM's
-=============
+===============================================
 Out of the box, Pecan provides no opinionated support for working with databases,
 but it's easy to hook into your ORM of choice with minimal effort.  This article
 details best practices for integrating the popular Python ORM, SQLAlchemy, into
 your Pecan project.
 
 ``init_model`` and Preparing Your Model
-----------------
+---------------------------------------
 Pecan's default quickstart project includes an empty stub directory for implementing
 your model as you see fit::
 
@@ -96,7 +96,8 @@ Here's what a sample Pecan configuration file with database bindings might look 
         Session.remove()
         
 Binding Within the Application
-----------------
+------------------------------
+
 There are several approaches that can be taken to wrap your application's requests with calls
 to appropriate model function calls.  One approach is WSGI middleware.  We also recommend
 Pecan :ref:`hooks`.  Pecan comes with ``TransactionHook``, a hook which can
@@ -146,7 +147,8 @@ manner:
 Also note that there is a useful ``@after_commit`` decorator provided in :ref:`pecan_decorators`.
 
 Splitting Reads and Writes
-----------------
+--------------------------
+
 Employing the strategy above with ``TransactionHook`` makes it very simple to split database
 reads and writes based upon HTTP methods (i.e., GET/HEAD requests are read-only and would potentially
 be routed to a read-only database slave, while POST/PUT/DELETE requests require writing, and

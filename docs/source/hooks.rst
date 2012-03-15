@@ -45,7 +45,7 @@ was chosen by Pecan's routing.
 ``on_error`` is passed a shared state object **and** the original exception.
             
 Attaching Hooks
---------------
+---------------
 Hooks can be attached in a project-wide manner by specifying a list of hooks
 in your project's ``app.py`` file::
 
