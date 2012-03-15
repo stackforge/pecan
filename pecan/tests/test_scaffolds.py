@@ -12,16 +12,153 @@ import pecan
 if sys.version_info < (2, 7):
     import unittest2 as unittest
 else:
-    import unittest
+    import unittest # noqa
 
 
 def has_internet():
     try:
-        response = urllib2.urlopen('http://google.com', timeout=1)
+        urllib2.urlopen('http://google.com', timeout=1)
         return True
     except urllib2.URLError:
         pass  # pragma: no cover
     return False
+
+
+class TestPecanScaffold(unittest.TestCase):
+
+    def test_normalize_pkg_name(self):
+        from pecan.scaffolds import PecanScaffold
+        s = PecanScaffold()
+        assert s.normalize_pkg_name('sam') == 'sam'
+        assert s.normalize_pkg_name('sam1') == 'sam1'
+        assert s.normalize_pkg_name('sam_') == 'sam_'
+        assert s.normalize_pkg_name('Sam') == 'sam'
+        assert s.normalize_pkg_name('SAM') == 'sam'
+        assert s.normalize_pkg_name('sam ') == 'sam'
+        assert s.normalize_pkg_name(' sam') == 'sam'
+        assert s.normalize_pkg_name('sam$') == 'sam'
+        assert s.normalize_pkg_name('sam-sam') == 'samsam'
+
+
+class TestScaffoldUtils(unittest.TestCase):
+
+    def setUp(self):
+        self.scaffold_destination = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.scaffold_destination)
+
+    def test_copy_dir(self):
+        from pecan.scaffolds import PecanScaffold
+
+        class SimpleScaffold(PecanScaffold):
+            _scaffold_dir = ('pecan', os.path.join(
+                'tests', 'scaffold_fixtures', 'simple'
+            ))
+
+        SimpleScaffold().copy_to(os.path.join(
+            self.scaffold_destination,
+            'someapp'
+        ))
+
+        assert os.path.isfile(os.path.join(
+            self.scaffold_destination, 'someapp', 'foo'
+        ))
+        assert os.path.isfile(os.path.join(
+            self.scaffold_destination, 'someapp', 'bar', 'spam.txt'
+        ))
+        assert open(os.path.join(
+            self.scaffold_destination, 'someapp', 'foo'
+        ), 'r').read().strip() == 'YAR'
+        assert open(os.path.join(
+            self.scaffold_destination, 'someapp', 'foo'
+        ), 'r').read().strip() == 'YAR'
+
+    def test_destination_directory_levels_deep(self):
+        from pecan.scaffolds import copy_dir
+        from cStringIO import StringIO
+        f = StringIO()
+        copy_dir(('pecan', os.path.join(
+                'tests', 'scaffold_fixtures', 'simple'
+            )),
+            os.path.join(self.scaffold_destination, 'some', 'app'),
+            {},
+            out_=f
+        )
+
+        assert os.path.isfile(os.path.join(
+            self.scaffold_destination, 'some', 'app', 'foo')
+        )
+        assert os.path.isfile(os.path.join(
+            self.scaffold_destination, 'some', 'app', 'bar', 'spam.txt')
+        )
+        assert open(os.path.join(
+            self.scaffold_destination, 'some', 'app', 'foo'
+        ), 'r').read().strip() == 'YAR'
+        assert open(os.path.join(
+            self.scaffold_destination, 'some', 'app', 'bar', 'spam.txt'
+        ), 'r').read().strip() == 'Pecan'
+
+    def test_destination_directory_already_exists(self):
+        from pecan.scaffolds import copy_dir
+        from cStringIO import StringIO
+        f = StringIO()
+        copy_dir(('pecan', os.path.join(
+                'tests', 'scaffold_fixtures', 'simple'
+            )),
+            os.path.join(self.scaffold_destination),
+            {},
+            out_=f
+        )
+        assert 'already exists' in f.getvalue()
+
+    def test_copy_dir_with_filename_substitution(self):
+        from pecan.scaffolds import copy_dir
+        copy_dir(('pecan', os.path.join(
+                'tests', 'scaffold_fixtures', 'file_sub'
+            )),
+            os.path.join(
+                self.scaffold_destination, 'someapp'
+            ),
+            {'package': 'thingy'}
+        )
+
+        assert os.path.isfile(os.path.join(
+            self.scaffold_destination, 'someapp', 'foo_thingy')
+        )
+        assert os.path.isfile(os.path.join(
+            self.scaffold_destination, 'someapp', 'bar_thingy', 'spam.txt')
+        )
+        assert open(os.path.join(
+            self.scaffold_destination, 'someapp', 'foo_thingy'
+        ), 'r').read().strip() == 'YAR'
+        assert open(os.path.join(
+            self.scaffold_destination, 'someapp', 'bar_thingy', 'spam.txt'
+        ), 'r').read().strip() == 'Pecan'
+
+    def test_copy_dir_with_file_content_substitution(self):
+        from pecan.scaffolds import copy_dir
+        copy_dir(('pecan', os.path.join(
+                'tests', 'scaffold_fixtures', 'content_sub'
+            )),
+            os.path.join(
+                self.scaffold_destination, 'someapp'
+            ),
+            {'package': 'thingy'}
+        )
+
+        assert os.path.isfile(os.path.join(
+            self.scaffold_destination, 'someapp', 'foo')
+        )
+        assert os.path.isfile(os.path.join(
+            self.scaffold_destination, 'someapp', 'bar', 'spam.txt')
+        )
+        assert open(os.path.join(
+            self.scaffold_destination, 'someapp', 'foo'
+        ), 'r').read().strip() == 'YAR thingy'
+        assert open(os.path.join(
+            self.scaffold_destination, 'someapp', 'bar', 'spam.txt'
+        ), 'r').read().strip() == 'Pecan thingy'
 
 
 class TestTemplateBuilds(unittest.TestCase):
@@ -86,7 +223,7 @@ class TestTemplateBuilds(unittest.TestCase):
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
     @unittest.skipUnless(
         getattr(pecan, '__run_all_tests__', False) is True,
-        'Skipping (really slow).  To run, `$ python setup.py test --functional.`'
+        'Skipping (slow).  To run, `$ python setup.py test --functional.`'
     )
     def test_project_pecan_serve_command(self):
         pecan_exe = os.path.join(self.install_dir, 'bin', 'pecan')
@@ -113,10 +250,9 @@ class TestTemplateBuilds(unittest.TestCase):
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
     @unittest.skipUnless(
         getattr(pecan, '__run_all_tests__', False) is True,
-        'Skipping (really slow).  To run, `$ python setup.py test --functional.`'
+        'Skipping (slow).  To run, `$ python setup.py test --functional.`'
     )
     def test_project_pecan_shell_command(self):
-        from pecan.testing import load_test_app
         pecan_exe = os.path.join(self.install_dir, 'bin', 'pecan')
 
         # Start the server
@@ -148,7 +284,7 @@ class TestTemplateBuilds(unittest.TestCase):
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
     @unittest.skipUnless(
         getattr(pecan, '__run_all_tests__', False) is True,
-        'Skipping (really slow).  To run, `$ python setup.py test --functional.`'
+        'Skipping (slow).  To run, `$ python setup.py test --functional.`'
     )
     def test_project_tests_command(self):
         py_exe = os.path.join(self.install_dir, 'bin', 'python')
