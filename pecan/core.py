@@ -49,7 +49,7 @@ def override_template(template, content_type=None):
     your response.
 
     :param template: a valid path to a template file, just as you would specify
-    in an ``@expose``.
+                     in an ``@expose``.
     :param content_type: a valid MIME type to use for the response.func_closure
     '''
 
@@ -86,10 +86,10 @@ def redirect(location=None, internal=False, code=None, headers={},
 
     :param location: The HTTP location to redirect to.
     :param internal: A boolean indicating whether the redirect should be
-    internal.
+                     internal.
     :param code: The HTTP status code to use for the redirect. Defaults to 302.
     :param headers: Any HTTP headers to send with the response, as a
-    dictionary.
+                    dictionary.
     '''
 
     if add_slash:
@@ -123,9 +123,9 @@ def render(template, namespace):
     controller where you have no template specified in the ``@expose``.
 
     :param template: The path to your template, as you would specify in
-    ``@expose``.
+                     ``@expose``.
     :param namespace: The namespace to use for rendering the template, as a
-    dictionary.
+                      dictionary.
     '''
 
     return state.app.render(template, namespace)
@@ -137,8 +137,9 @@ def load_app(config):
     configuration.
 
     :param config: Can be a dictionary containing configuration, or a string
-    which represents a (relative) configuration filename.
-    :returns a pecan.Pecan object
+                   which represents a (relative) configuration filename.
+
+    returns a pecan.Pecan object
     '''
     from configuration import _runtime_conf, set_config
     set_config(config, overwrite=True)
@@ -158,6 +159,22 @@ class Pecan(object):
     '''
     Base Pecan application object. Generally created using ``pecan.make_app``,
     rather than being created manually.
+
+    Creates a Pecan application instance, which is a WSGI application.
+
+    :param root: A string representing a root controller object (e.g.,
+                "myapp.controller.root.RootController")
+    :param default_renderer: The default rendering engine to use. Defaults
+                             to mako.
+    :param template_path: The default relative path to use for templates.
+                          Defaults to 'templates'.
+    :param hooks: A list of Pecan hook objects to use for this application.
+    :param custom_renderers: Custom renderer objects, as a dictionary keyed
+                             by engine name.
+    :param extra_template_vars: Any variables to inject into the template
+                                namespace automatically.
+    :param force_canonical: A boolean indicating if this project should
+                            require canonical URLs.
     '''
 
     def __init__(self, root,
@@ -169,21 +186,6 @@ class Pecan(object):
                  force_canonical=True
         ):
         '''
-        Creates a Pecan application instance, which is a WSGI application.
-
-        :param root: A string representing a root controller object (e.g.,
-                    "myapp.controller.root.RootController")
-        :param default_renderer: The default rendering engine to use. Defaults
-        to mako.
-        :param template_path: The default relative path to use for templates.
-        Defaults to 'templates'.
-        :param hooks: A list of Pecan hook objects to use for this application.
-        :param custom_renderers: Custom renderer objects, as a dictionary keyed
-        by engine name.
-        :param extra_template_vars: Any variables to inject into the template
-        namespace automatically.
-        :param force_canonical: A boolean indicating if this project should
-        require canonical URLs.
         '''
 
         if isinstance(root, basestring):
@@ -254,7 +256,7 @@ class Pecan(object):
         Determines the hooks to be run, in which order.
 
         :param controller: If specified, includes hooks for a specific
-        controller.
+                           controller.
         '''
 
         controller_hooks = []
@@ -272,8 +274,8 @@ class Pecan(object):
         Processes hooks of the specified type.
 
         :param hook_type: The type of hook, including ``before``, ``after``,
-        ``on_error``, and ``on_route``.
-        :param *args: Arguments to pass to the hooks.
+                          ``on_error``, and ``on_route``.
+        :param \*args: Arguments to pass to the hooks.
         '''
 
         if hook_type in ['before', 'on_route']:

@@ -29,16 +29,15 @@ class ConfigDict(dict):
 class Config(object):
     '''
     Base class for Pecan configurations.
+
+    Create a Pecan configuration object from a dictionary or a
+    filename.
+    
+    :param conf_dict: A python dictionary to use for the configuration.
+    :param filename: A filename to use for the configuration.
     '''
 
     def __init__(self, conf_dict={}, filename=''):
-        '''
-        Create a Pecan configuration object from a dictionary or a
-        filename.
-
-        :param conf_dict: A python dictionary to use for the configuration.
-        :param filename: A filename to use for the configuration.
-        '''
 
         self.__values__ = {}
         self.__file__ = filename
@@ -52,7 +51,7 @@ class Config(object):
         Updates this configuration with a dictionary.
 
         :param conf_dict: A python dictionary to update this configuration
-        with.
+                          with.
         '''
 
         if isinstance(conf_dict, dict):
@@ -96,7 +95,7 @@ class Config(object):
         Converts recursively the Config object into a valid dictionary.
 
         :param prefix: A string to optionally prefix all key elements in the
-        returned dictonary.
+                       returned dictonary.
         '''
 
         conf_obj = dict(self)
@@ -186,8 +185,7 @@ def set_config(config, overwrite=False):
     Updates the global configuration.
 
     :param config: Can be a dictionary containing configuration, or a string
-    which
-    represents a (relative) configuration filename.
+                   which represents a (relative) configuration filename.
     '''
 
     if overwrite is True:

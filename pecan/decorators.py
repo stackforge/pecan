@@ -27,12 +27,12 @@ def expose(template=None,
     access via HTTP, and to configure that access.
 
     :param template: The path to a template, relative to the base template
-    directory.
+                     directory.
     :param content_type: The content-type to use for this template.
-    :param generic: A boolean which flags this as a "generic" controller, which
-    uses generic functions based upon ``simplegeneric`` generic functions.
-    Allows you to split a single controller into multiple paths based upon HTTP
-    method.
+    :param generic: A boolean which flags this as a "generic" controller,
+                    which uses generic functions based upon ``simplegeneric``
+                    generic functions.  Allows you to split a single
+                    controller into multiple paths based upon HTTP method.
     '''
 
     if template == 'json':
@@ -69,7 +69,7 @@ def transactional(ignore_redirects=True):
     regardless of HTTP method.
 
     :param ignore_redirects: Indicates if the hook should ignore redirects
-    for this controller or not.
+                             for this controller or not.
     '''
 
     def deco(f):
@@ -115,7 +115,7 @@ def after_commit(action):
     commit is successfully issued.
 
     :param action: The callable to call after the commit is successfully
-    issued.
+                   issued.
     '''
     return  after_action('commit', action)
 
@@ -127,7 +127,7 @@ def after_rollback(action):
     rollback is successfully issued.
 
     :param action: The callable to call after the rollback is successfully
-    issued.
+                   issued.
     '''
     return  after_action('rollback', action)
 
