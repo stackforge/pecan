@@ -23,3 +23,25 @@ class TestDebugMiddleware(TestCase):
         r = self.app.get('/error', expect_errors=True)
         assert r.status_int == 400
         assert 'AssertionError' in r.body
+
+    def test_middleware_complains_in_multi_process_environment(self):
+
+        class MultiProcessApp(object):
+
+            def __init__(self, app):
+                self.app = app
+
+            def __call__(self, environ, start_response):
+                environ['wsgi.multiprocess'] = True
+                return self.app(environ, start_response)
+
+        def conditional_error_app(environ, start_response):
+            start_response("200 OK", [('Content-type', 'text/plain')])
+            return ['Hello, World!']
+
+        app = TestApp(MultiProcessApp(DebugMiddleware(conditional_error_app)))
+        self.assertRaises(
+            AssertionError, 
+            app.get,
+            '/'
+        )
