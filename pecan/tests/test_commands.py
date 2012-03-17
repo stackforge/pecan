@@ -26,8 +26,11 @@ class TestCommandRunner(unittest.TestCase):
     def test_run(self):
         from pecan.commands import CommandRunner
         runner = CommandRunner()
-        with self.assertRaises(RuntimeError):
-            runner.run(['serve', 'missing_file.py'])
+        self.assertRaises(
+            RuntimeError,
+            runner.run,
+            ['serve', 'missing_file.py']
+        )
 
 
 class TestCreateCommand(unittest.TestCase):
