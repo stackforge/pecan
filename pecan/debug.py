@@ -122,7 +122,7 @@ class DebugMiddleware(object):
 
     def __call__(self, environ, start_response):
         assert not environ['wsgi.multiprocess'], (
-            "The EvalException middleware is not usable in a "
+            "The DebugMiddleware middleware is not usable in a "
             "multi-process environment")
         try:
             return self.app(environ, start_response)
