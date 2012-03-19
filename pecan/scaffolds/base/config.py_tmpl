@@ -10,7 +10,7 @@ app = {
     'modules'         : ['${package}'],
     'static_root'     : '%(confdir)s/public', 
     'template_path'   : '%(confdir)s/${package}/templates',
-    'reload'          : True,
+    'force_canonical' : True,
     'debug'           : True,
     'errors'          : {
         '404'            : '/error/404',

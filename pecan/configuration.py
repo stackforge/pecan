@@ -17,7 +17,8 @@ DEFAULT = {
         'root': None,
         'modules': [],
         'static_root': 'public',
-        'template_path': ''
+        'template_path': '',
+        'force_canonical': True
     }
 }
 
