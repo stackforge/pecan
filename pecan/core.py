@@ -1,4 +1,3 @@
-from configuration      import _runtime_conf, set_config
 from templating         import RendererFactory
 from routing            import lookup_controller, NonCanonicalPath
 from util               import _cfg, encode_if_needed
@@ -141,6 +140,7 @@ def load_app(config):
     which represents a (relative) configuration filename.
     :returns a pecan.Pecan object
     '''
+    from configuration import _runtime_conf, set_config
     set_config(config, overwrite=True)
 
     for package_name in getattr(_runtime_conf.app, 'modules', []):

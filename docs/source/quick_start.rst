@@ -95,9 +95,8 @@ If you just run ``pecan serve``, passing ``config.py`` as an argument for
 configuration, it will bring up the development server and serve the app::
 
     $ pecan serve config.py 
-    Starting subprocess with file monitor
     Starting server in PID 000.
-    serving on 0.0.0.0:8080 view at http://127.0.0.1:8080
+    serving on 0.0.0.0:8080, view at http://127.0.0.1:8080
 
     
 The location for the config file and the argument itself are very flexible - 
@@ -122,7 +121,6 @@ This is how your default (generated) configuration file should look::
         'modules' : ['test_project'],
         'static_root' : '%(confdir)s/public', 
         'template_path' : '%(confdir)s/test_project/templates',
-        'reload': True,
         'debug' : True,
         'errors' : {
             '404' : '/error/404',
@@ -138,11 +136,7 @@ This is how your default (generated) configuration file should look::
     # pecan.conf
 
 
-**Nothing** in the configuration file above is actually required for Pecan to
-run. If you fail to provide some values, Pecan will fill in the missing things
-it needs to run.
-
-You can also add your own configuration as dictionaries.
+You can also add your own configuration as Python dictionaries.
 
 For more specific documentation on configuration, see the :ref:`Configuration`
 section.

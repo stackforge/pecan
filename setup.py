@@ -8,12 +8,11 @@ version = '0.1.0'
 # determine requirements
 #
 requirements = [
-  "WebOb >= 1.0.0",
-  "WebCore >= 1.0.0",
-  "simplegeneric >= 0.7",
+  "WebOb >= 1.2dev", #py3 compat
+  "simplegeneric >= 0.8",  # py3 compat
   "Mako >= 0.4.0",
   "Paste >= 1.7.5.1",
-  "WebTest >= 1.2.2"
+  "WebTest >= 1.3.1"  # py3 compat
 ]
 
 try:
@@ -83,7 +82,7 @@ setup(
     keywords='web framework wsgi object-dispatch http',
     author='Jonathan LaCour, Ryan Petrello, Mark McClain, Yoann Roman, '\
            'Jeremy Jones, Alfredo Deza, Benjamin W. Smith',
-    author_email='jonathan@cleverdevil.org',
+    author_email='info@pecanpy.org',
     url='http://github.com/pecan/pecan',
     license='BSD',
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
@@ -103,5 +102,5 @@ setup(
     base = pecan.scaffolds:BaseScaffold
     [console_scripts]
     pecan = pecan.commands:CommandRunner.handle_command_line
-    """,
+    """
 )

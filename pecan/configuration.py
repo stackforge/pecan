@@ -161,7 +161,6 @@ def conf_from_dict(conf_dict):
 
     :param conf_dict: The configuration dictionary.
     '''
-
     conf = Config(filename=conf_dict.get('__file__', ''))
 
     for k, v in conf_dict.iteritems():
@@ -195,7 +194,10 @@ def set_config(config, overwrite=False):
         _runtime_conf.empty()
 
     if isinstance(config, basestring):
-        _runtime_conf.update(conf_from_file(config))
+        config = conf_from_file(config)
+        _runtime_conf.update(config)
+        if config.__file__:
+            _runtime_conf.__file__ = config.__file__
     elif isinstance(config, dict):
         _runtime_conf.update(conf_from_dict(config))
     else:

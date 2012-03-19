@@ -85,6 +85,10 @@ debug_template_raw = '''<html>
     }
 
     ${styles}
+
+    .highlight .n, .highlight .ne  {
+        color: #FFF;
+    }
   </style>
  </head>
  <body>

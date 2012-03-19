@@ -41,7 +41,6 @@ A typical application configuration might look like this::
         'modules' : ['project'],
         'static_root'   : '%(confdir)s/public', 
         'template_path' : '%(confdir)s/project/templates',
-        'reload' : True,
         'debug' : True 
     }
 
@@ -60,9 +59,6 @@ used to serve static files (like CSS and Javascript files) during development.
 
 **template_path** Points to the directory where your template files live
 (relative to the project root).
-
-**reload** - When ``True``, ``pecan serve`` will listen for file changes and
-restart your app (especially useful for development).
 
 **debug** Enables ``WebError`` to display tracebacks in the browser 
 (**IMPORTANT**: Make sure this is *always* set to ``False`` in production

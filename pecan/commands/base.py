@@ -34,6 +34,9 @@ class CommandManager(object):
     def load_commands(self):
         for ep in pkg_resources.iter_entry_points('pecan.command'):
             log.debug('%s loading plugin %s', self.__class__.__name__, ep)
+            if ep.name in self.commands:
+                warn("Duplicate entry points found on `%s` - ignoring %s" % (ep.name, ep), RuntimeWarning)
+                continue
             try:
                 cmd = ep.load()
                 assert hasattr(cmd, 'run')
