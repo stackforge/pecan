@@ -25,7 +25,6 @@ While Pecan doesn't provide support for sessions or databases out of the
 box, tutorials are included for integrating these yourself in just a few
 lines of code.
 
-
 Narrative Documentation
 =======================
 
