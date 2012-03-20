@@ -218,24 +218,22 @@ debug_template = Template(debug_template_raw)
 __debug_environ__ = None
 
 
-def debug_request():
-    pdb.post_mortem()  # pragma: no cover
-
-
 class PdbMiddleware(object):
-    def __init__(self, app):
+    def __init__(self, app, debugger):
         self.app = app
+        self.debugger = debugger
 
     def __call__(self, environ, start_response):
         try:
             return self.app(environ, start_response)
         except:
-            debug_request()
+            self.debugger()
 
 
 class DebugMiddleware(object):
-    def __init__(self, app):
+    def __init__(self, app, debugger=pdb.post_mortem):
         self.app = app
+        self.debugger = debugger
 
     def __call__(self, environ, start_response):
         assert not environ['wsgi.multiprocess'], (
@@ -246,7 +244,9 @@ class DebugMiddleware(object):
         global __debug_environ__
         debugging = environ['PATH_INFO'] == '/__pecan_initiate_pdb__'
         if debugging:
-            PdbMiddleware(self.app)(__debug_environ__, start_response)
+            PdbMiddleware(self.app, self.debugger)(
+                __debug_environ__, start_response
+            )
             environ = __debug_environ__
 
         try:
