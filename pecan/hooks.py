@@ -91,6 +91,14 @@ class PecanHook(object):
 
 class TransactionHook(PecanHook):
     '''
+    :param start: A callable that will bind to a writable database and
+                  start a transaction.
+    :param start_ro: A callable that will bind to a readable database.
+    :param commit: A callable that will commit the active transaction.
+    :param rollback: A callable that will roll back the active
+                     transaction.
+    :param clear: A callable that will clear your current context.
+
     A basic framework hook for supporting wrapping requests in
     transactions. By default, it will wrap all but ``GET`` and ``HEAD``
     requests in a transaction. Override the ``is_transactional`` method
@@ -98,15 +106,6 @@ class TransactionHook(PecanHook):
     '''
 
     def __init__(self, start, start_ro, commit, rollback, clear):
-        '''
-        :param start: A callable that will bind to a writable database and
-        start a transaction.
-        :param start_ro: A callable that will bind to a readable database.
-        :param commit: A callable that will commit the active transaction.
-        :param rollback: A callable that will roll back the active
-        transaction.
-        :param clear: A callable that will clear your current context.
-        '''
 
         self.start = start
         self.start_ro = start_ro
@@ -196,6 +195,15 @@ class TransactionHook(PecanHook):
 
 class RequestViewerHook(PecanHook):
     '''
+    :param config:   A (optional) dictionary that can hold ``items`` and/or
+                     ``blacklist`` keys.
+    :param writer:   The stream writer to use. Can redirect output to other
+                     streams as long as the passed in stream has a
+                     ``write`` callable method.
+    :param terminal: Outputs to the chosen stream writer (usually
+                     the terminal)
+    :param headers:  Sets values to the X-HTTP headers
+     
     Returns some information about what is going on in a single request.  It
     accepts specific items to report on but uses a default list of items when
     none are passed in.  Based on the requested ``url``, items can also be
@@ -203,8 +211,8 @@ class RequestViewerHook(PecanHook):
     Configuration is flexible, can be passed in (or not) and can contain
     some or all the keys supported.
 
-    ``items``
-    ---------
+    **items**
+    
     This key holds the items that this hook will display. When this key is
     passed only the items in the list will be used.  Valid items are *any*
     item that the ``request`` object holds, by default it uses the
@@ -217,11 +225,11 @@ class RequestViewerHook(PecanHook):
     * params
     * hooks
 
-    .. :note::
+    .. note::
         This key should always use a ``list`` of items to use.
 
-    ``blacklist``
-    -------------
+    **blacklist**
+    
     This key holds items that will be blacklisted based on ``url``. If
     there is a need to ommit urls that start with `/javascript`, then this
     key would look like::
@@ -232,7 +240,7 @@ class RequestViewerHook(PecanHook):
     will verify that the url is not starting with items in this list to display
     results, otherwise it will get ommited.
 
-    .. :note::
+    .. note::
         This key should always use a ``list`` of items to use.
 
     For more detailed documentation about this hook, please see
@@ -243,16 +251,7 @@ class RequestViewerHook(PecanHook):
 
     def __init__(self, config=None, writer=sys.stdout, terminal=True,
         headers=True):
-        '''
-        :param config:   A (optional) dictionary that can hold ``items`` and/or
-                         ``blacklist`` keys.
-        :param writer:   The stream writer to use. Can redirect output to other
-                         streams as long as the passed in stream has a
-                         ``write`` callable method.
-        :param terminal: Outputs to the chosen stream writer (usually
-                         the terminal)
-        :param headers:  Sets values to the X-HTTP headers
-        '''
+
         if not config:
             self.config = {'items': self.available}
         else:
