@@ -45,3 +45,21 @@ class TestDebugMiddleware(TestCase):
             app.get,
             '/'
         )
+
+    def test_middlware_allows_for_post_mortem_debugging(self):
+        # monkeypatch debug request
+        from pecan.middleware import debug
+
+        def patch_debugger(d):
+            def _patched_debug_request():
+                d.append(True)
+            return _patched_debug_request
+
+        debugger = []
+        debug.debug_request = patch_debugger(debugger)
+
+        r = self.app.get('/error', expect_errors=True)
+        assert r.status_int == 400
+
+        r = self.app.get('/__pecan_initiate_pdb__', expect_errors=True)
+        assert len(debugger) > 0

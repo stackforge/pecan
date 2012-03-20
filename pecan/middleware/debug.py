@@ -163,7 +163,12 @@ debug_template_raw = '''<html>
                 btn.disabled = false;
             }
         }
-        request.send('/__pecan_initiate_pdb__');
+        request.send('');
+
+        /* automatically timeout after 5 minutes, re-enabling the button */
+        setTimeout(function() {
+           request.abort();
+        }, 5 * 60 * 1000);
     }
   </script>
  </head>
@@ -213,6 +218,10 @@ debug_template = Template(debug_template_raw)
 __debug_environ__ = None
 
 
+def debug_request():
+    pdb.post_mortem()  # pragma: no cover
+
+
 class PdbMiddleware(object):
     def __init__(self, app):
         self.app = app
@@ -221,7 +230,7 @@ class PdbMiddleware(object):
         try:
             return self.app(environ, start_response)
         except:
-            pdb.post_mortem()
+            debug_request()
 
 
 class DebugMiddleware(object):
