@@ -6,6 +6,8 @@ from mako.template import Template
 
 from webob import Response
 
+import pdb
+
 debug_template_raw = '''<html>
  <head>
   <title>Pecan - Application Error</title>
@@ -119,12 +121,50 @@ debug_template_raw = '''<html>
        color: #C70 !important;
     }
 
+    #debug {
+        background: #FDF6E3;
+        padding: 10px !important;
+        margin-top: 10px;
+        font-family: monospace;
+    }
 
   </style>
   <script type="text/javascript">
       SyntaxHighlighter.defaults['gutter'] = false;
       SyntaxHighlighter.defaults['toolbar'] = false;
       SyntaxHighlighter.all()
+  </script>
+
+  <script type="text/javascript">
+    function get_request() {
+        /* ajax sans jquery makes me sad */
+        var request = false;
+
+        // Mozilla/Safari
+        if (window.XMLHttpRequest) {
+            request = new XMLHttpRequest();
+        }
+
+        // IE
+        else if (window.ActiveXObject) {
+            request = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        return request;
+    }
+
+    function debug_request(btn) {
+        btn.disabled = true;
+
+        request = get_request();
+        request.open('GET', '/__pecan_initiate_pdb__', true);
+        request.onreadystatechange = function() {
+            if (request.readyState == 4) {
+                btn.disabled = false;
+            }
+        }
+        request.send('/__pecan_initiate_pdb__');
+    }
   </script>
  </head>
  <body>
@@ -151,6 +191,15 @@ debug_template_raw = '''<html>
       <pre class="brush: python">${traceback}</pre>
     </div>
 
+    % if not debugging:
+    <b>Want to debug this request?</b>
+    <div id="debug">
+      You can <button onclick="debug_request(this)">
+        repeat this request
+      </button> with a Python debugger breakpoint.
+    </div>
+    % endif
+
     <h2>WSGI Environment</h2>
     <div id="environ">
       <pre class="brush: python">${environment}</pre>
@@ -161,6 +210,18 @@ debug_template_raw = '''<html>
 '''
 
 debug_template = Template(debug_template_raw)
+__debug_environ__ = None
+
+
+class PdbMiddleware(object):
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        try:
+            return self.app(environ, start_response)
+        except:
+            pdb.post_mortem()
 
 
 class DebugMiddleware(object):
@@ -171,9 +232,21 @@ class DebugMiddleware(object):
         assert not environ['wsgi.multiprocess'], (
             "The DebugMiddleware middleware is not usable in a "
             "multi-process environment")
+
+        # initiate a PDB session if requested
+        global __debug_environ__
+        debugging = environ['PATH_INFO'] == '/__pecan_initiate_pdb__'
+        if debugging:
+            PdbMiddleware(self.app)(__debug_environ__, start_response)
+            environ = __debug_environ__
+
         try:
             return self.app(environ, start_response)
         except:
+            # save the environ for debugging
+            if not debugging:
+                __debug_environ__ = environ
+
             # get a formatted exception
             out = StringIO()
             print_exc(file=out)
@@ -189,7 +262,8 @@ class DebugMiddleware(object):
                 shcore=shcore,
                 shbrushpython=shbrushpython,
                 shcorecss=shcorecss,
-                shthemedefault=shthemedefault
+                shthemedefault=shthemedefault,
+                debugging=debugging
             )
 
             # construct and return our response
