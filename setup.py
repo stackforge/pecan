@@ -8,7 +8,7 @@ version = '0.1.0'
 # determine requirements
 #
 requirements = [
-  "WebOb >= 1.2dev", #py3 compat
+  "WebOb >= 1.2dev",  # py3 compat
   "simplegeneric >= 0.8",  # py3 compat
   "Mako >= 0.4.0",
   "Paste >= 1.7.5.1",

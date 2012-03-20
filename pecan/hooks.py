@@ -203,7 +203,7 @@ class RequestViewerHook(PecanHook):
     :param terminal: Outputs to the chosen stream writer (usually
                      the terminal)
     :param headers:  Sets values to the X-HTTP headers
-     
+
     Returns some information about what is going on in a single request.  It
     accepts specific items to report on but uses a default list of items when
     none are passed in.  Based on the requested ``url``, items can also be
@@ -212,7 +212,7 @@ class RequestViewerHook(PecanHook):
     some or all the keys supported.
 
     **items**
-    
+
     This key holds the items that this hook will display. When this key is
     passed only the items in the list will be used.  Valid items are *any*
     item that the ``request`` object holds, by default it uses the
@@ -229,7 +229,7 @@ class RequestViewerHook(PecanHook):
         This key should always use a ``list`` of items to use.
 
     **blacklist**
-    
+
     This key holds items that will be blacklisted based on ``url``. If
     there is a need to ommit urls that start with `/javascript`, then this
     key would look like::

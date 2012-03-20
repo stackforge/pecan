@@ -33,7 +33,7 @@ class Config(object):
 
     Create a Pecan configuration object from a dictionary or a
     filename.
-    
+
     :param conf_dict: A python dictionary to use for the configuration.
     :param filename: A filename to use for the configuration.
     '''
