@@ -98,7 +98,6 @@ class ServeCommand(BaseCommand):
         paths.append((os.path.dirname(conf.__file__), False))
         return paths
 
-
     def _serve(self, app, conf):
         from wsgiref.simple_server import make_server
 

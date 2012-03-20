@@ -41,7 +41,7 @@ class TestDebugMiddleware(TestCase):
 
         app = TestApp(MultiProcessApp(DebugMiddleware(conditional_error_app)))
         self.assertRaises(
-            AssertionError, 
+            AssertionError,
             app.get,
             '/'
         )

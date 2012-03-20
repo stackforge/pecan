@@ -80,6 +80,11 @@ You may notice that **model/__init__.py** is mostly empty.  You may wish to add
 code here to define tables, ORM definitions, and parse bindings from your 
 configuration file.
 
+Now that you've created your first Pecan application, you'll want to deploy it
+in "development mode", such that it’s available on ``sys.path``, yet can still
+be edited directly from its source checkout::
+
+    $ python setup.py develop
 
 .. _running_application:
 

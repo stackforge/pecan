@@ -24,7 +24,7 @@ if PY3:  # pragma: no cover
             return s
         return str(s, encoding, errors)
 else:
-    def native_(s, encoding='latin-1', errors='strict'): # noqa
+    def native_(s, encoding='latin-1', errors='strict'):  # noqa
         """ If ``s`` is an instance of ``text_type``, return
         ``s.encode(encoding, errors)``, otherwise return ``str(s)``"""
         if isinstance(s, text_type):
