@@ -4,9 +4,9 @@ from pecan.middleware.logger import TransLogger
 from webtest import TestApp
 
 if sys.version_info < (2, 7):
-    import unittest2 as unittest
+    import unittest2 as unittest # pragma: nocover
 else:
-    import unittest  # noqa
+    import unittest  # pragma: nocover
 
 from pecan import (
     Pecan, expose, request, response, redirect, abort, make_app,
@@ -171,7 +171,7 @@ class TestLookups(unittest.TestCase):
         class RootController(object):
             @expose()
             def _lookup(self, someID):
-                return 'Bad arg spec'
+                return 'Bad arg spec'  # pragma: nocover
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -245,7 +245,7 @@ class TestControllerArguments(unittest.TestCase):
     def test_required_argument(self):
         try:
             r = self.app_.get('/')
-            assert r.status_int != 200
+            assert r.status_int != 200  # pragma: nocover
         except Exception, ex:
             assert type(ex) == TypeError
             assert ex.args[0] == 'index() takes exactly 2 arguments (1 given)'
@@ -644,7 +644,7 @@ class TestControllerArguments(unittest.TestCase):
     def test_no_remainder(self):
         try:
             r = self.app_.get('/eater')
-            assert r.status_int != 200
+            assert r.status_int != 200  # pragma: nocover
         except Exception, ex:
             assert type(ex) == TypeError
             assert ex.args[0] == 'eater() takes at least 2 arguments (1 given)'
@@ -779,16 +779,16 @@ class TestRedirect(unittest.TestCase):
         class ChildController(object):
             @expose()
             def index(self):
-                redirect('/testing')
+                redirect('/testing')  # pragma: nocover
 
         class RootController(object):
             @expose()
             def index(self):
-                redirect('/testing')
+                redirect('/testing')  # pragma: nocover
 
             @expose()
             def testing(self):
-                return 'it worked!'
+                return 'it worked!'  # pragma: nocover
             child = ChildController()
 
         app = TestApp(make_app(RootController(), debug=True))
@@ -975,7 +975,7 @@ class TestCanonicalRouting(unittest.TestCase):
     def test_posts_fail(self):
         try:
             self.app_.post('/sub', dict(foo=1))
-            raise Exception("Post should fail")
+            raise Exception("Post should fail")  # pragma: nocover
         except Exception, e:
             assert isinstance(e, RuntimeError)
 
@@ -1002,13 +1002,13 @@ class TestNonCanonical(unittest.TestCase):
         class ArgSubController(object):
             @expose()
             def index(self, arg):
-                return arg
+                return arg  # pragma: nocover
 
         class AcceptController(object):
             @accept_noncanonical
             @expose()
             def index(self):
-                return 'accept'
+                return 'accept'  # pragma: nocover
 
         class SubController(object):
             @expose()
@@ -1098,7 +1098,7 @@ class TestLogging(unittest.TestCase):
         writes = []
 
         def _write_log(self, *args, **kwargs):
-            writes.append(1)
+            writes.append(1)  # pragma: nocover
         TransLogger.write_log = _write_log
 
         # check the request
@@ -1118,7 +1118,7 @@ class TestLogging(unittest.TestCase):
         writes = []
 
         def _write_log(self, *args, **kwargs):
-            writes.append(1)
+            writes.append(1)  # pragma: nocover
         TransLogger.write_log = _write_log
 
         # check the request
@@ -1138,7 +1138,7 @@ class TestLogging(unittest.TestCase):
         writes = []
 
         def _write_log(self, *args, **kwargs):
-            writes.append(1)
+            writes.append(1)  # pragma: nocover
 
         TransLogger.write_log = _write_log
 
@@ -1370,7 +1370,6 @@ class TestEngines(unittest.TestCase):
             @expose()
             def index(self, name='Jonathan'):
                 return render('mako.html', dict(name=name))
-                return dict(name=name)
 
         app = TestApp(
             Pecan(RootController(),
