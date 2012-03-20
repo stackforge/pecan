@@ -78,7 +78,10 @@ class CommandRunner(object):
             )
             for arg in getattr(cmd, 'arguments', tuple()):
                 arg = arg.copy()
-                sub.add_argument(arg.pop('command'), **arg)
+                if isinstance(arg.get('command'), basestring):
+                    sub.add_argument(arg.pop('command'), **arg)
+                elif isinstance(arg.get('command'), list):
+                    sub.add_argument(*arg.pop('command'), **arg)
 
     def run(self, args):
         ns = self.parser.parse_args(args)

@@ -10,7 +10,7 @@ import sys
 class NativePythonShell(object):
 
     @classmethod
-    def invoke(cls, ns, banner):
+    def invoke(cls, ns, banner):  # pragma: nocover
         import code
         py_prefix = sys.platform.startswith('java') and 'J' or 'P'
         shell_banner = 'Pecan Interactive Shell\n%sython %s\n\n' % \
@@ -26,7 +26,7 @@ class NativePythonShell(object):
 class IPythonShell(object):
 
     @classmethod
-    def invoke(cls, ns, banner):
+    def invoke(cls, ns, banner):  # pragma: nocover
         try:
             from IPython.frontend.terminal.embed import (
                 InteractiveShellEmbed
@@ -51,7 +51,7 @@ class ShellCommand(BaseCommand):
     }    
 
     arguments = BaseCommand.arguments + ({
-        'command': '--shell',
+        'command': ['--shell', '-s'],
         'help': 'which Python shell to use',
         'choices': SHELLS.keys(),
         'default': 'python'
