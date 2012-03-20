@@ -83,7 +83,7 @@ class ForwardRequestException(Exception):
 
     .. code-block:: python
 
-        from pecan.recursive import ForwardRequestException
+        from pecan.middleware.recursive import ForwardRequestException
         def app(environ, start_response):
             if environ['PATH_INFO'] == '/hello':
                 start_response("200 OK", [('Content-type', 'text/plain')])
@@ -96,7 +96,7 @@ class ForwardRequestException(Exception):
             else:
                 raise ForwardRequestException('/error')
 
-        from pecan.recursive import RecursiveMiddleware
+        from pecan.middleware.recursive import RecursiveMiddleware
         app = RecursiveMiddleware(app)
 
     If you ran this application and visited ``/hello`` you would get a

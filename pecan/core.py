@@ -1,14 +1,14 @@
-from templating         import RendererFactory
-from routing            import lookup_controller, NonCanonicalPath
-from util               import _cfg, encode_if_needed
+from templating import RendererFactory
+from routing import lookup_controller, NonCanonicalPath
+from util import _cfg, encode_if_needed
+from middleware.recursive import ForwardRequestException
 
-from webob              import Request, Response, exc
-from threading          import local
-from itertools          import chain
-from mimetypes          import guess_type, add_type
-from pecan.recursive    import ForwardRequestException
-from urlparse           import urlsplit, urlunsplit
-from os.path            import splitext
+from webob import Request, Response, exc
+from threading import local
+from itertools import chain
+from mimetypes import guess_type, add_type
+from urlparse import urlsplit, urlunsplit
+from os.path import splitext
 
 try:
     from simplejson import loads

@@ -1,6 +1,6 @@
 import sys
 import warnings
-from paste.translogger import TransLogger
+from pecan.middleware.logger import TransLogger
 from webtest import TestApp
 
 if sys.version_info < (2, 7):

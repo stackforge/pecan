@@ -1,5 +1,6 @@
 from unittest import TestCase
-from pecan.static import SharedDataMiddleware, FileWrapper, _dump_date
+from pecan.middleware.static import (SharedDataMiddleware, FileWrapper,
+                                    _dump_date)
 
 import os
 
