@@ -1,7 +1,7 @@
 from unittest import TestCase
 from webtest import TestApp
 
-from pecan.debug import DebugMiddleware
+from pecan.middleware.debug import DebugMiddleware
 
 
 class TestDebugMiddleware(TestCase):

@@ -1,15 +1,15 @@
 from paste.errordocument import make_errordocument
-from paste.translogger import TransLogger
 
 from core import (
     abort, override_template, Pecan, load_app, redirect, render,
     request, response
 )
-from recursive import RecursiveMiddleware
 from decorators import expose
 from hooks import RequestViewerHook
-from static import SharedDataMiddleware
-from debug import DebugMiddleware
+from middleware.debug import DebugMiddleware
+from middleware.logger import TransLogger
+from middleware.recursive import RecursiveMiddleware
+from middleware.static import SharedDataMiddleware
 
 from configuration import set_config
 from configuration import _runtime_conf as conf

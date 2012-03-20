@@ -1,7 +1,8 @@
 from unittest import TestCase
 from webtest import TestApp
 
-from pecan.recursive import RecursiveMiddleware, ForwardRequestException
+from pecan.middleware.recursive import (RecursiveMiddleware,
+                                        ForwardRequestException)
 
 
 def simple_app(environ, start_response):
