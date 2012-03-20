@@ -36,24 +36,24 @@ class TestStaticFileMiddleware(TestCase):
         return None
 
     def test_file_can_be_found(self):
-        result = self._request('/static/text.txt')
+        result = self._request('/static_fixtures/text.txt')
         assert isinstance(result, FileWrapper)
 
     def test_no_file_found_causes_passthrough(self):
-        result = self._request('/static/nosuchfile.txt')
+        result = self._request('/static_fixtures/nosuchfile.txt')
         assert not isinstance(result, FileWrapper)
         assert result == ['Hello world!\n']
 
     def test_mime_type_works_for_png_files(self):
-        self._request('/static/self.png')
+        self._request('/static_fixtures/self.png')
         assert self._get_response_header('Content-Type') == 'image/png'
 
     def test_file_can_be_closed(self):
-        result = self._request('/static/text.txt')
+        result = self._request('/static_fixtures/text.txt')
         assert result.close() == None
 
     def test_file_can_be_iterated_over(self):
-        result = self._request('/static/text.txt')
+        result = self._request('/static_fixtures/text.txt')
         assert len([x for x in result])
 
     def test_date_dumping_on_unix_timestamps(self):
@@ -62,5 +62,5 @@ class TestStaticFileMiddleware(TestCase):
 
     def test_separator_sanitization_still_finds_file(self):
         os.altsep = ':'
-        result = self._request(':static:text.txt')
+        result = self._request(':static_fixtures:text.txt')
         assert isinstance(result, FileWrapper)
