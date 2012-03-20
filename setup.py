@@ -28,7 +28,12 @@ try:
 except:
     requirements.append('argparse')
 
-tests_require = requirements + ['virtualenv']
+tests_require = requirements + [
+    'virtualenv',
+    'Genshi',
+    'Kajiki',
+    'Jinja'
+]
 if sys.version_info < (2, 7):
     tests_require += ['unittest2']
 
