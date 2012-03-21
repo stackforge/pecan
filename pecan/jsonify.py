@@ -29,14 +29,6 @@ except ImportError:         # pragma no cover
     class RowProxy:
         pass
 
-#
-# exceptions
-#
-
-
-class JsonEncodeError(Exception):
-    pass
-
 
 #
 # encoders

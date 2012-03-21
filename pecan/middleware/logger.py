@@ -10,19 +10,6 @@ import time
 import urllib
 
 
-def asbool(obj):
-    if isinstance(obj, (str, unicode)):
-        obj = obj.strip().lower()
-        if obj in ['true', 'yes', 'on', 'y', 't', '1']:
-            return True
-        elif obj in ['false', 'no', 'off', 'n', 'f', '0']:
-            return False
-        else:
-            raise ValueError(
-                "String is not true/false: %r" % obj)
-    return bool(obj)
-
-
 class TransLogger(object):
     """
     This logging middleware will log all requests as they go through.
@@ -96,9 +83,9 @@ class TransLogger(object):
                 offset = "%0.4d" % (offset)  # pragma: nocover
         remote_addr = '-'
         if environ.get('HTTP_X_FORWARDED_FOR'):
-            remote_addr = environ['HTTP_X_FORWARDED_FOR']
+            remote_addr = environ['HTTP_X_FORWARDED_FOR']  # pragma: nocover
         elif environ.get('REMOTE_ADDR'):
-            remote_addr = environ['REMOTE_ADDR']
+            remote_addr = environ['REMOTE_ADDR']  # pragma: nocover
         d = {
             'REMOTE_ADDR': remote_addr,
             'REMOTE_USER': environ.get('REMOTE_USER') or '-',
@@ -113,25 +100,3 @@ class TransLogger(object):
             }
         message = self.format % d
         self.logger.log(self.logging_level, message)
-
-
-def make_filter(
-    app, global_conf,
-    logger_name='wsgi',
-    format=None,
-    logging_level=logging.INFO,
-    setup_console_handler=True,
-    set_logger_level=logging.DEBUG):
-    if isinstance(logging_level, basestring):
-        logging_level = logging._levelNames[logging_level]
-    if isinstance(set_logger_level, basestring):
-        set_logger_level = logging._levelNames[set_logger_level]
-    return TransLogger(
-        app,
-        format=format or None,
-        logging_level=logging_level,
-        logger_name=logger_name,
-        setup_console_handler=asbool(setup_console_handler),
-        set_logger_level=set_logger_level)
-
-make_filter.__doc__ = TransLogger.__doc__
