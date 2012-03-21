@@ -4,7 +4,7 @@ from pecan.middleware.logger import TransLogger
 from webtest import TestApp
 
 if sys.version_info < (2, 7):
-    import unittest2 as unittest # pragma: nocover
+    import unittest2 as unittest  # pragma: nocover
 else:
     import unittest  # pragma: nocover
 
