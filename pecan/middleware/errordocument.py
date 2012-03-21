@@ -1,5 +1,5 @@
 import sys
-from recursive import ForwardRequestException
+from recursive import ForwardRequestException, RecursionLoop
 
 
 class StatusPersist(object):
@@ -45,8 +45,8 @@ class ErrorDocumentMiddleware(object):
 
         def replacement_start_response(status, headers, exc_info=None):
             try:
-                status_code = status.split(' ')[0]
-            except (ValueError, TypeError):
+                status_code = int(status.split(' ')[0])
+            except (ValueError, TypeError):  # pragma: nocover
                 raise Exception((
                     'ErrorDocumentMiddleware received an invalid '
                     'status %s' % status
