@@ -29,21 +29,12 @@ except ImportError: # pragma no cover
     class RowProxy:
         pass
 
-#
-# exceptions
-#
-
-## PCH: why are we ignoring these?
-class JsonEncodeError(Exception):
-    pass
-
 
 #
 # encoders
 #
 
 def is_saobject(obj):
-    ## PCH: what is this?
     return hasattr(obj, '_sa_class_manager')
 
 
@@ -66,7 +57,7 @@ class GenericJSON(JSONEncoder):
         * date and datetime objects
             returns the object cast to str
         * Decimal objects
-            rerutns the object cast to float
+            returns the object cast to float
         * SQLAlchemy objects
             returns a copy of the object.__dict__ with internal SQLAlchemy 
             parameters removed
@@ -78,9 +69,12 @@ class GenericJSON(JSONEncoder):
             .. note:: {'count': 5, 'rows': [(u'Ed Jones',), (u'Pete Jones',), (u'Wendy Williams',), (u'Mary Contrary',), (u'Fred Flinstone',)]}
         
         * SQLAlchemy RowProxy objects
-            TBD
+            Casts the RowProxy cursor object into a dictionary, probably
+            losing its ordered dictionary behavior in the process but
+            making it JSON-friendly.
         * webob_dicts objects
-            TBD
+            returns webob_dicts.mixed() dictionary, which is guaranteed
+            to be JSON-friendly.
         '''
         if hasattr(obj, '__json__') and callable(obj.__json__):
             return obj.__json__()
@@ -91,8 +85,6 @@ class GenericJSON(JSONEncoder):
               # SimpleJSON has better Decimal encoding than the std lib
               # but only in recent versions
             return float(obj)
-        ## PCH: The following three seem risky.  We're digging in SQLAlchemy
-        ##      internals, which are subject to change.   
         elif is_saobject(obj):
             props = {}
             for key in obj.__dict__:
@@ -109,9 +101,6 @@ class GenericJSON(JSONEncoder):
         elif isinstance(obj, webob_dicts):
             return obj.mixed()
         else:
-            ## PCH: is this safe?  how/where are exceptions handled?
-            ## should we at least try and rethrow something of an
-            ## expected type?
             return JSONEncoder.default(self, obj)
 
 
@@ -120,7 +109,6 @@ _default = GenericJSON()
 
 @generic
 def jsonify(obj):
-    ## PCH: why not GenericJSON().default(obj) ?
     return _default.default(obj)
 
 
@@ -132,5 +120,4 @@ _instance = GenericFunctionJSON()
 
 
 def encode(obj):
-    ## PCH: why not GenericFunctionJSON().encode(obj) ?
     return _instance.encode(obj)
