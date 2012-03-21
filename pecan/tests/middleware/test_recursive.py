@@ -103,7 +103,7 @@ class TestRecursiveMiddleware(TestCase):
                                     status, headers, exc_info=None
                                 ):
                                 return start_response(
-                                    '404', headers, exc_info
+                                    '404 Not Found', headers, exc_info
                                 )
                             return self.app(e, keep_status_start_response)
 
