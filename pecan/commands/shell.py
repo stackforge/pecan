@@ -54,8 +54,9 @@ class IPythonShell(object):
             shell = InteractiveShellEmbed(banner2=banner)
             shell(local_ns=ns)
         except ImportError:
+            # Support for the IPython <= 0.10 shell API
             from IPython.Shell import IPShellEmbed
-            shell = IPShellEmbed(argv=self.args)
+            shell = IPShellEmbed(argv=[])
             shell.set_banner(shell.IP.BANNER + '\n\n' + banner)
             shell(local_ns=ns, global_ns={})
 

@@ -84,7 +84,6 @@ class TestRecursiveMiddleware(TestCase):
         forward(TestForwardRequestMiddleware(error_docs_app))
 
     def test_ForwardRequest_factory(self):
-        from paste.errordocument import StatusKeeper
 
         class TestForwardRequestMiddleware(Middleware):
             def __call__(self, environ, start_response):
@@ -93,9 +92,23 @@ class TestRecursiveMiddleware(TestCase):
                 environ['PATH_INFO'] = self.url
 
                 def factory(app):
-                    return StatusKeeper(app,
-                        status='404 Not Found', url='/error', headers=[]
-                    )
+
+                    class WSGIApp(object):
+
+                        def __init__(self, app):
+                            self.app = app
+
+                        def __call__(self, e, start_response):
+                            def keep_status_start_response(
+                                    status, headers, exc_info=None
+                                ):
+                                return start_response(
+                                    '404', headers, exc_info
+                                )
+                            return self.app(e, keep_status_start_response)
+
+                    return WSGIApp(app)
+
                 raise ForwardRequestException(factory=factory)
 
         app = TestForwardRequestMiddleware(error_docs_app)
