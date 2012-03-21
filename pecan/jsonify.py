@@ -92,7 +92,7 @@ class GenericJSON(JSONEncoder):
                     props[key] = getattr(obj, key)
             return props
         elif isinstance(obj, ResultProxy):
-            props = dict(rows=list(obj), count=obj.rowcount) ## PCH: memory issues on huge resultsets?
+            props = dict(rows=list(obj), count=obj.rowcount)
             if props['count'] < 0:
                 props['count'] = len(props['rows'])
             return props
