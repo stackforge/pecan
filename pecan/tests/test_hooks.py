@@ -1,5 +1,5 @@
 from cStringIO import StringIO
-from pecan import make_app, expose, request, redirect, abort
+from pecan import make_app, expose, redirect, abort
 from pecan.core import state
 from pecan.hooks import (
     PecanHook, TransactionHook, HookController, RequestViewerHook

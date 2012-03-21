@@ -1,5 +1,3 @@
-from paste.errordocument import make_errordocument
-
 from core import (
     abort, override_template, Pecan, load_app, redirect, render,
     request, response
@@ -7,6 +5,7 @@ from core import (
 from decorators import expose
 from hooks import RequestViewerHook
 from middleware.debug import DebugMiddleware
+from middleware.errordocument import ErrorDocumentMiddleware
 from middleware.logger import TransLogger
 from middleware.recursive import RecursiveMiddleware
 from middleware.static import SharedDataMiddleware
@@ -38,16 +37,16 @@ def make_app(root, static_root=None, debug=False, errorcfg={},
     if wrap_app:
         app = wrap_app(app)
 
+    # Configuration for serving custom error messages
+    if hasattr(conf.app, 'errors'):
+        app = ErrorDocumentMiddleware(app, conf.app.errors)
+
     # Included for internal redirect support
     app = RecursiveMiddleware(app)
 
     # When in debug mode, load our exception dumping middleware
     if debug:
         app = DebugMiddleware(app)
-
-    # Configuration for serving custom error messages
-    if hasattr(conf.app, 'errors'):
-        app = make_errordocument(app, conf, **dict(conf.app.errors))
 
     # Support for serving static files (for development convenience)
     if static_root:
