@@ -11,7 +11,7 @@ try:
     # WebOb <= 1.1.1
     from webob.multidict import MultiDict, UnicodeMultiDict
     webob_dicts = (MultiDict, UnicodeMultiDict)  # pragma: no cover
-except ImportError: # pragma no cover
+except ImportError:  # pragma no cover
     # WebOb >= 1.2
     from webob.multidict import MultiDict
     webob_dicts = (MultiDict,)
@@ -20,7 +20,7 @@ from simplegeneric import generic
 
 try:
     from sqlalchemy.engine.base import ResultProxy, RowProxy
-except ImportError: # pragma no cover
+except ImportError:  # pragma no cover
     # dummy classes since we don't have SQLAlchemy installed
 
     class ResultProxy:
@@ -46,12 +46,12 @@ class GenericJSON(JSONEncoder):
     def default(self, obj):
         '''
         Converts an object and returns a ``JSON``-friendly structure.
-        
-        :param obj: object or structure to be converted into a 
+
+        :param obj: object or structure to be converted into a
                     ``JSON``-ifiable structure
 
         Considers the following special cases in order:
-        
+
         * object has a callable __json__() attribute defined
             returns the result of the call to __json__()
         * date and datetime objects
@@ -59,15 +59,16 @@ class GenericJSON(JSONEncoder):
         * Decimal objects
             returns the object cast to float
         * SQLAlchemy objects
-            returns a copy of the object.__dict__ with internal SQLAlchemy 
+            returns a copy of the object.__dict__ with internal SQLAlchemy
             parameters removed
         * SQLAlchemy ResultProxy objects
             Casts the iterable ResultProxy into a list of tuples containing
             the entire resultset data, returns the list in a dictionary
             along with the resultset "row" count.
-        
-            .. note:: {'count': 5, 'rows': [(u'Ed Jones',), (u'Pete Jones',), (u'Wendy Williams',), (u'Mary Contrary',), (u'Fred Flinstone',)]}
-        
+
+            .. note:: {'count': 5, 'rows': [(u'Ed Jones',), (u'Pete Jones',),
+            (u'Wendy Williams',), (u'Mary Contrary',), (u'Fred Flinstone',)]}
+
         * SQLAlchemy RowProxy objects
             Casts the RowProxy cursor object into a dictionary, probably
             losing its ordered dictionary behavior in the process but

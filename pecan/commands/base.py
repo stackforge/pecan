@@ -134,7 +134,6 @@ class BaseCommand(object):
             def run(self, args):
                 super(SomeCommand, self).run(args)
                 print args.extra_arg
-                print self.load_app()
     """
 
     class __metaclass__(type):
