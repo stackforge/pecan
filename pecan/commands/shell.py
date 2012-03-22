@@ -17,7 +17,7 @@ class NativePythonShell(object):
         """
         :param ns: local namespace
         :param banner: interactive shell startup banner
-        
+
         Embed an interactive native python shell.
         """
         import code
@@ -42,7 +42,7 @@ class IPythonShell(object):
         """
         :param ns: local namespace
         :param banner: interactive shell startup banner
-        
+
         Embed an interactive ipython shell.
         Try the InteractiveShellEmbed API first, fall back on
         IPShellEmbed for older IPython versions.
@@ -67,18 +67,15 @@ class BPythonShell(object):
     """
 
     @classmethod
-    def invoke(cls, ns, banner):  #pragma: nocover
+    def invoke(cls, ns, banner):  # pragma: nocover
         """
         :param ns: local namespace
         :param banner: interactive shell startup banner
-        
+
         Embed an interactive bpython shell.
         """
-        try:
-            from bpython import embed
-        except ImportError:
-            pass
-        shell = embed(ns, ['-i'], banner)
+        from bpython import embed
+        embed(ns, ['-i'], banner)
 
 
 class ShellCommand(BaseCommand):
@@ -94,7 +91,7 @@ class ShellCommand(BaseCommand):
         'python': NativePythonShell,
         'ipython': IPythonShell,
         'bpython': BPythonShell,
-    }    
+    }
 
     arguments = BaseCommand.arguments + ({
         'command': ['--shell', '-s'],
@@ -163,7 +160,7 @@ class ShellCommand(BaseCommand):
 
     def load_model(self, config):
         """
-        Load the model extension module 
+        Load the model extension module
         """
         for package_name in getattr(config.app, 'modules', []):
             module = __import__(package_name, fromlist=['model'])
