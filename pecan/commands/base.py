@@ -109,7 +109,33 @@ class CommandRunner(object):
 
 
 class BaseCommand(object):
-    """ Base class for Pecan commands. """
+    """
+    A base interface for Pecan commands.
+
+    Can be extended to support ``pecan`` command extensions in individual Pecan
+    projects, e.g.,
+
+    $ ``pecan my-custom-command config.py``
+
+    ::
+
+        # myapp/myapp/custom_command.py
+        class CustomCommand(pecan.commands.base.BaseCommand):
+            '''
+            (First) line of the docstring is used to summarize the command.
+            '''
+
+            arguments = ({
+                'command': '--extra_arg',
+                'help': 'an extra command line argument',
+                'optional': True
+            })
+
+            def run(self, args):
+                super(SomeCommand, self).run(args)
+                print args.extra_arg
+                print self.load_app()
+    """
 
     class __metaclass__(type):
         @property

@@ -65,6 +65,7 @@ docstrings here:
    :maxdepth: 2
    
    pecan_core.rst
+   pecan_commands.rst
    pecan_configuration.rst
    pecan_decorators.rst
    pecan_deploy.rst

@@ -95,3 +95,8 @@ which can be specified with the ``--shell`` flag (or its abbreviated alias,
 ::
     $ pecan shell --shell=ipython config.py
     $ pecan shell -s bpython config.py
+
+
+Extending ``pecan`` with Custom Commands
+----------------------------------------
+TODO
