@@ -74,10 +74,7 @@ class BPythonShell(object):
         
         Embed an interactive bpython shell.
         """
-        try:
-            from bpython import embed
-        except ImportError:
-            pass
+        from bpython import embed
         shell = embed(ns, ['-i'], banner)
 
 

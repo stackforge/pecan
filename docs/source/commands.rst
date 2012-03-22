@@ -84,7 +84,14 @@ command::
     >>> app.get('/')
     <200 OK text/html body='<html>\n ...\n\n'/936>
 
+Press ``Ctrl-D`` to exit the interactive shell (or ``Ctrl-Z`` on Windows).
+
 Using an Alternative Shell
 ++++++++++++++++++++++++++
-Pecan has support for the `IPython <http://ipython.org/>`_ and `bpython
-<http://bpython-interpreter.org/>`_ alternative shells.
+``pecan shell`` has optional support for the `IPython <http://ipython.org/>`_
+and `bpython <http://bpython-interpreter.org/>`_ alternative shells, each of
+which can be specified with the ``--shell`` flag (or its abbreviated alias,
+``-s``), e.g.,
+::
+    $ pecan shell --shell=ipython config.py
+    $ pecan shell -s bpython config.py
