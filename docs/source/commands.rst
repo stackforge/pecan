@@ -3,7 +3,9 @@
 Command Line Pecan
 ==================
 Any Pecan application can be controlled and inspected from the command line
-using the built-in ``pecan`` command.
+using the built-in ``pecan`` command.  The usage examples of the ``pecan``
+command in this document are intended to be invoked from your project's root
+directory.  
 
 Serving a Pecan App For Development
 -----------------------------------
@@ -47,4 +49,42 @@ As you work, Pecan will listen for any file or directory modification events in 
 
 The Interactive Shell
 ---------------------
-TODO
+Pecan applications also come with an interactive Python shell which can be used
+to execute expressions in an environment very similar to the one your
+application runs in.  To invoke an interactive shell, use the ``pecan shell``
+command::
+
+    $ pecan shell config.py
+    Pecan Interactive Shell
+    Python 2.7.1 (r271:86832, Jul 31 2011, 19:30:53)
+    [GCC 4.2.1 (Based on Apple Inc. build 5658)
+    
+      The following objects are available:
+      wsgiapp    - This project's WSGI App instance
+      conf       - The current configuration
+      app        - webtest.TestApp wrapped around wsgiapp
+
+    >>> conf
+    Config({
+        'app': Config({
+            'root': 'myapp.controllers.root.RootController',
+            'modules': ['myapp'],
+            'static_root': '/Users/somebody/myapp/public', 
+            'template_path': '/Users/somebody/myapp/project/templates',
+            'errors': {'404': '/error/404'},
+            'debug': True
+        }),
+        'server': Config({
+            'host': '0.0.0.0',
+            'port': '8080'
+        })
+    })
+    >>> app
+    <webtest.app.TestApp object at 0x101a830>
+    >>> app.get('/')
+    <200 OK text/html body='<html>\n ...\n\n'/936>
+
+Using an Alternative Shell
+++++++++++++++++++++++++++
+Pecan has support for the `IPython <http://ipython.org/>`_ and `bpython
+<http://bpython-interpreter.org/>`_ alternative shells.
