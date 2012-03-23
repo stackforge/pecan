@@ -193,3 +193,27 @@ our example, form submissions) will be routed to this method.
 
 **def error**: Finally, we have the error controller that allows your application to 
 display custom pages for certain HTTP errors (404, etc...).
+
+Running the Tests For Your Application
+--------------------------------------
+Your application comes with a few example tests that you can run, replace, and
+add to.  To run them::
+
+    $ python setup.py test -q
+    running test
+    running egg_info
+    writing requirements to sam.egg-info/requires.txt
+    writing sam.egg-info/PKG-INFO
+    writing top-level names to sam.egg-info/top_level.txt
+    writing dependency_links to sam.egg-info/dependency_links.txt
+    reading manifest file 'sam.egg-info/SOURCES.txt'
+    reading manifest template 'MANIFEST.in'
+    writing manifest file 'sam.egg-info/SOURCES.txt'
+    running build_ext
+    ....
+    ----------------------------------------------------------------------
+    Ran 4 tests in 0.009s
+
+    OK
+
+The tests themselves can be found in the ``tests`` module in your project.
