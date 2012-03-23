@@ -42,11 +42,11 @@ class CreateCommand(BaseCommand):
     manager = ScaffoldManager()
 
     arguments = ({
-        'command': 'project_name',
+        'name': 'project_name',
         'help': 'the (package) name of the new project'
     }, {
+        'name': 'template_name',
         'metavar': 'template_name',
-        'command': 'template_name',
         'help': 'a registered Pecan template',
         'nargs': '?',
         'default': DEFAULT_SCAFFOLD,

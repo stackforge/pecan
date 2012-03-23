@@ -131,7 +131,7 @@ that within this package is a ``wget.py`` module::
         '''
 
         arguments = pecan.commands.BaseCommand.arguments + ({
-            'command': 'path',
+            'name': 'path',
             'help': 'the URI path of the resource to request'
         },)
 

@@ -78,10 +78,10 @@ class CommandRunner(object):
             )
             for arg in getattr(cmd, 'arguments', tuple()):
                 arg = arg.copy()
-                if isinstance(arg.get('command'), basestring):
-                    sub.add_argument(arg.pop('command'), **arg)
-                elif isinstance(arg.get('command'), list):
-                    sub.add_argument(*arg.pop('command'), **arg)
+                if isinstance(arg.get('name'), basestring):
+                    sub.add_argument(arg.pop('name'), **arg)
+                elif isinstance(arg.get('name'), list):
+                    sub.add_argument(*arg.pop('name'), **arg)
 
     def run(self, args):
         ns = self.parser.parse_args(args)
@@ -126,7 +126,7 @@ class BaseCommand(object):
             '''
 
             arguments = ({
-                'command': '--extra_arg',
+                'name': '--extra_arg',
                 'help': 'an extra command line argument',
                 'optional': True
             })
@@ -142,7 +142,7 @@ class BaseCommand(object):
             return cls.__doc__.strip().splitlines()[0].rstrip('.')
 
     arguments = ({
-        'command': 'config_file',
+        'name': 'config_file',
         'help': 'a Pecan configuration file'
     },)
 
