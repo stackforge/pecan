@@ -51,6 +51,12 @@ def make_app(root, static_root=None, debug=False, errorcfg={},
         # Support for serving static files (for development convenience)
         if static_root:
             app = StaticFileMiddleware(app, static_root)
+    elif static_root:
+        from warnings import warn
+        warn(
+            "`static_root` is only used when `debug` is True, ignoring",
+            RuntimeWarning
+        )
 
     # Support for simple Apache-style logs
     if isinstance(logging, dict) or logging == True:
