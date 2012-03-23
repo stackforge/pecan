@@ -1,7 +1,7 @@
 .. _hooks:
 
-Hooks
-=====
+Pecan Hooks
+===========
 Pecan Hooks are a nice way to interact with the framework itself without having to
 write WSGI middleware.
 
