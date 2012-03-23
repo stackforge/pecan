@@ -1,7 +1,7 @@
 .. _configuration:
 
-Configuration
-=============
+Configuring Pecan Applications
+==============================
 Pecan is very easy to configure. As long as you follow certain conventions,
 using, setting and dealing with configuration should be very intuitive.  
 
