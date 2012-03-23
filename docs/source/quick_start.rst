@@ -16,13 +16,10 @@ Base Application Template
 A basic template for getting started is included with Pecan.  From
 your shell, type::
 
-    $ pecan create
-
-The above command will prompt you for a project name. This example uses
-*test_project*, but you can also provide an argument at the end of the
-example command above, like::
-
     $ pecan create test_project
+
+This example uses *test_project* as your project name, but you can replace
+it with any valid Python package name you like.
 
 Go ahead and change into your newly created project directory::
 

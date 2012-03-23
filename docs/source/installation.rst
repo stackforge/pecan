@@ -29,10 +29,10 @@ Next, let's install Pecan::
 
 Development (Unstable) Version
 ------------------------------
-If you want to run the development version of Pecan you will
+If you want to run the latest development version of Pecan you will
 need to install git and clone the repo from GitHub::
 
-    git clone https://github.com/dreamhost/pecan.git
+    git clone https://github.com/dreamhost/pecan.git -b next
 
 Assuming your virtual environment is still activated, call ``setup.py`` to
 install the development version::
@@ -40,6 +40,10 @@ install the development version::
     cd pecan
     python setup.py develop
 
+.. note::
+    The ``next`` development branch is **very** volatile and is never
+    recommended for production use.
+
 ...alternatively, you can also install from GitHub directly with ``pip``::
 
-    pip install -e git://github.com/dreamhost/pecan.git#egg=pecan
+    pip install -e git://github.com/dreamhost/pecan.git@next#egg=pecan

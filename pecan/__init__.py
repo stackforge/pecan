@@ -17,7 +17,7 @@ from configuration import _runtime_conf as conf
 __all__ = [
     'make_app', 'load_app', 'Pecan', 'request', 'response',
     'override_template', 'expose', 'conf', 'set_config', 'render',
-    'abort', 'ValidationException', 'redirect'
+    'abort', 'redirect'
 ]
 
 

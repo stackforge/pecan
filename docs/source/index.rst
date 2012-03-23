@@ -33,14 +33,16 @@ Narrative Documentation
    
    installation.rst
    quick_start.rst   
-   commands.rst
    routing.rst
    templates.rst
    rest.rst
    configuration.rst
    secure_controller.rst
-   jsonify.rst
    hooks.rst
+   jsonify.rst
+   commands.rst
+   development.rst
+   logging.rst
    testing.rst
 
 
@@ -52,6 +54,7 @@ Cookbook and Common Patterns
    forms.rst
    sessions.rst
    databases.rst
+   errors.rst
    deployment.rst
    
 

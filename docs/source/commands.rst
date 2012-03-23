@@ -131,7 +131,7 @@ that within this package is a ``wget.py`` module::
         '''
 
         arguments = pecan.commands.BaseCommand.arguments + ({
-            'command': 'path',
+            'name': 'path',
             'help': 'the URI path of the resource to request'
         },)
 
@@ -184,7 +184,7 @@ and usage output it provides::
     $ pecan wget config.py /path/to/some/resource
 
 Additionally, you'll notice that the first line of ``GetCommand``'s docstring
-(``Issues a (simulated) HTTP GET and returns the request body.``) is
+- ``Issues a (simulated) HTTP GET and returns the request body`` - is
 automatically used to describe the ``wget`` command in the output for ``$ pecan
 -h``.  Following this convention allows you to easily integrate a summary for
 your command into the Pecan command line tool.
@@ -192,7 +192,7 @@ your command into the Pecan command line tool.
 Registering a Custom Command
 ++++++++++++++++++++++++++++
 Now that you've written your custom command, you’ll need to tell your
-distribution’s ``setup.py`` about its existence and re-install.  Within your
+distribution’s ``setup.py`` about its existence and reinstall.  Within your
 distribution’s ``setup.py`` file, you'll find a call to ``setuptools.setup()``,
 e.g., ::
 
@@ -206,7 +206,7 @@ e.g., ::
     )
 
 Assuming it doesn't exist already, we'll add the ``entry_points`` argument 
-to the ``setup()`` call, and define a Pecan command definition for your custom
+to the ``setup()`` call, and define a ``[pecan.command]`` definition for your custom
 command::
 
     
@@ -223,7 +223,7 @@ command::
         """
     )
 
-Once you've done this, re-install your project in development to register the
+Once you've done this, reinstall your project in development to register the
 new entry point::
 
     $ python setup.py develop

@@ -67,7 +67,7 @@ class GenericJSON(JSONEncoder):
             along with the resultset "row" count.
 
             .. note:: {'count': 5, 'rows': [(u'Ed Jones',), (u'Pete Jones',),
-            (u'Wendy Williams',), (u'Mary Contrary',), (u'Fred Flinstone',)]}
+                (u'Wendy Williams',), (u'Mary Contrary',), (u'Fred Smith',)]}
 
         * SQLAlchemy RowProxy objects
             Casts the RowProxy cursor object into a dictionary, probably
