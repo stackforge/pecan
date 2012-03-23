@@ -33,7 +33,6 @@ Narrative Documentation
    
    installation.rst
    quick_start.rst   
-   commands.rst
    routing.rst
    templates.rst
    rest.rst
@@ -41,6 +40,7 @@ Narrative Documentation
    secure_controller.rst
    jsonify.rst
    hooks.rst
+   commands.rst
    testing.rst
 
 
