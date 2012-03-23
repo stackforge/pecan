@@ -88,7 +88,7 @@ def http_date(timestamp=None):
     return _dump_date(timestamp, ' ')
 
 
-class SharedDataMiddleware(object):
+class StaticFileMiddleware(object):
     """A WSGI middleware that provides static content for development
     environments.
 

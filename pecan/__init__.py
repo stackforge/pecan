@@ -8,7 +8,7 @@ from middleware.debug import DebugMiddleware
 from middleware.errordocument import ErrorDocumentMiddleware
 from middleware.logger import TransLogger
 from middleware.recursive import RecursiveMiddleware
-from middleware.static import SharedDataMiddleware
+from middleware.static import StaticFileMiddleware
 
 from configuration import set_config
 from configuration import _runtime_conf as conf
@@ -48,9 +48,9 @@ def make_app(root, static_root=None, debug=False, errorcfg={},
     if debug:
         app = DebugMiddleware(app)
 
-    # Support for serving static files (for development convenience)
-    if static_root:
-        app = SharedDataMiddleware(app, static_root)
+        # Support for serving static files (for development convenience)
+        if static_root:
+            app = StaticFileMiddleware(app, static_root)
 
     # Support for simple Apache-style logs
     if isinstance(logging, dict) or logging == True:

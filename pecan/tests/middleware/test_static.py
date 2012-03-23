@@ -1,5 +1,5 @@
 from unittest import TestCase
-from pecan.middleware.static import (SharedDataMiddleware, FileWrapper,
+from pecan.middleware.static import (StaticFileMiddleware, FileWrapper,
                                     _dump_date)
 
 import os
@@ -13,7 +13,7 @@ class TestStaticFileMiddleware(TestCase):
             start_response('200 OK', response_headers)
             return ['Hello world!\n']
 
-        self.app = SharedDataMiddleware(
+        self.app = StaticFileMiddleware(
             app, os.path.dirname(__file__)
         )
 
