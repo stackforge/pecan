@@ -45,7 +45,11 @@ class TestSecure(TestCase):
 
             secret = SecretController()
 
-        app = TestApp(make_app(RootController(), static_root='tests/static'))
+        app = TestApp(make_app(
+            RootController(),
+            debug=True,
+            static_root='tests/static'
+        ))
         response = app.get('/')
         assert response.status_int == 200
         assert response.body == 'Hello, World!'
@@ -103,7 +107,11 @@ class TestSecure(TestCase):
 
             secret = SecretController()
 
-        app = TestApp(make_app(RootController(), static_root='tests/static'))
+        app = TestApp(make_app(
+            RootController(),
+            debug=True,
+            static_root='tests/static'
+        ))
         response = app.get('/')
         assert response.status_int == 200
         assert response.body == 'Hello, World!'
@@ -257,9 +265,11 @@ class TestObjectPathSecurity(TestCase):
         self.secret_cls = SecretController
 
         self.permissions_checked = permissions_checked
-        self.app = TestApp(
-            make_app(RootController(), static_root='tests/static')
-        )
+        self.app = TestApp(make_app(
+            RootController(),
+            debug=True,
+            static_root='tests/static'
+        ))
 
     def tearDown(self):
         self.permissions_checked.clear()
