@@ -113,30 +113,49 @@ This is how your default (generated) configuration file should look::
 
     # Server Specific Configurations
     server = {
-        'port' : '8080',
-        'host' : '0.0.0.0'
+        'port': '8080',
+        'host': '0.0.0.0'
     }
 
     # Pecan Application Configurations
     app = {
-        'root' : 'test_project.controllers.root.RootController',
-        'modules' : ['test_project'],
-        'static_root' : '%(confdir)s/public', 
-        'template_path' : '%(confdir)s/test_project/templates',
-        'debug' : True,
-        'errors' : {
-            '404' : '/error/404',
-            '__force_dict__' : True
+        'root': '${package}.controllers.root.RootController',
+        'modules': ['${package}'],
+        'static_root': '%(confdir)s/public', 
+        'template_path': '%(confdir)s/${package}/templates',
+        'debug': True,
+        'errors': {
+            '404': '/error/404',
+            '__force_dict__': True
+        }
+    }
+
+    logging = {
+        'loggers': {
+            'root' : {'level': 'INFO', 'handlers': ['console']},
+            '${package}': {'level': 'DEBUG', 'handlers': ['console']}
+        },
+        'handlers': {
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+                'formatter': 'simple'
+            }
+        },
+        'formatters': {
+            'simple': {
+                'format': ('%(asctime)s %(levelname)-5.5s [%(name)s]'
+                           '[%(threadName)s] %(message)s')
+            }
         }
     }
 
     # Custom Configurations must be in Python dictionary format::
     #
     # foo = {'bar':'baz'}
-    # 
+    #
     # All configurations are accessible at::
     # pecan.conf
-
 
 You can also add your own configuration as Python dictionaries.
 
