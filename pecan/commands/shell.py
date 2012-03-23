@@ -94,7 +94,7 @@ class ShellCommand(BaseCommand):
     }
 
     arguments = BaseCommand.arguments + ({
-        'command': ['--shell', '-s'],
+        'name': ['--shell', '-s'],
         'help': 'which Python shell to use',
         'choices': SHELLS.keys(),
         'default': 'python'
