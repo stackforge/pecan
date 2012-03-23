@@ -73,6 +73,7 @@ docstrings here:
    pecan_decorators.rst
    pecan_deploy.rst
    pecan_hooks.rst
+   pecan_middleware_debug.rst
    pecan_jsonify.rst
    pecan_rest.rst
    pecan_routing.rst

@@ -231,6 +231,35 @@ class PdbMiddleware(object):
 
 
 class DebugMiddleware(object):
+    """A WSGI middleware that provides debugging assistance for development
+    environments.
+
+    To enable the debugging middleware, simply set the ``debug`` flag to
+    ``True`` in your configuration file::
+
+        app = {
+            ...
+            'debug': True,
+            ...
+        }
+
+    Once enabled, the middleware will automatically catch exceptions raised by
+    your application, and display the Python stack trace and WSGI environment
+    in your browser for easy debugging.
+
+    To further aid in debugging, the middleware includes the ability to repeat
+    the offending request, automatically inserting a breakpoint, and dropping
+    your console into the Python debugger, ``pdb``.
+
+    For more information, refer to the  `documentation for pdb
+    <http://docs.python.org/library/pdb.html>`_ available on the Python
+    website.
+
+    :param app: the application to wrap.
+    :param debugger: a callable to start debugging, defaulting to the Python
+                     debugger, ``pdb``.
+    """
+
     def __init__(self, app, debugger=pdb.post_mortem):
         self.app = app
         self.debugger = debugger
