@@ -9,7 +9,7 @@ def setup_app(config):
         config.app.root,
         static_root     = config.app.static_root,
         template_path   = config.app.template_path,
-        debug           = getattr(config.app, 'debug', None),
-        logging         = getattr(config.app, 'logging', None),
+        logging         = getattr(config, 'logging', {}),
+        debug           = getattr(config.app, 'debug', False),
         force_canonical = getattr(config.app, 'force_canonical', True)
     )
