@@ -1,8 +1,8 @@
 .. _jsonify:
 
 
-JSON Support
-============
+JSON Serialization
+==================
 Pecan includes a simple, easy-to-use system for generating and serving
 ``JSON``. To get started, create a file in your project called
 ``json.py`` and import it in your project's ``app.py``.
