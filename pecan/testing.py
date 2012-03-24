@@ -12,6 +12,7 @@ def load_test_app(config):
 
     returns a pecan.Pecan WSGI application wrapped in a webtest.TestApp
     instance.
+
     ::
         app = load_test_app('path/to/some/config.py')
 
