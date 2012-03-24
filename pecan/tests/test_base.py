@@ -1,6 +1,5 @@
 import sys
 import warnings
-from pecan.middleware.logger import TransLogger
 from webtest import TestApp
 
 if sys.version_info < (2, 7):
@@ -1075,141 +1074,65 @@ class TestNonCanonical(unittest.TestCase):
 
 
 class TestLogging(unittest.TestCase):
-    """
-    Mocks logging calls so we can make sure they get called. We could use
-    Fudge for this, but it would add an additional dependency to Pecan for
-    a single set of tests.
-    """
 
-    def setUp(self):
-        self._write_log = TransLogger.write_log
-
-    def tearDown(self):
-        TransLogger.write_log = self._write_log
-
-    def test_default(self):
-
+    def test_logging_setup(self):
         class RootController(object):
             @expose()
             def index(self):
-                return '/'
+                import logging
+                logging.getLogger('pecantesting').info('HELLO WORLD')
+                return "HELLO WORLD"
 
-        # monkeypatch the logger
-        writes = []
+        from cStringIO import StringIO
+        f = StringIO()
 
-        def _write_log(self, *args, **kwargs):
-            writes.append(1)  # pragma: nocover
-        TransLogger.write_log = _write_log
+        app = TestApp(make_app(RootController(), logging={
+            'loggers': {
+                'pecantesting': {
+                    'level': 'INFO', 'handlers': ['memory']
+                }
+            },
+            'handlers': {
+                'memory': {
+                    'level': 'INFO',
+                    'class': 'logging.StreamHandler',
+                    'stream': f
+                }
+            }
+        }))
 
-        # check the request
-        app = TestApp(make_app(RootController(), debug=True))
-        r = app.get('/')
-        assert r.status_int == 200
-        assert writes == []
+        app.get('/')
+        assert f.getvalue() == 'HELLO WORLD\n'
 
-    def test_default_route(self):
-
+    def test_logging_setup_with_config_obj(self):
         class RootController(object):
             @expose()
             def index(self):
-                return '/'
+                import logging
+                logging.getLogger('pecantesting').info('HELLO WORLD')
+                return "HELLO WORLD"
 
-        # monkeypatch the logger
-        writes = []
+        from cStringIO import StringIO
+        f = StringIO()
 
-        def _write_log(self, *args, **kwargs):
-            writes.append(1)  # pragma: nocover
-        TransLogger.write_log = _write_log
+        from pecan.configuration import conf_from_dict
+        app = TestApp(make_app(RootController(), logging=conf_from_dict({
+            'loggers': {
+                'pecantesting': {
+                    'level': 'INFO', 'handlers': ['memory']
+                }
+            },
+            'handlers': {
+                'memory': {
+                    'level': 'INFO',
+                    'class': 'logging.StreamHandler',
+                    'stream': f
+                }
+            }
+        })))
 
-        # check the request
-        app = TestApp(make_app(RootController(), debug=True))
-        r = app.get('/')
-        assert r.status_int == 200
-        assert len(writes) == 0
-
-    def test_no_logging(self):
-
-        class RootController(object):
-            @expose()
-            def index(self):
-                return '/'
-
-        # monkeypatch the logger
-        writes = []
-
-        def _write_log(self, *args, **kwargs):
-            writes.append(1)  # pragma: nocover
-
-        TransLogger.write_log = _write_log
-
-        # check the request
-        app = TestApp(make_app(RootController(), debug=True, logging=False))
-        r = app.get('/')
-        assert r.status_int == 200
-        assert len(writes) == 0
-
-    def test_basic_logging(self):
-
-        class RootController(object):
-            @expose()
-            def index(self):
-                return '/'
-
-        # monkeypatch the logger
-        writes = []
-
-        def _write_log(self, *args, **kwargs):
-            writes.append(1)
-
-        TransLogger.write_log = _write_log
-
-        # check the request
-        app = TestApp(make_app(RootController(), debug=True, logging=True))
-        r = app.get('/')
-        assert r.status_int == 200
-        assert len(writes) == 1
-
-    def test_empty_config(self):
-
-        class RootController(object):
-            @expose()
-            def index(self):
-                return '/'
-
-        # monkeypatch the logger
-        writes = []
-
-        def _write_log(self, *args, **kwargs):
-            writes.append(1)
-
-        TransLogger.write_log = _write_log
-
-        # check the request
-        app = TestApp(make_app(RootController(), debug=True, logging={}))
-        r = app.get('/')
-        assert r.status_int == 200
-        assert len(writes) == 1
-
-    def test_custom_config(self):
-
-        class RootController(object):
-            @expose()
-            def index(self):
-                return '/'
-
-        # create a custom logger
-        writes = []
-
-        class FakeLogger(object):
-            def log(self, *args, **kwargs):
-                writes.append(1)
-
-        # check the request
-        app = TestApp(make_app(RootController(), debug=True,
-                               logging={'logger': FakeLogger()}))
-        r = app.get('/')
-        assert r.status_int == 200
-        assert len(writes) == 1
+        app.get('/')
+        assert f.getvalue() == 'HELLO WORLD\n'
 
 
 class TestEngines(unittest.TestCase):

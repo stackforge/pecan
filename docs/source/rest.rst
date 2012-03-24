@@ -6,7 +6,7 @@ Writing RESTful Web Services with Pecan
 If you need to write controllers to interact with objects, using the 
 ``RestController`` may help speed things up. It follows the Representational 
 State Transfer Protocol, also known as REST, by routing the standard HTTP 
-verbs of GET, POST, PUT, and DELETE to individual methods::
+verbs of ``GET``, ``POST``, ``PUT``, and ``DELETE`` to individual methods::
 
     from pecan import expose
     from pecan.rest import RestController
@@ -55,8 +55,8 @@ By default, the ``RestController`` routes as follows:
 |                 |                                                              | DELETE /books/1                            |
 +-----------------+--------------------------------------------------------------+--------------------------------------------+
 
-Pecan's ``RestController`` uses the de-facto standard ``?_method=`` query 
-string hack to work around the lack of PUT/DELETE support in current browsers.
+Pecan's ``RestController`` uses the ``?_method=`` query string to work around
+the lack of PUT/DELETE form submission support in most current browsers.
 
 The ``RestController`` still supports the ``index``, ``_default``, and 
 ``_lookup`` routing overrides. If you need to override ``_route``, however, 

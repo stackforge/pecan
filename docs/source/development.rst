@@ -9,7 +9,7 @@ Reloading Automatically as Files Change
 
 Debugging Pecan Applications
 ----------------------------
-Pecan comes with a simple debugging middleware for helping track down problems 
+Pecan comes with simple debugging middleware for helping diagnose problems 
 in your applications. To enable the debugging middleware, simply set the
 ``debug`` flag to ``True`` in your configuration file::
 
@@ -20,26 +20,22 @@ in your applications. To enable the debugging middleware, simply set the
     }
 
 Once enabled, the middleware will automatically catch exceptions raised by your
-application, and display the Python stack trace and WSGI environment in your 
-browser for easy debugging.
+application and display the Python stack trace and WSGI environment in your 
+browser for easy debugging:
 
 .. figure:: debug-middleware-1.png
    :alt: Pecan debug middleware sample output.
    :width: 90%
-   :align: center
 
 To further aid in debugging, the middleware includes the ability to repeat the
 offending request, automatically inserting a breakpoint, and dropping your
-console into the Python debugger, ``pdb``. 
+console into the Python debugger, ``pdb``:
 
 .. figure:: debug-middleware-2.png
    :alt: Pecan debug middleware request debugger. 
-   :align: center
 
-For more information, refer to the  
-`documentation for pdb <http://docs.python.org/library/pdb.html>`_ available on
-the Python website.
-
+Refer to the  `pdb documentation <http://docs.python.org/library/pdb.html>`_
+for more information on using the Python debugger.
 
 Serving Static Files
 --------------------

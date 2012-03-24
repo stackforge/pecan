@@ -76,8 +76,9 @@ Exposing Controllers
 
 At its core, ``@expose`` is how you tell Pecan which methods in a class
 are publically-visible controllers. If a method is *not* decorated with
-``@expose``, it will not be routed to.  ``@expose`` accepts three optional
-parameters, some of which can impact routing. 
+``@expose``, it will never be routed to.  ``@expose`` accepts three optional
+parameters, some of which can impact routing and the content type of the
+response body. 
 
 ::
 
@@ -140,7 +141,7 @@ The ``_lookup`` special method provides a way to process a portion of a URL,
 and then return a new controller object to route to for the remainder.
 
 A ``_lookup`` method will accept one or more arguments, representing chunks
-of the URL to be processed, split on `/`, and then provide a `*remainder` list
+of the URL to be processed, split on ``/``, and then provide a ``*remainder`` list
 which will be processed by the returned controller via object-dispatch.
 
 Additionally, the ``_lookup`` method on a controller is called as a last
@@ -168,8 +169,8 @@ resort, when no other controller matches the URL via standard object-dispatch.
             else:
                 abort(404)
 
-An HTTP GET request to `/8/name` would return the name of the student
-where `primary_key == 8`.
+An HTTP GET request to ``/8/name`` would return the name of the student
+where ``primary_key == 8``.
 
 Falling Back with ``_default``
 ------------------------------

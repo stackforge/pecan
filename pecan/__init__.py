@@ -6,12 +6,16 @@ from decorators import expose
 from hooks import RequestViewerHook
 from middleware.debug import DebugMiddleware
 from middleware.errordocument import ErrorDocumentMiddleware
-from middleware.logger import TransLogger
 from middleware.recursive import RecursiveMiddleware
 from middleware.static import StaticFileMiddleware
 
-from configuration import set_config
+from configuration import set_config, Config
 from configuration import _runtime_conf as conf
+
+try:
+    from logging.config import dictConfig as load_logging_config
+except ImportError:
+    from .compat.dictconfig import dictConfig as load_logging_config
 
 
 __all__ = [
@@ -21,8 +25,8 @@ __all__ = [
 ]
 
 
-def make_app(root, static_root=None, debug=False, errorcfg={},
-             wrap_app=None, logging=False, **kw):
+def make_app(root, static_root=None, logging={}, debug=False,
+             wrap_app=None, **kw):
 
     # A shortcut for the RequestViewerHook middleware.
     if hasattr(conf, 'requestviewer'):
@@ -44,6 +48,14 @@ def make_app(root, static_root=None, debug=False, errorcfg={},
     # Included for internal redirect support
     app = RecursiveMiddleware(app)
 
+    # Pass logging configuration (if it exists) on to the Python logging module
+    if logging:
+        if isinstance(logging, Config):
+            logging = logging.to_dict()
+        if 'version' not in logging:
+            logging['version'] = 1
+        load_logging_config(logging)
+
     # When in debug mode, load our exception dumping middleware
     if debug:
         app = DebugMiddleware(app)
@@ -57,9 +69,5 @@ def make_app(root, static_root=None, debug=False, errorcfg={},
             "`static_root` is only used when `debug` is True, ignoring",
             RuntimeWarning
         )
-
-    # Support for simple Apache-style logs
-    if isinstance(logging, dict) or logging == True:
-        app = TransLogger(app, **(isinstance(logging, dict) and logging or {}))
 
     return app
