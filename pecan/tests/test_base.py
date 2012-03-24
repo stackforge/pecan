@@ -1073,6 +1073,68 @@ class TestNonCanonical(unittest.TestCase):
         assert len(wrapped_apps) == 1
 
 
+class TestLogging(unittest.TestCase):
+
+    def test_logging_setup(self):
+        class RootController(object):
+            @expose()
+            def index(self):
+                import logging
+                logging.getLogger('pecantesting').info('HELLO WORLD')
+                return "HELLO WORLD"
+
+        from cStringIO import StringIO
+        f = StringIO()
+
+        app = TestApp(make_app(RootController(), logging={
+            'loggers': {
+                'pecantesting': {
+                    'level': 'INFO', 'handlers': ['memory']
+                }
+            },
+            'handlers': {
+                'memory': {
+                    'level': 'INFO',
+                    'class': 'logging.StreamHandler',
+                    'stream': f
+                }
+            }
+        }))
+
+        app.get('/')
+        assert f.getvalue() == 'HELLO WORLD\n'
+
+    def test_logging_setup_with_config_obj(self):
+        class RootController(object):
+            @expose()
+            def index(self):
+                import logging
+                logging.getLogger('pecantesting').info('HELLO WORLD')
+                return "HELLO WORLD"
+
+        from cStringIO import StringIO
+        f = StringIO()
+
+        from pecan.configuration import conf_from_dict
+        app = TestApp(make_app(RootController(), logging=conf_from_dict({
+            'loggers': {
+                'pecantesting': {
+                    'level': 'INFO', 'handlers': ['memory']
+                }
+            },
+            'handlers': {
+                'memory': {
+                    'level': 'INFO',
+                    'class': 'logging.StreamHandler',
+                    'stream': f
+                }
+            }
+        })))
+
+        app.get('/')
+        assert f.getvalue() == 'HELLO WORLD\n'
+
+
 class TestEngines(unittest.TestCase):
 
     template_path = os.path.join(os.path.dirname(__file__), 'templates')

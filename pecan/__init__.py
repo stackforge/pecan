@@ -9,7 +9,7 @@ from middleware.errordocument import ErrorDocumentMiddleware
 from middleware.recursive import RecursiveMiddleware
 from middleware.static import StaticFileMiddleware
 
-from configuration import set_config
+from configuration import set_config, Config
 from configuration import _runtime_conf as conf
 from logging.config import dictConfig as load_logging_config
 
@@ -46,7 +46,8 @@ def make_app(root, static_root=None, logging={}, debug=False,
 
     # Pass logging configuration (if it exists) on to the Python logging module
     if logging:
-        logging = logging.as_dict()
+        if isinstance(logging, Config):
+            logging = logging.as_dict()
         if 'version' not in logging:
             logging['version'] = 1
         load_logging_config(logging)
