@@ -59,27 +59,34 @@ give you an idea of what you should expect.
 
 A few things have been created for you, so let's review them one by one:
 
-* **public**: All your static files (like CSS and Javascript) live here. If you
-  have any images they would live here too.
+* **public**: All your static files (like CSS, Javascript, and images) live
+  here. If you have any images they would live here too.  Pecan comes with
+  a simple file server that serves these static files as you develop.
 
 
-The remaining directories encompass your models, controllers and templates, and
-tests:
+Pecan application structure generally follows the
+`MVC <http://en.wikipedia.org/wiki/Model–view–controller>`_ pattern.  The
+remaining directories encompass your models, controllers and templates...
 
 *  **test_project/controllers**:  The container directory for your controller files.
 *  **test_project/templates**:    All your templates go in here.
 *  **test_project/model**:        Container for your model files.
+
+...and finally, a directory to house unit and integration tests:
+
 *  **test_project/tests**:        All of the tests for your application.
 
 To avoid unneeded dependencies and to remain as flexible as possible, Pecan
-doesn't impose any database or ORM (Object Relational Mapper) out of the box. 
-You may notice that **model/__init__.py** is mostly empty.  You may wish to add 
-code here to define tables, ORM definitions, and parse bindings from your 
-configuration file.
+doesn't impose any database or ORM 
+(`Object Relational Mapper
+<http://en.wikipedia.org/wiki/Object-relational_mapping>`_) out of the box.
+You may notice that **model/__init__.py** is mostly empty.  If your project
+will interact with a database, this if where you should add code to parse
+bindings from your configuration file and define tables and ORM definitions.
 
 Now that you've created your first Pecan application, you'll want to deploy it
 in "development mode", such that it’s available on ``sys.path``, yet can still
-be edited directly from its source checkout::
+be edited directly from its source distribution::
 
     $ python setup.py develop
 
@@ -90,8 +97,9 @@ Running the Application
 Before starting up your Pecan app, you'll need a configuration file.  The
 base project template should have created one for you already, ``config.py``.
 
-This file already contains the necessary information to run a Pecan app, like
-ports, static paths and so forth. 
+This file already contains the basic necessary information to run your Pecan
+app, like the host and port to serve it on, where your controllers and templates
+are stored on disk, and which directory to serve static files from.
 
 If you just run ``pecan serve``, passing ``config.py`` as an argument for
 configuration, it will bring up the development server and serve the app::
@@ -100,14 +108,14 @@ configuration, it will bring up the development server and serve the app::
     Starting server in PID 000.
     serving on 0.0.0.0:8080, view at http://127.0.0.1:8080
 
-    
-The location for the config file and the argument itself are very flexible - 
-you can pass an absolute or relative path to the file.
+The location for the configuration file and the argument itself are very
+flexible - you can pass an absolute or relative path to the file.
 
 
-Simple Configuration
---------------------
-For ease of use, Pecan configuration files are pure Python.
+Python-Based Configuration
+--------------------------
+For ease of use, Pecan configuration files are pure Python - they're even saved
+as ``.py`` files.
 
 This is how your default (generated) configuration file should look::
 
@@ -159,13 +167,15 @@ This is how your default (generated) configuration file should look::
 
 You can also add your own configuration as Python dictionaries.
 
-For more specific documentation on configuration, see the :ref:`Configuration`
-section.
+There's a lot to cover here, so we'll come back to configuration files in
+a later chapter (:ref:`Configuration`).
 
     
 The Application Root
 --------------------
-The Root Controller is the root of your application.
+The **Root Controller** is the root of your application.  You can think of it
+as being analogous to your application's root path (in our case,
+``http://localhost:8080/``).
 
 This is how it looks in the project template
 (``test_project.controllers.root.RootController``)::
@@ -195,23 +205,46 @@ This is how it looks in the project template
 
 
 You can specify additional classes and methods if you need to do so, but for 
-now we have an *index* and *index_post* method.
+now, let's examine the sample project, controller by controller::
 
-**def index**: is *exposed* via the decorator ``@expose`` (which in turn uses the
-``index.html`` template) at the root of the application (http://127.0.0.1:8080/),
-so any HTTP GET that hits the root of your application (/) will be routed to
-this method.
+    @expose(generic=True, template='index.html')
+    def index(self):
+        return dict()
 
-Notice that the index method returns a dictionary - this dictionary is used as
-a namespace to render the specified template (``index.html``) into HTML.
+The ``index`` method is marked as **publically available** via the ``@expose`` 
+decorator (which in turn uses the ``index.html`` template) at the root of the
+application (http://127.0.0.1:8080/), so any HTTP ``GET`` that hits the root of
+your application (``/``) will be routed to this method.
 
-**def index_post**: receives one HTTP POST argument (``q``).
+Notice that the ``index`` method returns a Python dictionary - this dictionary
+is used as a namespace to render the specified template (``index.html``) into
+HTML, and is the primary mechanism by which data is passed from controller to 
+template.
 
-``method`` has been set to 'POST', so HTTP POSTs to the application root (in
-our example, form submissions) will be routed to this method.
+::
 
-**def error**: Finally, we have the error controller that allows your application to 
-display custom pages for certain HTTP errors (404, etc...).
+    @index.when(method='POST')
+    def index_post(self, q):
+        redirect('http://pecan.readthedocs.org/en/latest/search.html?q=%s' % q)
+
+The ``index_post`` method receives one HTTP ``POST`` argument (``q``).  Because
+the argument ``method`` to ``@index.when`` has been set to ``'POST'``, any
+HTTP ``POST`` to the application root (in the example project, a form
+submission) will be routed to this method.
+
+::
+
+    @expose('error.html')
+    def error(self, status):
+        try:
+            status = int(status)
+        except ValueError:
+            status = 0
+        message = getattr(status_map.get(status), 'explanation', '')
+        return dict(status=status, message=message)
+
+Finally, we have the ``error`` method, which allows the application to display
+custom pages for certain HTTP errors (``404``, etc...).
 
 Running the Tests For Your Application
 --------------------------------------

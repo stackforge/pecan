@@ -9,7 +9,7 @@ Reloading Automatically as Files Change
 
 Debugging Pecan Applications
 ----------------------------
-Pecan comes with a simple debugging middleware for helping track down problems 
+Pecan comes with simple debugging middleware for helping diagnose problems 
 in your applications. To enable the debugging middleware, simply set the
 ``debug`` flag to ``True`` in your configuration file::
 

@@ -14,25 +14,25 @@ supports the following templating engines:
  * `JSON`
 
 The default template system is `mako`, but can be configured by passing the 
-``default_renderer`` key in your app configuration::
+``default_renderer`` key in your application's configuration::
     
     app = {
         'default_renderer' : 'kajiki',
         # ...
     }
 
-The available renderer type strings are `mako`, `genshi`, `kajiki`, `jinja`, 
-and `json`.
+The available renderer type strings are ``mako``, ``genshi``, ``kajiki``,
+``jinja``, and ``json``.
 
 
 Using Template Renderers
 ------------------------
 
 :ref:`pecan_decorators` defines a decorator called ``@expose``, which is used
-to flag a method as a controller. The ``@expose`` decorator takes a variety of
-parameters, including a ``template`` argument, which is the path to the template
-file to use for that controller. A controller will use the default template 
-engine, unless the path is prefixed by another renderer name::
+to flag a method as a public controller. The ``@expose`` decorator takes
+a variety of parameters, including a ``template`` argument, which is the path
+to the template file to use for that controller. ``@expose`` will use the
+default template engine unless the path is prefixed by another renderer name::
 
     class MyController(object):
         @expose('path/to/mako/template.html')
