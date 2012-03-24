@@ -79,8 +79,7 @@ class Config(object):
 
     def __dictify__(self, obj, prefix):
         '''
-        Private helper method for as_dict.
-        **Do not use directly**
+        Private helper method for to_dict.
         '''
         for k, v in obj.items():
             if prefix:
@@ -91,7 +90,7 @@ class Config(object):
             obj[k] = v
         return obj
 
-    def as_dict(self, prefix=None):
+    def to_dict(self, prefix=None):
         '''
         Converts recursively the Config object into a valid dictionary.
 

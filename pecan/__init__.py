@@ -51,7 +51,7 @@ def make_app(root, static_root=None, logging={}, debug=False,
     # Pass logging configuration (if it exists) on to the Python logging module
     if logging:
         if isinstance(logging, Config):
-            logging = logging.as_dict()
+            logging = logging.to_dict()
         if 'version' not in logging:
             logging['version'] = 1
         load_logging_config(logging)

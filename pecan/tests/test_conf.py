@@ -182,56 +182,56 @@ class TestConf(TestCase):
         conf = configuration.Config({'a': 1})
         assert conf.get('b', True) is True
 
-    def test_config_as_dict(self):
+    def test_config_to_dict(self):
         from pecan import configuration
         conf = configuration.initconf()
 
         assert isinstance(conf, configuration.Config)
 
-        as_dict = conf.as_dict()
+        to_dict = conf.to_dict()
 
-        assert isinstance(as_dict, dict)
-        assert as_dict['server']['host'] == '0.0.0.0'
-        assert as_dict['server']['port'] == '8080'
-        assert as_dict['app']['modules'] == []
-        assert as_dict['app']['root'] == None
-        assert as_dict['app']['static_root'] == 'public'
-        assert as_dict['app']['template_path'] == ''
+        assert isinstance(to_dict, dict)
+        assert to_dict['server']['host'] == '0.0.0.0'
+        assert to_dict['server']['port'] == '8080'
+        assert to_dict['app']['modules'] == []
+        assert to_dict['app']['root'] == None
+        assert to_dict['app']['static_root'] == 'public'
+        assert to_dict['app']['template_path'] == ''
 
-    def test_config_as_dict_nested(self):
+    def test_config_to_dict_nested(self):
         from pecan import configuration
         """have more than one level nesting and convert to dict"""
         conf = configuration.initconf()
         nested = {'one': {'two': 2}}
         conf['nested'] = nested
 
-        as_dict = conf.as_dict()
+        to_dict = conf.to_dict()
 
-        assert isinstance(as_dict, dict)
-        assert as_dict['server']['host'] == '0.0.0.0'
-        assert as_dict['server']['port'] == '8080'
-        assert as_dict['app']['modules'] == []
-        assert as_dict['app']['root'] == None
-        assert as_dict['app']['static_root'] == 'public'
-        assert as_dict['app']['template_path'] == ''
-        assert as_dict['nested']['one']['two'] == 2
+        assert isinstance(to_dict, dict)
+        assert to_dict['server']['host'] == '0.0.0.0'
+        assert to_dict['server']['port'] == '8080'
+        assert to_dict['app']['modules'] == []
+        assert to_dict['app']['root'] == None
+        assert to_dict['app']['static_root'] == 'public'
+        assert to_dict['app']['template_path'] == ''
+        assert to_dict['nested']['one']['two'] == 2
 
-    def test_config_as_dict_prefixed(self):
+    def test_config_to_dict_prefixed(self):
         from pecan import configuration
         """Add a prefix for keys"""
         conf = configuration.initconf()
 
         assert isinstance(conf, configuration.Config)
 
-        as_dict = conf.as_dict('prefix_')
+        to_dict = conf.to_dict('prefix_')
 
-        assert isinstance(as_dict, dict)
-        assert as_dict['prefix_server']['prefix_host'] == '0.0.0.0'
-        assert as_dict['prefix_server']['prefix_port'] == '8080'
-        assert as_dict['prefix_app']['prefix_modules'] == []
-        assert as_dict['prefix_app']['prefix_root'] == None
-        assert as_dict['prefix_app']['prefix_static_root'] == 'public'
-        assert as_dict['prefix_app']['prefix_template_path'] == ''
+        assert isinstance(to_dict, dict)
+        assert to_dict['prefix_server']['prefix_host'] == '0.0.0.0'
+        assert to_dict['prefix_server']['prefix_port'] == '8080'
+        assert to_dict['prefix_app']['prefix_modules'] == []
+        assert to_dict['prefix_app']['prefix_root'] == None
+        assert to_dict['prefix_app']['prefix_static_root'] == 'public'
+        assert to_dict['prefix_app']['prefix_template_path'] == ''
 
 
 class TestGlobalConfig(TestCase):

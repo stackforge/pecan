@@ -256,7 +256,7 @@ class RequestViewerHook(PecanHook):
             self.config = {'items': self.available}
         else:
             if config.__class__.__name__ == 'Config':
-                self.config = config.as_dict()
+                self.config = config.to_dict()
             else:
                 self.config = config
         self.writer = writer
