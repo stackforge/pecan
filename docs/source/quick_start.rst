@@ -60,8 +60,8 @@ give you an idea of what you should expect.
 A few things have been created for you, so let's review them one by one:
 
 * **public**: All your static files (like CSS, Javascript, and images) live
-  here. If you have any images they would live here too.  Pecan comes with
-  a simple file server that serves these static files as you develop.
+  here.  Pecan comes with a simple file server that serves these static files
+  as you develop.
 
 
 Pecan application structure generally follows the
