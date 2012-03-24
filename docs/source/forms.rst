@@ -12,34 +12,37 @@ This article details best practices for integrating the popular forms library,
 Defining a Form Definition
 --------------------------
 
-A basic form with a first name field that is required and a last name optional
-field.
-
-.. code-block:: python
+Let's start by building a basic form with a required ``first_name`` field and an optional ``last_name`` field::
 
     from wtforms import Form, TextField, validators
 
+    class MyForm(Form):
+        first_name = TextField(u'First Name', validators=[validators.required()])
+        last_name = TextField(u'Last Name', validators=[validators.optional()])
+
     class SomeController(object):
-        ...
-        class MyForm(Form):
-            first_name = TextField(u'First Name', validators=[validators.required()])
-            last_name = TextField(u'Last Name', validators=[validators.optional()])
+        pass
 
 Rendering a Form in a Template
 ------------------------------
 
-Using that same MyForm definition we can render it to a template.
+Next, let's add a controller, and pass a form instance to the template::
 
-In the controller file:
+    from pecan import expose
+    from wtforms import Form, TextField, validators
 
-.. code-block:: python
+    class MyForm(Form):
+        first_name = TextField(u'First Name', validators=[validators.required()])
+        last_name = TextField(u'Last Name', validators=[validators.optional()])
 
     class SomeController(object):
-        @expose(template='index.html)
-        def index(self):
-            return dict(form=self.MyForm())
 
-In the template file using `Mako <http://www.makeotemplates.org/>`_:
+        @expose(template='index.html')
+        def index(self):
+            return dict(form=MyForm())
+
+Here's the template file (which uses the `Mako <http://www.makeotemplates.org/>`_
+templating language):
 
 .. code-block:: html
 
@@ -58,21 +61,25 @@ In the template file using `Mako <http://www.makeotemplates.org/>`_:
 Validating POST Values
 ----------------------
 
-Using the same MyForm definition we will redirect if the form is validated,
-otherwise, render the form again.
+Using the same ``MyForm`` definition, let's redirect the user if the form is 
+validated, otherwise, render the form again.
 
 .. code-block:: python
 
-    from pecan import request
+    from pecan import expose, request
+    from wtforms import Form, TextField, validators
+
+    class MyForm(Form):
+        first_name = TextField(u'First Name', validators=[validators.required()])
+        last_name = TextField(u'Last Name', validators=[validators.optional()])
 
     class SomeController(object):
-        @expose(method='POST', template='index.html')
+
+        @expose(template='index.html')
         def index(self):
             my_form = MyForm(request.POST)
-            if request.method == 'POST' && my_form.validate():
-                save_values()
+            if request.method == 'POST' and my_form.validate():
+                # save_values()
                 redirect('/success')
             else:
                 return dict(form=my_form)
-        ...
-
