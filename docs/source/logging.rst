@@ -104,3 +104,57 @@ writing logs to file.  A few interesting ones are:
 
 Using any of them is as simple as defining a new handler in your
 application's ``logging`` block and assigning it to one of more loggers.
+
+Logging Requests with Paste Translogger
+---------------------------------------
+`Paste <http://pythonpaste.org/>`_ (which is not included with Pecan) includes
+the `TransLogger <http://pythonpaste.org/modules/translogger.html>`_ middleware
+for logging requests in `Apache Combined Log Format
+<http://httpd.apache.org/docs/2.2/logs.html#combined>`_. Combined with
+file-based logging, TransLogger can be used to create an ``access.log`` file
+similar to ``Apache``.
+
+To add this middleware, modify your the ``setup_app`` method in your
+project's ``app.py`` as follows::
+
+    # myapp/myapp/app.py
+    from pecan import make_app
+    from paste.translogger import TransLogger
+
+    def setup_app(config):
+        # ...
+        app = make_app(
+            config.app.root
+            # ...
+        )
+        app = TransLogger(app, setup_console_handler=False)
+        return app
+
+By default, ``TransLogger`` creates a logger named ``wsgi``, so you'll need to
+specify a new (file-based) handler for this logger in our Pecan configuration
+file::
+
+    # myapp/config.py
+
+    app = { ... }
+    server = { ... }
+
+    logging = {
+        'loggers': {
+            # ...
+            'wsgi': {'level': 'INFO', 'handlers': ['logfile'], 'qualname': 'wsgi'}
+        },
+        'handlers': {
+            # ...
+            'logfile': {
+                'class': 'logging.FileHandler',
+                'filename': '/etc/access.log',
+                'level': 'INFO',
+                'formatter': 'messageonly'
+            }
+        },
+        'formatters': {
+            # ...
+            'messageonly': {'format': '%(message)s'}
+        }
+    }
