@@ -11,7 +11,11 @@ from middleware.static import StaticFileMiddleware
 
 from configuration import set_config, Config
 from configuration import _runtime_conf as conf
-from logging.config import dictConfig as load_logging_config
+
+try:
+    from logging.config import dictConfig as load_logging_config
+except ImportError:
+    from .compat.dictconfig import dictConfig as load_logging_config
 
 
 __all__ = [
