@@ -27,6 +27,7 @@ The server ``host`` and ``port`` in your configuration file can be changed as
 described in :ref:`server_configuration`.
 
 .. include:: reload.rst
+    :start-after: #reload
 
 The Interactive Shell
 ---------------------

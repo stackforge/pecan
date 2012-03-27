@@ -4,6 +4,7 @@ Developing Pecan Applications Locally
 =====================================
 
 .. include:: reload.rst
+    :start-after: #reload
 
 Debugging Pecan Applications
 ----------------------------
