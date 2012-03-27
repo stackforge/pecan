@@ -1,3 +1,6 @@
+Reloading Automatically as Files Change
+---------------------------------------
+
 Pausing to restart your development server as you work can be interruptive, so
 ``pecan serve`` provides a ``--reload`` flag to make life easier.
 

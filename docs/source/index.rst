@@ -56,6 +56,7 @@ Cookbook and Common Patterns
    databases.rst
    errors.rst
    deployment.rst
+   reload.rst
    
 
 API Documentation
