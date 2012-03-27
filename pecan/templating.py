@@ -208,7 +208,7 @@ def format_line_context(filename, lineno, context=10):
 #
 class ExtraNamespace(object):
     '''
-    Extra variables for the template namesapce to pass to the renderer as named
+    Extra variables for the template namespace to pass to the renderer as named
     parameters.
 
     :param extras: dictionary of extra parameters. Defaults to an empty dict.
