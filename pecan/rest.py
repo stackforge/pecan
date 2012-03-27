@@ -12,12 +12,16 @@ class RestController(object):
     to implement a REST controller. A set of custom actions can also
     be specified. For more details, see :ref:`pecan_rest`.
     '''
-
     _custom_actions = {}
-
+    
     @expose()
     def _route(self, args):
-
+        '''
+        Routes a request to the appropriate controller and returns its result.
+        
+        Performs a bit of validation - refuses to route delete and put actions
+        via a GET request).
+        '''
         # convention uses "_method" to handle browser-unsupported methods
         if request.environ.get('pecan.validation_redirected', False) == True:
             #
@@ -46,6 +50,9 @@ class RestController(object):
         return result
 
     def _find_controller(self, *args):
+        '''
+        Returns the appropriate controller for routing a custom action.
+        '''
         for name in args:
             obj = getattr(self, name, None)
             if obj and iscontroller(obj):
@@ -53,7 +60,10 @@ class RestController(object):
         return None
 
     def _find_sub_controllers(self, remainder):
-
+        '''
+        Identifies the correct controller to route to by analyzing the 
+        request URI.
+        '''
         # need either a get_one or get to parse args
         method = None
         for name in ('get_one', 'get'):
@@ -89,7 +99,9 @@ class RestController(object):
                 )
 
     def _handle_custom(self, method, remainder):
-
+        '''
+        Routes ``_custom`` actions to the appropriate controller.
+        '''
         # try finding a post_{custom} or {custom} method first
         controller = self._find_controller('post_%s' % method, method)
         if controller:
@@ -107,7 +119,9 @@ class RestController(object):
         abort(404)
 
     def _handle_get(self, method, remainder):
-
+        '''
+        Routes ``GET`` actions to the appropriate controller.
+        '''
         # route to a get_all or get if no additional parts are available
         if not remainder or remainder == ['']:
             controller = self._find_controller('get_all', 'get')
@@ -144,7 +158,9 @@ class RestController(object):
         abort(404)
 
     def _handle_delete(self, method, remainder):
-
+        '''
+        Routes ``DELETE`` actions to the appropriate controller.
+        '''
         # check for post_delete/delete requests first
         controller = self._find_controller('post_delete', 'delete')
         if controller:
@@ -162,7 +178,9 @@ class RestController(object):
         abort(404)
 
     def _handle_post(self, method, remainder):
-
+        '''
+        Routes ``POST`` requests.
+        '''
         # check for custom POST/PUT requests
         if remainder:
             method_name = remainder[-1]
@@ -187,4 +205,7 @@ class RestController(object):
     _handle_put = _handle_post
 
     def _set_routing_args(self, args):
+        '''
+        Sets default routing arguments.
+        '''
         request.pecan.setdefault('routing_args', []).extend(args)

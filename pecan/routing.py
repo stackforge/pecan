@@ -7,12 +7,23 @@ __all__ = ['lookup_controller', 'find_object']
 
 
 class NonCanonicalPath(Exception):
+    '''
+    Exception Raised when a non-canonical path is encountered when 'walking'
+    the URI.  This is typically a ``POST`` request which requires a trailing
+    slash.
+    '''
     def __init__(self, controller, remainder):
         self.controller = controller
         self.remainder = remainder
 
 
 def lookup_controller(obj, url_path):
+    '''
+    Traverses the requested url path and returns the appropriate controller
+    object, including default routes.
+
+    Handles common errors gracefully.
+    '''
     remainder = url_path
     notfound_handlers = []
 
@@ -51,6 +62,11 @@ def lookup_controller(obj, url_path):
 
 
 def find_object(obj, remainder, notfound_handlers):
+    '''
+    'Walks' the url path in search of an action for which a controller is 
+    implemented and returns that controller object along with what's left
+    of the remainder.
+    '''
     prev_obj = None
     while True:
         if obj is None:
