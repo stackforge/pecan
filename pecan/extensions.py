@@ -75,6 +75,7 @@ class PecanExtensionImporter(object):
             log.debug('%s loading extension %s', self.__class__.__name__, ep)
             module = ep.load()
             if not inspect.ismodule(module):
+                log.debug('%s is not a module, skipping...' % module)
                 continue
             return module
         raise PecanExtensionMissing(
