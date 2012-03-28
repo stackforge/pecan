@@ -6,7 +6,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class PecanExtensionMissing(Exception):
+class PecanExtensionMissing(ImportError):
     pass
 
 
