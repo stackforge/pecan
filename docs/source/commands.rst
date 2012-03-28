@@ -26,9 +26,8 @@ Serving your Pecan app is as simple as invoking the ``pecan serve`` command::
 The server ``host`` and ``port`` in your configuration file can be changed as
 described in :ref:`server_configuration`.
 
-Reloading Automatically as Files Change
-+++++++++++++++++++++++++++++++++++++++
 .. include:: reload.rst
+    :start-after: #reload
 
 The Interactive Shell
 ---------------------

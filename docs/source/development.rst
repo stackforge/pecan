@@ -3,9 +3,8 @@
 Developing Pecan Applications Locally
 =====================================
 
-Reloading Automatically as Files Change
----------------------------------------
 .. include:: reload.rst
+    :start-after: #reload
 
 Debugging Pecan Applications
 ----------------------------
