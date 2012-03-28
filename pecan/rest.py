@@ -9,8 +9,17 @@ from util import iscontroller
 class RestController(object):
     '''
     A base class for ``REST`` based controllers. Inherit from this class
-    to implement a REST controller. A set of custom actions can also
-    be specified. For more details, see :ref:`pecan_rest`.
+    to implement a REST controller. 
+    
+    ``RestController`` implements a set of routing functions which override
+    the default pecan routing with behavior consistent with RESTful routing.
+    This functionality covers navigation to the requested resource 
+    controllers, and the appropriate handling of both the common (``GET``,
+    ``POST``, ``PUT``, ``DELETE``) as well as custom-defined REST action
+    methods.
+
+    For more on developing **RESTful** web applications with Pecan, see
+    :ref:`rest`.
     '''
     _custom_actions = {}
     
