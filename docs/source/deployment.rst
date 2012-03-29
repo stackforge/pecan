@@ -7,7 +7,8 @@ Deploying a Pecan project to a production environment can be accomplished in
 a variety of ways.  A few popular options for deployment are documented here.
 It is important, however, to note that these examples are meant to provide
 *direction*, not explicit instruction; deployment is usually heavily dependent
-upon the needs and goals of individual applications, so your mileage may vary.
+upon the needs and goals of individual applications, so your mileage will
+probably vary.
 
 .. note::
     While Pecan comes packaged with a simple server *for development use* 
@@ -23,7 +24,7 @@ Disabling Debug Mode
 --------------------
 One of the most important steps to take before deploying a Pecan app into
 production is to disable **Debug Mode**, which is responsible for serving
-static files locally and providing a development-oriented debug environment
+static files locally and providing a development-oriented debugging environment
 for tracebacks.  In your production configuration file, ensure that::
 
     # myapp/production_config.py
@@ -64,9 +65,9 @@ serving static files separately from your WSGI application (primarily for
 performance reasons).  There are several popular ways to accomplish this.  Here
 are two:
 
-1.  Set up a proxy server (such as `nginx <http://nginx.org/>`_, `cherokee
-    <http://www.cherokee-project.com>`_, or `lighttpd
-    <http://www.lighttpd.net/>`_) to serve static files and proxy application
+1.  Set up a proxy server (such as `nginx <http://nginx.org/en>`__, `cherokee
+    <http://www.cherokee-project.com>`__, or `lighttpd
+    <http://www.lighttpd.net/>`__) to serve static files and proxy application
     requests through to your WSGI application:
 
 ::
@@ -96,9 +97,15 @@ developer/sysadmin-friendly application container server coded in pure C.  It
 uses the `uwsgi <http://projects.unbit.it/uwsgi/wiki/uwsgiProtocol>`__
 protocol, but can speak other protocols as well (http, fastcgi...).
 
+`Cherokee <http://www.cherokee-project.com/>`__ is a flexible, very fast, lightweight Web server. It is
+implemented entirely in C, and has no dependencies beyond a standard C library.
+
 Gunicorn + nginx
 ++++++++++++++++
 `Gunicorn <http://gunicorn.org/'>`__, or "Green Unicorn", is a WSGI HTTP Server for
 UNIX. It’s a pre-fork worker model ported from Ruby’s Unicorn project. It
-supports both eventlet and greenlet. Running a Flask application on this server
-is quite simple:
+supports both eventlet and greenlet.
+
+`nginx <http://nginx.org/en/>`_ is a web and a reverse proxy server for HTTP, SMTP, POP3 and IMAP
+protocols, with a strong focus on high concurrency, performance and low memory
+usage. 
