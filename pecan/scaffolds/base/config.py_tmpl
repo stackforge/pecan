@@ -12,7 +12,7 @@ app = {
     'template_path': '%(confdir)s/${package}/templates',
     'debug': True,
     'errors': {
-        '404': '/error/404',
+        404: '/error/404',
         '__force_dict__': True
     }
 }
