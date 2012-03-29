@@ -504,7 +504,7 @@ class Pecan(object):
         try:
             # add context and environment to the request
             state.request.context = {}
-            state.request.pecan = dict(content_type=None, validation_errors={})
+            state.request.pecan = dict(content_type=None)
 
             self.handle_request()
         except Exception, e:
