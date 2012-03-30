@@ -11,6 +11,7 @@ dependencies.
 
 Installing
 ----------
+
 ::
     $ pip install pecan
 
@@ -21,6 +22,7 @@ Installing
 
 Running Tests
 -------------
+
 ::
     $ python setup.py test
 
