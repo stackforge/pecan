@@ -39,7 +39,7 @@ class ErrorDocumentMiddleware(object):
     '''
     Intersects HTTP response status code, looks it up in the error map defined
     in the Pecan app config.py, and routes to the controller assigned to that
-    status.  
+    status.
     '''
     def __init__(self, app, error_map):
         self.app = app

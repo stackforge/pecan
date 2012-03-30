@@ -63,7 +63,7 @@ def lookup_controller(obj, url_path):
 
 def find_object(obj, remainder, notfound_handlers):
     '''
-    'Walks' the url path in search of an action for which a controller is 
+    'Walks' the url path in search of an action for which a controller is
     implemented and returns that controller object along with what's left
     of the remainder.
     '''
