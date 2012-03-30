@@ -88,9 +88,9 @@ Common Recipes
 Apache + mod_wsgi
 +++++++++++++++++
 `mod_wsgi <http://code.google.com/p/modwsgi/>`_ is a popular Apache module
-which can be used to host any WSGI-compatible Python applicationa.
+which can be used to host any WSGI-compatible Python application.
 
-uwsgi + cherokee
+uWSGI + cherokee
 ++++++++++++++++
 `uWSGI <http://projects.unbit.it/uwsgi/>`_ is a fast, self-healing and
 developer/sysadmin-friendly application container server coded in pure C.  It
@@ -102,10 +102,10 @@ implemented entirely in C, and has no dependencies beyond a standard C library.
 
 Gunicorn + nginx
 ++++++++++++++++
-`Gunicorn <http://gunicorn.org/'>`__, or "Green Unicorn", is a WSGI HTTP Server for
+`Gunicorn <http://gunicorn.org/>`__, or "Green Unicorn", is a WSGI HTTP Server for
 UNIX. It’s a pre-fork worker model ported from Ruby’s Unicorn project. It
 supports both eventlet and greenlet.
 
-`nginx <http://nginx.org/en/>`_ is a web and a reverse proxy server for HTTP, SMTP, POP3 and IMAP
+`nginx <http://nginx.org/en/>`_ is a web and reverse proxy server for HTTP, SMTP, POP3 and IMAP
 protocols, with a strong focus on high concurrency, performance and low memory
 usage. 

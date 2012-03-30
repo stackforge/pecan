@@ -16,6 +16,7 @@ except ImportError:             # pragma: no cover
     from json import loads      # noqa
 
 import urllib
+import sys
 
 # make sure that json is defined in mimetypes
 add_type('application/json', '.json', True)
@@ -213,14 +214,11 @@ class Pecan(object):
             name = '.'.join(parts[:-1])
             fromlist = parts[-1:]
 
-            try:
-                module = __import__(name, fromlist=fromlist)
-                kallable = getattr(module, parts[-1])
-                msg = "%s does not represent a callable class or function."
-                assert hasattr(kallable, '__call__'), msg % item
-                return kallable()
-            except AttributeError:
-                raise ImportError('No item named %s' % item)
+            module = __import__(name, fromlist=fromlist)
+            kallable = getattr(module, parts[-1])
+            msg = "%s does not represent a callable class or function."
+            assert hasattr(kallable, '__call__'), msg % item
+            return kallable()
 
         raise ImportError('No item named %s' % item)
 
