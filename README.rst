@@ -13,6 +13,7 @@ Installing
 ----------
 
 ::
+
     $ pip install pecan
 
 ...or, for the latest (unstable) tip::
@@ -24,6 +25,7 @@ Running Tests
 -------------
 
 ::
+
     $ python setup.py test
 
 Viewing Documentation
