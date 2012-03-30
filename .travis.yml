@@ -4,5 +4,8 @@ python:
   - "2.7"
 env:
   - PYTHONPATH='.'
+branches:
+  only:
+    - next
 install: pip install -r requirements.txt --use-mirrors
-script: git checkout next && python setup.py test --functional
+script: python setup.py test --functional
