@@ -28,6 +28,10 @@ Running Tests
 
     $ python setup.py test
 
+...or, to run all tests across all supported environments::
+
+    $ pip install tox && tox
+
 Viewing Documentation
 ---------------------
 `Available Online <http://pecan.readthedocs.org>`_, or to build manually::
