@@ -32,8 +32,7 @@ environments:
        Use ``pip freeze`` and ``pip install`` to create and install from
        a ``requirements.txt`` file for your project.
 
-    *  Install Pecan manually via the instructions found in
-       :ref:`Installation`.
+    *  Via the manual instructions found in :ref:`Installation`.
 
 .. note::
     Regardless of the route you choose, it's highly recommended that all
