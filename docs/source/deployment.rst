@@ -17,8 +17,28 @@ probably vary.
 
 Installing Pecan
 ----------------
-For instructions on installing Pecan in most any environment, refer to
-the documentation on :ref:`Installation`.
+A few popular options are avaliable for installing Pecan in production
+environments:
+
+    *  Using `setuptools/distribute
+       <http://packages.python.org/distribute/setuptools.html>`_.  Manage
+       Pecan as a dependency in your project's ``setup.py`` file so that it's
+       installed alongside your project (e.g., ``python
+       /path/to/project/setup.py install``).  The default Pecan project
+       described in :ref:`quick_start` facilitates this by including Pecan as
+       a dependency for your project.
+
+    *  Using `pip <http://www.pip-installer.org/en/latest/requirements.html>`_.
+       Use ``pip freeze`` and ``pip install`` to create and install from
+       a ``requirements.txt`` file for your project.
+
+    *  Install Pecan manually via the instructions found in
+       :ref:`Installation`.
+
+.. note::
+    Regardless of the route you choose, it's highly recommended that all
+    deployment installations be done in a Python `virtual environment
+    <http://www.virtualenv.org/>`_.
 
 Disabling Debug Mode
 --------------------
@@ -45,6 +65,7 @@ examples are:
 * `uWSGI <http://projects.unbit.it/uwsgi/>`__
 * `Gunicorn <http://gunicorn.org/>`__
 * `waitress <http://docs.pylonsproject.org/projects/waitress/en/latest/>`__
+* `CherryPy <http://cherrypy.org/>`__
 
 Generally speaking, the WSGI entry point to any Pecan application can be
 generated using ``pecan.deploy``::
@@ -54,7 +75,7 @@ generated using ``pecan.deploy``::
 
 Considerations for Static Files
 -------------------------------
-Pecan comes with simple static file serving (e.g., CSS, Javascript, images)
+Pecan comes with static file serving (e.g., CSS, Javascript, images)
 middleware which is **not** recommended for use in production.  
 
 In production, Pecan doesn't serve media files itself; it leaves that job to
@@ -72,12 +93,12 @@ are two:
 
 ::
 
-    HTTP Client ─── Proxy Server (0.0.0.0:80) ─── Static Files
+    <HTTP Client> ─── <Production/Proxy Server>, e.g., Apache, nginx, cherokee (0.0.0.0:80) ─── <Static Files>
                        │
-                       ├── WSGI Server Instance (127.0.0.1:5000)
-                       ├── WSGI Server Instance (127.0.0.1:5001)
-                       ├── WSGI Server Instance (127.0.0.1:5002)
-                       └── WSGI Server Instance (127.0.0.1:5003)
+                       ├── <WSGI Server> Instance e.g., mod_wsgi, Gunicorn, uWSGI (127.0.0.1:5000 or /tmp/some.sock)
+                       ├── <WSGI Server> Instance e.g., mod_wsgi, Gunicorn, uWSGI (127.0.0.1:5001 or /tmp/some.sock)
+                       ├── <WSGI Server> Instance e.g., mod_wsgi, Gunicorn, uWSGI (127.0.0.1:5002 or /tmp/some.sock)
+                       └── <WSGI Server> Instance e.g., mod_wsgi, Gunicorn, uWSGI (127.0.0.1:5003 or /tmp/some.sock)
 
 
 2.  Serve static files via a separate service, virtual host, or CDN.
@@ -88,24 +109,89 @@ Common Recipes
 Apache + mod_wsgi
 +++++++++++++++++
 `mod_wsgi <http://code.google.com/p/modwsgi/>`_ is a popular Apache module
-which can be used to host any WSGI-compatible Python application.
+which can be used to host any WSGI-compatible Python application (including your Pecan application).
 
-uWSGI + cherokee
-++++++++++++++++
+To get started, check out the `installation and configuration documentation <http://code.google.com/p/modwsgi/wiki/InstallationInstructions>`_ for mod_wsgi.
+
+For the sake of example, let's say that our project, ``simpleapp``, lives at
+``/var/www/simpleapp``, and that a `virtualenv <http://www.virtualenv.org>`_
+has been created at ``/var/www/venv`` with any necessary dependencies installed
+(including Pecan).  Additionally, for security purposes, we've created a user,
+``user1``, and a group, ``group1`` to execute our application under.
+
+The first step is to create a ``.wsgi`` file which mod_wsgi will use as an entry point for your application::
+
+    # /var/www/simpleapp/app.wsgi
+    from pecan.deploy import deploy
+    application = deploy('/var/www/simpleapp/config.py')
+
+Next, add Apache configuration for your application.  Here's a simple example::
+
+    <VirtualHost *>
+        ServerName example.com
+
+        WSGIDaemonProcess simpleapp user=user1 group=group1 threads=5 python-path=/var/www/venv/lib/python2.7/site-packages
+        WSGIScriptAlias / /var/www/simpleapp/app.wsgi
+
+        <Directory /var/www/simpleapp/>
+            WSGIProcessGroup simpleapp
+            WSGIApplicationGroup %{GLOBAL}
+            Order deny,allow
+            Allow from all
+        </Directory>
+    </VirtualHost>
+
+For more instructions and examples of mounting WSGI applications using mod_wsgi, consult the `mod_wsgi Documentation <http://code.google.com/p/modwsgi/wiki/QuickConfigurationGuide#Mounting_The_WSGI_Application>`_.
+
+Finally, restart Apache and give it a try.
+
+uWSGI
++++++
 `uWSGI <http://projects.unbit.it/uwsgi/>`_ is a fast, self-healing and
 developer/sysadmin-friendly application container server coded in pure C.  It
 uses the `uwsgi <http://projects.unbit.it/uwsgi/wiki/uwsgiProtocol>`__
 protocol, but can speak other protocols as well (http, fastcgi...).
 
-`Cherokee <http://www.cherokee-project.com/>`__ is a flexible, very fast, lightweight Web server. It is
-implemented entirely in C, and has no dependencies beyond a standard C library.
+Running Pecan applications with uWSGI is a snap::
 
-Gunicorn + nginx
-++++++++++++++++
+    $ pip install uwsgi
+    $ pecan create simpleapp && cd simpleapp
+    $ python setup.py develop
+
+Next, let's create a new file in the project root::
+
+    # wsgi.py
+    from pecan.deploy import deploy
+    application = deploy('config.py')
+
+...and then run it with::
+
+    $ uwsgi --http-socket 127.0.0.1:8000 -H /path/to/virtualenv -w wsgi
+
+...or using a Unix socket (that nginx, for example, could be configured to
+`proxy to <http://projects.unbit.it/uwsgi/wiki/RunOnNginx>`_)::
+
+    $ uwsgi -s /tmp/uwsgi.sock -H ../path/to/virtualenv -w wsgi
+
+Gunicorn
+++++++++
 `Gunicorn <http://gunicorn.org/>`__, or "Green Unicorn", is a WSGI HTTP Server for
 UNIX. It’s a pre-fork worker model ported from Ruby’s Unicorn project. It
 supports both eventlet and greenlet.
 
-`nginx <http://nginx.org/en/>`_ is a web and reverse proxy server for HTTP, SMTP, POP3 and IMAP
-protocols, with a strong focus on high concurrency, performance and low memory
-usage. 
+Running a Pecan application on Gunicorn is simple.  Let's walk through it with
+Pecan's default project::
+
+    $ pip install gunicorn
+    $ pecan create simpleapp && cd simpleapp
+    $ python setup.py develop
+
+Next, let's create a new file in the project root::
+
+    # wsgi.py
+    from pecan.deploy import deploy
+    application = deploy('config.py')
+
+...and then run it with::
+
+    $ gunicorn wsgi
