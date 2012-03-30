@@ -63,3 +63,9 @@ All contributions must:
     * Not break the test or build.  Before issuing a pull request, ``$ pip
       install tox && tox`` from your source to ensure that all tests still pass
       across multiple versions of Python.
+    * Add your name to the (bottom of the) AUTHORS file.
+
+Additional Help/Support
+-----------------------
+Most Pecan interaction is done via the #pecanpy channel on `FreeNode
+<http://freenode.net/>`_ IRC.
