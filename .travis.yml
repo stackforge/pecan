@@ -6,6 +6,7 @@ env:
   - PYTHONPATH='.'
 branches:
   only:
+    - master
     - next
 install: pip install -r requirements.txt --use-mirrors
 script: python setup.py test --functional
