@@ -106,19 +106,24 @@ class BaseTest(unittest.TestCase):
         self.message_num += 1
         return "%d" % self.message_num
 
+
 class ExceptionFormatter(logging.Formatter):
     """A special exception formatter."""
     def formatException(self, ei):
         return "Got a [%s]" % ei[0].__name__
 
+
 def formatFunc(format, datefmt=None):
     return logging.Formatter(format, datefmt)
+
 
 def handlerFunc():
     return logging.StreamHandler()
 
+
 class CustomHandler(logging.StreamHandler):
     pass
+
 
 class ConfigDictTest(BaseTest):
 
@@ -130,21 +135,21 @@ class ConfigDictTest(BaseTest):
     config0 = {
         'version': 1,
         'formatters': {
-            'form1' : {
-                'format' : '%(levelname)s ++ %(message)s',
+            'form1': {
+                'format': '%(levelname)s ++ %(message)s',
             },
         },
-        'handlers' : {
-            'hand1' : {
-                'class' : 'logging.StreamHandler',
-                'formatter' : 'form1',
-                'level' : 'NOTSET',
-                'stream'  : 'ext://sys.stdout',
+        'handlers': {
+            'hand1': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'form1',
+                'level': 'NOTSET',
+                'stream': 'ext://sys.stdout',
             },
         },
-        'root' : {
-            'level' : 'WARNING',
-            'handlers' : ['hand1'],
+        'root': {
+            'level': 'WARNING',
+            'handlers': ['hand1'],
         },
     }
 
@@ -152,392 +157,391 @@ class ConfigDictTest(BaseTest):
     config1 = {
         'version': 1,
         'formatters': {
-            'form1' : {
-                'format' : '%(levelname)s ++ %(message)s',
+            'form1': {
+                'format': '%(levelname)s ++ %(message)s',
             },
         },
-        'handlers' : {
-            'hand1' : {
-                'class' : 'logging.StreamHandler',
-                'formatter' : 'form1',
-                'level' : 'NOTSET',
-                'stream'  : 'ext://sys.stdout',
+        'handlers': {
+            'hand1': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'form1',
+                'level': 'NOTSET',
+                'stream': 'ext://sys.stdout',
             },
         },
-        'loggers' : {
-            'compiler.parser' : {
-                'level' : 'DEBUG',
-                'handlers' : ['hand1'],
+        'loggers': {
+            'compiler.parser': {
+                'level': 'DEBUG',
+                'handlers': ['hand1'],
             },
         },
-        'root' : {
-            'level' : 'WARNING',
+        'root': {
+            'level': 'WARNING',
         },
-    } 
+    }
 
     # config2 has a subtle configuration error that should be reported
     config2 = {
         'formatters': {
-            'form1' : {
-                'format' : '%(levelname)s ++ %(message)s',
+            'form1': {
+                'format': '%(levelname)s ++ %(message)s',
             },
         },
-        'handlers' : {
-            'hand1' : {
-                'class' : 'logging.StreamHandler',
-                'formatter' : 'form1',
-                'level' : 'NOTSET',
-                'stream'  : 'ext://sys.stdbout',
+        'handlers': {
+            'hand1': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'form1',
+                'level': 'NOTSET',
+                'stream': 'ext://sys.stdbout',
             },
         },
-        'loggers' : {
-            'compiler.parser' : {
-                'level' : 'DEBUG',
-                'handlers' : ['hand1'],
+        'loggers': {
+            'compiler.parser': {
+                'level': 'DEBUG',
+                'handlers': ['hand1'],
             },
         },
-        'root' : {
-            'level' : 'WARNING',
+        'root': {
+            'level': 'WARNING',
         },
-    } 
+    }
 
     #As config1 but with a misspelt level on a handler
     config2a = {
         'formatters': {
-            'form1' : {
-                'format' : '%(levelname)s ++ %(message)s',
+            'form1': {
+                'format': '%(levelname)s ++ %(message)s',
             },
         },
-        'handlers' : {
-            'hand1' : {
-                'class' : 'logging.StreamHandler',
-                'formatter' : 'form1',
-                'level' : 'NTOSET',
-                'stream'  : 'ext://sys.stdout',
+        'handlers': {
+            'hand1': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'form1',
+                'level': 'NTOSET',
+                'stream': 'ext://sys.stdout',
             },
         },
-        'loggers' : {
-            'compiler.parser' : {
-                'level' : 'DEBUG',
-                'handlers' : ['hand1'],
+        'loggers': {
+            'compiler.parser': {
+                'level': 'DEBUG',
+                'handlers': ['hand1'],
             },
         },
-        'root' : {
-            'level' : 'WARNING',
+        'root': {
+            'level': 'WARNING',
         },
-    } 
-
+    }
 
     #As config1 but with a misspelt level on a logger
     config2b = {
         'formatters': {
-            'form1' : {
-                'format' : '%(levelname)s ++ %(message)s',
+            'form1': {
+                'format': '%(levelname)s ++ %(message)s',
             },
         },
-        'handlers' : {
-            'hand1' : {
-                'class' : 'logging.StreamHandler',
-                'formatter' : 'form1',
-                'level' : 'NOTSET',
-                'stream'  : 'ext://sys.stdout',
+        'handlers': {
+            'hand1': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'form1',
+                'level': 'NOTSET',
+                'stream': 'ext://sys.stdout',
             },
         },
-        'loggers' : {
-            'compiler.parser' : {
-                'level' : 'DEBUG',
-                'handlers' : ['hand1'],
+        'loggers': {
+            'compiler.parser': {
+                'level': 'DEBUG',
+                'handlers': ['hand1'],
             },
         },
-        'root' : {
-            'level' : 'WRANING',
+        'root': {
+            'level': 'WRANING',
         },
-    } 
+    }
 
     # config3 has a less subtle configuration error
     config3 = {
         'formatters': {
-            'form1' : {
-                'format' : '%(levelname)s ++ %(message)s',
+            'form1': {
+                'format': '%(levelname)s ++ %(message)s',
             },
         },
-        'handlers' : {
-            'hand1' : {
-                'class' : 'logging.StreamHandler',
-                'formatter' : 'misspelled_name',
-                'level' : 'NOTSET',
-                'stream'  : 'ext://sys.stdout',
+        'handlers': {
+            'hand1': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'misspelled_name',
+                'level': 'NOTSET',
+                'stream': 'ext://sys.stdout',
             },
         },
-        'loggers' : {
-            'compiler.parser' : {
-                'level' : 'DEBUG',
-                'handlers' : ['hand1'],
+        'loggers': {
+            'compiler.parser': {
+                'level': 'DEBUG',
+                'handlers': ['hand1'],
             },
         },
-        'root' : {
-            'level' : 'WARNING',
+        'root': {
+            'level': 'WARNING',
         },
-    } 
+    }
 
     # config4 specifies a custom formatter class to be loaded
     config4 = {
         'version': 1,
         'formatters': {
-            'form1' : {
-                '()' : __name__ + '.ExceptionFormatter',
-                'format' : '%(levelname)s:%(name)s:%(message)s',
+            'form1': {
+                '()': __name__ + '.ExceptionFormatter',
+                'format': '%(levelname)s:%(name)s:%(message)s',
             },
         },
-        'handlers' : {
-            'hand1' : {
-                'class' : 'logging.StreamHandler',
-                'formatter' : 'form1',
-                'level' : 'NOTSET',
-                'stream'  : 'ext://sys.stdout',
+        'handlers': {
+            'hand1': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'form1',
+                'level': 'NOTSET',
+                'stream': 'ext://sys.stdout',
             },
         },
-        'root' : {
-            'level' : 'NOTSET',
-                'handlers' : ['hand1'],
+        'root': {
+            'level': 'NOTSET',
+                'handlers': ['hand1'],
         },
-    } 
+    }
 
     # As config4 but using an actual callable rather than a string
     config4a = {
         'version': 1,
         'formatters': {
-            'form1' : {
-                '()' : ExceptionFormatter,
-                'format' : '%(levelname)s:%(name)s:%(message)s',
+            'form1': {
+                '()': ExceptionFormatter,
+                'format': '%(levelname)s:%(name)s:%(message)s',
             },
-            'form2' : {
-                '()' : __name__ + '.formatFunc',
-                'format' : '%(levelname)s:%(name)s:%(message)s',
+            'form2': {
+                '()': __name__ + '.formatFunc',
+                'format': '%(levelname)s:%(name)s:%(message)s',
             },
-            'form3' : {
-                '()' : formatFunc,
-                'format' : '%(levelname)s:%(name)s:%(message)s',
-            },
-        },
-        'handlers' : {
-            'hand1' : {
-                'class' : 'logging.StreamHandler',
-                'formatter' : 'form1',
-                'level' : 'NOTSET',
-                'stream'  : 'ext://sys.stdout',
-            },
-            'hand2' : {
-                '()' : handlerFunc,
+            'form3': {
+                '()': formatFunc,
+                'format': '%(levelname)s:%(name)s:%(message)s',
             },
         },
-        'root' : {
-            'level' : 'NOTSET',
-                'handlers' : ['hand1'],
+        'handlers': {
+            'hand1': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'form1',
+                'level': 'NOTSET',
+                'stream': 'ext://sys.stdout',
+            },
+            'hand2': {
+                '()': handlerFunc,
+            },
         },
-    } 
+        'root': {
+            'level': 'NOTSET',
+                'handlers': ['hand1'],
+        },
+    }
 
     # config5 specifies a custom handler class to be loaded
     config5 = {
         'version': 1,
         'formatters': {
-            'form1' : {
-                'format' : '%(levelname)s ++ %(message)s',
+            'form1': {
+                'format': '%(levelname)s ++ %(message)s',
             },
         },
-        'handlers' : {
-            'hand1' : {
-                'class' : __name__ + '.CustomHandler',
-                'formatter' : 'form1',
-                'level' : 'NOTSET',
-                'stream'  : 'ext://sys.stdout',
+        'handlers': {
+            'hand1': {
+                'class': __name__ + '.CustomHandler',
+                'formatter': 'form1',
+                'level': 'NOTSET',
+                'stream': 'ext://sys.stdout',
             },
         },
-        'loggers' : {
-            'compiler.parser' : {
-                'level' : 'DEBUG',
-                'handlers' : ['hand1'],
+        'loggers': {
+            'compiler.parser': {
+                'level': 'DEBUG',
+                'handlers': ['hand1'],
             },
         },
-        'root' : {
-            'level' : 'WARNING',
+        'root': {
+            'level': 'WARNING',
         },
-    } 
+    }
 
     # config6 specifies a custom handler class to be loaded
     # but has bad arguments
     config6 = {
         'formatters': {
-            'form1' : {
-                'format' : '%(levelname)s ++ %(message)s',
+            'form1': {
+                'format': '%(levelname)s ++ %(message)s',
             },
         },
-        'handlers' : {
-            'hand1' : {
-                'class' : __name__ + '.CustomHandler',
-                'formatter' : 'form1',
-                'level' : 'NOTSET',
-                'stream'  : 'ext://sys.stdout',
-                '9' : 'invalid parameter name',
+        'handlers': {
+            'hand1': {
+                'class': __name__ + '.CustomHandler',
+                'formatter': 'form1',
+                'level': 'NOTSET',
+                'stream': 'ext://sys.stdout',
+                '9': 'invalid parameter name',
             },
         },
-        'loggers' : {
-            'compiler.parser' : {
-                'level' : 'DEBUG',
-                'handlers' : ['hand1'],
+        'loggers': {
+            'compiler.parser': {
+                'level': 'DEBUG',
+                'handlers': ['hand1'],
             },
         },
-        'root' : {
-            'level' : 'WARNING',
+        'root': {
+            'level': 'WARNING',
         },
-    } 
+    }
 
     #config 7 does not define compiler.parser but defines compiler.lexer
     #so compiler.parser should be disabled after applying it
     config7 = {
         'version': 1,
         'formatters': {
-            'form1' : {
-                'format' : '%(levelname)s ++ %(message)s',
+            'form1': {
+                'format': '%(levelname)s ++ %(message)s',
             },
         },
-        'handlers' : {
-            'hand1' : {
-                'class' : 'logging.StreamHandler',
-                'formatter' : 'form1',
-                'level' : 'NOTSET',
-                'stream'  : 'ext://sys.stdout',
+        'handlers': {
+            'hand1': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'form1',
+                'level': 'NOTSET',
+                'stream': 'ext://sys.stdout',
             },
         },
-        'loggers' : {
-            'compiler.lexer' : {
-                'level' : 'DEBUG',
-                'handlers' : ['hand1'],
+        'loggers': {
+            'compiler.lexer': {
+                'level': 'DEBUG',
+                'handlers': ['hand1'],
             },
         },
-        'root' : {
-            'level' : 'WARNING',
+        'root': {
+            'level': 'WARNING',
         },
-    } 
+    }
 
     config8 = {
         'version': 1,
-        'disable_existing_loggers' : False,
+        'disable_existing_loggers': False,
         'formatters': {
-            'form1' : {
-                'format' : '%(levelname)s ++ %(message)s',
+            'form1': {
+                'format': '%(levelname)s ++ %(message)s',
             },
         },
-        'handlers' : {
-            'hand1' : {
-                'class' : 'logging.StreamHandler',
-                'formatter' : 'form1',
-                'level' : 'NOTSET',
-                'stream'  : 'ext://sys.stdout',
+        'handlers': {
+            'hand1': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'form1',
+                'level': 'NOTSET',
+                'stream': 'ext://sys.stdout',
             },
         },
-        'loggers' : {
-            'compiler' : {
-                'level' : 'DEBUG',
-                'handlers' : ['hand1'],
+        'loggers': {
+            'compiler': {
+                'level': 'DEBUG',
+                'handlers': ['hand1'],
             },
-            'compiler.lexer' : {
+            'compiler.lexer': {
             },
         },
-        'root' : {
-            'level' : 'WARNING',
+        'root': {
+            'level': 'WARNING',
         },
-    } 
+    }
 
     config9 = {
         'version': 1,
         'formatters': {
-            'form1' : {
-                'format' : '%(levelname)s ++ %(message)s',
+            'form1': {
+                'format': '%(levelname)s ++ %(message)s',
             },
         },
-        'handlers' : {
-            'hand1' : {
-                'class' : 'logging.StreamHandler',
-                'formatter' : 'form1',
-                'level' : 'WARNING',
-                'stream'  : 'ext://sys.stdout',
+        'handlers': {
+            'hand1': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'form1',
+                'level': 'WARNING',
+                'stream': 'ext://sys.stdout',
             },
         },
-        'loggers' : {
-            'compiler.parser' : {
-                'level' : 'WARNING',
-                'handlers' : ['hand1'],
+        'loggers': {
+            'compiler.parser': {
+                'level': 'WARNING',
+                'handlers': ['hand1'],
             },
         },
-        'root' : {
-            'level' : 'NOTSET',
+        'root': {
+            'level': 'NOTSET',
         },
-    } 
+    }
 
     config9a = {
         'version': 1,
-        'incremental' : True,
-        'handlers' : {
-            'hand1' : {
-                'level' : 'WARNING',
+        'incremental': True,
+        'handlers': {
+            'hand1': {
+                'level': 'WARNING',
             },
         },
-        'loggers' : {
-            'compiler.parser' : {
-                'level' : 'INFO',
+        'loggers': {
+            'compiler.parser': {
+                'level': 'INFO',
             },
         },
-    } 
+    }
 
     config9b = {
         'version': 1,
-        'incremental' : True,
-        'handlers' : {
-            'hand1' : {
-                'level' : 'INFO',
+        'incremental': True,
+        'handlers': {
+            'hand1': {
+                'level': 'INFO',
             },
         },
-        'loggers' : {
-            'compiler.parser' : {
-                'level' : 'INFO',
+        'loggers': {
+            'compiler.parser': {
+                'level': 'INFO',
             },
         },
-    } 
+    }
 
     #As config1 but with a filter added
     config10 = {
         'version': 1,
         'formatters': {
-            'form1' : {
-                'format' : '%(levelname)s ++ %(message)s',
+            'form1': {
+                'format': '%(levelname)s ++ %(message)s',
             },
         },
-        'filters' : {
-            'filt1' : {
-                'name' : 'compiler.parser',
+        'filters': {
+            'filt1': {
+                'name': 'compiler.parser',
             },
         },
-        'handlers' : {
-            'hand1' : {
-                'class' : 'logging.StreamHandler',
-                'formatter' : 'form1',
-                'level' : 'NOTSET',
-                'stream'  : 'ext://sys.stdout',
-                'filters' : ['filt1'],
+        'handlers': {
+            'hand1': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'form1',
+                'level': 'NOTSET',
+                'stream': 'ext://sys.stdout',
+                'filters': ['filt1'],
             },
         },
-        'loggers' : {
-            'compiler.parser' : {
-                'level' : 'DEBUG',
-                'filters' : ['filt1'],
+        'loggers': {
+            'compiler.parser': {
+                'level': 'DEBUG',
+                'filters': ['filt1'],
             },
         },
-        'root' : {
-            'level' : 'WARNING',
-            'handlers' : ['hand1'],
+        'root': {
+            'level': 'WARNING',
+            'handlers': ['hand1'],
         },
-    } 
+    }
 
     def apply_config(self, conf):
         dictConfig(conf)
@@ -690,15 +694,17 @@ class ConfigDictTest(BaseTest):
         with captured_stdout() as output:
             self.apply_config(self.config9)
             logger = logging.getLogger("compiler.parser")
-            #Nothing will be output since both handler and logger are set to WARNING
+            # Nothing will be output since both handler and logger are
+            # set to WARNING
             logger.info(self.next_message())
             self.assert_log_lines([], stream=output)
             self.apply_config(self.config9a)
-            #Nothing will be output since both handler is still set to WARNING
+            # Nothing will be output since both handler is still set
+            # to WARNING
             logger.info(self.next_message())
             self.assert_log_lines([], stream=output)
             self.apply_config(self.config9b)
-            #Message should now be output
+            # Message should now be output
             logger.info(self.next_message())
             if sys.version_info[:2] == (2, 7):
                 self.assert_log_lines([

@@ -9,11 +9,11 @@ from util import iscontroller
 class RestController(object):
     '''
     A base class for ``REST`` based controllers. Inherit from this class
-    to implement a REST controller. 
-    
+    to implement a REST controller.
+
     ``RestController`` implements a set of routing functions which override
     the default pecan routing with behavior consistent with RESTful routing.
-    This functionality covers navigation to the requested resource 
+    This functionality covers navigation to the requested resource
     controllers, and the appropriate handling of both the common (``GET``,
     ``POST``, ``PUT``, ``DELETE``) as well as custom-defined REST action
     methods.
@@ -22,12 +22,12 @@ class RestController(object):
     :ref:`rest`.
     '''
     _custom_actions = {}
-    
+
     @expose()
     def _route(self, args):
         '''
         Routes a request to the appropriate controller and returns its result.
-        
+
         Performs a bit of validation - refuses to route delete and put actions
         via a GET request).
         '''
@@ -70,7 +70,7 @@ class RestController(object):
 
     def _find_sub_controllers(self, remainder):
         '''
-        Identifies the correct controller to route to by analyzing the 
+        Identifies the correct controller to route to by analyzing the
         request URI.
         '''
         # need either a get_one or get to parse args

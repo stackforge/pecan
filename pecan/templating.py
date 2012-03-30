@@ -24,7 +24,7 @@ class JsonRenderer(object):
 
     # TODO: add error formatter for json (pass it through json lint?)
 
-_builtin_renderers['json'] = JsonRenderer 
+_builtin_renderers['json'] = JsonRenderer
 
 #
 # Genshi rendering engine
@@ -218,7 +218,7 @@ class ExtraNamespace(object):
 
     def update(self, d):
         '''
-        Updates the extra variable dictionary for the namespace. 
+        Updates the extra variable dictionary for the namespace.
         '''
         self.namespace.update(d)
 
@@ -270,7 +270,7 @@ class RendererFactory(object):
     def get(self, name, template_path):
         '''
         Returns the renderer object.
-        
+
         :param name: name of the requested renderer
         :param template_path: path to the template
         '''
