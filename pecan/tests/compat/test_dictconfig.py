@@ -23,7 +23,7 @@ except ImportError:
 from pecan.compat.dictconfig import dictConfig
 import logging
 import re
-from test.test_support import captured_stdout, run_unittest
+from test.test_support import captured_stdout
 import unittest
 
 
@@ -725,9 +725,3 @@ class ConfigDictTest(BaseTest):
                 ('WARNING', '1'),
                 ('ERROR', '4'),
             ], stream=output)
-        
-def test_main():
-    run_unittest(ConfigDictTest)
-
-if __name__ == "__main__":
-    test_main()
