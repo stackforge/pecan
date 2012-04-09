@@ -115,7 +115,7 @@ debug_template_raw = '''<html>
 
     .syntaxhighlighter .container .line {
        background: #FDF6E3 !important;
-    }
+    
 
     .syntaxhighlighter .container .line .python.string {
        color: #C70 !important;
@@ -268,6 +268,9 @@ class DebugMiddleware(object):
         assert not environ['wsgi.multiprocess'], (
             "The DebugMiddleware middleware is not usable in a "
             "multi-process environment")
+
+        if environ.get('paste.testing'):
+            return self.app(environ, start_response)
 
         # initiate a PDB session if requested
         global __debug_environ__
