@@ -115,7 +115,7 @@ debug_template_raw = '''<html>
 
     .syntaxhighlighter .container .line {
        background: #FDF6E3 !important;
-    
+    }    
 
     .syntaxhighlighter .container .line .python.string {
        color: #C70 !important;
