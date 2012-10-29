@@ -1050,9 +1050,9 @@ class TestNonCanonical(unittest.TestCase):
             @expose()
             def index(self):
                 request.testing = True
-                assert request.testing == True
+                assert request.testing is True
                 del request.testing
-                assert hasattr(request, 'testing') == False
+                assert hasattr(request, 'testing') is False
                 return '/'
 
         app = TestApp(make_app(RootController(), debug=True))
@@ -1295,8 +1295,7 @@ class TestEngines(unittest.TestCase):
                 return render('mako.html', dict(name=name))
 
         app = TestApp(
-            Pecan(RootController(),
-            template_path=self.template_path)
+            Pecan(RootController(), template_path=self.template_path)
         )
         r = app.get('/')
         assert r.status_int == 200

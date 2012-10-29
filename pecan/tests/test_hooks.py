@@ -1078,7 +1078,8 @@ class TestRequestViewerHook(TestCase):
                 return 'Hello, World!'
 
         app = TestApp(
-            make_app(RootController(),
+            make_app(
+                RootController(),
                 hooks=[
                     RequestViewerHook(
                         config={'items':['path']}, writer=_stdout
@@ -1112,7 +1113,8 @@ class TestRequestViewerHook(TestCase):
                 return 'Hello, World!'
 
         app = TestApp(
-            make_app(RootController(),
+            make_app(
+                RootController(),
                 hooks=[
                     RequestViewerHook(
                         config={'blacklist':['/']}, writer=_stdout
@@ -1138,7 +1140,8 @@ class TestRequestViewerHook(TestCase):
                 return 'Hello, World!'
 
         app = TestApp(
-            make_app(RootController(),
+            make_app(
+                RootController(),
                 hooks=[
                     RequestViewerHook(
                         config={'items':['date']}, writer=_stdout

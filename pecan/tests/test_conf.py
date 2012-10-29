@@ -194,7 +194,7 @@ class TestConf(TestCase):
         assert to_dict['server']['host'] == '0.0.0.0'
         assert to_dict['server']['port'] == '8080'
         assert to_dict['app']['modules'] == []
-        assert to_dict['app']['root'] == None
+        assert to_dict['app']['root'] is None
         assert to_dict['app']['static_root'] == 'public'
         assert to_dict['app']['template_path'] == ''
 
@@ -211,7 +211,7 @@ class TestConf(TestCase):
         assert to_dict['server']['host'] == '0.0.0.0'
         assert to_dict['server']['port'] == '8080'
         assert to_dict['app']['modules'] == []
-        assert to_dict['app']['root'] == None
+        assert to_dict['app']['root'] is None
         assert to_dict['app']['static_root'] == 'public'
         assert to_dict['app']['template_path'] == ''
         assert to_dict['nested']['one']['two'] == 2
@@ -229,7 +229,7 @@ class TestConf(TestCase):
         assert to_dict['prefix_server']['prefix_host'] == '0.0.0.0'
         assert to_dict['prefix_server']['prefix_port'] == '8080'
         assert to_dict['prefix_app']['prefix_modules'] == []
-        assert to_dict['prefix_app']['prefix_root'] == None
+        assert to_dict['prefix_app']['prefix_root'] is None
         assert to_dict['prefix_app']['prefix_static_root'] == 'public'
         assert to_dict['prefix_app']['prefix_template_path'] == ''
 
@@ -265,7 +265,8 @@ class TestGlobalConfig(TestCase):
 
     def test_overwrite_from_file(self):
         from pecan import configuration
-        configuration.set_config(os.path.join(
+        configuration.set_config(
+            os.path.join(
                 __here__,
                 'config_fixtures/foobar.py',
             ),

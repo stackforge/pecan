@@ -82,9 +82,10 @@ class TestScaffoldUtils(unittest.TestCase):
     def test_destination_directory_levels_deep(self):
         from pecan.scaffolds import copy_dir
         f = StringIO()
-        copy_dir(('pecan', os.path.join(
-                'tests', 'scaffold_fixtures', 'simple'
-            )),
+        copy_dir(
+            (
+                'pecan', os.path.join('tests', 'scaffold_fixtures', 'simple')
+            ),
             os.path.join(self.scaffold_destination, 'some', 'app'),
             {},
             out_=f
@@ -107,9 +108,10 @@ class TestScaffoldUtils(unittest.TestCase):
         from pecan.scaffolds import copy_dir
         from cStringIO import StringIO
         f = StringIO()
-        copy_dir(('pecan', os.path.join(
-                'tests', 'scaffold_fixtures', 'simple'
-            )),
+        copy_dir(
+            (
+                'pecan', os.path.join('tests', 'scaffold_fixtures', 'simple')
+            ),
             os.path.join(self.scaffold_destination),
             {},
             out_=f
@@ -118,9 +120,10 @@ class TestScaffoldUtils(unittest.TestCase):
 
     def test_copy_dir_with_filename_substitution(self):
         from pecan.scaffolds import copy_dir
-        copy_dir(('pecan', os.path.join(
-                'tests', 'scaffold_fixtures', 'file_sub'
-            )),
+        copy_dir(
+            (
+                'pecan', os.path.join('tests', 'scaffold_fixtures', 'file_sub')
+            ),
             os.path.join(
                 self.scaffold_destination, 'someapp'
             ),
@@ -143,9 +146,11 @@ class TestScaffoldUtils(unittest.TestCase):
 
     def test_copy_dir_with_file_content_substitution(self):
         from pecan.scaffolds import copy_dir
-        copy_dir(('pecan', os.path.join(
-                'tests', 'scaffold_fixtures', 'content_sub'
-            )),
+        copy_dir(
+            (
+                'pecan',
+                os.path.join('tests', 'scaffold_fixtures', 'content_sub'),
+            ),
             os.path.join(
                 self.scaffold_destination, 'someapp'
             ),

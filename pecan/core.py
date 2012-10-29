@@ -178,16 +178,9 @@ class Pecan(object):
                             require canonical URLs.
     '''
 
-    def __init__(self, root,
-                 default_renderer='mako',
-                 template_path='templates',
-                 hooks=[],
-                 custom_renderers={},
-                 extra_template_vars={},
-                 force_canonical=True
-        ):
-        '''
-        '''
+    def __init__(self, root, default_renderer='mako',
+                 template_path='templates', hooks=[], custom_renderers={},
+                 extra_template_vars={}, force_canonical=True):
 
         if isinstance(root, basestring):
             root = self.__translate_root__(root)
@@ -236,13 +229,13 @@ class Pecan(object):
             return node, remainder
         except NonCanonicalPath, e:
             if self.force_canonical and \
-                not _cfg(e.controller).get('accept_noncanonical', False):
+                    not _cfg(e.controller).get('accept_noncanonical', False):
                 if request.method == 'POST':
                     raise RuntimeError(
-                        "You have POSTed to a URL '%s' which '\
-                        'requires a slash. Most browsers will not maintain '\
-                        'POST data when redirected. Please update your code '\
-                        'to POST to '%s/' or set force_canonical to False" % \
+                        "You have POSTed to a URL '%s' which "
+                        "requires a slash. Most browsers will not maintain "
+                        "POST data when redirected. Please update your code "
+                        "to POST to '%s/' or set force_canonical to False"
                         (request.pecan['routing_path'],
                             request.pecan['routing_path'])
                     )
@@ -404,7 +397,8 @@ class Pecan(object):
                 'text/html'
             )
         elif cfg.get('content_type') is not None and \
-            request.pecan['content_type'] not in cfg.get('content_types', {}):
+                request.pecan['content_type'] not in \
+                cfg.get('content_types', {}):
 
             import warnings
             msg = "Controller '%s' defined does not support content_type " + \

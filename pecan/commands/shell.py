@@ -154,8 +154,8 @@ class ShellCommand(BaseCommand):
         try:
             shell().invoke(locs, banner)
         except ImportError, e:
-            warn(
-                ("%s is not installed, `%s`, "
+            warn((
+                "%s is not installed, `%s`, "
                 "falling back to native shell") % (self.args.shell, e),
                 RuntimeWarning
             )
