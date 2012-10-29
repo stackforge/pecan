@@ -252,7 +252,7 @@ explicitly to method arguments:
 
 ::
 
-    $ curl http://localhost:8080/one/two/three
+    $ curl http://localhost:8080/args/one/two/three
     one,two,three
 
 The same effect can be achieved with HTTP ``POST`` body variables:
