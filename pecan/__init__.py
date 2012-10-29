@@ -34,6 +34,14 @@ def make_app(root, static_root=None, logging={}, debug=False,
         existing_hooks.append(RequestViewerHook(conf.requestviewer))
         kw['hooks'] = existing_hooks
 
+    # Pass logging configuration (if it exists) on to the Python logging module
+    if logging:
+        if isinstance(logging, Config):
+            logging = logging.to_dict()
+        if 'version' not in logging:
+            logging['version'] = 1
+        load_logging_config(logging)
+
     # Instantiate the WSGI app by passing **kw onward
     app = Pecan(root, **kw)
 
@@ -47,14 +55,6 @@ def make_app(root, static_root=None, logging={}, debug=False,
 
     # Included for internal redirect support
     app = RecursiveMiddleware(app)
-
-    # Pass logging configuration (if it exists) on to the Python logging module
-    if logging:
-        if isinstance(logging, Config):
-            logging = logging.to_dict()
-        if 'version' not in logging:
-            logging['version'] = 1
-        load_logging_config(logging)
 
     # When in debug mode, load our exception dumping middleware
     if debug:
