@@ -24,12 +24,12 @@ class CheckForRecursionMiddleware(object):
 
     def __call__(self, environ, start_response):
         path_info = environ.get('PATH_INFO', '')
-        if path_info in self.env.get(
-            'pecan.recursive.old_path_info', []):
+        if path_info in self.env.get('pecan.recursive.old_path_info', []):
             raise RecursionLoop(
                 "Forwarding loop detected; %r visited twice (internal "
                 "redirect path: %s)"
-                % (path_info, self.env['pecan.recursive.old_path_info']))
+                % (path_info, self.env['pecan.recursive.old_path_info'])
+            )
         old_path_info = self.env.setdefault(
             'pecan.recursive.old_path_info', []
         )
@@ -122,17 +122,20 @@ class ForwardRequestException(Exception):
     def __init__(self, url=None, environ={}, factory=None, path_info=None):
         # Check no incompatible options have been chosen
         if factory and url:
-            raise TypeError(  # pragma: no cover
+            raise TypeError(
                 'You cannot specify factory and a url in '
-                'ForwardRequestException')
+                'ForwardRequestException'
+            )  # pragma: nocover
         elif factory and environ:
-            raise TypeError(  # pragma: no cover
+            raise TypeError(
                 'You cannot specify factory and environ in '
-                'ForwardRequestException')
+                'ForwardRequestException'
+            )  # pragma: nocover
         if url and environ:
-            raise TypeError(  # pragma: no cover
+            raise TypeError(
                 'You cannot specify environ and url in '
-                'ForwardRequestException')
+                'ForwardRequestException'
+            )  # pragma: nocover
 
         # set the path_info or warn about its use.
         if path_info:

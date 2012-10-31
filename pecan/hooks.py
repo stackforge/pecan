@@ -1,9 +1,10 @@
 import sys
-from inspect   import getmembers
+from inspect import getmembers
+
 from webob.exc import HTTPFound
 
-from util      import iscontroller, _cfg
-from routing   import lookup_controller
+from util import iscontroller, _cfg
+from routing import lookup_controller
 
 __all__ = [
     'PecanHook', 'TransactionHook', 'HookController',
@@ -250,7 +251,7 @@ class RequestViewerHook(PecanHook):
     available = ['path', 'status', 'method', 'controller', 'params', 'hooks']
 
     def __init__(self, config=None, writer=sys.stdout, terminal=True,
-        headers=True):
+                 headers=True):
 
         if not config:
             self.config = {'items': self.available}
@@ -269,20 +270,20 @@ class RequestViewerHook(PecanHook):
 
         # Default and/or custom response information
         responses = {
-             'controller': lambda self, state: self.get_controller(state),
-             'method': lambda self, state: state.request.method,
-             'path': lambda self, state: state.request.path,
-             'params': lambda self, state: [
-                 (p[0].encode('utf-8'), p[1].encode('utf-8'))
-                 for p in state.request.params.items()
-             ],
-             'status': lambda self, state: state.response.status,
-             'hooks': lambda self, state: self.format_hooks(state.app.hooks),
-         }
+            'controller': lambda self, state: self.get_controller(state),
+            'method': lambda self, state: state.request.method,
+            'path': lambda self, state: state.request.path,
+            'params': lambda self, state: [
+                (p[0].encode('utf-8'), p[1].encode('utf-8'))
+                for p in state.request.params.items()
+            ],
+            'status': lambda self, state: state.response.status,
+            'hooks': lambda self, state: self.format_hooks(state.app.hooks),
+        }
 
         is_available = [
-                i for i in self.items
-                if i in self.available or hasattr(state.request, i)
+            i for i in self.items
+            if i in self.available or hasattr(state.request, i)
         ]
 
         terminal = []

@@ -78,10 +78,11 @@ class _SecuredAttribute(object):
 
 # helper for secure decorator
 def _allowed_check_permissions_types(x):
-    return (ismethod(x) or
-            isfunction(x) or
-            isinstance(x, basestring)
-        )
+    return (
+        ismethod(x) or
+        isfunction(x) or
+        isinstance(x, basestring)
+    )
 
 
 # methods that can either decorate functions or wrap classes

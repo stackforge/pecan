@@ -32,7 +32,7 @@ _builtin_renderers['json'] = JsonRenderer
 
 try:
     from genshi.template import (TemplateLoader,
-                                TemplateError as gTemplateError)
+                                 TemplateError as gTemplateError)
 
     class GenshiRenderer(object):
         '''
@@ -71,8 +71,8 @@ except ImportError:                                 # pragma no cover
 
 try:
     from mako.lookup import TemplateLookup
-    from mako.exceptions import CompileException, SyntaxException, \
-            html_error_template
+    from mako.exceptions import (CompileException, SyntaxException,
+                                 html_error_template)
 
     class MakoRenderer(object):
         '''
