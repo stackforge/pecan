@@ -19,7 +19,7 @@ Installing
 ...or, for the latest (unstable) tip::
 
     $ git clone https://github.com/dreamhost/pecan.git -b next
-    $ cd pecan && python setup.py develop
+    $ cd pecan && python setup.py install
 
 Running Tests
 -------------
