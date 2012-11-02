@@ -908,6 +908,54 @@ class TestFileTypeExtensions(unittest.TestCase):
             assert r.status_int == 404
 
 
+class TestAcceptHeaders(unittest.TestCase):
+
+    @property
+    def app_(self):
+        """
+        Test extension splits
+        """
+        class RootController(object):
+
+            @expose(content_type='text/html')
+            @expose(content_type='application/json')
+            def index(self, *args):
+                return 'Foo'
+
+        return TestApp(Pecan(RootController()))
+
+    def test_quality(self):
+        r = self.app_.get('/', headers={
+            'Accept': 'text/html,application/json;q=0.9,*/*;q=0.8'
+        })
+        assert r.status_int == 200
+        assert r.content_type == 'text/html'
+
+        r = self.app_.get('/', headers={
+            'Accept': 'application/json,text/html;q=0.9,*/*;q=0.8'
+        })
+        assert r.status_int == 200
+        assert r.content_type == 'application/json'
+
+    def test_file_extension_has_higher_precedence(self):
+        r = self.app_.get('/index.html', headers={
+            'Accept': 'application/json,text/html;q=0.9,*/*;q=0.8'
+        })
+        assert r.status_int == 200
+        assert r.content_type == 'text/html'
+
+    def test_no_match(self):
+        r = self.app_.get('/', headers={
+            'Accept': 'application/xml',
+        }, status=404)
+        assert r.status_int == 404
+
+    def test_accept_header_missing(self):
+        r = self.app_.get('/')
+        assert r.status_int == 200
+        assert r.content_type == 'text/html'
+
+
 class TestCanonicalRouting(unittest.TestCase):
 
     @property

@@ -3,7 +3,7 @@ from routing import lookup_controller, NonCanonicalPath
 from util import _cfg, encode_if_needed
 from middleware.recursive import ForwardRequestException
 
-from webob import Request, Response, exc
+from webob import Request, Response, exc, acceptparse
 from threading import local
 from itertools import chain
 from mimetypes import guess_type, add_type
@@ -367,6 +367,7 @@ class Pecan(object):
         # by the file extension on the URI
         path = request.pecan['routing_path']
 
+        # attempt to guess the content type based on the file extension
         if not request.pecan['content_type'] and '.' in path.split('/')[-1]:
             path, extension = splitext(path)
             request.pecan['extension'] = extension
@@ -392,10 +393,35 @@ class Pecan(object):
 
         # if unsure ask the controller for the default content type
         if not request.pecan['content_type']:
-            request.pecan['content_type'] = cfg.get(
-                'content_type',
-                'text/html'
-            )
+            # attempt to find a best match based on accept headers (if they
+            # exist)
+            if 'Accept' in request.headers:
+                best_default = acceptparse.MIMEAccept(
+                    request.headers['Accept']
+                ).best_match(
+                    cfg.get('content_types', {}).keys()
+                )
+
+                if best_default is None:
+                    import warnings
+                    msg = "Controller '%s' defined does not support " + \
+                          "content_type '%s'. Supported type(s): %s"
+                    warnings.warn(
+                        msg % (
+                            controller.__name__,
+                            request.pecan['content_type'],
+                            cfg.get('content_types', {}).keys()
+                        ),
+                        RuntimeWarning
+                    )
+                    raise exc.HTTPNotFound
+
+                request.pecan['content_type'] = best_default
+            else:
+                request.pecan['content_type'] = cfg.get(
+                    'content_type',
+                    'text/html'
+                )
         elif cfg.get('content_type') is not None and \
                 request.pecan['content_type'] not in \
                 cfg.get('content_types', {}):
