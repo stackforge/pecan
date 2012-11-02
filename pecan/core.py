@@ -235,7 +235,7 @@ class Pecan(object):
                         "You have POSTed to a URL '%s' which "
                         "requires a slash. Most browsers will not maintain "
                         "POST data when redirected. Please update your code "
-                        "to POST to '%s/' or set force_canonical to False"
+                        "to POST to '%s/' or set force_canonical to False" %
                         (request.pecan['routing_path'],
                             request.pecan['routing_path'])
                     )
