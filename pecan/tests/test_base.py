@@ -908,12 +908,12 @@ class TestFileTypeExtensions(unittest.TestCase):
             assert r.status_int == 404
 
 
-class TestAcceptHeaders(unittest.TestCase):
+class TestContentTypeByAcceptHeaders(unittest.TestCase):
 
     @property
     def app_(self):
         """
-        Test extension splits
+        Test that content type is set appropriately based on Accept headers.
         """
         class RootController(object):
 
