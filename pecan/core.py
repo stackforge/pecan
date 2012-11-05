@@ -1,27 +1,29 @@
-from templating import RendererFactory
-from routing import lookup_controller, NonCanonicalPath
-from util import _cfg, encode_if_needed
-from middleware.recursive import ForwardRequestException
-
-from webob import Request, Response, exc, acceptparse
+import urllib
+import sys
+try:
+    from simplejson import loads
+except ImportError:             # pragma: no cover
+    from json import loads      # noqa
 from threading import local
 from itertools import chain
 from mimetypes import guess_type, add_type
 from urlparse import urlsplit, urlunsplit
 from os.path import splitext
+import logging
 
-try:
-    from simplejson import loads
-except ImportError:             # pragma: no cover
-    from json import loads      # noqa
+from webob import Request, Response, exc, acceptparse
 
-import urllib
-import sys
+from templating import RendererFactory
+from routing import lookup_controller, NonCanonicalPath
+from util import _cfg, encode_if_needed
+from middleware.recursive import ForwardRequestException
+
 
 # make sure that json is defined in mimetypes
 add_type('application/json', '.json', True)
 
 state = local()
+logger = logging.getLogger(__name__)
 
 
 def proxy(key):
@@ -403,18 +405,16 @@ class Pecan(object):
                 )
 
                 if best_default is None:
-                    import warnings
                     msg = "Controller '%s' defined does not support " + \
                           "content_type '%s'. Supported type(s): %s"
-                    warnings.warn(
+                    logger.error(
                         msg % (
                             controller.__name__,
                             request.pecan['content_type'],
                             cfg.get('content_types', {}).keys()
-                        ),
-                        RuntimeWarning
+                        )
                     )
-                    raise exc.HTTPNotFound
+                    raise exc.HTTPNotAcceptable()
 
                 request.pecan['content_type'] = best_default
             else:
@@ -426,16 +426,14 @@ class Pecan(object):
                 request.pecan['content_type'] not in \
                 cfg.get('content_types', {}):
 
-            import warnings
             msg = "Controller '%s' defined does not support content_type " + \
                   "'%s'. Supported type(s): %s"
-            warnings.warn(
+            logger.error(
                 msg % (
                     controller.__name__,
                     request.pecan['content_type'],
                     cfg.get('content_types', {}).keys()
-                ),
-                RuntimeWarning
+                )
             )
             raise exc.HTTPNotFound
 

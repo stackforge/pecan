@@ -944,11 +944,11 @@ class TestContentTypeByAcceptHeaders(unittest.TestCase):
         assert r.status_int == 200
         assert r.content_type == 'text/html'
 
-    def test_no_match(self):
+    def test_not_acceptable(self):
         r = self.app_.get('/', headers={
             'Accept': 'application/xml',
-        }, status=404)
-        assert r.status_int == 404
+        }, status=406)
+        assert r.status_int == 406
 
     def test_accept_header_missing(self):
         r = self.app_.get('/')
