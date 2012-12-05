@@ -49,6 +49,15 @@ Let's look at each value and what it means:
 **app** is a reserved variable name for the configuration, so make sure you
 don't override it.
 
+**modules** is a list of modules where pecan will search for applications.
+Generally this should contain a single item, the name of your project's
+python package.
+At least one of the listed modules must contain an ``app.setup_app`` function
+which is called to create the WSGI app.  In other words, this package should
+be where your ``app.py`` file is located, and this file should contain a
+``setup_app`` function.
+See :ref:`app_template` for more about the ``app.py`` file.
+
 **root** The root controller of your application. Remember to provide
 a string representing a Python path to some callable (e.g.,
 ``"yourapp.controllers.root.RootController"``).
