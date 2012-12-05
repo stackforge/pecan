@@ -27,7 +27,33 @@ __all__ = [
 
 def make_app(root, static_root=None, logging={}, debug=False,
              wrap_app=None, **kw):
+    '''
+    Utility for creating the Pecan application object.  This function should
+    generally be called from the ``setup_app`` function in your project's
+    ``app.py`` file.
 
+    :param root: A string representing a root controller object (e.g.,
+                 "myapp.controller.root.RootController")
+    :param static_root: The relative path to a directory containing static
+                        files.  Serving static files is only enabled when
+                        debug mode is set.
+    :param logging: A dictionary used to configure logging.  This uses
+                    ``logging.config.dictConfig``.
+    :param debug: A flag to enable debug mode.  This enables the debug
+                  middleware and serving static files.
+    :param wrap_app: A function or middleware class to wrap the Pecan app.
+                     This must either be a wsgi middleware class or a
+                     function that returns a wsgi application. This wrapper
+                     is applied first before wrapping the application in
+                     other middlewares such as Pecan's debug middleware.
+                     This should be used if you want to use middleware to
+                     perform authentication or intercept all requests before
+                     they are routed to the root controller.
+
+    All other keyword arguments are passed in to the Pecan app constructor.
+
+    :returns: a ``Pecan`` object.
+    '''
     # A shortcut for the RequestViewerHook middleware.
     if hasattr(conf, 'requestviewer'):
         existing_hooks = kw.get('hooks', [])
