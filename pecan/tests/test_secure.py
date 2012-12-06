@@ -1,8 +1,14 @@
-import unittest
+import sys
+
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest  # noqa
+
+from webtest import TestApp
 
 from pecan import expose, make_app
 from pecan.secure import secure, unlocked, SecureController
-from webtest import TestApp
 
 try:
     set()
