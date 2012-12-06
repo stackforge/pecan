@@ -6,18 +6,17 @@ import pdb
 from mako.template import Template
 from webob import Response
 
-from .resources import (pecan_image, shcore, shbrushpython, shcorecss,
-                        shthemedefault)
+from .resources import (pecan_image, syntax_js, syntax_css, theme, brush)
 
 
 debug_template_raw = '''<html>
  <head>
   <title>Pecan - Application Error</title>
 
-  <link rel="stylesheet" type="text/css" href="${shcorecss}" />
-  <link rel="stylesheet" type="text/css" href="${shthemedefault}" />
+  <link rel="stylesheet" type="text/css" href="${syntax_css}" />
+  <link rel="stylesheet" type="text/css" href="${theme}" />
 
-  <script type="text/javascript" src="${shcore}">
+  <script type="text/javascript" src="${syntax_js}">
     /**
      * SyntaxHighlighter
      * http://alexgorbatchev.com/SyntaxHighlighter
@@ -35,7 +34,7 @@ debug_template_raw = '''<html>
      * Dual licensed under the MIT and GPL licenses.
      */
   </script>
-  <script type="text/javascript" src="${shbrushpython}">
+  <script type="text/javascript" src="${brush}">
     /**
      * SyntaxHighlighter
      * http://alexgorbatchev.com/SyntaxHighlighter
@@ -302,10 +301,10 @@ class DebugMiddleware(object):
                 traceback=out.getvalue(),
                 environment=formatted_environ,
                 pecan_image=pecan_image,
-                shcore=shcore,
-                shbrushpython=shbrushpython,
-                shcorecss=shcorecss,
-                shthemedefault=shthemedefault,
+                syntax_js=syntax_js,
+                brush=brush,
+                syntax_css=syntax_css,
+                theme=theme,
                 debugging=debugging
             )
 
