@@ -4,10 +4,10 @@ import tempfile
 import shutil
 import subprocess
 import pkg_resources
-import httplib
 import urllib2
 import time
 from cStringIO import StringIO
+
 import pecan
 
 if sys.version_info < (2, 7):
@@ -220,9 +220,8 @@ class TestTemplateBuilds(unittest.TestCase):
         ])
 
     def poll(self, proc):
-        limit = 5
+        limit = 30
         for i in range(limit):
-            time.sleep(1)
             proc.poll()
 
             # Make sure it's running
@@ -230,6 +229,7 @@ class TestTemplateBuilds(unittest.TestCase):
                 break
             elif i == limit:  # pragma: no cover
                 raise RuntimeError("pecan serve config.py didn't start.")
+            time.sleep(.1)
 
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
     @unittest.skipUnless(
@@ -248,13 +248,23 @@ class TestTemplateBuilds(unittest.TestCase):
 
         try:
             self.poll(proc)
-
-            # ...and that it's serving (valid) content...
-            conn = httplib.HTTPConnection('localhost:8080')
-            conn.request('GET', '/')
-            resp = conn.getresponse()
-            assert resp.status == 200
-            assert 'This is a sample Pecan project.' in resp.read()
+            retries = 30
+            while True:
+                retries -= 1
+                if retries < 0:  # pragma: nocover
+                    raise RuntimeError(
+                        "The HTTP server has not replied within 3 seconds."
+                    )
+                try:
+                    # ...and that it's serving (valid) content...
+                    resp = urllib2.urlopen('http://localhost:8080/')
+                    assert resp.getcode() == 200
+                    assert 'This is a sample Pecan project.' in resp.read()
+                except urllib2.URLError:
+                    pass
+                else:
+                    break
+                time.sleep(.1)
         finally:
             proc.terminate()
 
