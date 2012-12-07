@@ -1,8 +1,14 @@
-from unittest import TestCase
+import sys
+
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest  # noqa
+
+from webtest import TestApp
 
 from pecan import expose, make_app
 from pecan.secure import secure, unlocked, SecureController
-from webtest import TestApp
 
 try:
     set()
@@ -10,7 +16,7 @@ except:
     from sets import Set as set
 
 
-class TestSecure(TestCase):
+class TestSecure(unittest.TestCase):
     def test_simple_secure(self):
         authorized = False
 
@@ -184,7 +190,7 @@ class TestSecure(TestCase):
             assert isinstance(e, TypeError)
 
 
-class TestObjectPathSecurity(TestCase):
+class TestObjectPathSecurity(unittest.TestCase):
     def setUp(self):
         permissions_checked = set()
 
@@ -392,3 +398,32 @@ class TestObjectPathSecurity(TestCase):
         response = self.app.get('/notsecret/unlocked/')
         assert response.status_int == 200
         assert response.body == 'Index unlocked'
+
+
+class SecureControllerSharedPermissionsRegression(unittest.TestCase):
+    """Regression tests for https://github.com/dreamhost/pecan/issues/131"""
+
+    def setUp(self):
+        class Parent(object):
+            @expose()
+            def index(self):
+                return 'hello'
+
+        class UnsecuredChild(Parent):
+            pass
+
+        class SecureChild(Parent, SecureController):
+            @classmethod
+            def check_permissions(cls):
+                return False
+
+        class RootController(object):
+
+            secured = SecureChild()
+            unsecured = UnsecuredChild()
+
+        self.app = TestApp(make_app(RootController()))
+
+    def test_inherited_security(self):
+        assert self.app.get('/secured/', status=401).status_int == 401
+        assert self.app.get('/unsecured/').status_int == 200

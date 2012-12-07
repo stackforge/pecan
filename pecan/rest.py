@@ -32,7 +32,7 @@ class RestController(object):
         via a GET request).
         '''
         # convention uses "_method" to handle browser-unsupported methods
-        if request.environ.get('pecan.validation_redirected', False) == True:
+        if request.environ.get('pecan.validation_redirected', False) is True:
             #
             # If the request has been internally redirected due to a validation
             # exception, we want the request method to be enforced as GET, not
@@ -97,8 +97,8 @@ class RestController(object):
                     self._set_routing_args(remainder[:i])
                     return lookup_controller(controller, remainder[i + 1:])
         elif fixed_args < len(remainder) and hasattr(
-                self, remainder[fixed_args]
-            ):
+            self, remainder[fixed_args]
+        ):
             controller = getattr(self, remainder[fixed_args])
             if not ismethod(controller):
                 self._set_routing_args(remainder[:fixed_args])

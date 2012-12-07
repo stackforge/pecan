@@ -2,16 +2,16 @@ import sys
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
-version = '0.2.0a'
+version = '0.2.0b'
 
 #
 # determine requirements
 #
 requirements = [
-  "WebOb >= 1.2dev",  # py3 compat
-  "simplegeneric >= 0.8",  # py3 compat
-  "Mako >= 0.4.0",
-  "WebTest >= 1.3.1"  # py3 compat
+    "WebOb >= 1.2dev",  # py3 compat
+    "simplegeneric >= 0.8",  # py3 compat
+    "Mako >= 0.4.0",
+    "WebTest >= 1.3.1"  # py3 compat
 ]
 
 try:
@@ -61,8 +61,8 @@ class test(TestCommand):
 setup(
     name='pecan',
     version=version,
-    description="A WSGI object-dispatching web framework, designed to be "\
-                  "lean and fast, with few dependancies.",
+    description="A WSGI object-dispatching web framework, designed to be "
+                "lean and fast, with few dependancies.",
     long_description=None,
     classifiers=[
         'Development Status :: 5 - Production/Stable',

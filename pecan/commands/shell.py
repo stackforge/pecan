@@ -51,7 +51,12 @@ class IPythonShell(object):
             from IPython.frontend.terminal.embed import (
                 InteractiveShellEmbed
             )
-            shell = InteractiveShellEmbed(banner2=banner)
+            # try and load their default profile
+            from IPython.frontend.terminal.ipapp import (
+                load_default_config
+            )
+            config = load_default_config()
+            shell = InteractiveShellEmbed(config=config, banner2=banner)
             shell(local_ns=ns)
         except ImportError:
             # Support for the IPython <= 0.10 shell API
@@ -149,8 +154,8 @@ class ShellCommand(BaseCommand):
         try:
             shell().invoke(locs, banner)
         except ImportError, e:
-            warn(
-                ("%s is not installed, `%s`, "
+            warn((
+                "%s is not installed, `%s`, "
                 "falling back to native shell") % (self.args.shell, e),
                 RuntimeWarning
             )

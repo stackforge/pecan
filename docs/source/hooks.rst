@@ -61,9 +61,10 @@ Hooks can also be applied selectively to controllers and their sub-controllers
 using the ``__hooks__`` attribute on one or more controllers::
 
     from pecan import expose
+    from pecan.hooks import HookController
     from my_hooks import SimpleHook
 
-    class SimpleController(object):
+    class SimpleController(HookController):
     
         __hooks__ = [SimpleHook()]
     

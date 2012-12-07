@@ -44,7 +44,7 @@ class PecanExtensionImporter(object):
 
     def __eq__(self, b):
         return self.__class__.__module__ == b.__class__.__module__ and \
-               self.__class__.__name__ == b.__class__.__name__
+            self.__class__.__name__ == b.__class__.__name__
 
     def __ne__(self, b):
         return not self.__eq__(b)

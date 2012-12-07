@@ -1,6 +1,6 @@
 from unittest import TestCase
 from pecan.middleware.static import (StaticFileMiddleware, FileWrapper,
-                                    _dump_date)
+                                     _dump_date)
 
 import os
 
@@ -50,7 +50,7 @@ class TestStaticFileMiddleware(TestCase):
 
     def test_file_can_be_closed(self):
         result = self._request('/static_fixtures/text.txt')
-        assert result.close() == None
+        assert result.close() is None
 
     def test_file_can_be_iterated_over(self):
         result = self._request('/static_fixtures/text.txt')

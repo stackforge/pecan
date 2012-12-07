@@ -18,7 +18,7 @@ Here's an example of wrapping your WSGI application with Beaker's
 ``SessionMiddleware`` in your project's `app.py`::
 
     from pecan import conf, make_app
-    from beaker import SessionMiddleware
+    from beaker.middleware import SessionMiddleware
     from test_project import model
 
     app = make_app(

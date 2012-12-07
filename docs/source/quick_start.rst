@@ -9,6 +9,7 @@ Let's create a small sample project with Pecan.
     This guide does not cover the installation of Pecan. If you need
     instructions for installing Pecan, go to :ref:`installation`.
 
+.. _app_template:
 
 Base Application Template
 -------------------------
@@ -76,6 +77,13 @@ remaining directories encompass your models, controllers and templates...
 
 *  **test_project/tests**:        All of the tests for your application.
 
+The **test_project/app.py** file controls how the Pecan application will be
+created. This file must contain a ``setup_app`` function which returns the
+WSGI application object.  Generally you will not need to modify the ``app.py``
+file provided by the base application template unless you need to customize
+your app in a way that cannot be accomplished using config.  See
+:ref:`python_based_config` below.
+
 To avoid unneeded dependencies and to remain as flexible as possible, Pecan
 doesn't impose any database or ORM 
 (`Object Relational Mapper
@@ -111,6 +119,7 @@ configuration, it will bring up the development server and serve the app::
 The location for the configuration file and the argument itself are very
 flexible - you can pass an absolute or relative path to the file.
 
+.. _python_based_config:
 
 Python-Based Configuration
 --------------------------

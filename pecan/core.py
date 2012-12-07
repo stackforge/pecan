@@ -1,27 +1,29 @@
-from templating import RendererFactory
-from routing import lookup_controller, NonCanonicalPath
-from util import _cfg, encode_if_needed
-from middleware.recursive import ForwardRequestException
-
-from webob import Request, Response, exc
+import urllib
+import sys
+try:
+    from simplejson import loads
+except ImportError:             # pragma: no cover
+    from json import loads      # noqa
 from threading import local
 from itertools import chain
 from mimetypes import guess_type, add_type
 from urlparse import urlsplit, urlunsplit
 from os.path import splitext
+import logging
 
-try:
-    from simplejson import loads
-except ImportError:             # pragma: no cover
-    from json import loads      # noqa
+from webob import Request, Response, exc, acceptparse
 
-import urllib
-import sys
+from templating import RendererFactory
+from routing import lookup_controller, NonCanonicalPath
+from util import _cfg, encode_if_needed
+from middleware.recursive import ForwardRequestException
+
 
 # make sure that json is defined in mimetypes
 add_type('application/json', '.json', True)
 
 state = local()
+logger = logging.getLogger(__name__)
 
 
 def proxy(key):
@@ -178,16 +180,9 @@ class Pecan(object):
                             require canonical URLs.
     '''
 
-    def __init__(self, root,
-                 default_renderer='mako',
-                 template_path='templates',
-                 hooks=[],
-                 custom_renderers={},
-                 extra_template_vars={},
-                 force_canonical=True
-        ):
-        '''
-        '''
+    def __init__(self, root, default_renderer='mako',
+                 template_path='templates', hooks=[], custom_renderers={},
+                 extra_template_vars={}, force_canonical=True):
 
         if isinstance(root, basestring):
             root = self.__translate_root__(root)
@@ -236,13 +231,13 @@ class Pecan(object):
             return node, remainder
         except NonCanonicalPath, e:
             if self.force_canonical and \
-                not _cfg(e.controller).get('accept_noncanonical', False):
+                    not _cfg(e.controller).get('accept_noncanonical', False):
                 if request.method == 'POST':
                     raise RuntimeError(
-                        "You have POSTed to a URL '%s' which '\
-                        'requires a slash. Most browsers will not maintain '\
-                        'POST data when redirected. Please update your code '\
-                        'to POST to '%s/' or set force_canonical to False" % \
+                        "You have POSTed to a URL '%s' which "
+                        "requires a slash. Most browsers will not maintain "
+                        "POST data when redirected. Please update your code "
+                        "to POST to '%s/' or set force_canonical to False" %
                         (request.pecan['routing_path'],
                             request.pecan['routing_path'])
                     )
@@ -374,6 +369,7 @@ class Pecan(object):
         # by the file extension on the URI
         path = request.pecan['routing_path']
 
+        # attempt to guess the content type based on the file extension
         if not request.pecan['content_type'] and '.' in path.split('/')[-1]:
             path, extension = splitext(path)
             request.pecan['extension'] = extension
@@ -399,23 +395,45 @@ class Pecan(object):
 
         # if unsure ask the controller for the default content type
         if not request.pecan['content_type']:
-            request.pecan['content_type'] = cfg.get(
-                'content_type',
-                'text/html'
-            )
-        elif cfg.get('content_type') is not None and \
-            request.pecan['content_type'] not in cfg.get('content_types', {}):
+            # attempt to find a best match based on accept headers (if they
+            # exist)
+            if 'Accept' in request.headers:
+                best_default = acceptparse.MIMEAccept(
+                    request.headers['Accept']
+                ).best_match(
+                    cfg.get('content_types', {}).keys()
+                )
 
-            import warnings
+                if best_default is None:
+                    msg = "Controller '%s' defined does not support " + \
+                          "content_type '%s'. Supported type(s): %s"
+                    logger.error(
+                        msg % (
+                            controller.__name__,
+                            request.pecan['content_type'],
+                            cfg.get('content_types', {}).keys()
+                        )
+                    )
+                    raise exc.HTTPNotAcceptable()
+
+                request.pecan['content_type'] = best_default
+            else:
+                request.pecan['content_type'] = cfg.get(
+                    'content_type',
+                    'text/html'
+                )
+        elif cfg.get('content_type') is not None and \
+                request.pecan['content_type'] not in \
+                cfg.get('content_types', {}):
+
             msg = "Controller '%s' defined does not support content_type " + \
                   "'%s'. Supported type(s): %s"
-            warnings.warn(
+            logger.error(
                 msg % (
                     controller.__name__,
                     request.pecan['content_type'],
                     cfg.get('content_types', {}).keys()
-                ),
-                RuntimeWarning
+                )
             )
             raise exc.HTTPNotFound
 

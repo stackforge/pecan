@@ -15,7 +15,7 @@ from pecan.jsonify import jsonify, encode, ResultProxy, RowProxy
 from pecan import Pecan, expose
 from webtest import TestApp
 
-from webob.multidict       import MultiDict
+from webob.multidict import MultiDict
 
 
 def make_person():
@@ -182,10 +182,13 @@ class TestJsonifySQLAlchemyGenericEncoder(TestCase):
 
         # create the table and mapper
         metadata = schema.MetaData()
-        user_table = schema.Table('user', metadata,
+        user_table = schema.Table(
+            'user',
+            metadata,
             schema.Column('id', types.Integer, primary_key=True),
             schema.Column('first_name', types.Unicode(25)),
-            schema.Column('last_name', types.Unicode(25)))
+            schema.Column('last_name', types.Unicode(25))
+        )
 
         class User(object):
             pass

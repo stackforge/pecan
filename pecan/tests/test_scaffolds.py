@@ -4,10 +4,10 @@ import tempfile
 import shutil
 import subprocess
 import pkg_resources
-import httplib
 import urllib2
 import time
 from cStringIO import StringIO
+
 import pecan
 
 if sys.version_info < (2, 7):
@@ -82,9 +82,10 @@ class TestScaffoldUtils(unittest.TestCase):
     def test_destination_directory_levels_deep(self):
         from pecan.scaffolds import copy_dir
         f = StringIO()
-        copy_dir(('pecan', os.path.join(
-                'tests', 'scaffold_fixtures', 'simple'
-            )),
+        copy_dir(
+            (
+                'pecan', os.path.join('tests', 'scaffold_fixtures', 'simple')
+            ),
             os.path.join(self.scaffold_destination, 'some', 'app'),
             {},
             out_=f
@@ -107,9 +108,10 @@ class TestScaffoldUtils(unittest.TestCase):
         from pecan.scaffolds import copy_dir
         from cStringIO import StringIO
         f = StringIO()
-        copy_dir(('pecan', os.path.join(
-                'tests', 'scaffold_fixtures', 'simple'
-            )),
+        copy_dir(
+            (
+                'pecan', os.path.join('tests', 'scaffold_fixtures', 'simple')
+            ),
             os.path.join(self.scaffold_destination),
             {},
             out_=f
@@ -118,9 +120,10 @@ class TestScaffoldUtils(unittest.TestCase):
 
     def test_copy_dir_with_filename_substitution(self):
         from pecan.scaffolds import copy_dir
-        copy_dir(('pecan', os.path.join(
-                'tests', 'scaffold_fixtures', 'file_sub'
-            )),
+        copy_dir(
+            (
+                'pecan', os.path.join('tests', 'scaffold_fixtures', 'file_sub')
+            ),
             os.path.join(
                 self.scaffold_destination, 'someapp'
             ),
@@ -143,9 +146,11 @@ class TestScaffoldUtils(unittest.TestCase):
 
     def test_copy_dir_with_file_content_substitution(self):
         from pecan.scaffolds import copy_dir
-        copy_dir(('pecan', os.path.join(
-                'tests', 'scaffold_fixtures', 'content_sub'
-            )),
+        copy_dir(
+            (
+                'pecan',
+                os.path.join('tests', 'scaffold_fixtures', 'content_sub'),
+            ),
             os.path.join(
                 self.scaffold_destination, 'someapp'
             ),
@@ -215,9 +220,8 @@ class TestTemplateBuilds(unittest.TestCase):
         ])
 
     def poll(self, proc):
-        limit = 5
+        limit = 30
         for i in range(limit):
-            time.sleep(1)
             proc.poll()
 
             # Make sure it's running
@@ -225,6 +229,7 @@ class TestTemplateBuilds(unittest.TestCase):
                 break
             elif i == limit:  # pragma: no cover
                 raise RuntimeError("pecan serve config.py didn't start.")
+            time.sleep(.1)
 
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
     @unittest.skipUnless(
@@ -243,13 +248,23 @@ class TestTemplateBuilds(unittest.TestCase):
 
         try:
             self.poll(proc)
-
-            # ...and that it's serving (valid) content...
-            conn = httplib.HTTPConnection('localhost:8080')
-            conn.request('GET', '/')
-            resp = conn.getresponse()
-            assert resp.status == 200
-            assert 'This is a sample Pecan project.' in resp.read()
+            retries = 30
+            while True:
+                retries -= 1
+                if retries < 0:  # pragma: nocover
+                    raise RuntimeError(
+                        "The HTTP server has not replied within 3 seconds."
+                    )
+                try:
+                    # ...and that it's serving (valid) content...
+                    resp = urllib2.urlopen('http://localhost:8080/')
+                    assert resp.getcode() == 200
+                    assert 'This is a sample Pecan project.' in resp.read()
+                except urllib2.URLError:
+                    pass
+                else:
+                    break
+                time.sleep(.1)
         finally:
             proc.terminate()
 

@@ -1,3 +1,4 @@
+from functools import wraps
 from inspect import getmembers, ismethod, isfunction
 from webob import exc
 
@@ -78,10 +79,11 @@ class _SecuredAttribute(object):
 
 # helper for secure decorator
 def _allowed_check_permissions_types(x):
-    return (ismethod(x) or
-            isfunction(x) or
-            isinstance(x, basestring)
-        )
+    return (
+        ismethod(x) or
+        isfunction(x) or
+        isinstance(x, basestring)
+    )
 
 
 # methods that can either decorate functions or wrap classes
@@ -134,14 +136,20 @@ class SecureController(object):
                 unlocked=[]
             )
 
-            for name, value in getmembers(cls):
+            for name, value in getmembers(cls)[:]:
                 if ismethod(value):
                     if iscontroller(value) and value._pecan.get(
                         'secured'
                     ) is None:
-                        value._pecan['secured'] = Protected
-                        value._pecan['check_permissions'] = \
+                        # Wrap the function so that the security context is
+                        # local to this class definition.  This works around
+                        # the fact that unbound method attributes are shared
+                        # across classes with the same bases.
+                        wrapped = _make_wrapper(value)
+                        wrapped._pecan['secured'] = Protected
+                        wrapped._pecan['check_permissions'] = \
                             cls.check_permissions
+                        setattr(cls, name, wrapped)
                 elif hasattr(value, '__class__'):
                     if name.startswith('__') and name.endswith('__'):
                         continue
@@ -160,6 +168,15 @@ class SecureController(object):
     @classmethod
     def check_permissions(cls):
         return False
+
+
+def _make_wrapper(f):
+    """return a wrapped function with a copy of the _pecan context"""
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        return f(*args, **kwargs)
+    wrapper._pecan = f._pecan.copy()
+    return wrapper
 
 
 # methods to evaluate security during routing

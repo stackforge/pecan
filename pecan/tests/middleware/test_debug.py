@@ -1,18 +1,32 @@
 from unittest import TestCase
+from wsgiref.util import setup_testing_defaults
+
 from webtest import TestApp
 
 from pecan.middleware.debug import DebugMiddleware
+
+
+class StripPasteVar(object):
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        environ.pop('paste.testing')
+        return self.app(environ, start_response)
 
 
 class TestDebugMiddleware(TestCase):
 
     def setUp(self):
         def conditional_error_app(environ, start_response):
+            setup_testing_defaults(environ)
             if environ['PATH_INFO'] == '/error':
                 assert 1 == 2
             start_response("200 OK", [('Content-type', 'text/plain')])
             return ['requested page returned']
-        self.app = TestApp(DebugMiddleware(conditional_error_app))
+        self.app = TestApp(StripPasteVar(DebugMiddleware(
+            conditional_error_app
+        )))
 
     def test_middleware_passes_through_when_no_exception_raised(self):
         r = self.app.get('/')
@@ -54,12 +68,10 @@ class TestDebugMiddleware(TestCase):
 
         debugger = []
 
-        app = TestApp(
-            DebugMiddleware(
-                self.app,
-                patch_debugger(debugger)
-            )
-        )
+        app = TestApp(StripPasteVar(DebugMiddleware(
+            self.app,
+            patch_debugger(debugger)
+        )))
 
         r = app.get('/error', expect_errors=True)
         assert r.status_int == 400
