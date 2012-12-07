@@ -424,7 +424,6 @@ class SecureControllerSharedPermissionsRegression(unittest.TestCase):
 
         self.app = TestApp(make_app(RootController()))
 
-    @unittest.expectedFailure
     def test_inherited_security(self):
         assert self.app.get('/secured/', status=401).status_int == 401
         assert self.app.get('/unsecured/').status_int == 200
