@@ -8,7 +8,7 @@ server = {
 app = {
     'root': '${package}.controllers.root.RootController',
     'modules': ['${package}'],
-    'static_root': '%(confdir)s/public', 
+    'static_root': '%(confdir)s/public',
     'template_path': '%(confdir)s/${package}/templates',
     'debug': True,
     'errors': {
@@ -19,7 +19,7 @@ app = {
 
 logging = {
     'loggers': {
-        'root' : {'level': 'INFO', 'handlers': ['console']},
+        'root': {'level': 'INFO', 'handlers': ['console']},
         '${package}': {'level': 'DEBUG', 'handlers': ['console']}
     },
     'handlers': {
