@@ -94,14 +94,7 @@ class CommandRunner(object):
 
     @property
     def version(self):
-        try:
-            dist = pkg_resources.get_distribution('Pecan')
-            if os.path.dirname(os.path.dirname(__file__)) == dist.location:
-                return dist.version  # pragma: nocover
-            else:
-                return '(development)'
-        except:  # pragma: nocover
-            return '(development)'
+        return pkg_resources.get_distribution('pecan').version
 
     @property
     def commands(self):
