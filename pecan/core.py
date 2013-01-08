@@ -371,10 +371,15 @@ class Pecan(object):
 
         # attempt to guess the content type based on the file extension
         if not request.pecan['content_type'] and '.' in path.split('/')[-1]:
-            path, extension = splitext(path)
-            request.pecan['extension'] = extension
+            new_path, extension = splitext(path)
+
             # preface with a letter to ensure compat for 2.5
-            request.pecan['content_type'] = guess_type('x' + extension)[0]
+            potential_type = guess_type('x' + extension)[0]
+
+            if potential_type is not None:
+                path = new_path
+                request.pecan['extension'] = extension
+                request.pecan['content_type'] = potential_type
 
         controller, remainder = self.route(self.root, path)
         cfg = _cfg(controller)
