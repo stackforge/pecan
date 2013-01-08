@@ -863,7 +863,7 @@ class TestFileTypeExtensions(unittest.TestCase):
         class RootController(object):
             @expose(content_type=None)
             def _default(self, *args):
-                ext = request.pecan.get('extension')
+                ext = request.pecan['extension']
                 assert len(args) == 1
                 if ext:
                     assert ext not in args[0]
@@ -916,7 +916,7 @@ class TestFileTypeExtensions(unittest.TestCase):
             @expose(content_type=None)
             def _default(self, *args):
                 assert 'example:x.tiny' in args
-                assert 'extension' not in request.pecan
+                assert request.pecan['extension'] is None
                 return 'SOME VALUE'
 
         app = TestApp(Pecan(RootController()))

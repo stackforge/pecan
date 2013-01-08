@@ -368,6 +368,7 @@ class Pecan(object):
         # lookup the controller, respecting content-type as requested
         # by the file extension on the URI
         path = request.pecan['routing_path']
+        request.pecan['extension'] = None
 
         # attempt to guess the content type based on the file extension
         if not request.pecan['content_type'] and '.' in path.split('/')[-1]:
