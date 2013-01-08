@@ -15,7 +15,7 @@ from configuration import _runtime_conf as conf
 try:
     from logging.config import dictConfig as load_logging_config
 except ImportError:
-    from .compat.dictconfig import dictConfig as load_logging_config
+    from .compat.dictconfig import dictConfig as load_logging_config  # noqa
 
 
 __all__ = [

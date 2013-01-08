@@ -23,10 +23,10 @@ try:
 except ImportError:  # pragma no cover
     # dummy classes since we don't have SQLAlchemy installed
 
-    class ResultProxy:
+    class ResultProxy:  # noqa
         pass
 
-    class RowProxy:
+    class RowProxy:  # noqa
         pass
 
 
