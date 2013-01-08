@@ -863,7 +863,11 @@ class TestFileTypeExtensions(unittest.TestCase):
         class RootController(object):
             @expose(content_type=None)
             def _default(self, *args):
-                return request.pecan['extension']
+                ext = request.pecan['extension']
+                assert len(args) == 1
+                if ext:
+                    assert ext not in args[0]
+                return ext or ''
 
         return TestApp(Pecan(RootController()))
 
@@ -883,7 +887,7 @@ class TestFileTypeExtensions(unittest.TestCase):
         assert r.body == ''
 
     def test_multi_dot_extension(self):
-        r = self.app_.get('/gradient.js.js')
+        r = self.app_.get('/gradient.min.js')
         assert r.status_int == 200
         assert r.body == '.js'
 
@@ -906,6 +910,20 @@ class TestFileTypeExtensions(unittest.TestCase):
             warnings.simplefilter("ignore")
             r = app.get('/index.txt', expect_errors=True)
             assert r.status_int == 404
+
+    def test_unknown_file_extension(self):
+        class RootController(object):
+            @expose(content_type=None)
+            def _default(self, *args):
+                assert 'example:x.tiny' in args
+                assert request.pecan['extension'] is None
+                return 'SOME VALUE'
+
+        app = TestApp(Pecan(RootController()))
+
+        r = app.get('/example:x.tiny')
+        assert r.status_int == 200
+        assert r.body == 'SOME VALUE'
 
 
 class TestContentTypeByAcceptHeaders(unittest.TestCase):
