@@ -322,3 +322,34 @@ class TestTemplateBuilds(unittest.TestCase):
         proc.wait()
 
         assert proc.stderr.read().splitlines()[-1].strip() == 'OK'
+
+    @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
+    @unittest.skipUnless(
+        getattr(pecan, '__run_all_tests__', False) is True,
+        'Skipping (slow).  To run, `$ python setup.py test --functional.`'
+    )
+    def test_project_passes_pep8(self):
+        # Install pep8
+        pip_exe = os.path.join(self.install_dir, 'bin', 'pip')
+        proc = subprocess.Popen([
+            pip_exe,
+            'install',
+            'pep8'
+        ])
+        proc.wait()
+
+        # Run pep8 on setup.py and the project
+        pep8_exe = os.path.join(self.install_dir, 'bin', 'pep8')
+        proc = subprocess.Popen([
+            pep8_exe,
+            'setup.py',
+            'testing123'
+        ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        proc.wait()
+
+        # No output == good
+        output = proc.stdout.read()
+        assert output == ''
