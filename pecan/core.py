@@ -1,5 +1,4 @@
 import urllib
-import sys
 try:
     from simplejson import loads
 except ImportError:             # pragma: no cover
