@@ -372,14 +372,14 @@ class TestGunicornServeCommand(TestTemplateBuilds):
         super(TestGunicornServeCommand, self).create_virtualenv()
 
         # Install gunicorn
-        self.gunicorn_exe = self.install_dependency('gunicorn')
+        self.install_dependency('gunicorn')
 
-    def install_dependency(self, name):
-        return super(
-            TestGunicornServeCommand,
-            self
-        ).install_dependency(name).replace(
-            'gunicorn', 'gunicorn_pecan'
+    @property
+    def gunicorn_exe(self):
+        return os.path.join(
+            self.install_dir,
+            'bin',
+            'gunicorn_pecan'
         )
 
     def poll_gunicorn(self, proc, port):
