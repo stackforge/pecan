@@ -226,6 +226,7 @@ class TestTemplateBuilds(unittest.TestCase):
         proc = subprocess.Popen([
             pip_exe,
             'install',
+            '-U',
             name
         ])
         proc.wait()
