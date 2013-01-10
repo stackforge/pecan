@@ -184,13 +184,4 @@ Pecan's default project::
     $ pip install gunicorn
     $ pecan create simpleapp && cd simpleapp
     $ python setup.py develop
-
-Next, let's create a new file in the project root::
-
-    # wsgi.py
-    from pecan.deploy import deploy
-    application = deploy('config.py')
-
-...and then run it with::
-
-    $ gunicorn wsgi
+    $ gunicorn_pecan config.py

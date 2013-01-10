@@ -182,13 +182,13 @@ class TestTemplateBuilds(unittest.TestCase):
 
     def setUp(self):
         # Make a temp install location and record the cwd
-        self.install()
+        self.install_scaffolded_package()
 
     def tearDown(self):
         shutil.rmtree(self.install_dir)
         os.chdir(self.cwd)
 
-    def install(self):
+    def create_virtualenv(self):
         # Create a new virtualenv in the temp install location
         import virtualenv
         virtualenv.create_environment(
@@ -198,6 +198,8 @@ class TestTemplateBuilds(unittest.TestCase):
         # chdir into the pecan source
         os.chdir(pkg_resources.get_distribution('pecan').location)
 
+    def install_scaffolded_package(self):
+        self.create_virtualenv()
         py_exe = os.path.join(self.install_dir, 'bin', 'python')
         pecan_exe = os.path.join(self.install_dir, 'bin', 'pecan')
 
@@ -219,6 +221,21 @@ class TestTemplateBuilds(unittest.TestCase):
             'develop'
         ])
 
+    def install_dependency(self, name):
+        pip_exe = os.path.join(self.install_dir, 'bin', 'pip')
+        proc = subprocess.Popen([
+            pip_exe,
+            'install',
+            name
+        ])
+        proc.wait()
+
+        return os.path.join(
+            self.install_dir,
+            'bin',
+            name
+        )
+
     def poll(self, proc):
         limit = 30
         for i in range(limit):
@@ -228,7 +245,7 @@ class TestTemplateBuilds(unittest.TestCase):
             if proc.returncode is None:
                 break
             elif i == limit:  # pragma: no cover
-                raise RuntimeError("pecan serve config.py didn't start.")
+                raise RuntimeError("Server process didn't start.")
             time.sleep(.1)
 
     @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
@@ -330,16 +347,9 @@ class TestTemplateBuilds(unittest.TestCase):
     )
     def test_project_passes_pep8(self):
         # Install pep8
-        pip_exe = os.path.join(self.install_dir, 'bin', 'pip')
-        proc = subprocess.Popen([
-            pip_exe,
-            'install',
-            'pep8'
-        ])
-        proc.wait()
+        pep8_exe = self.install_dependency('pep8')
 
         # Run pep8 on setup.py and the project
-        pep8_exe = os.path.join(self.install_dir, 'bin', 'pep8')
         proc = subprocess.Popen([
             pep8_exe,
             'setup.py',
@@ -353,3 +363,72 @@ class TestTemplateBuilds(unittest.TestCase):
         # No output == good
         output = proc.stdout.read()
         assert output == ''
+
+
+class TestGunicornServeCommand(TestTemplateBuilds):
+
+    def create_virtualenv(self):
+        super(TestGunicornServeCommand, self).create_virtualenv()
+
+        # Install gunicorn
+        self.gunicorn_exe = self.install_dependency('gunicorn')
+
+    def install_dependency(self, name):
+        return super(
+            TestGunicornServeCommand,
+            self
+        ).install_dependency(name).replace(
+            'gunicorn', 'gunicorn_pecan'
+        )
+
+    def poll_gunicorn(self, proc, port):
+        try:
+            self.poll(proc)
+            retries = 30
+            while True:
+                retries -= 1
+                if retries < 0:  # pragma: nocover
+                    raise RuntimeError(
+                        "The gunicorn server has not replied within 3 seconds."
+                    )
+                try:
+                    # ...and that it's serving (valid) content...
+                    resp = urllib2.urlopen('http://localhost:%d/' % port)
+                    assert resp.getcode() == 200
+                    assert 'This is a sample Pecan project.' in resp.read()
+                except urllib2.URLError:
+                    pass
+                else:
+                    break
+                time.sleep(.1)
+        finally:
+            proc.terminate()
+
+    @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
+    @unittest.skipUnless(
+        getattr(pecan, '__run_all_tests__', False) is True,
+        'Skipping (slow).  To run, `$ python setup.py test --functional.`'
+    )
+    def test_serve_from_config(self):
+        # Start the server
+        proc = subprocess.Popen([
+            self.gunicorn_exe,
+            'config.py'
+        ])
+
+        self.poll_gunicorn(proc, 8080)
+
+    @unittest.skipUnless(has_internet(), 'Internet connectivity unavailable.')
+    @unittest.skipUnless(
+        getattr(pecan, '__run_all_tests__', False) is True,
+        'Skipping (slow).  To run, `$ python setup.py test --functional.`'
+    )
+    def test_serve_with_custom_bind(self):
+        # Start the server
+        proc = subprocess.Popen([
+            self.gunicorn_exe,
+            '--bind=0.0.0.0:9191',
+            'config.py'
+        ])
+
+        self.poll_gunicorn(proc, 9191)
