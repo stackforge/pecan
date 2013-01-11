@@ -278,3 +278,7 @@ add to.  To run them::
     OK
 
 The tests themselves can be found in the ``tests`` module in your project.
+
+Deploying to a Web Server
+-------------------------
+Ready to deploy your new Pecan app?  Take a look at :ref:`deployment`.

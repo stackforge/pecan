@@ -42,6 +42,7 @@ Narrative Documentation
    jsonify.rst
    commands.rst
    development.rst
+   deployment.rst
    logging.rst
    testing.rst
 
@@ -55,7 +56,6 @@ Cookbook and Common Patterns
    sessions.rst
    databases.rst
    errors.rst
-   deployment.rst
    
 
 API Documentation
