@@ -31,7 +31,8 @@ tests_require = requirements + [
     'virtualenv',
     'Genshi',
     'Kajiki',
-    'Jinja'
+    'Jinja',
+    'gunicorn'
 ]
 if sys.version_info < (2, 7):
     tests_require += ['unittest2']
@@ -102,5 +103,6 @@ setup(
     base = pecan.scaffolds:BaseScaffold
     [console_scripts]
     pecan = pecan.commands:CommandRunner.handle_command_line
+    gunicorn_pecan = pecan.commands.serve:gunicorn_run
     """
 )
