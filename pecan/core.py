@@ -177,11 +177,15 @@ class Pecan(object):
                                 namespace automatically.
     :param force_canonical: A boolean indicating if this project should
                             require canonical URLs.
+    :param guess_content_type_from_ext: A boolean indicating if this project
+                            should use the extension in the URL for guessing
+                            the content type to return.
     '''
 
     def __init__(self, root, default_renderer='mako',
                  template_path='templates', hooks=[], custom_renderers={},
-                 extra_template_vars={}, force_canonical=True):
+                 extra_template_vars={}, force_canonical=True,
+                 guess_content_type_from_ext=True):
 
         if isinstance(root, basestring):
             root = self.__translate_root__(root)
@@ -192,6 +196,7 @@ class Pecan(object):
         self.hooks = hooks
         self.template_path = template_path
         self.force_canonical = force_canonical
+        self.guess_content_type_from_ext = guess_content_type_from_ext
 
     def __translate_root__(self, item):
         '''
@@ -370,7 +375,9 @@ class Pecan(object):
         request.pecan['extension'] = None
 
         # attempt to guess the content type based on the file extension
-        if not request.pecan['content_type'] and '.' in path.split('/')[-1]:
+        if self.guess_content_type_from_ext \
+                and not request.pecan['content_type'] \
+                and '.' in path.split('/')[-1]:
             new_path, extension = splitext(path)
 
             # preface with a letter to ensure compat for 2.5
