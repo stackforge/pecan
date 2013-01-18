@@ -117,7 +117,7 @@ def after_commit(action):
     :param action: The callable to call after the commit is successfully
                    issued.
     '''
-    return  after_action('commit', action)
+    return after_action('commit', action)
 
 
 def after_rollback(action):
@@ -129,7 +129,7 @@ def after_rollback(action):
     :param action: The callable to call after the rollback is successfully
                    issued.
     '''
-    return  after_action('rollback', action)
+    return after_action('rollback', action)
 
 
 def accept_noncanonical(func):
