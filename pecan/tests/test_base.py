@@ -925,6 +925,21 @@ class TestFileTypeExtensions(unittest.TestCase):
         assert r.status_int == 200
         assert r.body == 'SOME VALUE'
 
+    def test_guessing_disabled(self):
+        class RootController(object):
+            @expose(content_type=None)
+            def _default(self, *args):
+                assert 'index.html' in args
+                assert request.pecan['extension'] is None
+                return 'SOME VALUE'
+
+        app = TestApp(Pecan(RootController(),
+                            guess_content_type_from_ext=False))
+
+        r = app.get('/index.html')
+        assert r.status_int == 200
+        assert r.body == 'SOME VALUE'
+
 
 class TestContentTypeByAcceptHeaders(unittest.TestCase):
 
