@@ -886,4 +886,5 @@ class TestRestController(TestCase):
         kwargs = {'foo': 'bar', 'spam': 'eggs'}
         r = app.post('/', kwargs)
         assert r.status_int == 200
-        assert r.body == dumps(kwargs)
+        assert r.namespace['foo'] == 'bar'
+        assert r.namespace['spam'] == 'eggs'
