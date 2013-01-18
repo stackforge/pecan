@@ -312,7 +312,7 @@ class Pecan(object):
             valid_args = valid_args[len(args):]
 
         # handle wildcard arguments
-        if remainder:
+        if filter(None, remainder):
             if not argspec[1]:
                 abort(404)
             args.extend(remainder)

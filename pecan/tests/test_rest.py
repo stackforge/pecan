@@ -863,3 +863,28 @@ class TestRestController(TestCase):
         r = app.get('/foos/bars/bazs/final/named')
         assert r.status_int == 200
         assert r.body == 'NAMED'
+
+    def test_post_with_kwargs_only(self):
+
+        class RootController(RestController):
+
+            @expose()
+            def get_all(self):
+                return 'INDEX'
+
+            @expose('json')
+            def post(self, **kw):
+                return kw
+
+        # create the app
+        app = TestApp(make_app(RootController()))
+
+        r = app.get('/')
+        assert r.status_int == 200
+        assert r.body == 'INDEX'
+
+        kwargs = {'foo': 'bar', 'spam': 'eggs'}
+        r = app.post('/', kwargs)
+        assert r.status_int == 200
+        assert r.namespace['foo'] == 'bar'
+        assert r.namespace['spam'] == 'eggs'
