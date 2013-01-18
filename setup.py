@@ -31,7 +31,7 @@ tests_require = requirements + [
     'virtualenv',
     'Genshi',
     'Kajiki',
-    'Jinja',
+    'Jinja2',
     'gunicorn'
 ]
 if sys.version_info < (2, 7):
