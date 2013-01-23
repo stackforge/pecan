@@ -19,7 +19,9 @@ class ServeCommand(BaseCommand):
 
     arguments = ({
         'name': 'config_file',
-        'help': 'a Pecan configuration file'
+        'help': 'a Pecan configuration file',
+        'nargs': '?',
+        'default': None,
     }, {
         'name': '--reload',
         'help': 'Watch for changes and automatically reload.',
