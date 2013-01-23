@@ -136,7 +136,9 @@ class BaseCommand(object):
 
     arguments = ({
         'name': 'config_file',
-        'help': 'a Pecan configuration file'
+        'help': 'a Pecan configuration file',
+        'nargs': '?',
+        'default': None,
     },)
 
     def run(self, args):
