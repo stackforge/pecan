@@ -741,7 +741,6 @@ class TestSriptName(unittest.TestCase):
         assert r.status_int == 200
 
 
-
 class TestRedirect(unittest.TestCase):
 
     @property
