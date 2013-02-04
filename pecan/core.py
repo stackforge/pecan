@@ -363,8 +363,9 @@ class Pecan(object):
         # get a sorted list of hooks, by priority (no controller hooks yet)
         state.hooks = self.determine_hooks()
 
-        # store the routing path to allow hooks to modify it
-        request.pecan['routing_path'] = request.path
+        # store the routing path for the current application to allow hooks to
+        # modify it
+        request.pecan['routing_path'] = request.path_info
 
         # handle "on_route" hooks
         self.handle_hooks('on_route', state)

@@ -725,6 +725,23 @@ class TestAbort(unittest.TestCase):
         assert r.status_int == 401
 
 
+class TestSriptName(unittest.TestCase):
+
+    def setUp(self):
+        self.environ = {'SCRIPT_NAME': '/foo'}
+
+    def test_handle_script_name(self):
+        class RootController(object):
+            @expose()
+            def index(self):
+                return 'Root Index'
+
+        app = TestApp(Pecan(RootController()), extra_environ=self.environ)
+        r = app.get('/foo/')
+        assert r.status_int == 200
+
+
+
 class TestRedirect(unittest.TestCase):
 
     @property
