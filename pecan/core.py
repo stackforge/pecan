@@ -38,6 +38,11 @@ def proxy(key):
         def __delattr__(self, attr):
             obj = getattr(state, key)
             return delattr(obj, attr)
+
+        def __dir__(self):
+            obj = getattr(state, key)
+            return dir(obj)
+
     return ObjectProxy()
 
 
