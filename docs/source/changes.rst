@@ -3,14 +3,12 @@
 
 * Include a license, readme, and ``requirements.txt`` in distributions.
 * Improve inspection with ``dir()`` for ``pecan.request`` and ``pecan.response``
-* Fix a pep8 spacing violation.
 * Fix a bug which prevented pecan applications from being mounted at WSGI
   virtual paths.
 
 0.2.0
 =====
 
-* Resolve a few pep8 issues.
 * Update base project scaffolding tests to be more repeatable.
 * Add an application-level configuration option to disable content-type guessing by URL
 * Fix the wrong test dependency on Jinja, it's Jinja2.
