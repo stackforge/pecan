@@ -64,10 +64,6 @@ Pecan's source code is well documented using Python docstrings and
 comments. In addition, we have generated API documentation from the
 docstrings here:
 
-.. toctree::
-   :maxdepth: 1
-
-   changes.rst
 
 .. toctree::
    :maxdepth: 2
@@ -86,6 +82,15 @@ docstrings here:
    pecan_templating.rst
    pecan_testing.rst
    pecan_util.rst
+
+
+Change History
+=================
+
+.. toctree::
+   :maxdepth: 1
+
+   changes.rst
 
 
 License

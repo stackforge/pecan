@@ -1,8 +1,5 @@
-Change History
-==============
-
 0.2.1
------
+=====
 
 * Include a license, readme, and ``requirements.txt`` in distributions.
 * Improve inspection with ``dir()`` for ``pecan.request`` and ``pecan.response``
@@ -11,7 +8,8 @@ Change History
   virtual paths.
 
 0.2.0
------
+=====
+
 * Resolve a few pep8 issues.
 * Update base project scaffolding tests to be more repeatable.
 * Add an application-level configuration option to disable content-type guessing by URL
@@ -26,7 +24,7 @@ Change History
 * Fix misleading output for ``$ pecan --version``.
 
 0.2.0b
-------
+======
 
 * Fix a bug in ``SecureController``.  Resolves #131.
 * Extract debug middleware static file dependencies into physical files.
