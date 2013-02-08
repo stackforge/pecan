@@ -65,6 +65,11 @@ comments. In addition, we have generated API documentation from the
 docstrings here:
 
 .. toctree::
+   :maxdepth: 1
+
+   changes.rst
+
+.. toctree::
    :maxdepth: 2
    
    pecan_core.rst
