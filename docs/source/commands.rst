@@ -86,9 +86,9 @@ Configuration from and environment variable
 -------------------------------------------
 In all the examples shown, you will see that the `pecan` commands where
 accepting a file path to the configuration file. An alternative to this is to
-set the configuration in an environment variable (``PECAN_CONFIG``).
+specify the configuration file in an environment variable (``PECAN_CONFIG``).
 
-This is completely optional, if a file path is passed in explicitly, Pecan will
+This is completely optional; if a file path is passed in explicitly, Pecan will
 honor that before looking for an environment variable.
 
 For example, to ``serve`` a Pecan application, a variable could be exported and
@@ -99,9 +99,9 @@ subsequently be re-used when no path is passed in::
     Starting server in PID 000.
     serving on 0.0.0.0:8080, view at http://127.0.0.1:8080
 
-Note that the path needs to go to a valid pecan configuration file, otherwise
-the command will error out with a meaningful message indicating that the path
-is either invalid (for example if a directory is passed in).
+Note that the path needs to reference a valid pecan configuration file,
+otherwise the command will error out with a meaningful message indicating that
+the path is invalid (for example, if a directory is passed in).
 
 If ``PECAN_CONFIG`` is not set and no configuration is passed in, the command
 will error out because it will not be able to locate a configuration file.
