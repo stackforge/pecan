@@ -212,7 +212,8 @@ def set_config(config, overwrite=False):
     if overwrite is True:
         _runtime_conf.empty()
 
-    config = config or conf_from_env()
+    if config is None:
+        config = conf_from_env()
 
     if isinstance(config, basestring):
         config = conf_from_file(config)
