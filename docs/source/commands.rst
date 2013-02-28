@@ -8,7 +8,7 @@ Command Line Pecan
 Any Pecan application can be controlled and inspected from the command line
 using the built-in ``pecan`` command.  The usage examples of the ``pecan``
 command in this document are intended to be invoked from your project's root
-directory.  
+directory.
 
 Serving a Pecan App For Development
 -----------------------------------
@@ -40,7 +40,7 @@ command::
     Pecan Interactive Shell
     Python 2.7.1 (r271:86832, Jul 31 2011, 19:30:53)
     [GCC 4.2.1 (Based on Apple Inc. build 5658)
-    
+
       The following objects are available:
       wsgiapp    - This project's WSGI App instance
       conf       - The current configuration
@@ -51,7 +51,7 @@ command::
         'app': Config({
             'root': 'myapp.controllers.root.RootController',
             'modules': ['myapp'],
-            'static_root': '/Users/somebody/myapp/public', 
+            'static_root': '/Users/somebody/myapp/public',
             'template_path': '/Users/somebody/myapp/project/templates',
             'errors': {'404': '/error/404'},
             'debug': True
@@ -82,9 +82,9 @@ which can be specified with the ``--shell`` flag (or its abbreviated alias,
 
 .. _env_config:
 
-Configuration from and environment variable
--------------------------------------------
-In all the examples shown, you will see that the `pecan` commands where
+Configuration from an environment variable
+------------------------------------------
+In all the examples shown, you will see that the `pecan` commands were
 accepting a file path to the configuration file. An alternative to this is to
 specify the configuration file in an environment variable (``PECAN_CONFIG``).
 
@@ -153,7 +153,7 @@ Overriding the ``run`` Method
 ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 
 First, we're subclassing ``pecan.commands.BaseCommand`` and extending
-the ``run`` method to: 
+the ``run`` method to:
 
 * Load a Pecan application - ``self.load_app()``
 * Wrap it in a fake WGSI environment - ``webtest.TestApp()``
@@ -212,11 +212,11 @@ e.g., ::
         ...
     )
 
-Assuming it doesn't exist already, we'll add the ``entry_points`` argument 
+Assuming it doesn't exist already, we'll add the ``entry_points`` argument
 to the ``setup()`` call, and define a ``[pecan.command]`` definition for your custom
 command::
 
-    
+
     # myapp/setup.py
     ...
     setup(
