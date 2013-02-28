@@ -289,6 +289,9 @@ class TestConfFromEnv(TestCase):
         self.conf_from_env = self.get_conf_from_env()
         os.environ['PECAN_CONFIG'] = ''
 
+    def tearDown(self):
+        os.environ['PECAN_CONFIG'] = ''
+
     def get_conf_from_env(self):
         from pecan import configuration
         return configuration.conf_from_env
