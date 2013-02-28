@@ -110,22 +110,26 @@ class TestConf(TestCase):
         from pecan import configuration
         path = ('doesnotexist.py',)
         configuration.Config({})
-        self.assertRaises(RuntimeError, configuration.conf_from_file, os.path.join(
-            __here__,
-            'config_fixtures',
-            *path
-        ))
+        self.assertRaises(RuntimeError,
+                          configuration.conf_from_file,
+                          os.path.join(
+                              __here__,
+                              'config_fixtures',
+                              *path)
+                          )
 
     def test_config_missing_file_on_path(self):
         from pecan import configuration
         path = ('bad', 'bad', 'doesnotexist.py',)
         configuration.Config({})
 
-        self.assertRaises(RuntimeError, configuration.conf_from_file, os.path.join(
-            __here__,
-            'config_fixtures',
-            *path
-        ))
+        self.assertRaises(RuntimeError,
+                          configuration.conf_from_file,
+                          os.path.join(
+                              __here__,
+                              'config_fixtures',
+                              *path)
+                          )
 
     def test_config_with_syntax_error(self):
         from pecan import configuration
