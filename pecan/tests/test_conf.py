@@ -284,6 +284,11 @@ class TestGlobalConfig(TestCase):
 
 
 class TestConfFromEnv(TestCase):
+    #
+    # Note that there is a good chance of pollution if ``tearDown`` does not
+    # reset the configuration like this class does. If implementing new classes
+    # for configuration this tearDown **needs to be implemented**
+    #
 
     def setUp(self):
         self.conf_from_env = self.get_conf_from_env()
@@ -291,6 +296,11 @@ class TestConfFromEnv(TestCase):
 
     def tearDown(self):
         os.environ['PECAN_CONFIG'] = ''
+        from pecan import configuration
+        configuration.set_config(
+            dict(configuration.initconf()),
+            overwrite=True
+        )
 
     def get_conf_from_env(self):
         from pecan import configuration
