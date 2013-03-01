@@ -94,7 +94,7 @@ class BaseTest(unittest.TestCase):
             match = pat.search(actual)
             if not match:
                 self.fail("Log line does not match expected pattern:\n" +
-                            actual)
+                          actual)
             self.assertEquals(tuple(match.groups()), expected)
         s = stream.read()
         if s:
@@ -303,7 +303,7 @@ class ConfigDictTest(BaseTest):
         },
         'root': {
             'level': 'NOTSET',
-                'handlers': ['hand1'],
+            'handlers': ['hand1'],
         },
     }
 
@@ -337,7 +337,7 @@ class ConfigDictTest(BaseTest):
         },
         'root': {
             'level': 'NOTSET',
-                'handlers': ['hand1'],
+            'handlers': ['hand1'],
         },
     }
 
@@ -602,8 +602,8 @@ class ConfigDictTest(BaseTest):
             except RuntimeError:
                 logging.exception("just testing")
             sys.stdout.seek(0)
-            self.assertEquals(output.getvalue(),
-                "ERROR:root:just testing\nGot a [RuntimeError]\n")
+            expected = "ERROR:root:just testing\nGot a [RuntimeError]\n"
+            self.assertEquals(output.getvalue(), expected)
             # Original logger output is empty
             self.assert_log_lines([])
 
@@ -617,8 +617,8 @@ class ConfigDictTest(BaseTest):
             except RuntimeError:
                 logging.exception("just testing")
             sys.stdout.seek(0)
-            self.assertEquals(output.getvalue(),
-                "ERROR:root:just testing\nGot a [RuntimeError]\n")
+            expected = "ERROR:root:just testing\nGot a [RuntimeError]\n"
+            self.assertEquals(output.getvalue(), expected)
             # Original logger output is empty
             self.assert_log_lines([])
 

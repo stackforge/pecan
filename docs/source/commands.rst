@@ -8,7 +8,7 @@ Command Line Pecan
 Any Pecan application can be controlled and inspected from the command line
 using the built-in ``pecan`` command.  The usage examples of the ``pecan``
 command in this document are intended to be invoked from your project's root
-directory.  
+directory.
 
 Serving a Pecan App For Development
 -----------------------------------
@@ -40,7 +40,7 @@ command::
     Pecan Interactive Shell
     Python 2.7.1 (r271:86832, Jul 31 2011, 19:30:53)
     [GCC 4.2.1 (Based on Apple Inc. build 5658)
-    
+
       The following objects are available:
       wsgiapp    - This project's WSGI App instance
       conf       - The current configuration
@@ -51,7 +51,7 @@ command::
         'app': Config({
             'root': 'myapp.controllers.root.RootController',
             'modules': ['myapp'],
-            'static_root': '/Users/somebody/myapp/public', 
+            'static_root': '/Users/somebody/myapp/public',
             'template_path': '/Users/somebody/myapp/project/templates',
             'errors': {'404': '/error/404'},
             'debug': True
@@ -78,6 +78,34 @@ which can be specified with the ``--shell`` flag (or its abbreviated alias,
 
     $ pecan shell --shell=ipython config.py
     $ pecan shell -s bpython config.py
+
+
+.. _env_config:
+
+Configuration from an environment variable
+------------------------------------------
+In all the examples shown, you will see that the `pecan` commands were
+accepting a file path to the configuration file. An alternative to this is to
+specify the configuration file in an environment variable (``PECAN_CONFIG``).
+
+This is completely optional; if a file path is passed in explicitly, Pecan will
+honor that before looking for an environment variable.
+
+For example, to ``serve`` a Pecan application, a variable could be exported and
+subsequently be re-used when no path is passed in::
+
+    $ export PECAN_CONFIG=/path/to/app/config.py
+    $ pecan serve
+    Starting server in PID 000.
+    serving on 0.0.0.0:8080, view at http://127.0.0.1:8080
+
+Note that the path needs to reference a valid pecan configuration file,
+otherwise the command will error out with a meaningful message indicating that
+the path is invalid (for example, if a directory is passed in).
+
+If ``PECAN_CONFIG`` is not set and no configuration is passed in, the command
+will error out because it will not be able to locate a configuration file.
+
 
 Extending ``pecan`` with Custom Commands
 ----------------------------------------
@@ -125,7 +153,7 @@ Overriding the ``run`` Method
 ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 
 First, we're subclassing ``pecan.commands.BaseCommand`` and extending
-the ``run`` method to: 
+the ``run`` method to:
 
 * Load a Pecan application - ``self.load_app()``
 * Wrap it in a fake WGSI environment - ``webtest.TestApp()``
@@ -184,11 +212,11 @@ e.g., ::
         ...
     )
 
-Assuming it doesn't exist already, we'll add the ``entry_points`` argument 
+Assuming it doesn't exist already, we'll add the ``entry_points`` argument
 to the ``setup()`` call, and define a ``[pecan.command]`` definition for your custom
 command::
 
-    
+
     # myapp/setup.py
     ...
     setup(

@@ -110,22 +110,22 @@ class TestConf(TestCase):
         from pecan import configuration
         path = ('doesnotexist.py',)
         configuration.Config({})
-        self.assertRaises(IOError, configuration.conf_from_file, os.path.join(
-            __here__,
-            'config_fixtures',
-            *path
-        ))
+        self.assertRaises(
+            RuntimeError,
+            configuration.conf_from_file,
+            os.path.join(__here__, 'config_fixtures', *path)
+        )
 
     def test_config_missing_file_on_path(self):
         from pecan import configuration
         path = ('bad', 'bad', 'doesnotexist.py',)
         configuration.Config({})
 
-        self.assertRaises(IOError, configuration.conf_from_file, os.path.join(
-            __here__,
-            'config_fixtures',
-            *path
-        ))
+        self.assertRaises(
+            RuntimeError,
+            configuration.conf_from_file,
+            os.path.join(__here__, 'config_fixtures', *path)
+        )
 
     def test_config_with_syntax_error(self):
         from pecan import configuration
@@ -274,6 +274,47 @@ class TestGlobalConfig(TestCase):
         )
         assert dict(configuration._runtime_conf) == {'foo': 'bar'}
 
-    def test_set_config_invalid_type(self):
+    def test_set_config_none_type(self):
         from pecan import configuration
-        self.assertRaises(TypeError, configuration.set_config, None)
+        self.assertRaises(RuntimeError, configuration.set_config, None)
+
+    def test_set_config_to_dir(self):
+        from pecan import configuration
+        self.assertRaises(RuntimeError, configuration.set_config, '/')
+
+
+class TestConfFromEnv(TestCase):
+
+    def setUp(self):
+        self.conf_from_env = self.get_conf_from_env()
+        os.environ['PECAN_CONFIG'] = ''
+
+    def tearDown(self):
+        os.environ['PECAN_CONFIG'] = ''
+
+    def get_conf_from_env(self):
+        from pecan import configuration
+        return configuration.conf_from_env
+
+    def assertRaisesMessage(self, msg, exc, func, *args, **kwargs):
+        try:
+            func(*args, **kwargs)
+            self.assertFail()
+        except Exception as error:
+            assert issubclass(exc, error.__class__)
+            assert error.message == msg
+
+    def test_invalid_path(self):
+        os.environ['PECAN_CONFIG'] = '/'
+        msg = "PECAN_CONFIG was set to an invalid path: /"
+        self.assertRaisesMessage(msg, RuntimeError, self.conf_from_env)
+
+    def test_is_not_set(self):
+        msg = "PECAN_CONFIG is not set and " \
+              "no config file was passed as an argument."
+        self.assertRaisesMessage(msg, RuntimeError, self.conf_from_env)
+
+    def test_return_valid_path(self):
+        here = os.path.abspath(__file__)
+        os.environ['PECAN_CONFIG'] = here
+        assert self.conf_from_env() == here

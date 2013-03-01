@@ -136,7 +136,9 @@ class BaseCommand(object):
 
     arguments = ({
         'name': 'config_file',
-        'help': 'a Pecan configuration file'
+        'help': 'a Pecan configuration file',
+        'nargs': '?',
+        'default': None,
     },)
 
     def run(self, args):
@@ -144,6 +146,4 @@ class BaseCommand(object):
 
     def load_app(self):
         from pecan import load_app
-        if not os.path.isfile(self.args.config_file):
-            raise RuntimeError('`%s` is not a file.' % self.args.config_file)
         return load_app(self.args.config_file)

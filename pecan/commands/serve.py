@@ -17,15 +17,12 @@ class ServeCommand(BaseCommand):
     configuration file for the server and application.
     """
 
-    arguments = ({
-        'name': 'config_file',
-        'help': 'a Pecan configuration file'
-    }, {
+    arguments = BaseCommand.arguments + ({
         'name': '--reload',
         'help': 'Watch for changes and automatically reload.',
         'default': False,
         'action': 'store_true'
-    })
+    },)
 
     def run(self, args):
         super(ServeCommand, self).run(args)
