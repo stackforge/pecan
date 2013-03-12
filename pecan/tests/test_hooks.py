@@ -1082,7 +1082,7 @@ class TestRequestViewerHook(TestCase):
                 RootController(),
                 hooks=[
                     RequestViewerHook(
-                        config={'items':['path']}, writer=_stdout
+                        config={'items': ['path']}, writer=_stdout
                     )
                 ]
             )
@@ -1117,7 +1117,7 @@ class TestRequestViewerHook(TestCase):
                 RootController(),
                 hooks=[
                     RequestViewerHook(
-                        config={'blacklist':['/']}, writer=_stdout
+                        config={'blacklist': ['/']}, writer=_stdout
                     )
                 ]
             )
@@ -1144,7 +1144,7 @@ class TestRequestViewerHook(TestCase):
                 RootController(),
                 hooks=[
                     RequestViewerHook(
-                        config={'items':['date']}, writer=_stdout
+                        config={'items': ['date']}, writer=_stdout
                     )
                 ]
             )

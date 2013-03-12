@@ -286,7 +286,61 @@ class TestRestController(TestCase):
         assert r.status_int == 200
         assert r.body == dumps(dict(items=ThingsController.data))
 
-    def test_nested_rest(self):
+    def test_simple_nested_rest(self):
+
+        class BarController(RestController):
+
+            @expose()
+            def post(self):
+                return "BAR-POST"
+
+            @expose()
+            def delete(self, id_):
+                return "BAR-%s" % id_
+
+            @expose()
+            def post(self):
+                return "BAR-POST"
+
+            @expose()
+            def delete(self, id_):
+                return "BAR-%s" % id_
+
+        class FooController(RestController):
+
+            bar = BarController()
+
+            @expose()
+            def post(self):
+                return "FOO-POST"
+
+            @expose()
+            def delete(self, id_):
+                return "FOO-%s" % id_
+
+        class RootController(object):
+            foo = FooController()
+
+        # create the app
+        app = TestApp(make_app(RootController()))
+
+        r = app.post('/foo')
+        assert r.status_int == 200
+        assert r.body == "FOO-POST"
+
+        r = app.delete('/foo/1')
+        assert r.status_int == 200
+        assert r.body == "FOO-1"
+
+        r = app.post('/foo/bar')
+        assert r.status_int == 200
+        assert r.body == "BAR-POST"
+
+        r = app.delete('/foo/bar/2')
+        assert r.status_int == 200
+        assert r.body == "BAR-2"
+
+    def test_complicated_nested_rest(self):
 
         class BarsController(RestController):
 
