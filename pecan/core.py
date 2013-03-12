@@ -138,15 +138,13 @@ def render(template, namespace):
     return state.app.render(template, namespace)
 
 
-def load_app(config=None):
+def load_app(config):
     '''
     Used to load a ``Pecan`` application and its environment based on passed
     configuration.
 
     :param config: Can be a dictionary containing configuration, a string which
-                    represents a (relative) configuration filename or ``None``
-                    which will fallback to get the ``PECAN_CONFIG`` env
-                    variable.
+                    represents a (relative) configuration filename
 
     returns a pecan.Pecan object
     '''
