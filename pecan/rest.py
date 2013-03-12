@@ -1,8 +1,10 @@
 from inspect import getargspec, ismethod
 
+from webob import exc
+
 from core import abort, request
 from decorators import expose
-from routing import lookup_controller
+from routing import lookup_controller, handle_lookup_traversal
 from util import iscontroller
 
 
@@ -53,10 +55,41 @@ class RestController(object):
 
         # handle the request
         handler = getattr(self, '_handle_%s' % method, self._handle_custom)
-        result = handler(method, args)
+
+        try:
+            result = handler(method, args)
+
+            #
+            # If the signature of the handler does not match the number
+            # of remaining positional arguments, attempt to handle
+            # a _lookup method (if it exists)
+            #
+            argspec = getargspec(result[0])
+            num_args = len(argspec[0][1:])
+            if num_args < len(args):
+                _lookup_result = self._handle_lookup(args)
+                if _lookup_result:
+                    return _lookup_result
+        except exc.HTTPNotFound:
+            #
+            # If the matching handler results in a 404, attempt to handle
+            # a _lookup method (if it exists)
+            #
+            _lookup_result = self._handle_lookup(args)
+            if _lookup_result:
+                return _lookup_result
+            raise
 
         # return the result
         return result
+
+    def _handle_lookup(self, args):
+        # check for lookup controllers
+        lookup = getattr(self, '_lookup', None)
+        if args and iscontroller(lookup):
+            result = handle_lookup_traversal(lookup, args)
+            if result:
+                return lookup_controller(*result)
 
     def _find_controller(self, *args):
         '''
