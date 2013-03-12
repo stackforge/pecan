@@ -3,6 +3,8 @@ import sys
 
 from pecan.tests import PecanTestCase
 
+from mock import patch
+
 __here__ = os.path.dirname(__file__)
 
 
@@ -294,7 +296,6 @@ class TestConfFromEnv(PecanTestCase):
     def setUp(self):
         super(TestConfFromEnv, self).setUp()
         self.conf_from_env = self.get_conf_from_env()
-        os.environ['PECAN_CONFIG'] = ''
 
     def tearDown(self):
         os.environ['PECAN_CONFIG'] = ''
@@ -311,8 +312,8 @@ class TestConfFromEnv(PecanTestCase):
             assert issubclass(exc, error.__class__)
             assert error.message == msg
 
+    @patch.dict('os.environ', {'PECAN_CONFIG': '/'})
     def test_invalid_path(self):
-        os.environ['PECAN_CONFIG'] = '/'
         msg = "PECAN_CONFIG was set to an invalid path: /"
         self.assertRaisesMessage(msg, RuntimeError, self.conf_from_env)
 
@@ -321,7 +322,6 @@ class TestConfFromEnv(PecanTestCase):
               "no config file was passed as an argument."
         self.assertRaisesMessage(msg, RuntimeError, self.conf_from_env)
 
+    @patch.dict('os.environ', {'PECAN_CONFIG': os.path.abspath(__file__)})
     def test_return_valid_path(self):
-        here = os.path.abspath(__file__)
-        os.environ['PECAN_CONFIG'] = here
-        assert self.conf_from_env() == here
+        assert self.conf_from_env() == os.path.abspath(__file__)
