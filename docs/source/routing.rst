@@ -134,6 +134,35 @@ methods on your controller objects provides additional flexibility for
 processing all or part of a URL.
 
 
+Setting a Return Status Code
+--------------------------------
+
+Setting a specific HTTP response code (such as ``201 Created``) is simple:
+
+::
+
+    from pecan import expose, response
+
+    class RootController(object):
+
+        @expose('json')
+        def hello(self):
+            response.status = 201
+            return {'foo': 'bar'}
+
+Pecan also comes with ``abort``, a utility function for raising HTTP errors:
+
+::
+
+    from pecan import expose, abort
+
+    class RootController(object):
+
+        @expose('json')
+        def hello(self):
+            abort(404)
+
+
 Routing to Subcontrollers with ``_lookup``
 ------------------------------------------
 
