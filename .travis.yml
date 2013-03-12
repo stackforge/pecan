@@ -9,9 +9,9 @@ branches:
     - master
     - next
 install:
-  - pip install gunicorn
+  - pip install gunicorn --use-mirrors
   - pip install -r requirements.txt --use-mirrors
   - pip install pep8 --use-mirrors
 before_script:
   - pep8 --repeat --show-source --ignore=E125 --statistics --exclude *compat*,resources.py, pecan setup.py
-script: python setup.py test --functional
+script: python setup.py test
