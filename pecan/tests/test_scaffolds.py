@@ -9,6 +9,7 @@ import time
 from cStringIO import StringIO
 
 import pecan
+from pecan.tests import PecanTestCase
 
 if sys.version_info < (2, 7):
     import unittest2 as unittest
@@ -25,7 +26,7 @@ def has_internet():
     return False
 
 
-class TestPecanScaffold(unittest.TestCase):
+class TestPecanScaffold(PecanTestCase):
 
     def test_normalize_pkg_name(self):
         from pecan.scaffolds import PecanScaffold
@@ -41,9 +42,10 @@ class TestPecanScaffold(unittest.TestCase):
         assert s.normalize_pkg_name('sam-sam') == 'samsam'
 
 
-class TestScaffoldUtils(unittest.TestCase):
+class TestScaffoldUtils(PecanTestCase):
 
     def setUp(self):
+        super(TestScaffoldUtils, self).setUp()
         self.scaffold_destination = tempfile.mkdtemp()
         self.out = sys.stdout
 
@@ -172,7 +174,7 @@ class TestScaffoldUtils(unittest.TestCase):
         ), 'r').read().strip() == 'Pecan thingy'
 
 
-class TestTemplateBuilds(unittest.TestCase):
+class TestTemplateBuilds(PecanTestCase):
     """
     Used to build and test the templated quickstart project(s).
     """
@@ -181,6 +183,7 @@ class TestTemplateBuilds(unittest.TestCase):
     cwd = os.getcwd()
 
     def setUp(self):
+        super(TestTemplateBuilds, self).setUp()
         # Make a temp install location and record the cwd
         self.install_scaffolded_package()
 

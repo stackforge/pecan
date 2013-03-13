@@ -1,11 +1,12 @@
 import os
 import sys
-from unittest import TestCase
+
+from pecan.tests import PecanTestCase
 
 __here__ = os.path.dirname(__file__)
 
 
-class TestConf(TestCase):
+class TestConf(PecanTestCase):
 
     def test_update_config_fail_identifier(self):
         """Fail when naming does not pass correctness"""
@@ -234,7 +235,7 @@ class TestConf(TestCase):
         assert to_dict['prefix_app']['prefix_template_path'] == ''
 
 
-class TestGlobalConfig(TestCase):
+class TestGlobalConfig(PecanTestCase):
 
     def tearDown(self):
         from pecan import configuration
@@ -283,7 +284,7 @@ class TestGlobalConfig(TestCase):
         self.assertRaises(RuntimeError, configuration.set_config, '/')
 
 
-class TestConfFromEnv(TestCase):
+class TestConfFromEnv(PecanTestCase):
     #
     # Note that there is a good chance of pollution if ``tearDown`` does not
     # reset the configuration like this class does. If implementing new classes
@@ -291,16 +292,12 @@ class TestConfFromEnv(TestCase):
     #
 
     def setUp(self):
+        super(TestConfFromEnv, self).setUp()
         self.conf_from_env = self.get_conf_from_env()
         os.environ['PECAN_CONFIG'] = ''
 
     def tearDown(self):
         os.environ['PECAN_CONFIG'] = ''
-        from pecan import configuration
-        configuration.set_config(
-            dict(configuration.initconf()),
-            overwrite=True
-        )
 
     def get_conf_from_env(self):
         from pecan import configuration

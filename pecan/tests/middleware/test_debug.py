@@ -1,9 +1,9 @@
-from unittest import TestCase
 from wsgiref.util import setup_testing_defaults
 
 from webtest import TestApp
 
 from pecan.middleware.debug import DebugMiddleware
+from pecan.tests import PecanTestCase
 
 
 class StripPasteVar(object):
@@ -15,9 +15,11 @@ class StripPasteVar(object):
         return self.app(environ, start_response)
 
 
-class TestDebugMiddleware(TestCase):
+class TestDebugMiddleware(PecanTestCase):
 
     def setUp(self):
+        super(TestDebugMiddleware, self).setUp()
+
         def conditional_error_app(environ, start_response):
             setup_testing_defaults(environ)
             if environ['PATH_INFO'] == '/error':

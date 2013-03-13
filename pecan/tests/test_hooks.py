@@ -1,4 +1,7 @@
 from cStringIO import StringIO
+
+from webtest import TestApp
+
 from pecan import make_app, expose, redirect, abort
 from pecan.core import state
 from pecan.hooks import (
@@ -6,11 +9,10 @@ from pecan.hooks import (
 )
 from pecan.configuration import Config
 from pecan.decorators import transactional, after_commit, after_rollback
-from unittest import TestCase
-from webtest import TestApp
+from pecan.tests import PecanTestCase
 
 
-class TestHooks(TestCase):
+class TestHooks(PecanTestCase):
 
     def test_basic_single_hook(self):
         run_hook = []
@@ -329,7 +331,7 @@ class TestHooks(TestCase):
         assert run_hook[5] == 'after2'
 
 
-class TestTransactionHook(TestCase):
+class TestTransactionHook(PecanTestCase):
     def test_transaction_hook(self):
         run_hook = []
 
@@ -991,7 +993,7 @@ class TestTransactionHook(TestCase):
         assert run_hook[3] == 'clear'
 
 
-class TestRequestViewerHook(TestCase):
+class TestRequestViewerHook(PecanTestCase):
 
     def test_hook_from_config(self):
         from pecan.configuration import _runtime_conf as conf

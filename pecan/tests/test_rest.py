@@ -1,6 +1,3 @@
-from pecan import abort, expose, make_app, response
-from pecan.rest import RestController
-from unittest import TestCase
 from webtest import TestApp
 import warnings
 try:
@@ -8,8 +5,12 @@ try:
 except:
     from json import dumps, loads  # noqa
 
+from pecan import abort, expose, make_app, response
+from pecan.rest import RestController
+from pecan.tests import PecanTestCase
 
-class TestRestController(TestCase):
+
+class TestRestController(PecanTestCase):
 
     def test_basic_rest(self):
 

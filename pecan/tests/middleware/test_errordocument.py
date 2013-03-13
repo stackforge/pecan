@@ -1,8 +1,8 @@
-from unittest import TestCase
 from webtest import TestApp
 
 from pecan.middleware.errordocument import ErrorDocumentMiddleware
 from pecan.middleware.recursive import RecursiveMiddleware
+from pecan.tests import PecanTestCase
 
 
 def four_oh_four_app(environ, start_response):
@@ -18,9 +18,10 @@ def four_oh_four_app(environ, start_response):
     return []
 
 
-class TestDebugMiddleware(TestCase):
+class TestErrorDocumentMiddleware(PecanTestCase):
 
     def setUp(self):
+        super(TestErrorDocumentMiddleware, self).setUp()
         self.app = TestApp(RecursiveMiddleware(ErrorDocumentMiddleware(
             four_oh_four_app, {404: '/error/404'}
         )))

@@ -1,11 +1,12 @@
 import sys
+import os
 import warnings
-from webtest import TestApp
-
 if sys.version_info < (2, 7):
     import unittest2 as unittest  # pragma: nocover
 else:
     import unittest  # pragma: nocover
+
+from webtest import TestApp
 
 from pecan import (
     Pecan, expose, request, response, redirect, abort, make_app,
@@ -15,22 +16,21 @@ from pecan.templating import (
     _builtin_renderers as builtin_renderers, error_formatters
 )
 from pecan.decorators import accept_noncanonical
-
-import os
+from pecan.tests import PecanTestCase
 
 
 class SampleRootController(object):
     pass
 
 
-class TestAppRoot(unittest.TestCase):
+class TestAppRoot(PecanTestCase):
 
     def test_controller_lookup_by_string_path(self):
         app = Pecan('pecan.tests.test_base.SampleRootController')
         assert app.root and isinstance(app.root, SampleRootController)
 
 
-class TestIndexRouting(unittest.TestCase):
+class TestIndexRouting(PecanTestCase):
 
     @property
     def app_(self):
@@ -57,7 +57,7 @@ class TestIndexRouting(unittest.TestCase):
         assert r.body == 'Hello, World!'
 
 
-class TestObjectDispatch(unittest.TestCase):
+class TestObjectDispatch(PecanTestCase):
 
     @property
     def app_(self):
@@ -124,7 +124,7 @@ class TestObjectDispatch(unittest.TestCase):
         assert r.body == '/sub/sub/deeper'
 
 
-class TestLookups(unittest.TestCase):
+class TestLookups(PecanTestCase):
 
     @property
     def app_(self):
@@ -179,7 +179,7 @@ class TestLookups(unittest.TestCase):
             assert r.status_int == 404
 
 
-class TestControllerArguments(unittest.TestCase):
+class TestControllerArguments(PecanTestCase):
 
     @property
     def app_(self):
@@ -702,7 +702,7 @@ class TestControllerArguments(unittest.TestCase):
         assert r.body == 'eater: 10, dummy, day=12, month=1'
 
 
-class TestAbort(unittest.TestCase):
+class TestAbort(PecanTestCase):
 
     def test_abort(self):
         class RootController(object):
@@ -725,9 +725,10 @@ class TestAbort(unittest.TestCase):
         assert r.status_int == 401
 
 
-class TestSriptName(unittest.TestCase):
+class TestScriptName(PecanTestCase):
 
     def setUp(self):
+        super(TestScriptName, self).setUp()
         self.environ = {'SCRIPT_NAME': '/foo'}
 
     def test_handle_script_name(self):
@@ -741,7 +742,7 @@ class TestSriptName(unittest.TestCase):
         assert r.status_int == 200
 
 
-class TestRedirect(unittest.TestCase):
+class TestRedirect(PecanTestCase):
 
     @property
     def app_(self):
@@ -817,7 +818,7 @@ class TestRedirect(unittest.TestCase):
         assert res.request.environ['HTTP_X_FORWARDED_PROTO'] == 'https'
 
 
-class TestStreamedResponse(unittest.TestCase):
+class TestStreamedResponse(PecanTestCase):
 
     def test_streaming_response(self):
         import StringIO
@@ -847,7 +848,7 @@ class TestStreamedResponse(unittest.TestCase):
         assert r.body == 'plain text'
 
 
-class TestStateCleanup(unittest.TestCase):
+class TestStateCleanup(PecanTestCase):
 
     def test_request_state_cleanup(self):
         """
@@ -869,7 +870,7 @@ class TestStateCleanup(unittest.TestCase):
         assert state.__dict__.keys() == ['app']
 
 
-class TestFileTypeExtensions(unittest.TestCase):
+class TestFileTypeExtensions(PecanTestCase):
 
     @property
     def app_(self):
@@ -957,7 +958,7 @@ class TestFileTypeExtensions(unittest.TestCase):
         assert r.body == 'SOME VALUE'
 
 
-class TestContentTypeByAcceptHeaders(unittest.TestCase):
+class TestContentTypeByAcceptHeaders(PecanTestCase):
 
     @property
     def app_(self):
@@ -1005,7 +1006,7 @@ class TestContentTypeByAcceptHeaders(unittest.TestCase):
         assert r.content_type == 'text/html'
 
 
-class TestCanonicalRouting(unittest.TestCase):
+class TestCanonicalRouting(PecanTestCase):
 
     @property
     def app_(self):
@@ -1091,7 +1092,7 @@ class TestCanonicalRouting(unittest.TestCase):
         assert 'accept' == r.body
 
 
-class TestNonCanonical(unittest.TestCase):
+class TestNonCanonical(PecanTestCase):
 
     @property
     def app_(self):
@@ -1170,7 +1171,7 @@ class TestNonCanonical(unittest.TestCase):
         assert len(wrapped_apps) == 1
 
 
-class TestLogging(unittest.TestCase):
+class TestLogging(PecanTestCase):
 
     def test_logging_setup(self):
         class RootController(object):
@@ -1232,7 +1233,7 @@ class TestLogging(unittest.TestCase):
         assert f.getvalue() == 'HELLO WORLD\n'
 
 
-class TestEngines(unittest.TestCase):
+class TestEngines(PecanTestCase):
 
     template_path = os.path.join(os.path.dirname(__file__), 'templates')
 
