@@ -9,13 +9,13 @@ try:
     from sqlalchemy.engine import create_engine
 except ImportError:
     create_engine = None  # noqa
-from unittest import TestCase
+
+from webtest import TestApp
+from webob.multidict import MultiDict
 
 from pecan.jsonify import jsonify, encode, ResultProxy, RowProxy
 from pecan import Pecan, expose
-from webtest import TestApp
-
-from webob.multidict import MultiDict
+from pecan.tests import PecanTestCase
 
 
 def make_person():
@@ -49,7 +49,7 @@ def test_simple_rule():
     assert len(result) == 1
 
 
-class TestJsonify(TestCase):
+class TestJsonify(PecanTestCase):
 
     def test_simple_jsonify(self):
         Person = make_person()
@@ -75,7 +75,7 @@ class TestJsonify(TestCase):
         assert loads(r.body) == {'name': 'Jonathan LaCour'}
 
 
-class TestJsonifyGenericEncoder(TestCase):
+class TestJsonifyGenericEncoder(PecanTestCase):
     def test_json_callable(self):
         class JsonCallable(object):
             def __init__(self, arg):
@@ -118,9 +118,10 @@ class TestJsonifyGenericEncoder(TestCase):
         self.assertRaises(TypeError, encode, Foo())
 
 
-class TestJsonifySQLAlchemyGenericEncoder(TestCase):
+class TestJsonifySQLAlchemyGenericEncoder(PecanTestCase):
 
     def setUp(self):
+        super(TestJsonifySQLAlchemyGenericEncoder, self).setUp()
         if not create_engine:
             self.create_fake_proxies()
         else:

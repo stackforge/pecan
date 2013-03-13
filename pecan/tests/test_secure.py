@@ -9,6 +9,7 @@ from webtest import TestApp
 
 from pecan import expose, make_app
 from pecan.secure import secure, unlocked, SecureController
+from pecan.tests import PecanTestCase
 
 try:
     set()
@@ -16,7 +17,7 @@ except:
     from sets import Set as set
 
 
-class TestSecure(unittest.TestCase):
+class TestSecure(PecanTestCase):
     def test_simple_secure(self):
         authorized = False
 
@@ -190,8 +191,10 @@ class TestSecure(unittest.TestCase):
             assert isinstance(e, TypeError)
 
 
-class TestObjectPathSecurity(unittest.TestCase):
+class TestObjectPathSecurity(PecanTestCase):
+
     def setUp(self):
+        super(TestObjectPathSecurity, self).setUp()
         permissions_checked = set()
 
         class DeepSecretController(SecureController):
@@ -400,10 +403,12 @@ class TestObjectPathSecurity(unittest.TestCase):
         assert response.body == 'Index unlocked'
 
 
-class SecureControllerSharedPermissionsRegression(unittest.TestCase):
+class SecureControllerSharedPermissionsRegression(PecanTestCase):
     """Regression tests for https://github.com/dreamhost/pecan/issues/131"""
 
     def setUp(self):
+        super(SecureControllerSharedPermissionsRegression, self).setUp()
+
         class Parent(object):
             @expose()
             def index(self):

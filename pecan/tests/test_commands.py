@@ -1,7 +1,7 @@
-import unittest
+from pecan.tests import PecanTestCase
 
 
-class TestCommandManager(unittest.TestCase):
+class TestCommandManager(PecanTestCase):
 
     def test_commands(self):
         from pecan.commands import ServeCommand, ShellCommand, CreateCommand
@@ -12,7 +12,7 @@ class TestCommandManager(unittest.TestCase):
         assert m.commands['create'] == CreateCommand
 
 
-class TestCommandRunner(unittest.TestCase):
+class TestCommandRunner(PecanTestCase):
 
     def test_commands(self):
         from pecan.commands import (
@@ -33,7 +33,7 @@ class TestCommandRunner(unittest.TestCase):
         )
 
 
-class TestCreateCommand(unittest.TestCase):
+class TestCreateCommand(PecanTestCase):
 
     def test_run(self):
         from pecan.commands import CreateCommand

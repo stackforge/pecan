@@ -1,13 +1,14 @@
-from pecan import Pecan, expose
-from unittest import TestCase
 from webtest import TestApp
 try:
     from simplejson import dumps
 except:
     from json import dumps  # noqa
 
+from pecan import Pecan, expose
+from pecan.tests import PecanTestCase
 
-class TestGeneric(TestCase):
+
+class TestGeneric(PecanTestCase):
 
     def test_simple_generic(self):
         class RootController(object):

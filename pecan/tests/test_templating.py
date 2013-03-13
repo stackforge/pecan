@@ -1,12 +1,12 @@
-from unittest import TestCase
-
 from pecan.templating import RendererFactory, format_line_context
+from pecan.tests import PecanTestCase
 
 import tempfile
 
 
-class TestTemplate(TestCase):
+class TestTemplate(PecanTestCase):
     def setUp(self):
+        super(TestTemplate, self).setUp()
         self.rf = RendererFactory()
 
     def test_available(self):
@@ -31,9 +31,10 @@ class TestTemplate(TestCase):
         self.assertEqual(extra_vars.make_ns({'foo': 2}), {'foo': 2})
 
 
-class TestTemplateLineFormat(TestCase):
+class TestTemplateLineFormat(PecanTestCase):
 
     def setUp(self):
+        super(TestTemplateLineFormat, self).setUp()
         self.f = tempfile.NamedTemporaryFile()
 
     def tearDown(self):

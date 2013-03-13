@@ -1,8 +1,8 @@
-from unittest import TestCase
 from webtest import TestApp
 
 from pecan.middleware.recursive import (RecursiveMiddleware,
                                         ForwardRequestException)
+from pecan.tests import PecanTestCase
 
 
 def simple_app(environ, start_response):
@@ -56,7 +56,7 @@ def forward(app):
             raise AssertionError('Failed to detect forwarding loop')
 
 
-class TestRecursiveMiddleware(TestCase):
+class TestRecursiveMiddleware(PecanTestCase):
 
     def test_ForwardRequest_url(self):
         class TestForwardRequestMiddleware(Middleware):

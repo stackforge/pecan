@@ -1,13 +1,15 @@
-from unittest import TestCase
 from pecan.middleware.static import (StaticFileMiddleware, FileWrapper,
                                      _dump_date)
+from pecan.tests import PecanTestCase
 
 import os
 
 
-class TestStaticFileMiddleware(TestCase):
+class TestStaticFileMiddleware(PecanTestCase):
 
     def setUp(self):
+        super(TestStaticFileMiddleware, self).setUp()
+
         def app(environ, start_response):
             response_headers = [('Content-type', 'text/plain')]
             start_response('200 OK', response_headers)
