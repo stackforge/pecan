@@ -3,7 +3,6 @@ import sys
 
 from pecan.tests import PecanTestCase
 
-from mock import patch
 
 __here__ = os.path.dirname(__file__)
 
@@ -295,33 +294,33 @@ class TestConfFromEnv(PecanTestCase):
 
     def setUp(self):
         super(TestConfFromEnv, self).setUp()
-        self.conf_from_env = self.get_conf_from_env()
+        self.addCleanup(self._remove_config_key)
 
-    def tearDown(self):
-        os.environ['PECAN_CONFIG'] = ''
-
-    def get_conf_from_env(self):
         from pecan import configuration
-        return configuration.conf_from_env
+        self.get_conf_path_from_env = configuration.get_conf_path_from_env
 
-    def assertRaisesMessage(self, msg, exc, func, *args, **kwargs):
-        try:
-            func(*args, **kwargs)
-            self.assertFail()
-        except Exception as error:
-            assert issubclass(exc, error.__class__)
-            assert error.message == msg
+    def _remove_config_key(self):
+        os.environ.pop('PECAN_CONFIG', None)
 
-    @patch.dict('os.environ', {'PECAN_CONFIG': '/'})
     def test_invalid_path(self):
+        os.environ['PECAN_CONFIG'] = '/'
         msg = "PECAN_CONFIG was set to an invalid path: /"
-        self.assertRaisesMessage(msg, RuntimeError, self.conf_from_env)
+        self.assertRaisesRegexp(
+            RuntimeError,
+            msg,
+            self.get_conf_path_from_env
+        )
 
     def test_is_not_set(self):
         msg = "PECAN_CONFIG is not set and " \
               "no config file was passed as an argument."
-        self.assertRaisesMessage(msg, RuntimeError, self.conf_from_env)
+        self.assertRaisesRegexp(
+            RuntimeError,
+            msg,
+            self.get_conf_path_from_env
+        )
 
-    @patch.dict('os.environ', {'PECAN_CONFIG': os.path.abspath(__file__)})
     def test_return_valid_path(self):
-        assert self.conf_from_env() == os.path.abspath(__file__)
+        __here__ = os.path.abspath(__file__)
+        os.environ['PECAN_CONFIG'] = __here__
+        assert self.get_conf_path_from_env() == __here__
