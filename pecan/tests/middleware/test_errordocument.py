@@ -18,10 +18,10 @@ def four_oh_four_app(environ, start_response):
     return []
 
 
-class TestDebugMiddleware(PecanTestCase):
+class TestErrorDocumentMiddleware(PecanTestCase):
 
     def setUp(self):
-        super(TestDebugMiddleware, self).setUp()
+        super(TestErrorDocumentMiddleware, self).setUp()
         self.app = TestApp(RecursiveMiddleware(ErrorDocumentMiddleware(
             four_oh_four_app, {404: '/error/404'}
         )))

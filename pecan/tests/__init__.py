@@ -17,4 +17,4 @@ class PecanTestCase(TestCase):
             dict(configuration.initconf()),
             overwrite=True
         )
-        os.environ['PECAN_CONFIG'] = ''
+        os.environ.pop('PECAN_CONFIG', None)
