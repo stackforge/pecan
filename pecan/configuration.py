@@ -211,6 +211,7 @@ def set_config(config, overwrite=False):
     if config is None:
         config = get_conf_path_from_env()
 
+    # must be after the fallback other a bad fallback will incorrectly clear
     if overwrite is True:
         _runtime_conf.empty()
 
