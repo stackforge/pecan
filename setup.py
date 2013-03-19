@@ -37,25 +37,6 @@ tests_require = requirements + [
 if sys.version_info < (2, 7):
     tests_require += ['unittest2']
 
-
-class test(TestCommand):
-
-    user_options = TestCommand.user_options + [(
-        'functional',
-        None,
-        'Run all tests (even the really slow functional ones)'
-    )]
-
-    def initialize_options(self):
-        self.functional = None
-        return TestCommand.initialize_options(self)
-
-    def finalize_options(self):
-        if self.functional:
-            import pecan
-            setattr(pecan, '__run_all_tests__', True)
-        return TestCommand.finalize_options(self)
-
 #
 # call setup
 #
@@ -93,7 +74,6 @@ setup(
     install_requires=requirements,
     tests_require=tests_require,
     test_suite='pecan',
-    cmdclass={'test': test},
     entry_points="""
     [pecan.command]
     serve = pecan.commands:ServeCommand
