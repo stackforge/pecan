@@ -170,6 +170,11 @@ class RestController(object):
         '''
         Routes ``DELETE`` actions to the appropriate controller.
         '''
+        if remainder:
+            controller = getattr(self, remainder[0], None)
+            if controller and not ismethod(controller):
+                return lookup_controller(controller, remainder[1:])
+
         # check for post_delete/delete requests first
         controller = self._find_controller('post_delete', 'delete')
         if controller:
@@ -211,7 +216,8 @@ class RestController(object):
 
         abort(404)
 
-    _handle_put = _handle_post
+    def _handle_put(self, method, remainder):
+        return self._handle_post(method, remainder)
 
     def _set_routing_args(self, args):
         '''
