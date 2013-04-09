@@ -20,7 +20,8 @@ def load_resource(filename):
         )
 
 pecan_image = load_resource('pecan.png')
-syntax_js = load_resource('syntax.js')
+xregexp_js = load_resource('XRegExp.js')
+syntax_js = load_resource('shCore.js')
 syntax_css = load_resource('syntax.css')
 theme = load_resource('theme.css')
 brush = load_resource('brush-python.js')

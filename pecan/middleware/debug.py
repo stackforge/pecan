@@ -6,7 +6,8 @@ import pdb
 from mako.template import Template
 from webob import Response
 
-from .resources import (pecan_image, syntax_js, syntax_css, theme, brush)
+from .resources import (pecan_image, xregexp_js, syntax_js, syntax_css, theme,
+                        brush)
 
 
 debug_template_raw = '''<html>
@@ -16,6 +17,7 @@ debug_template_raw = '''<html>
   <link rel="stylesheet" type="text/css" href="${syntax_css}" />
   <link rel="stylesheet" type="text/css" href="${theme}" />
 
+  <script type="text/javascript" src="${xregexp_js}"></script>
   <script type="text/javascript" src="${syntax_js}">
     /**
      * SyntaxHighlighter
@@ -301,6 +303,7 @@ class DebugMiddleware(object):
                 traceback=out.getvalue(),
                 environment=formatted_environ,
                 pecan_image=pecan_image,
+                xregexp_js=xregexp_js,
                 syntax_js=syntax_js,
                 brush=brush,
                 syntax_css=syntax_css,
