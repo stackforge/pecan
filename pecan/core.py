@@ -545,6 +545,7 @@ class Pecan(object):
             # if this is an HTTP Exception, set it as the response
             if isinstance(e, exc.HTTPException):
                 state.response = e
+                environ['pecan.original_exception'] = e
 
             # if this is not an internal redirect, run error hooks
             if not isinstance(e, ForwardRequestException):

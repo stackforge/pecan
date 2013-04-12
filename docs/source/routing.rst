@@ -163,6 +163,13 @@ Pecan also comes with ``abort``, a utility function for raising HTTP errors:
             abort(404)
 
 
+Under the hood, ``abort`` raises an instance of
+``webob.exc.WSGIHTTPException`` which is used by pecan to render default
+response bodies for HTTP errors.  This exception is stored in the WSGI request
+environ at ``pecan.original_exception``, where it can be accessed later in the
+request cycle (by, for example, other middleware or :ref:`errors`).
+
+
 Routing to Subcontrollers with ``_lookup``
 ------------------------------------------
 
