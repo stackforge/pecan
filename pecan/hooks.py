@@ -144,7 +144,8 @@ class TransactionHook(PecanHook):
             self.start_ro()
 
     def before(self, state):
-        if self.is_transactional(state) and not state.request.transactional:
+        if self.is_transactional(state) \
+                and not getattr(state.request, 'transactional', False):
             self.clear()
             state.request.transactional = True
             self.start()
@@ -170,7 +171,7 @@ class TransactionHook(PecanHook):
         state.request.error = True
 
     def after(self, state):
-        if state.request.transactional:
+        if getattr(state.request, 'transactional', False):
             action_name = None
             if state.request.error:
                 action_name = 'after_rollback'
