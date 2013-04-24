@@ -188,6 +188,11 @@ class Pecan(object):
                             the content type to return.
     '''
 
+    SIMPLEST_CONTENT_TYPES = (
+        ['text/html'],
+        ['text/plain']
+    )
+
     def __init__(self, root, default_renderer='mako',
                  template_path='templates', hooks=[], custom_renderers={},
                  extra_template_vars={}, force_canonical=True,
@@ -423,43 +428,34 @@ class Pecan(object):
         if not req.pecan['content_type']:
             # attempt to find a best match based on accept headers (if they
             # exist)
-            if 'Accept' in req.headers:
-                accept = req.headers['Accept']
-                if accept == '*/*' or (
-                        accept.startswith('text/html,') and
-                        content_types.keys() in (
-                            ['text/html'],
-                            ['text/plain']
-                        )):
-                    req.pecan['content_type'] = cfg.get(
-                        'content_type',
-                        'text/html'
-                    )
-                else:
-                    best_default = acceptparse.MIMEAccept(
-                        accept
-                    ).best_match(
-                        content_types.keys()
-                    )
-
-                    if best_default is None:
-                        msg = "Controller '%s' defined does not support " + \
-                              "content_type '%s'. Supported type(s): %s"
-                        logger.error(
-                            msg % (
-                                controller.__name__,
-                                req.pecan['content_type'],
-                                content_types.keys()
-                            )
-                        )
-                        raise exc.HTTPNotAcceptable()
-
-                    req.pecan['content_type'] = best_default
-            else:
+            accept = req.headers.get('Accept', '*/*')
+            if accept == '*/*' or (
+                    accept.startswith('text/html,') and
+                    list(content_types.keys()) in self.SIMPLEST_CONTENT_TYPES):
                 req.pecan['content_type'] = cfg.get(
                     'content_type',
                     'text/html'
                 )
+            else:
+                best_default = acceptparse.MIMEAccept(
+                    accept
+                ).best_match(
+                    content_types.keys()
+                )
+
+                if best_default is None:
+                    msg = "Controller '%s' defined does not support " + \
+                          "content_type '%s'. Supported type(s): %s"
+                    logger.error(
+                        msg % (
+                            controller.__name__,
+                            req.pecan['content_type'],
+                            content_types.keys()
+                        )
+                    )
+                    raise exc.HTTPNotAcceptable()
+
+                req.pecan['content_type'] = best_default
         elif cfg.get('content_type') is not None and \
                 req.pecan['content_type'] not in \
                 content_types:
