@@ -1,4 +1,5 @@
 import cgi
+from jsonify import encode
 
 _builtin_renderers = {}
 error_formatters = []
@@ -19,7 +20,6 @@ class JsonRenderer(object):
         '''
         Implements ``JSON`` rendering.
         '''
-        from jsonify import encode
         return encode(namespace)
 
     # TODO: add error formatter for json (pass it through json lint?)
