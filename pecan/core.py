@@ -9,6 +9,7 @@ from mimetypes import guess_type, add_type
 from urlparse import urlsplit, urlunsplit
 from os.path import splitext
 import logging
+import operator
 
 from webob import Request, Response, exc, acceptparse
 
@@ -201,7 +202,7 @@ class Pecan(object):
         # pre-sort these so we don't have to do it per-request
         self.hooks = list(sorted(
             hooks,
-            lambda x, y: cmp(x.priority, y.priority)
+            key=operator.attrgetter('priority')
         ))
         self.template_path = template_path
         self.force_canonical = force_canonical
@@ -272,7 +273,7 @@ class Pecan(object):
                 return list(
                     sorted(
                         chain(controller_hooks, self.hooks),
-                        lambda x, y: cmp(x.priority, y.priority)
+                        key=operator.attrgetter('priority')
                     )
                 )
         return self.hooks
