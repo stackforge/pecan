@@ -144,8 +144,10 @@ class TestHooks(PecanTestCase):
                 return 'Hello, World!'
 
         class SimpleHook(PecanHook):
-            def __init__(self, id):
+            def __init__(self, id, priority=None):
                 self.id = str(id)
+                if priority:
+                    self.priority = priority
 
             def on_route(self, state):
                 run_hook.append('on_route' + self.id)
@@ -160,31 +162,9 @@ class TestHooks(PecanTestCase):
                 run_hook.append('error' + self.id)
 
         papp = make_app(RootController(), hooks=[
-            SimpleHook(1), SimpleHook(2), SimpleHook(3)
+            SimpleHook(1, 3), SimpleHook(2, 2), SimpleHook(3, 1)
         ])
         app = TestApp(papp)
-        response = app.get('/')
-        assert response.status_int == 200
-        assert response.body == 'Hello, World!'
-
-        assert len(run_hook) == 10
-        assert run_hook[0] == 'on_route1'
-        assert run_hook[1] == 'on_route2'
-        assert run_hook[2] == 'on_route3'
-        assert run_hook[3] == 'before1'
-        assert run_hook[4] == 'before2'
-        assert run_hook[5] == 'before3'
-        assert run_hook[6] == 'inside'
-        assert run_hook[7] == 'after3'
-        assert run_hook[8] == 'after2'
-        assert run_hook[9] == 'after1'
-
-        run_hook = []
-
-        state.app.hooks[0].priority = 3
-        state.app.hooks[1].priority = 2
-        state.app.hooks[2].priority = 1
-
         response = app.get('/')
         assert response.status_int == 200
         assert response.body == 'Hello, World!'
