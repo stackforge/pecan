@@ -500,9 +500,6 @@ class Pecan(object):
                 request.pecan['content_type'] = 'application/json'
             result = self.render(template, result)
 
-        if 'pecan.params' in request.environ:
-            params = request.environ.pop('pecan.params')
-
         # If we are in a test request put the namespace where it can be
         # accessed directly
         if request.environ.get('paste.testing'):
