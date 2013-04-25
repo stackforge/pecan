@@ -156,23 +156,22 @@ def conf_from_file(filepath):
     return conf_from_dict(conf_dict)
 
 
-def conf_from_env():
+def get_conf_path_from_env():
     '''
     If the ``PECAN_CONFIG`` environment variable exists and it points to
     a valid path it will return that, otherwise it will raise
     a ``RuntimeError``.
     '''
     config_path = os.environ.get('PECAN_CONFIG')
-    error = None
     if not config_path:
         error = "PECAN_CONFIG is not set and " \
                 "no config file was passed as an argument."
     elif not os.path.isfile(config_path):
         error = "PECAN_CONFIG was set to an invalid path: %s" % config_path
+    else:
+        return config_path
 
-    if error:
-        raise RuntimeError(error)
-    return config_path
+    raise RuntimeError(error)
 
 
 def conf_from_dict(conf_dict):
@@ -209,11 +208,12 @@ def set_config(config, overwrite=False):
                    which represents a (relative) configuration filename.
     '''
 
+    if config is None:
+        config = get_conf_path_from_env()
+
+    # must be after the fallback other a bad fallback will incorrectly clear
     if overwrite is True:
         _runtime_conf.empty()
-
-    if config is None:
-        config = conf_from_env()
 
     if isinstance(config, basestring):
         config = conf_from_file(config)
