@@ -22,12 +22,16 @@ your shell, type::
 This example uses *test_project* as your project name, but you can replace
 it with any valid Python package name you like.
 
-Go ahead and change into your newly created project directory::
+Go ahead and change into your newly created project directory.  You'll want to
+deploy it in "development mode", such that it’s available on ``sys.path``, yet
+can still be edited directly from its source distribution::
 
     $ cd test_project
-    $ ls
+    $ python setup.py develop
 
 This is how the layout of your new project should look::
+
+    $ ls
 
     ├── MANIFEST.in
     ├── config.py
@@ -91,12 +95,6 @@ doesn't impose any database or ORM
 You may notice that **model/__init__.py** is mostly empty.  If your project
 will interact with a database, this if where you should add code to parse
 bindings from your configuration file and define tables and ORM definitions.
-
-Now that you've created your first Pecan application, you'll want to deploy it
-in "development mode", such that it’s available on ``sys.path``, yet can still
-be edited directly from its source distribution::
-
-    $ python setup.py develop
 
 .. _running_application:
 
