@@ -1,3 +1,14 @@
+0.2.3
+=====
+* Add a variety of optimizations to ``pecan.core`` that improve request
+  handling time by approximately 30% for simple object dispatch routing.
+* Store exceptions raised by ``abort`` in the WSGI environ so they can be
+  accessed later in the request handling (e.g., by other middleware or pecan
+  hooks).
+* Make TransactionHook more robust so that it isn't as susceptible to failure
+  when exceptions occur in *other* pecan hooks within a request.
+* Rearrange quickstart verbiage so users don't miss a necessary step.
+
 0.2.2
 =====
 * Unobfuscate syntax highlighting JavaScript for debian packaging.
