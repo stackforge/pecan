@@ -1,3 +1,13 @@
+0.2.2
+=====
+* Unobfuscate syntax highlighting JavaScript for debian packaging.
+* Extract the scaffold-building tests into tox.
+* Add support for specifying a pecan configuration file via the
+  ``PECAN_CONFIG``
+  environment variable.
+* Fix a bug in ``DELETE`` methods in two (or more) nested ``RestControllers``.
+* Add documentation for returning specific HTTP status codes.
+
 0.2.1
 =====
 
