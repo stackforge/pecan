@@ -848,7 +848,24 @@ class TestStreamedResponse(PecanTestCase):
         assert r.body == 'plain text'
 
 
-class TestStateCleanup(PecanTestCase):
+class TestThreadLocalState(PecanTestCase):
+
+    def test_thread_local_dir(self):
+        """
+        Threadlocal proxies for request and response should properly
+        proxy ``dir()`` calls to the underlying webob class.
+        """
+        class RootController(object):
+            @expose()
+            def index(self):
+                assert 'method' in dir(request)
+                assert 'status' in dir(response)
+                return '/'
+
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert r.body == '/'
 
     def test_request_state_cleanup(self):
         """
