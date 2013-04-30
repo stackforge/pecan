@@ -16,6 +16,7 @@ except ImportError:  # pragma no cover
     from webob.multidict import MultiDict
     webob_dicts = (MultiDict,)
 
+import six
 from simplegeneric import generic
 
 try:
@@ -77,7 +78,7 @@ class GenericJSON(JSONEncoder):
             returns webob_dicts.mixed() dictionary, which is guaranteed
             to be JSON-friendly.
         '''
-        if hasattr(obj, '__json__') and callable(obj.__json__):
+        if hasattr(obj, '__json__') and six.callable(obj.__json__):
             return obj.__json__()
         elif isinstance(obj, (date, datetime)):
             return str(obj)
