@@ -7,6 +7,7 @@ else:
     import unittest  # pragma: nocover
 
 from webtest import TestApp
+from six.moves import cStringIO as StringIO
 
 from pecan import (
     Pecan, expose, request, response, redirect, abort, make_app,
@@ -821,14 +822,13 @@ class TestRedirect(PecanTestCase):
 class TestStreamedResponse(PecanTestCase):
 
     def test_streaming_response(self):
-        import StringIO
 
         class RootController(object):
             @expose(content_type='text/plain')
             def test(self, foo):
                 if foo == 'stream':
                     # mimic large file
-                    contents = StringIO.StringIO('stream')
+                    contents = StringIO('stream')
                     response.content_type = 'application/octet-stream'
                     contents.seek(0, os.SEEK_END)
                     response.content_length = contents.tell()
@@ -1198,7 +1198,6 @@ class TestLogging(PecanTestCase):
                 logging.getLogger('pecantesting').info('HELLO WORLD')
                 return "HELLO WORLD"
 
-        from cStringIO import StringIO
         f = StringIO()
 
         app = TestApp(make_app(RootController(), logging={
@@ -1227,7 +1226,6 @@ class TestLogging(PecanTestCase):
                 logging.getLogger('pecantesting').info('HELLO WORLD')
                 return "HELLO WORLD"
 
-        from cStringIO import StringIO
         f = StringIO()
 
         from pecan.configuration import conf_from_dict

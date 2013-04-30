@@ -15,10 +15,7 @@
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import sys
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO  # noqa
+from six.moves import cStringIO as StringIO
 
 from pecan.compat.dictconfig import dictConfig
 import logging

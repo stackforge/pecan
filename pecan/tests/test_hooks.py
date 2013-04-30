@@ -1,9 +1,7 @@
-from cStringIO import StringIO
-
 from webtest import TestApp
+from six.moves import cStringIO as StringIO
 
 from pecan import make_app, expose, redirect, abort
-from pecan.core import state
 from pecan.hooks import (
     PecanHook, TransactionHook, HookController, RequestViewerHook
 )
