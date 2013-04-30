@@ -6,10 +6,15 @@ except ImportError:             # pragma: no cover
 from threading import local
 from itertools import chain
 from mimetypes import guess_type, add_type
-from urlparse import urlsplit, urlunsplit
 from os.path import splitext
 import logging
 import operator
+
+import six
+if six.PY3:
+    import urllib.parse as urlparse
+else:
+    import urlparse  # noqa
 
 from webob import Request, Response, exc, acceptparse
 
@@ -102,16 +107,16 @@ def redirect(location=None, internal=False, code=None, headers={},
 
     if add_slash:
         if location is None:
-            split_url = list(urlsplit(state.request.url))
+            split_url = list(urlparse.urlsplit(state.request.url))
             new_proto = state.request.environ.get(
                 'HTTP_X_FORWARDED_PROTO', split_url[0]
             )
             split_url[0] = new_proto
         else:
-            split_url = urlsplit(location)
+            split_url = urlparse.urlsplit(location)
 
         split_url[2] = split_url[2].rstrip('/') + '/'
-        location = urlunsplit(split_url)
+        location = urlparse.urlunsplit(split_url)
 
     if not headers:
         headers = {}
