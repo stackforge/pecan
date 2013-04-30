@@ -1,4 +1,6 @@
-from inspect import getargspec, getmembers, isclass, ismethod
+from inspect import getargspec, getmembers, isclass, ismethod, isfunction
+
+import six
 
 from .util import _cfg
 
@@ -75,7 +77,10 @@ def transactional(ignore_redirects=True):
 
     def deco(f):
         if isclass(f):
-            for meth in [m[1] for m in getmembers(f) if ismethod(m[1])]:
+            for meth in [
+                m[1] for m in getmembers(f)
+                if (isfunction if six.PY3 else ismethod)(m[1])
+            ]:
                 if getattr(meth, 'exposed', False):
                     _cfg(meth)['transactional'] = True
                     _cfg(meth)['transactional_ignore_redirects'] = _cfg(
