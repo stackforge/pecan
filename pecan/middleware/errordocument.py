@@ -1,6 +1,6 @@
 import sys
 
-from pecan.compat import bytes_
+from six import b as b_
 from .recursive import ForwardRequestException, RecursionLoop
 
 
@@ -32,7 +32,7 @@ class StatusPersist(object):
                 [('Content-type', 'text/plain')],
                 sys.exc_info()
             )
-            return [bytes_(
+            return [b_(
                 'Error: %s.  (Error page could not be fetched)' % self.status
             )]
 

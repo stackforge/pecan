@@ -72,7 +72,7 @@ class TestJsonify(PecanTestCase):
 
         r = app.get('/')
         assert r.status_int == 200
-        assert loads(r.body) == {'name': 'Jonathan LaCour'}
+        assert loads(r.body.decode()) == {'name': 'Jonathan LaCour'}
 
 
 class TestJsonifyGenericEncoder(PecanTestCase):

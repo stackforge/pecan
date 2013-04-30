@@ -3,7 +3,10 @@ import os
 import re
 import pkg_resources
 from string import Template
-from pecan.compat import native_, bytes_
+
+import six
+
+from pecan.compat import native_
 
 DEFAULT_SCAFFOLD = 'base'
 _bad_chars_re = re.compile('[^a-zA-Z0-9_]')
@@ -119,4 +122,5 @@ def render_template(content, variables):
     """
     fsenc = sys.getfilesystemencoding()
     content = native_(content, fsenc)
+    bytes_ = lambda s, enc: s.encode(enc) if six.PY3 else s
     return bytes_(Template(content).substitute(variables), fsenc)
