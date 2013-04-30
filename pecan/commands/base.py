@@ -126,7 +126,7 @@ class BaseCommand(object):
 
             def run(self, args):
                 super(SomeCommand, self).run(args)
-                print args.extra_arg
+                print(args.extra_arg)
     """
 
     class __metaclass__(type):
