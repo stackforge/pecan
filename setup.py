@@ -30,14 +30,17 @@ except:
 
 tests_require = requirements + [
     'virtualenv',
-    'Genshi',
-    'Kajiki',
     'Jinja2',
     'gunicorn',
     'mock'
 ]
 if sys.version_info < (2, 7):
     tests_require += ['unittest2']
+
+if sys.version_info < (3, 0):
+    # These don't support Python3 yet - don't run their tests
+    tests_require += ['Genshi']
+    tests_require += ['Kajiki']
 
 #
 # call setup
