@@ -250,7 +250,10 @@ class TestControllerArguments(PecanTestCase):
             assert r.status_int != 200  # pragma: nocover
         except Exception as ex:
             assert type(ex) == TypeError
-            assert ex.args[0] == 'index() takes exactly 2 arguments (1 given)'
+            assert ex.args[0] in (
+                "index() takes exactly 2 arguments (1 given)",
+                "index() missing 1 required positional argument: 'id'"
+            )  # this messaging changed in Python 3.3
 
     def test_single_argument(self):
         r = self.app_.get('/1')
@@ -649,7 +652,10 @@ class TestControllerArguments(PecanTestCase):
             assert r.status_int != 200  # pragma: nocover
         except Exception as ex:
             assert type(ex) == TypeError
-            assert ex.args[0] == 'eater() takes at least 2 arguments (1 given)'
+            assert ex.args[0] in (
+                "eater() takes at least 2 arguments (1 given)",
+                "eater() missing 1 required positional argument: 'id'"
+            )  # this messaging changed in Python 3.3
 
     def test_one_remainder(self):
         r = self.app_.get('/eater/1')
