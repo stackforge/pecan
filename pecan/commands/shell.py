@@ -128,6 +128,12 @@ class ShellCommand(BaseCommand):
         exec(
             'from pecan import abort, conf, redirect, request, response'
         ) in locs
+        from pecan import abort, conf, redirect, request, response
+        locs['abort'] = abort
+        locs['conf'] = conf
+        locs['redirect'] = redirect
+        locs['request'] = request
+        locs['response'] = response
 
         # prepare the banner
         banner = '  The following objects are available:\n'
