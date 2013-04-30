@@ -248,7 +248,7 @@ class Pecan(object):
         try:
             node, remainder = lookup_controller(node, path)
             return node, remainder
-        except NonCanonicalPath, e:
+        except NonCanonicalPath as e:
             if self.force_canonical and \
                     not _cfg(e.controller).get('accept_noncanonical', False):
                 if req.method == 'POST':
@@ -555,7 +555,7 @@ class Pecan(object):
             state.request.pecan = dict(content_type=None)
 
             self.handle_request(state.request, state.response)
-        except Exception, e:
+        except Exception as e:
             # if this is an HTTP Exception, set it as the response
             if isinstance(e, exc.HTTPException):
                 state.response = e

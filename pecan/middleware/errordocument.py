@@ -22,7 +22,7 @@ class StatusPersist(object):
 
         try:
             return self.app(environ, keep_status_start_response)
-        except RecursionLoop, e:
+        except RecursionLoop as e:
             environ['wsgi.errors'].write(
                 'Recursion error getting error page: %s\n' % e
             )

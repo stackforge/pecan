@@ -187,7 +187,7 @@ class TestSecure(PecanTestCase):
 
         try:
             secure(Foo())
-        except Exception, e:
+        except Exception as e:
             assert isinstance(e, TypeError)
 
 

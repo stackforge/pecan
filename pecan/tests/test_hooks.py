@@ -127,7 +127,7 @@ class TestHooks(PecanTestCase):
         run_hook = []
         try:
             response = app.get('/causeerror')
-        except Exception, e:
+        except Exception as e:
             assert isinstance(e, IndexError)
 
         assert len(run_hook) == 2

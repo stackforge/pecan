@@ -304,7 +304,7 @@ class RequestViewerHook(PecanHook):
                     value = getattr(state.request, request_info)
                 else:
                     value = value(self, state)
-            except Exception, e:
+            except Exception as e:
                 value = e
 
             terminal.append('%-12s - %s\n' % (request_info, value))

@@ -50,7 +50,7 @@ def lookup_controller(obj, url_path):
                             # crossing controller boundary
                             cross_boundary(prev_obj, obj)
                             break
-                    except TypeError, te:
+                    except TypeError as te:
                         import warnings
                         msg = 'Got exception calling lookup(): %s (%s)'
                         warnings.warn(

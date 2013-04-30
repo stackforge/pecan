@@ -245,7 +245,7 @@ class TestControllerArguments(PecanTestCase):
         try:
             r = self.app_.get('/')
             assert r.status_int != 200  # pragma: nocover
-        except Exception, ex:
+        except Exception as ex:
             assert type(ex) == TypeError
             assert ex.args[0] == 'index() takes exactly 2 arguments (1 given)'
 
@@ -644,7 +644,7 @@ class TestControllerArguments(PecanTestCase):
         try:
             r = self.app_.get('/eater')
             assert r.status_int != 200  # pragma: nocover
-        except Exception, ex:
+        except Exception as ex:
             assert type(ex) == TypeError
             assert ex.args[0] == 'eater() takes at least 2 arguments (1 given)'
 
@@ -1090,7 +1090,7 @@ class TestCanonicalRouting(PecanTestCase):
         try:
             self.app_.post('/sub', dict(foo=1))
             raise Exception("Post should fail")  # pragma: nocover
-        except Exception, e:
+        except Exception as e:
             assert isinstance(e, RuntimeError)
 
     def test_with_args(self):
@@ -1280,7 +1280,7 @@ class TestEngines(PecanTestCase):
         error_msg = None
         try:
             r = app.get('/badtemplate.html')
-        except Exception, e:
+        except Exception as e:
             for error_f in error_formatters:
                 error_msg = error_f(e)
                 if error_msg:
@@ -1328,7 +1328,7 @@ class TestEngines(PecanTestCase):
         error_msg = None
         try:
             r = app.get('/badtemplate.html')
-        except Exception, e:
+        except Exception as e:
             for error_f in error_formatters:
                 error_msg = error_f(e)
                 if error_msg:
@@ -1361,7 +1361,7 @@ class TestEngines(PecanTestCase):
         error_msg = None
         try:
             r = app.get('/badtemplate.html')
-        except Exception, e:
+        except Exception as e:
             for error_f in error_formatters:
                 error_msg = error_f(e)
                 if error_msg:
