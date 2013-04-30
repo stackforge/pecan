@@ -66,8 +66,8 @@ class GenericJSON(JSONEncoder):
             the entire resultset data, returns the list in a dictionary
             along with the resultset "row" count.
 
-            .. note:: {'count': 5, 'rows': [(u'Ed Jones',), (u'Pete Jones',),
-                (u'Wendy Williams',), (u'Mary Contrary',), (u'Fred Smith',)]}
+            .. note:: {'count': 5, 'rows': [('Ed Jones',), ('Pete Jones',),
+                ('Wendy Williams',), ('Mary Contrary',), ('Fred Smith',)]}
 
         * SQLAlchemy RowProxy objects
             Casts the RowProxy cursor object into a dictionary, probably

@@ -203,8 +203,8 @@ class TestJsonifySQLAlchemyGenericEncoder(PecanTestCase):
 
         # add some dummy data
         user_table.insert().execute([
-            {'first_name': u'Jonathan', 'last_name': u'LaCour'},
-            {'first_name': u'Yoann', 'last_name': u'Roman'}
+            {'first_name': 'Jonathan', 'last_name': 'LaCour'},
+            {'first_name': 'Yoann', 'last_name': 'Roman'}
         ])
 
         # get the SA objects
