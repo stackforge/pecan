@@ -54,8 +54,9 @@ class TestErrorDocumentMiddleware(PecanTestCase):
         )))
         r = app.get('/', expect_errors=True)
         assert r.status_int == 404
-        assert r.body == b_('Error: 404 Not Found.  '
-                          '(Error page could not be fetched)')
+        assert r.body == b_(
+            'Error: 404 Not Found.  (Error page could not be fetched)'
+        )
 
     def test_original_exception(self):
 
