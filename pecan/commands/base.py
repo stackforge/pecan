@@ -1,9 +1,10 @@
 import pkg_resources
-import os.path
 import argparse
 import logging
 import sys
 from warnings import warn
+
+import six
 
 log = logging.getLogger(__name__)
 
@@ -78,7 +79,7 @@ class CommandRunner(object):
             )
             for arg in getattr(cmd, 'arguments', tuple()):
                 arg = arg.copy()
-                if isinstance(arg.get('name'), basestring):
+                if isinstance(arg.get('name'), six.string_types):
                     sub.add_argument(arg.pop('name'), **arg)
                 elif isinstance(arg.get('name'), list):
                     sub.add_argument(*arg.pop('name'), **arg)

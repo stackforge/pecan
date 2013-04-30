@@ -2,6 +2,8 @@ from functools import wraps
 from inspect import getmembers, ismethod, isfunction
 from webob import exc
 
+import six
+
 from .decorators import expose
 from .util import _cfg, iscontroller
 
@@ -56,7 +58,7 @@ class _SecuredAttribute(object):
         self._parent = None
 
     def _check_permissions(self):
-        if isinstance(self.check_permissions, basestring):
+        if isinstance(self.check_permissions, six.string_types):
             return getattr(self.parent, self.check_permissions)()
         else:
             return self.check_permissions()
@@ -82,7 +84,7 @@ def _allowed_check_permissions_types(x):
     return (
         ismethod(x) or
         isfunction(x) or
-        isinstance(x, basestring)
+        isinstance(x, six.string_types)
     )
 
 
@@ -185,7 +187,7 @@ def handle_security(controller):
     if controller._pecan.get('secured', False):
         check_permissions = controller._pecan['check_permissions']
 
-        if isinstance(check_permissions, basestring):
+        if isinstance(check_permissions, six.string_types):
             check_permissions = getattr(controller.im_self, check_permissions)
 
         if not check_permissions():

@@ -203,7 +203,7 @@ class Pecan(object):
                  extra_template_vars={}, force_canonical=True,
                  guess_content_type_from_ext=True):
 
-        if isinstance(root, basestring):
+        if isinstance(root, six.string_types):
             root = self.__translate_root__(root)
 
         self.root = root
@@ -315,7 +315,8 @@ class Pecan(object):
         valid_args = argspec[0][1:]
 
         def _decode(x):
-            return urllib.unquote_plus(x) if isinstance(x, basestring) else x
+            return urllib.unquote_plus(x) if isinstance(x, six.string_types) \
+                else x
 
         remainder = [_decode(x) for x in remainder]
 
