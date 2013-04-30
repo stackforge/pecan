@@ -2,6 +2,8 @@ import re
 import inspect
 import os
 
+import six
+
 
 IDENTIFIER = re.compile(r'[a-z_](\w)*$', re.IGNORECASE)
 
@@ -56,7 +58,7 @@ class Config(object):
         '''
 
         if isinstance(conf_dict, dict):
-            iterator = conf_dict.iteritems()
+            iterator = six.iteritems(conf_dict)
         else:
             iterator = iter(conf_dict)
 
@@ -81,7 +83,7 @@ class Config(object):
         '''
         Private helper method for to_dict.
         '''
-        for k, v in obj.items():
+        for k, v in obj.copy().items():
             if prefix:
                 del obj[k]
                 k = "%s%s" % (prefix, k)
@@ -118,14 +120,14 @@ class Config(object):
                 self.__values__[key] = ConfigDict(value)
             else:
                 self.__values__[key] = Config(value, filename=self.__file__)
-        elif isinstance(value, basestring) and '%(confdir)s' in value:
+        elif isinstance(value, str) and '%(confdir)s' in value:
             confdir = os.path.dirname(self.__file__) or os.getcwd()
             self.__values__[key] = value.replace('%(confdir)s', confdir)
         else:
             self.__values__[key] = value
 
     def __iter__(self):
-        return self.__values__.iteritems()
+        return six.iteritems(self.__values__)
 
     def __dir__(self):
         """
@@ -150,7 +152,11 @@ def conf_from_file(filepath):
     if not os.path.isfile(abspath):
         raise RuntimeError('`%s` is not a file.' % abspath)
 
-    execfile(abspath, globals(), conf_dict)
+    exec(
+        compile(open(abspath).read(), abspath, 'exec'),
+        globals(),
+        conf_dict
+    )
     conf_dict['__file__'] = abspath
 
     return conf_from_dict(conf_dict)
@@ -182,7 +188,7 @@ def conf_from_dict(conf_dict):
     '''
     conf = Config(filename=conf_dict.get('__file__', ''))
 
-    for k, v in conf_dict.iteritems():
+    for k, v in six.iteritems(conf_dict):
         if k.startswith('__'):
             continue
         elif inspect.ismodule(v):
@@ -215,7 +221,7 @@ def set_config(config, overwrite=False):
     if overwrite is True:
         _runtime_conf.empty()
 
-    if isinstance(config, basestring):
+    if isinstance(config, str):
         config = conf_from_file(config)
         _runtime_conf.update(config)
         if config.__file__:

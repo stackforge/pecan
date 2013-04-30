@@ -356,7 +356,7 @@ class Pecan(object):
 
         # handle wildcard GET/POST params
         if argspec[2]:
-            for name, value in all_params.iteritems():
+            for name, value in six.iteritems(all_params):
                 if name not in argspec[0]:
                     kwargs[encode_if_needed(name)] = value
 
