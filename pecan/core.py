@@ -1,4 +1,3 @@
-import urllib
 try:
     from simplejson import loads
 except ImportError:             # pragma: no cover
@@ -13,8 +12,10 @@ import operator
 import six
 if six.PY3:
     import urllib.parse as urlparse
+    from urllib.parse import unquote_plus
 else:
     import urlparse  # noqa
+    from urllib import unquote_plus
 
 from webob import Request, Response, exc, acceptparse
 
@@ -315,7 +316,7 @@ class Pecan(object):
         valid_args = argspec[0][1:]
 
         def _decode(x):
-            return urllib.unquote_plus(x) if isinstance(x, six.string_types) \
+            return unquote_plus(x) if isinstance(x, six.string_types) \
                 else x
 
         remainder = [_decode(x) for x in remainder]
