@@ -1,7 +1,14 @@
 import os
-import urllib
 from mimetypes import guess_type
 from contextlib import closing
+from base64 import b64encode
+
+import six
+
+if six.PY3:
+    from urllib.parse import quote
+else:
+    from urllib import quote  # noqa
 
 
 def load_resource(filename):
@@ -12,11 +19,14 @@ def load_resource(filename):
         ),
         'rb'
     )) as f:
+        data = f.read()
+        if six.PY3:
+            data = data.replace(b'\n', b'')  # pragma: nocover
+        else:
+            data.replace('\n', '')
         return 'data:%s;base64,%s' % (
             guess_type(filename)[0],
-            urllib.quote(
-                f.read().encode('base64').replace('\n', '')
-            )
+            quote(b64encode(data))
         )
 
 pecan_image = load_resource('pecan.png')
