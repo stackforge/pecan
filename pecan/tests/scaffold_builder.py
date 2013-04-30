@@ -1,7 +1,6 @@
 import os
 import sys
 import subprocess
-import urllib2
 import time
 
 
@@ -9,6 +8,12 @@ if sys.version_info < (2, 7):
     import unittest2 as unittest
 else:
     import unittest  # noqa
+
+import six
+if six.PY3:
+    from urllib.request import urlopen, URLError
+else:
+    from urllib2 import urlopen, URLError  # noqa
 
 from pecan.tests import PecanTestCase
 
@@ -55,10 +60,10 @@ if __name__ == '__main__':
                         )
                     try:
                         # ...and that it's serving (valid) content...
-                        resp = urllib2.urlopen('http://localhost:8080/')
+                        resp = urlopen('http://localhost:8080/')
                         assert resp.getcode() == 200
                         assert 'This is a sample Pecan project.' in resp.read()
-                    except urllib2.URLError:
+                    except URLError:
                         pass
                     else:
                         break
@@ -108,10 +113,10 @@ if __name__ == '__main__':
                         )
                     try:
                         # ...and that it's serving (valid) content...
-                        resp = urllib2.urlopen('http://localhost:%d/' % port)
+                        resp = urlopen('http://localhost:%d/' % port)
                         assert resp.getcode() == 200
                         assert 'This is a sample Pecan project.' in resp.read()
-                    except urllib2.URLError:
+                    except URLError:
                         pass
                     else:
                         break
