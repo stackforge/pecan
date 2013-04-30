@@ -61,9 +61,11 @@ class CommandRunner(object):
 
     def __init__(self):
         self.manager = CommandManager()
-        self.parser = HelpfulArgumentParser(
-            version='Pecan %s' % self.version,
-            add_help=True
+        self.parser = HelpfulArgumentParser(add_help=True)
+        self.parser.add_argument(
+            '--version',
+            action='version',
+            version='Pecan %s' % self.version
         )
         self.parse_sub_commands()
 
