@@ -1,5 +1,6 @@
 import sys
-from recursive import ForwardRequestException, RecursionLoop
+
+from .recursive import ForwardRequestException, RecursionLoop
 
 
 class StatusPersist(object):

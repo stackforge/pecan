@@ -1,5 +1,5 @@
 import cgi
-from jsonify import encode
+from .jsonify import encode
 
 _builtin_renderers = {}
 error_formatters = []

@@ -3,8 +3,8 @@ from inspect import getmembers
 
 from webob.exc import HTTPFound
 
-from util import iscontroller, _cfg
-from routing import lookup_controller
+from .util import iscontroller, _cfg
+from .routing import lookup_controller
 
 __all__ = [
     'PecanHook', 'TransactionHook', 'HookController',

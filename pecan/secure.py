@@ -2,8 +2,8 @@ from functools import wraps
 from inspect import getmembers, ismethod, isfunction
 from webob import exc
 
-from decorators import expose
-from util import _cfg, iscontroller
+from .decorators import expose
+from .util import _cfg, iscontroller
 
 __all__ = ['unlocked', 'secure', 'SecureController']
 

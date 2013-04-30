@@ -1,9 +1,9 @@
 from inspect import getargspec, ismethod
 
-from core import abort, request
-from decorators import expose
-from routing import lookup_controller
-from util import iscontroller
+from .core import abort, request
+from .decorators import expose
+from .routing import lookup_controller
+from .util import iscontroller
 
 
 class RestController(object):

@@ -1,7 +1,7 @@
 from webob import exc
 
-from secure import handle_security, cross_boundary
-from util import iscontroller
+from .secure import handle_security, cross_boundary
+from .util import iscontroller
 
 __all__ = ['lookup_controller', 'find_object']
 

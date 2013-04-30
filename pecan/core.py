@@ -13,10 +13,10 @@ import operator
 
 from webob import Request, Response, exc, acceptparse
 
-from templating import RendererFactory
-from routing import lookup_controller, NonCanonicalPath
-from util import _cfg, encode_if_needed
-from middleware.recursive import ForwardRequestException
+from .templating import RendererFactory
+from .routing import lookup_controller, NonCanonicalPath
+from .util import _cfg, encode_if_needed
+from .middleware.recursive import ForwardRequestException
 
 
 # make sure that json is defined in mimetypes
@@ -149,7 +149,7 @@ def load_app(config):
 
     returns a pecan.Pecan object
     '''
-    from configuration import _runtime_conf, set_config
+    from .configuration import _runtime_conf, set_config
     set_config(config, overwrite=True)
 
     for package_name in getattr(_runtime_conf.app, 'modules', []):
