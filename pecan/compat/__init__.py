@@ -1,15 +1,15 @@
 import sys
+import inspect
 
-# True if we are running on Python 3.
-PY3 = sys.version_info[0] == 3
+import six
 
-if PY3:  # pragma: no cover
+if six.PY3:  # pragma: no cover
     text_type = str
 else:
     text_type = unicode
 
 
-if PY3:  # pragma: no cover
+if six.PY3:  # pragma: no cover
     def native_(s, encoding='latin-1', errors='strict'):
         """ If ``s`` is an instance of ``text_type``, return
         ``s``, otherwise return ``str(s, encoding, errors)``"""
@@ -31,3 +31,6 @@ return ``str(s, encoding, errors)``
 Python 2: If ``s`` is an instance of ``text_type``, return
 ``s.encode(encoding, errors)``, otherwise return ``str(s)``
 """
+
+def is_bound_method(ob):
+    return inspect.ismethod(ob) and six.get_method_self(ob) is not None
