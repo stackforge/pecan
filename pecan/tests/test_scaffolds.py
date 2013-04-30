@@ -95,7 +95,6 @@ class TestScaffoldUtils(PecanTestCase):
 
     def test_destination_directory_already_exists(self):
         from pecan.scaffolds import copy_dir
-        from cStringIO import StringIO
         f = StringIO()
         copy_dir(
             (

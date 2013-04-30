@@ -102,7 +102,14 @@ class CommandRunner(object):
         return self.manager.commands
 
 
-class BaseCommand(object):
+class BaseCommandMeta(type):
+
+    @property
+    def summary(cls):
+        return cls.__doc__.strip().splitlines()[0].rstrip('.')
+
+
+class BaseCommandParent(object):
     """
     A base interface for Pecan commands.
 
@@ -130,11 +137,6 @@ class BaseCommand(object):
                 print(args.extra_arg)
     """
 
-    class __metaclass__(type):
-        @property
-        def summary(cls):
-            return cls.__doc__.strip().splitlines()[0].rstrip('.')
-
     arguments = ({
         'name': 'config_file',
         'help': 'a Pecan configuration file',
@@ -148,3 +150,5 @@ class BaseCommand(object):
     def load_app(self):
         from pecan import load_app
         return load_app(self.args.config_file)
+
+BaseCommand = BaseCommandMeta('BaseCommand', (BaseCommandParent,), {})

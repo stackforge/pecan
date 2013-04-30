@@ -336,7 +336,7 @@ class Pecan(object):
             valid_args = valid_args[len(args):]
 
         # handle wildcard arguments
-        if filter(None, remainder):
+        if [i for i in remainder if i]:
             if not argspec[1]:
                 abort(404)
             args.extend(remainder)
@@ -422,7 +422,7 @@ class Pecan(object):
         # handle generic controllers
         im_self = None
         if cfg.get('generic'):
-            im_self = controller.im_self
+            im_self = six.get_method_self(controller)
             handlers = cfg['generic_handlers']
             controller = handlers.get(req.method, handlers['DEFAULT'])
             cfg = _cfg(controller)
@@ -533,8 +533,14 @@ class Pecan(object):
             testing_variables['controller_output'] = result
 
         # set the body content
-        if isinstance(result, unicode):
-            resp.unicode_body = result
+        if six.PY3:
+            resp.text = result if isinstance(result, str) else str(
+                result,
+                'utf-8',
+                'strict'
+            )
+        elif isinstance(result, six.text_type):
+            resp.text = result
         else:
             resp.body = result
 

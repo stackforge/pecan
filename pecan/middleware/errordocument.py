@@ -1,5 +1,6 @@
 import sys
 
+from pecan.compat import bytes_
 from .recursive import ForwardRequestException, RecursionLoop
 
 
@@ -31,9 +32,9 @@ class StatusPersist(object):
                 [('Content-type', 'text/plain')],
                 sys.exc_info()
             )
-            return [
+            return [bytes_(
                 'Error: %s.  (Error page could not be fetched)' % self.status
-            ]
+            )]
 
 
 class ErrorDocumentMiddleware(object):

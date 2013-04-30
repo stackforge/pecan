@@ -10,6 +10,8 @@ import mimetypes
 from datetime import datetime
 from time import gmtime
 
+import six
+
 
 class FileWrapper(object):
     """This class can be used to convert a :class:`file`-like object into
@@ -42,6 +44,10 @@ class FileWrapper(object):
         raise StopIteration()
 
 
+if six.PY3:
+    FileWrapper.__next__ = FileWrapper.next
+
+
 def wrap_file(environ, file, buffer_size=8192):
     """Wraps a file.  This uses the WSGI server's file wrapper if available
     or otherwise the generic :class:`FileWrapper`.
@@ -64,7 +70,7 @@ def _dump_date(d, delim):
         d = gmtime()
     elif isinstance(d, datetime):
         d = d.utctimetuple()
-    elif isinstance(d, (int, long, float)):
+    elif isinstance(d, (int, float)):
         d = gmtime(d)
     return '%s, %02d%s%s%s%s %02d:%02d:%02d GMT' % (
         ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')[d.tm_wday],
