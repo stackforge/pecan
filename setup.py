@@ -1,6 +1,6 @@
 import sys
+
 from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
 
 version = '0.2.3'
 
@@ -11,7 +11,8 @@ requirements = [
     "WebOb >= 1.2dev",  # py3 compat
     "simplegeneric >= 0.8",  # py3 compat
     "Mako >= 0.4.0",
-    "WebTest >= 1.3.1"  # py3 compat
+    "WebTest >= 1.3.1",  # py3 compat
+    "six"
 ]
 
 try:
@@ -58,8 +59,12 @@ setup(
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
         'Topic :: Internet :: WWW/HTTP :: WSGI',
         'Topic :: Software Development :: Libraries :: Application Frameworks'
     ],
