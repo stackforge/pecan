@@ -39,8 +39,10 @@ if sys.version_info < (2, 7):
 
 if sys.version_info < (3, 0):
     # These don't support Python3 yet - don't run their tests
-    tests_require += ['Genshi']
     tests_require += ['Kajiki']
+    tests_require += ['Genshi>=0.7']
+else:
+    tests_require += ['Genshi']
 
 #
 # call setup
