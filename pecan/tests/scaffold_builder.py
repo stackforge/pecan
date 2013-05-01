@@ -10,6 +10,7 @@ else:
     import unittest  # noqa
 
 import six
+from six import b as b_
 if six.PY3:
     from urllib.request import urlopen, URLError
 else:
@@ -62,7 +63,8 @@ if __name__ == '__main__':
                         # ...and that it's serving (valid) content...
                         resp = urlopen('http://localhost:8080/')
                         assert resp.getcode() == 200
-                        assert 'This is a sample Pecan project.' in resp.read()
+                        assert 'This is a sample Pecan project.' in \
+                            resp.read().decode()
                     except URLError:
                         pass
                     else:
@@ -86,11 +88,11 @@ if __name__ == '__main__':
             self.poll(proc)
 
             out, _ = proc.communicate(
-                '{"model" : model, "conf" : conf, "app" : app}'
+                b_('{"model" : model, "conf" : conf, "app" : app}')
             )
-            assert 'testing123.model' in out, out
-            assert 'Config(' in out, out
-            assert 'webtest.app.TestApp' in out, out
+            assert 'testing123.model' in out.decode(), out
+            assert 'Config(' in out.decode(), out
+            assert 'webtest.app.TestApp' in out.decode(), out
 
             try:
                 # just in case stdin doesn't close
@@ -115,7 +117,8 @@ if __name__ == '__main__':
                         # ...and that it's serving (valid) content...
                         resp = urlopen('http://localhost:%d/' % port)
                         assert resp.getcode() == 200
-                        assert 'This is a sample Pecan project.' in resp.read()
+                        assert 'This is a sample Pecan project.' in \
+                            resp.read().decode()
                     except URLError:
                         pass
                     else:
