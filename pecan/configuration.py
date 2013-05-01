@@ -120,7 +120,7 @@ class Config(object):
                 self.__values__[key] = ConfigDict(value)
             else:
                 self.__values__[key] = Config(value, filename=self.__file__)
-        elif isinstance(value, str) and '%(confdir)s' in value:
+        elif isinstance(value, six.string_types) and '%(confdir)s' in value:
             confdir = os.path.dirname(self.__file__) or os.getcwd()
             self.__values__[key] = value.replace('%(confdir)s', confdir)
         else:
@@ -221,7 +221,7 @@ def set_config(config, overwrite=False):
     if overwrite is True:
         _runtime_conf.empty()
 
-    if isinstance(config, str):
+    if isinstance(config, six.string_types):
         config = conf_from_file(config)
         _runtime_conf.update(config)
         if config.__file__:

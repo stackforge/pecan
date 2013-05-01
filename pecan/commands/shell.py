@@ -125,9 +125,6 @@ class ShellCommand(BaseCommand):
             locs['model'] = model
 
         # insert the pecan locals
-        exec(
-            'from pecan import abort, conf, redirect, request, response'
-        ) in locs
         from pecan import abort, conf, redirect, request, response
         locs['abort'] = abort
         locs['conf'] = conf
