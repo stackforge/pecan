@@ -301,14 +301,6 @@ class TestRestController(PecanTestCase):
             def delete(self, id_):
                 return "BAR-%s" % id_
 
-            @expose()
-            def post(self):
-                return "BAR-POST"
-
-            @expose()
-            def delete(self, id_):
-                return "BAR-%s" % id_
-
         class FooController(RestController):
 
             bar = BarController()

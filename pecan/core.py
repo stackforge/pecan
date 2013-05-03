@@ -10,15 +10,10 @@ import logging
 import operator
 
 import six
-if six.PY3:
-    import urllib.parse as urlparse
-    from urllib.parse import unquote_plus
-else:
-    import urlparse  # noqa
-    from urllib import unquote_plus
 
 from webob import Request, Response, exc, acceptparse
 
+from .compat import urlparse, unquote_plus
 from .templating import RendererFactory
 from .routing import lookup_controller, NonCanonicalPath
 from .util import _cfg, encode_if_needed

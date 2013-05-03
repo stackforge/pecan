@@ -5,10 +5,7 @@ from base64 import b64encode
 
 import six
 
-if six.PY3:
-    from urllib.parse import quote
-else:
-    from urllib import quote  # noqa
+from pecan.compat import quote
 
 
 def load_resource(filename):

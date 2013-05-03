@@ -1,4 +1,4 @@
-from pecan import conf
+from pecan import conf  # noqa
 
 
 def init_model():

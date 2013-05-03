@@ -9,13 +9,9 @@ if sys.version_info < (2, 7):
 else:
     import unittest  # noqa
 
-import six
 from six import b as b_
-if six.PY3:
-    from urllib.request import urlopen, URLError
-else:
-    from urllib2 import urlopen, URLError  # noqa
 
+from pecan.compat import urlopen, URLError
 from pecan.tests import PecanTestCase
 
 

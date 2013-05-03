@@ -1,9 +1,4 @@
-import six
-if six.PY3:
-    from html import escape
-else:
-    from cgi import escape  # noqa
-
+from .compat import escape
 from .jsonify import encode
 
 _builtin_renderers = {}
