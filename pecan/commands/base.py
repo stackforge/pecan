@@ -142,7 +142,8 @@ class BaseCommandParent(object):
 
             def run(self, args):
                 super(SomeCommand, self).run(args)
-                print(args.extra_arg)
+                if args.extra_arg:
+                    pass
     """
 
     arguments = ({
