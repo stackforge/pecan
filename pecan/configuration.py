@@ -134,7 +134,7 @@ class Config(object):
         When using dir() returns a list of the values in the config.  Note:
         This function only works in Python2.6 or later.
         """
-        return list(self.__values__.copy().keys())
+        return list(self.__values__.keys())
 
     def __repr__(self):
         return 'Config(%s)' % str(self.__values__)
