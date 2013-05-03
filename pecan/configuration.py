@@ -152,11 +152,8 @@ def conf_from_file(filepath):
     if not os.path.isfile(abspath):
         raise RuntimeError('`%s` is not a file.' % abspath)
 
-    exec(
-        compile(open(abspath).read(), abspath, 'exec'),
-        globals(),
-        conf_dict
-    )
+    with open(abspath, 'rb') as f:
+        exec(compile(f.read(), abspath, 'exec'), globals(), conf_dict)
     conf_dict['__file__'] = abspath
 
     return conf_from_dict(conf_dict)
