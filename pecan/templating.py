@@ -63,7 +63,7 @@ try:
         '''
         if isinstance(exc_value, (gTemplateError)):
             retval = '<h4>Genshi error %s</h4>' % escape(
-                str(exc_value),
+                exc_value.args[0],
                 True
             )
             retval += format_line_context(exc_value.filename, exc_value.lineno)
