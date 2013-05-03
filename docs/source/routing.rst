@@ -3,15 +3,14 @@
 Controllers and Routing
 =======================
 
-When a user requests a certain URL in your app, how does Pecan know which
-controller to route to? Pecan uses a routing strategy known as 
-**object-dispatch** to map an HTTP request to a controller. 
+Pecan uses a routing strategy known as **object-dispatch** to map an
+HTTP request to a controller, and then the method to call.
+Object-dispatch begins by splitting the path into a list of components
+and then walking an object path, starting at the root controller. You
+can imagine your application's controllers as a tree of objects
+(branches of the object tree map directly to URL paths). 
 
-Object-dispatch begins by splitting the
-path into a list of components and then walking an object path, starting at
-the root controller. You can imagine your application's controllers as a tree
-of objects (branches of the object tree map directly to URL paths). Let's look 
-at a simple bookstore application: 
+Let's look at a simple bookstore application:
 
 ::
 
@@ -49,9 +48,9 @@ begin with Pecan breaking the request up into ``catalog``, ``books``, and
 ``bestsellers``. Next, Pecan would lookup ``catalog`` on the root
 controller. Using the ``catalog`` object, Pecan would then lookup
 ``books``, followed by ``bestsellers``. What if the URL ends in a slash?
-Pecan will check for an ``index`` method on the current object. 
+Pecan will check for an ``index`` method on the last controller object.
 
-To illustrate further, the following paths...
+To illustrate further, the following paths:
 
 ::
 
@@ -61,7 +60,7 @@ To illustrate further, the following paths...
              └── /catalog/books
                 └── /catalog/books/bestsellers
 
-Would route to the following controller methods...
+route to the following controller methods:
 
 ::
 
@@ -74,11 +73,11 @@ Would route to the following controller methods...
 Exposing Controllers
 --------------------
 
-At its core, ``@expose`` is how you tell Pecan which methods in a class
-are publically-visible controllers. If a method is *not* decorated with
-``@expose``, it will never be routed to.  ``@expose`` accepts three optional
-parameters, some of which can impact routing and the content type of the
-response body. 
+You tell Pecan which methods in a class are publically-visible via
+:func:`@expose`. If a method is *not* decorated with :func:`@expose`,
+Pecan will never route a request to it. :func:`@expose` accepts three
+optional parameters, some of which can impact routing and the content
+type of the response body.
 
 ::
 
@@ -107,19 +106,34 @@ Let's look at an example using ``template`` and ``content_type``:
         def hello(self):
             return {'msg': 'Hello!'}
 
-You'll notice that we used three ``expose`` decorators. 
+You'll notice that we called :func:`expose` three times, with different
+arguments.
+
+::
+
+        @expose('json')
 
 The first tells Pecan to serialize the response namespace using JSON
 serialization when the client requests ``/hello.json``. 
 
+::
+
+        @expose('text_template.mako', content_type='text/plain')
+
 The second tells Pecan to use the ``text_template.mako`` template file when the
 client requests ``/hello.txt``. 
 
-The third tells Pecan to use the html_template.mako template file when the 
+::
+
+        @expose('html_template.mako')
+
+The third tells Pecan to use the ``html_template.mako`` template file when the 
 client requests ``/hello.html``. If the client requests ``/hello``, Pecan will 
 use the ``text/html`` content type by default.
 
-Please see :ref:`pecan_decorators` for more information on ``@expose``.
+.. seealso::
+
+  * :ref:`pecan_decorators`
 
 
 
@@ -129,15 +143,16 @@ Pecan's Routing Algorithm
 Sometimes, the standard object-dispatch routing isn't adequate to properly
 route a URL to a controller. Pecan provides several ways to short-circuit 
 the object-dispatch system to process URLs with more control, including the
-special ``_lookup``, ``_default``, and ``_route`` methods. Defining these
+special :func:`_lookup`, :func:`_default`, and :func:`_route` methods. Defining these
 methods on your controller objects provides additional flexibility for 
 processing all or part of a URL.
 
 
 Setting a Return Status Code
---------------------------------
+----------------------------
 
-Setting a specific HTTP response code (such as ``201 Created``) is simple:
+Set a specific HTTP response code (such as ``201 Created``) by
+modifying the ``status`` attribute of the response object.
 
 ::
 
@@ -150,7 +165,7 @@ Setting a specific HTTP response code (such as ``201 Created``) is simple:
             response.status = 201
             return {'foo': 'bar'}
 
-Pecan also comes with ``abort``, a utility function for raising HTTP errors:
+Use the utility function :func:`abort` to raise HTTP errors.
 
 ::
 
@@ -163,25 +178,31 @@ Pecan also comes with ``abort``, a utility function for raising HTTP errors:
             abort(404)
 
 
-Under the hood, ``abort`` raises an instance of
-``webob.exc.WSGIHTTPException`` which is used by pecan to render default
-response bodies for HTTP errors.  This exception is stored in the WSGI request
-environ at ``pecan.original_exception``, where it can be accessed later in the
-request cycle (by, for example, other middleware or :ref:`errors`).
+:func:`abort` raises an instance of
+:class:`webob.exc.WSGIHTTPException` which is used by Pecan to render
+:default response bodies for HTTP errors.  This exception is stored in
+:the WSGI request environ at ``pecan.original_exception``, where it
+:can be accessed later in the request cycle (by, for example, other
+:middleware or :ref:`errors`).
 
 
 Routing to Subcontrollers with ``_lookup``
 ------------------------------------------
 
-The ``_lookup`` special method provides a way to process a portion of a URL, 
+The :func:`_lookup` special method provides a way to process a portion of a URL, 
 and then return a new controller object to route to for the remainder.
 
-A ``_lookup`` method will accept one or more arguments, representing chunks
-of the URL to be processed, split on ``/``, and then provide a ``*remainder`` list
-which will be processed by the returned controller via object-dispatch.
+A :func:`_lookup` method may accept one or more arguments, segments
+chunks of the URL path to be processed (split on
+``/``). :func:`_lookup` should also take variable positional arguments
+representing the rest of the path, and it should include any portion
+of the path it does not process in its return value. The example below
+uses a ``*remainder`` list which will be passed to the returned
+controller when the object-dispatch algorithm continues.
 
-Additionally, the ``_lookup`` method on a controller is called as a last
-resort, when no other controller matches the URL via standard object-dispatch.
+In addition to being used for creating controllers dynamically,
+:func:`_lookup` is called as a last resort, when no other controller
+method matches the URL and there is no :func:`_default` method.
 
 ::
 
@@ -211,7 +232,7 @@ where ``primary_key == 8``.
 Falling Back with ``_default``
 ------------------------------
 
-The ``_default`` controller is called as a last resort when no other controller 
+The :func:`_default` method is called as a last resort when no other controller 
 methods match the URL via standard object-dispatch.
 
 ::
@@ -232,28 +253,29 @@ methods match the URL via standard object-dispatch.
             return 'I cannot say hello in that language'
 
 
-...so in the example above, a request to ``/spanish`` would route to 
-``RootController._default``.
+In the example above, a request to ``/spanish`` would route to 
+:func:`RootController._default`.
             
 
 Defining Customized Routing with ``_route``
 -------------------------------------------
 
-The ``_route`` method allows a controller to completely override the routing 
-mechanism of Pecan. Pecan itself uses the ``_route`` method to implement its
-``RestController``. If you want to design an alternative routing system on 
-top of Pecan, defining a base controller class that defines a ``_route`` method
+The :func:`_route` method allows a controller to completely override the routing 
+mechanism of Pecan. Pecan itself uses the :func:`_route` method to implement its
+:class:`RestController`. If you want to design an alternative routing system on 
+top of Pecan, defining a base controller class that defines a :func:`_route` method
 will enable you to have total control.
 
 
 Mapping Controller Arguments
 ----------------------------
 
-In Pecan, HTTP ``GET`` and ``POST`` variables that are `not` consumed 
-during the routing process can be passed onto the controller as arguments.
+In Pecan, HTTP ``GET`` and ``POST`` variables that are not consumed
+during the routing process can be passed onto the controller method as
+arguments.
 
-Depending on the signature of your controller, these arguments can be mapped
-explicitly to method arguments:
+Depending on the signature of the method, these arguments can be mapped
+explicitly to arguments:
 
 ::
 
@@ -275,7 +297,7 @@ explicitly to method arguments:
     $ curl http://localhost:8080/kwargs?a=1&b=2&c=3
     {u'a': u'1', u'c': u'3', u'b': u'2'}
 
-...or can be consumed positionally:
+or can be consumed positionally:
 
 ::
 
@@ -311,6 +333,10 @@ Helper Functions
 ----------------
 
 Pecan also provides several useful helper functions for moving between
-different routes. The ``redirect`` function allows you to issue internal or 
-``HTTP 302`` redirects.  The ``redirect`` utility, along with several other 
-useful helpers, are documented in :ref:`pecan_core`.
+different routes. The :func:`redirect` function allows you to issue internal or 
+``HTTP 302`` redirects.  
+
+.. seealso::
+
+  The :func:`redirect` utility, along with several other useful
+  helpers, are documented in :ref:`pecan_core`.

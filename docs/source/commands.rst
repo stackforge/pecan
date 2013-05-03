@@ -5,15 +5,17 @@
 
 Command Line Pecan
 ==================
-Any Pecan application can be controlled and inspected from the command line
-using the built-in ``pecan`` command.  The usage examples of the ``pecan``
-command in this document are intended to be invoked from your project's root
-directory.
+
+Any Pecan application can be controlled and inspected from the command
+line using the built-in :command:`pecan` command.  The usage examples
+of :command:`pecan` in this document are intended to be invoked from
+your project's root directory.
 
 Serving a Pecan App For Development
 -----------------------------------
+
 Pecan comes bundled with a lightweight WSGI development server based on
-Python's ``wsgiref.simpleserver`` module.
+Python's :py:mod:`wsgiref.simpleserver` module.
 
 Serving your Pecan app is as simple as invoking the ``pecan serve`` command::
 
@@ -21,7 +23,7 @@ Serving your Pecan app is as simple as invoking the ``pecan serve`` command::
     Starting server in PID 000.
     serving on 0.0.0.0:8080, view at http://127.0.0.1:8080
 
-...and then visiting it in your browser.
+and then visiting it in your browser.
 
 The server ``host`` and ``port`` in your configuration file can be changed as
 described in :ref:`server_configuration`.
@@ -31,6 +33,7 @@ described in :ref:`server_configuration`.
 
 The Interactive Shell
 ---------------------
+
 Pecan applications also come with an interactive Python shell which can be used
 to execute expressions in an environment very similar to the one your
 application runs in.  To invoke an interactive shell, use the ``pecan shell``
@@ -70,10 +73,12 @@ Press ``Ctrl-D`` to exit the interactive shell (or ``Ctrl-Z`` on Windows).
 
 Using an Alternative Shell
 ++++++++++++++++++++++++++
+
 ``pecan shell`` has optional support for the `IPython <http://ipython.org/>`_
 and `bpython <http://bpython-interpreter.org/>`_ alternative shells, each of
 which can be specified with the ``--shell`` flag (or its abbreviated alias,
 ``-s``), e.g.,
+
 ::
 
     $ pecan shell --shell=ipython config.py
@@ -84,15 +89,18 @@ which can be specified with the ``--shell`` flag (or its abbreviated alias,
 
 Configuration from an environment variable
 ------------------------------------------
-In all the examples shown, you will see that the `pecan` commands were
-accepting a file path to the configuration file. An alternative to this is to
-specify the configuration file in an environment variable (``PECAN_CONFIG``).
+
+In all the examples shown, you will see that the :command:`pecan` commands 
+accepted a file path to the configuration file. An alternative to this is to
+specify the configuration file in an environment variable (:envvar:`PECAN_CONFIG`).
 
 This is completely optional; if a file path is passed in explicitly, Pecan will
 honor that before looking for an environment variable.
 
-For example, to ``serve`` a Pecan application, a variable could be exported and
-subsequently be re-used when no path is passed in::
+For example, to serve a Pecan application, a variable could be exported and
+subsequently be re-used when no path is passed in.
+
+::
 
     $ export PECAN_CONFIG=/path/to/app/config.py
     $ pecan serve
@@ -100,15 +108,16 @@ subsequently be re-used when no path is passed in::
     serving on 0.0.0.0:8080, view at http://127.0.0.1:8080
 
 Note that the path needs to reference a valid pecan configuration file,
-otherwise the command will error out with a meaningful message indicating that
+otherwise the command will error out with a message indicating that
 the path is invalid (for example, if a directory is passed in).
 
-If ``PECAN_CONFIG`` is not set and no configuration is passed in, the command
+If :envvar:`PECAN_CONFIG` is not set and no configuration is passed in, the command
 will error out because it will not be able to locate a configuration file.
 
 
 Extending ``pecan`` with Custom Commands
 ----------------------------------------
+
 While the commands packaged with Pecan are useful, the real utility of its
 command line toolset lies in its extensibility.  It's convenient to be able to
 write a Python script that can work "in a Pecan environment" with access to
@@ -152,8 +161,8 @@ Let's analyze this piece-by-piece.
 Overriding the ``run`` Method
 ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 
-First, we're subclassing ``pecan.commands.BaseCommand`` and extending
-the ``run`` method to:
+First, we're subclassing :class:`pecan.commands.BaseCommand` and extending
+the :func:`run` method to:
 
 * Load a Pecan application - ``self.load_app()``
 * Wrap it in a fake WGSI environment - ``webtest.TestApp()``
@@ -162,18 +171,20 @@ the ``run`` method to:
 Defining Custom Arguments
 ,,,,,,,,,,,,,,,,,,,,,,,,,
 
-The ``arguments`` class attribute is used to define command line arguments
+The :attr:`arguments` class attribute is used to define command line arguments
 specific to your custom command.  You'll notice in this example that we're
-*adding* to the arguments list provided by ``pecan.commands.BaseCommand``
+*adding* to the arguments list provided by :class:`pecan.commands.BaseCommand`
 (which already provides an argument for the ``config_file``), rather
 than overriding it entirely.
 
-The format of the ``arguments`` class attribute is a *tuple* of dictionaries,
+The format of the :attr:`arguments` class attribute is a :class:`tuple` of dictionaries,
 with each dictionary representing an argument definition in the
 same format accepted by Python's |argparse|_ module (more specifically,
-``argparse.ArgumentParser.add_argument``).  By providing a list of arguments in
-this format, the ``pecan`` command can include your custom commands in the help
-and usage output it provides::
+:func:`argparse.ArgumentParser.add_argument`).  By providing a list of arguments in
+this format, the :command:`pecan` command can include your custom commands in the help
+and usage output it provides.
+
+::
 
     $ pecan -h
     usage: pecan [-h] command ...
@@ -183,25 +194,26 @@ and usage output it provides::
         wget        Issues a (simulated) HTTP GET and returns the request body
         serve       Open an interactive shell with the Pecan app loaded
         ...
-
-::
-
+    
     $ pecan wget -h
     usage: pecan wget [-h] config_file path
     $ pecan wget config.py /path/to/some/resource
 
-Additionally, you'll notice that the first line of ``GetCommand``'s docstring
-- ``Issues a (simulated) HTTP GET and returns the request body`` - is
-automatically used to describe the ``wget`` command in the output for ``$ pecan
--h``.  Following this convention allows you to easily integrate a summary for
-your command into the Pecan command line tool.
+Additionally, you'll notice that the first line of the docstring from
+:class:`GetCommand` -- ``Issues a (simulated) HTTP GET and returns the
+request body`` -- is automatically used to describe the :command:`wget`
+command in the output for ``$ pecan -h``.  Following this convention
+allows you to easily integrate a summary for your command into the
+Pecan command line tool.
 
 Registering a Custom Command
 ++++++++++++++++++++++++++++
+
 Now that you've written your custom command, you’ll need to tell your
 distribution’s ``setup.py`` about its existence and reinstall.  Within your
-distribution’s ``setup.py`` file, you'll find a call to ``setuptools.setup()``,
-e.g., ::
+distribution’s ``setup.py`` file, you'll find a call to :func:`setuptools.setup`.
+
+::
 
     # myapp/setup.py
     ...
@@ -213,7 +225,7 @@ e.g., ::
     )
 
 Assuming it doesn't exist already, we'll add the ``entry_points`` argument
-to the ``setup()`` call, and define a ``[pecan.command]`` definition for your custom
+to the :func:`setup` call, and define a ``[pecan.command]`` definition for your custom
 command::
 
 
@@ -231,10 +243,14 @@ command::
     )
 
 Once you've done this, reinstall your project in development to register the
-new entry point::
+new entry point.
+
+::
 
     $ python setup.py develop
 
-...and give it a try::
+Then give it a try.
+
+::
 
     $ pecan wget config.py /path/to/some/resource

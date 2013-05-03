@@ -3,59 +3,75 @@
 Templating in Pecan 
 ===================
 
-Pecan supports a variety of templating engines out of the box, and also provides
-the ability to easily add support for new template engines. Currently, Pecan 
-supports the following templating engines:
+Pecan includes support for a variety of templating engines and also
+makes it easy to add support for new template engines. Currently,
+Pecan supports:
 
- * `Mako <http://www.makotemplates.org/>`_
- * `Genshi <http://genshi.edgewall.org/>`_
- * `Kajiki <http://kajiki.pythonisito.com/>`_
- * `Jinja2 <http://jinja.pocoo.org/>`_
- * `JSON`
+===============  =============
+Template System  Renderer Name
+===============  =============
+ Mako_             mako
+ Genshi_           genshi
+ Kajiki_           kajiki
+ Jinja2_           jinja
+ JSON              json
+===============  =============
 
-The default template system is `mako`, but can be configured by passing the 
-``default_renderer`` key in your application's configuration::
+.. _Mako: http://www.makotemplates.org/
+.. _Genshi: http://genshi.edgewall.org/
+.. _Kajiki: http://kajiki.pythonisito.com/
+.. _Jinja2: http://jinja.pocoo.org/
+
+The default template system is ``mako``, but that can be changed by
+passing the ``default_renderer`` key in your application's
+configuration::
     
     app = {
         'default_renderer' : 'kajiki',
         # ...
     }
 
-The available renderer type strings are ``mako``, ``genshi``, ``kajiki``,
-``jinja``, and ``json``.
-
 
 Using Template Renderers
 ------------------------
 
-:ref:`pecan_decorators` defines a decorator called ``@expose``, which is used
-to flag a method as a public controller. The ``@expose`` decorator takes
-a variety of parameters, including a ``template`` argument, which is the path
-to the template file to use for that controller. ``@expose`` will use the
-default template engine unless the path is prefixed by another renderer name::
+:py:mod:`pecan.decorators` defines a decorator called :func:`@expose`, which
+is used to flag a method as a public controller. The :func:`@expose`
+decorator takes a ``template`` argument, which can be used to specify
+the path to the template file to use for the controller method being
+exposed.
+
+::
 
     class MyController(object):
         @expose('path/to/mako/template.html')
         def index(self):
             return dict(message='I am a mako template')
 
+:func:`@expose` will use the default template engine unless the path
+is prefixed by another renderer name.
+
+::
+
         @expose('kajiki:path/to/kajiki/template.html')
         def my_controller(self):
             return dict(message='I am a kajiki template')
 
-For more information on the expose decorator, refer to :ref:`pecan_decorators`,
-:ref:`pecan_core`, and :ref:`routing`.
+.. seealso::
+
+  * :ref:`pecan_decorators`
+  * :ref:`pecan_core`
+  * :ref:`routing`
 
 
-Template Overrides and Manual Rendering
----------------------------------------
+Overriding Templates
+--------------------
 
-The :ref:`pecan_core` module contains two useful helper functions related to
-templating. The first is ``override_template``, which allows you to overrides
-which template is used in your controller, and the second is ``render``, which
-allows you to manually render output using the Pecan templating framework.
-
-To use ``override_template``, simply call it within the body of your controller
+:func:`override_template` allows you to override the template set for
+a controller method when it is exposed.  When
+:func:`override_template` is called within the body of the controller
+method, it changes the template that will be used for that invocation
+of the method.
 
 ::
 
@@ -66,7 +82,14 @@ To use ``override_template``, simply call it within the body of your controller
             override_template('template_two.html')
             return dict(message='I will now render with template_two.html')
 
-The ``render`` helper is also quite simple to use::
+Manual Rendering
+----------------
+
+:func:`render` allows you to manually render output using the Pecan
+templating framework. Pass the template path and values to go into the
+template, and :func:`render` returns the rendered output as text.
+
+::
 
     @expose()
     def controller(self):
@@ -76,16 +99,20 @@ The ``render`` helper is also quite simple to use::
 The JSON Renderer
 -----------------
 
-Pecan also provides a `JSON` renderer, e.g.,  ``@expose('json')``. For 
-more information on using `JSON` in Pecan, please refer to :ref:`jsonify` and
-:ref:`pecan_jsonify`.
+Pecan also provides a ``JSON`` renderer, which you can use by exposing
+a controller method with ``@expose('json')``. 
+
+.. seealso::
+
+  * :ref:`jsonify`
+  * :ref:`pecan_jsonify`
 
 
 Defining Custom Renderers
 -------------------------
 
-To define a custom renderer, you can create a class that follows a simple
-protocol::
+To define a custom renderer, you can create a class that follows the
+renderer protocol::
 
     class MyRenderer(object):
         def __init__(self, path, extra_vars):
@@ -105,7 +132,7 @@ protocol::
             return str(namespace)
 
 
-To enable your custom renderer, you can define a ``custom_renderers`` key in
+To enable your custom renderer, define a ``custom_renderers`` key in
 your application's configuration::
 
     app = {
