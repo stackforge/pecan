@@ -528,13 +528,7 @@ class Pecan(object):
             testing_variables['controller_output'] = result
 
         # set the body content
-        if six.PY3:
-            resp.text = result if isinstance(result, str) else str(
-                result,
-                'utf-8',
-                'strict'
-            )
-        elif isinstance(result, six.text_type):
+        if isinstance(result, six.text_type):
             resp.text = result
         else:
             resp.body = result
