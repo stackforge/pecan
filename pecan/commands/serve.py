@@ -7,8 +7,6 @@ import sys
 import time
 import subprocess
 
-import six
-
 from pecan.commands import BaseCommand
 
 
