@@ -1,3 +1,5 @@
+import warnings
+
 from webob import exc
 
 from secure import handle_security, cross_boundary
@@ -58,8 +60,7 @@ def handle_lookup_traversal(obj, args):
             # crossing controller boundary
             cross_boundary(prev_obj, obj)
             return result
-    except TypeError, te:
-        import warnings
+    except TypeError as te:
         msg = 'Got exception calling lookup(): %s (%s)'
         warnings.warn(
             msg % (te, te.args),
