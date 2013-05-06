@@ -61,7 +61,7 @@ To secure a class, invoke with two arguments::
         unclassified = UnclassifiedController()
 
 
-``SecureControler``
+``SecureController``
 -------------------
 
 Alternatively, the same functionality can also be accomplished by

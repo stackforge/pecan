@@ -113,7 +113,7 @@ Running the Application
 
 The base project template creates the configuration file with the
 basic settings you need to run your Pecan application in
-``config.py``. This file includes the host and port to run the serves
+``config.py``. This file includes the host and port to run the server
 on, the location where your controllers and templates are stored on
 disk, and the name of the directory containing any static files.
 

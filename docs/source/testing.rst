@@ -6,7 +6,7 @@ Tests can live anywhere in your Pecan project as long as the test runner can
 discover them. Traditionally, they exist in a package named ``myapp.tests``.
 
 The suggested mechanism for unit and integration testing of a Pecan application
-is the ``unittest`` module.
+is the :mod:`unittest` module.
 
 Test Discovery and Other Tools
 ------------------------------
@@ -120,7 +120,7 @@ A functional test for this controller might look something like
 In addition to :attr:`webtest.TestResponse.body`, Pecan also provides
 :attr:`webtest.TestResponse.namespace`, which represents the template namespace
 returned from the controller, and :attr:`webtest.TestResponse.template_name`, which
-yields the name of the template used.
+contains the name of the template used.
 
 ::
 

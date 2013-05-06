@@ -193,7 +193,7 @@ The :func:`_lookup` special method provides a way to process a portion of a URL,
 and then return a new controller object to route to for the remainder.
 
 A :func:`_lookup` method may accept one or more arguments, segments
-chunks of the URL path to be processed (split on
+of the URL path to be processed (split on
 ``/``). :func:`_lookup` should also take variable positional arguments
 representing the rest of the path, and it should include any portion
 of the path it does not process in its return value. The example below
