@@ -4,9 +4,11 @@ Writing RESTful Web Services with Pecan
 =======================================
 
 If you need to write controllers to interact with objects, using the 
-``RestController`` may help speed things up. It follows the Representational 
+:class:`RestController` may help speed things up. It follows the Representational 
 State Transfer Protocol, also known as REST, by routing the standard HTTP 
-verbs of ``GET``, ``POST``, ``PUT``, and ``DELETE`` to individual methods::
+verbs of ``GET``, ``POST``, ``PUT``, and ``DELETE`` to individual methods.
+
+::
 
     from pecan import expose
     from pecan.rest import RestController
@@ -25,7 +27,7 @@ verbs of ``GET``, ``POST``, ``PUT``, and ``DELETE`` to individual methods::
 URL Mapping
 -----------
 
-By default, the ``RestController`` routes as follows:
+By default, the :class:`RestController` routes as follows:
 
 +-----------------+--------------------------------------------------------------+--------------------------------------------+
 | Method          | Description                                                  | Example Method(s) / URL(s)                 |
@@ -55,19 +57,27 @@ By default, the ``RestController`` routes as follows:
 |                 |                                                              | DELETE /books/1                            |
 +-----------------+--------------------------------------------------------------+--------------------------------------------+
 
-Pecan's ``RestController`` uses the ``?_method=`` query string to work around
-the lack of PUT/DELETE form submission support in most current browsers.
+Pecan's :class:`RestController` uses the ``?_method=`` query string to
+work around the lack of support for the PUT and DELETE verbs when
+submitting forms in most current browsers.
 
-The ``RestController`` still supports the ``index``, ``_default``, and 
-``_lookup`` routing overrides. If you need to override ``_route``, however, 
-make sure to call ``RestController._route`` at the end of your custom 
-``_route`` method so that the REST routing described above still occurs.
+In addition to handling REST, the :class:`RestController` also
+supports the :func:`index`, :func:`_default`, and :func:`_lookup`
+routing overrides. 
+
+.. warning::
+
+  If you need to override :func:`_route`, make sure to call
+  :func:`RestController._route` at the end of your custom method so
+  that the REST routing described above still occurs.
 
 Nesting ``RestController``
 ---------------------------
 
-``RestController`` instances can be nested so that child resources get the 
-parameters necessary to look up parent resources. For example::
+:class:`RestController` instances can be nested so that child resources receive the 
+parameters necessary to look up parent resources. 
+
+For example::
 
     from pecan import expose
     from pecan.rest import RestController
@@ -101,21 +111,23 @@ parameters necessary to look up parent resources. For example::
         
         authors = AuthorsController()
 
-Accessing ``/authors/1/books/2`` would call ``BooksController.get`` with an 
-``author_id`` of 1 and ``id`` of 2.
+Accessing ``/authors/1/books/2`` invokes :func:`BooksController.get` with 
+``author_id`` set to ``1`` and ``id`` set to ``2``.
 
 To determine which arguments are associated with the parent resource, Pecan 
-looks at the ``get_one`` or ``get`` method signatures, in that order, in the 
+looks at the :func:`get_one` then :func:`get` method signatures, in that order, in the 
 parent controller. If the parent resource takes a variable number of arguments, 
-Pecan will hand it everything up to the child resource controller name (e.g., 
+Pecan will pass it everything up to the child resource controller name (e.g., 
 ``books`` in the above example).
 
 Defining Custom Actions
 -----------------------
 
 In addition to the default methods defined above, you can add additional 
-behaviors to a ``RestController`` by defining a special ``_custom_actions`` 
-dictionary. For example::
+behaviors to a :class:`RestController` by defining a special :attr:`_custom_actions`
+dictionary.
+
+For example::
 
     from pecan import expose
     from pecan.rest import RestController
@@ -135,5 +147,6 @@ dictionary. For example::
                 abort(404)
             book.checkout()
 
-Additional method names are the keys in the dictionary. The values are lists 
-of valid HTTP verbs for those custom actions, including PUT and DELETE.
+:attr:`_custom_actions` maps method names to the list of valid HTTP
+verbs for those custom actions. In this case :func:`checkout` supports
+``POST``.

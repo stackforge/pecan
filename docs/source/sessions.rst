@@ -2,7 +2,8 @@
 
 Working with Sessions and User Authentication
 =============================================
-Out of the box, Pecan provides no opinionated support for managing user sessions,
+
+Pecan provides no opinionated support for managing user sessions,
 but it's easy to hook into your session framework of choice with minimal
 effort.
 
@@ -11,11 +12,14 @@ framework, `Beaker <http://beaker.groovie.org>`_, into your Pecan project.
 
 Setting up Session Management
 -----------------------------
+
 There are several approaches that can be taken to set up session management.
 One approach is WSGI middleware.  Another is Pecan :ref:`hooks`.
 
 Here's an example of wrapping your WSGI application with Beaker's
-``SessionMiddleware`` in your project's `app.py`::
+:class:`SessionMiddleware` in your project's ``app.py``.
+
+::
 
     from pecan import conf, make_app
     from beaker.middleware import SessionMiddleware
@@ -26,7 +30,9 @@ Here's an example of wrapping your WSGI application with Beaker's
     )
     app = SessionMiddleware(app, conf.beaker)
 
-...and a corresponding dictionary in your configuration file::
+And a corresponding dictionary in your configuration file.
+
+::
 
     beaker = {
         'session.key'           : 'sessionkey',

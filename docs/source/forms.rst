@@ -2,7 +2,8 @@
 
 Generating and Validating Forms
 ===============================
-Out of the box, Pecan provides no opinionated support for working with
+
+Pecan provides no opinionated support for working with
 form generation and validation libraries, but it’s easy to import your
 library of choice with minimal effort.
 
@@ -12,7 +13,10 @@ This article details best practices for integrating the popular forms library,
 Defining a Form Definition
 --------------------------
 
-Let's start by building a basic form with a required ``first_name`` field and an optional ``last_name`` field::
+Let's start by building a basic form with a required ``first_name``
+field and an optional ``last_name`` field.
+
+::
 
     from wtforms import Form, TextField, validators
 
@@ -26,7 +30,9 @@ Let's start by building a basic form with a required ``first_name`` field and an
 Rendering a Form in a Template
 ------------------------------
 
-Next, let's add a controller, and pass a form instance to the template::
+Next, let's add a controller, and pass a form instance to the template.
+
+::
 
     from pecan import expose
     from wtforms import Form, TextField, validators
@@ -41,8 +47,9 @@ Next, let's add a controller, and pass a form instance to the template::
         def index(self):
             return dict(form=MyForm())
 
-Here's the template file (which uses the `Mako <http://www.makeotemplates.org/>`_
-templating language):
+Here's the Mako_ template file:
+
+.. _Mako: http://www.makeotemplates.org/
 
 .. code-block:: html
 
@@ -61,7 +68,7 @@ templating language):
 Validating POST Values
 ----------------------
 
-Using the same ``MyForm`` definition, let's redirect the user if the form is 
+Using the same :class:`MyForm` definition, let's redirect the user if the form is 
 validated, otherwise, render the form again.
 
 .. code-block:: python

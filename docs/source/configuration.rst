@@ -2,13 +2,17 @@
 
 Configuring Pecan Applications
 ==============================
+
 Pecan is very easy to configure. As long as you follow certain conventions,
 using, setting and dealing with configuration should be very intuitive.  
 
-Pecan configuration files are pure Python.
+Pecan configuration files are pure Python. Each "section" of the
+configuration is a dictionary assigned to a variable name in the
+configuration module.
 
 Default Values
 ---------------
+
 Below is the complete list of default values the framework uses::
 
 
@@ -30,9 +34,12 @@ Below is the complete list of default values the framework uses::
 
 Application Configuration
 -------------------------
-This is the part of the configuration that is specific to your application -
-the framework uses it to wrap your application into a valid 
-`WSGI app <http://www.wsgi.org/en/latest/what.html>`_.
+
+The ``app`` configuration values are used by Pecan to wrap your
+application into a valid `WSGI app
+<http://www.wsgi.org/en/latest/what.html>`_. The ``app`` configuration
+is specific to your application, and includes values like the root
+controller class location.
 
 A typical application configuration might look like this::
 
@@ -46,40 +53,56 @@ A typical application configuration might look like this::
 
 Let's look at each value and what it means:
 
-**app** is a reserved variable name for the configuration, so make sure you
-don't override it.
+**modules** 
+  A list of modules where pecan will search for applications.
+  Generally this should contain a single item, the name of your
+  project's python package.  At least one of the listed modules must
+  contain an ``app.setup_app`` function which is called to create the
+  WSGI app.  In other words, this package should be where your
+  ``app.py`` file is located, and this file should contain a
+  ``setup_app`` function.
 
-**modules** is a list of modules where pecan will search for applications.
-Generally this should contain a single item, the name of your project's
-python package.
-At least one of the listed modules must contain an ``app.setup_app`` function
-which is called to create the WSGI app.  In other words, this package should
-be where your ``app.py`` file is located, and this file should contain a
-``setup_app`` function.
-See :ref:`app_template` for more about the ``app.py`` file.
+**root**
+  The root controller of your application. Remember to provide a
+  string representing a Python path to some callable (e.g.,
+  ``"yourapp.controllers.root.RootController"``).
 
-**root** The root controller of your application. Remember to provide
-a string representing a Python path to some callable (e.g.,
-``"yourapp.controllers.root.RootController"``).
+**static_root**
+  The directory where your static files can be found (relative to
+  the project root).  Pecan comes with middleware that can
+  be used to serve static files (like CSS and Javascript files) during
+  development.
 
-**static_root** Points to the directory where your static files live (relative
-to the project root).  By default, Pecan comes with middleware that can be
-used to serve static files (like CSS and Javascript files) during development.
+**template_path**
+  Points to the directory where your template files live (relative to
+  the project root).
 
-**template_path** Points to the directory where your template files live
-(relative to the project root).
+**debug**
+  Enables ``WebError`` to display tracebacks in the browser 
 
-**debug** Enables ``WebError`` to display tracebacks in the browser 
-(**IMPORTANT**: Make sure this is *always* set to ``False`` in production
-environments).
+.. warning::
+
+  ``app`` is a reserved variable name for that section of the
+  configuration, so make sure you don't override it.
+
+.. warning::
+
+  Make sure **debug** is *always* set to ``False`` in production environments.
+
+.. seealso::
+
+  * :ref:`app_template`
 
 
 .. _server_configuration:
 
 Server Configuration
 --------------------
+
 Pecan provides some sane defaults.  Change these to alter the host and port your
-WSGI app is served on::
+WSGI app is served on.
+
+::
 
     server = {
         'port' : '8080',
@@ -88,9 +111,12 @@ WSGI app is served on::
 
 Additional Configuration
 ------------------------
-Your application may need access to other configuration values at runtime 
-(like third-party API credentials).  These types of configuration can be
-defined in their own blocks in your configuration file::
+
+Your application may need access to other configuration values at
+runtime (like third-party API credentials).  Put these settings in
+their own blocks in your configuration file.
+
+::
 
     twitter = {
         'api_key' : 'FOO',
@@ -99,17 +125,20 @@ defined in their own blocks in your configuration file::
 
 .. _accessibility:
 
-Accessing Configuration at Runtime 
+Accessing Configuration at Runtime
 ----------------------------------
-You can access any configuration value at runtime via ``pecan.conf``.
-This includes custom, application and server-specific values.
+
+You can access any configuration value at runtime via :py:mod:`pecan.conf`.
+This includes custom, application, and server-specific values.
 
 For example, if you needed to specify a global administrator, you could
-do so like this within the configuration file::
+do so like this within the configuration file.
+
+::
 
     administrator = 'foo_bar_user'
 
-And it would be accessible in `pecan.conf` as::
+And it would be accessible in :py:mod:`pecan.conf` as::
 
     >>> from pecan import conf
     >>> conf.administrator
@@ -118,12 +147,13 @@ And it would be accessible in `pecan.conf` as::
 
 Dictionary Conversion
 ---------------------
-In certain situations you might want to deal with keys and values, but in strict
-dictionary form. The ``Config`` object has a helper method for this purpose
-that will return a dictionary representation of itself, including nested values.
 
-Below is a representation of how you can access the ``as_dict`` method and what
-should return as a result (shortened for brevity):
+In certain situations you might want to deal with keys and values, but in strict
+dictionary form. The :class:`Config` object has a helper method for this purpose
+that will return a dictionary representation of the configuration, including nested values.
+
+Below is a representation of how you can access the :func:`as_dict` method and what
+it returns as a result (shortened for brevity):
 
 ::
 
@@ -136,9 +166,9 @@ should return as a result (shortened for brevity):
 
 Prefixing Dictionary Keys
 -------------------------
-``Config.as_dict`` allows you to pass an optional argument if you need to
-prefix the keys in the returned dictionary. This is a single argument in string
-form and it works like this (shortened for brevity):
+
+:func:`Config.as_dict` allows you to pass an optional string argument
+if you need to prefix the keys in the returned dictionary.
 
 ::
 
