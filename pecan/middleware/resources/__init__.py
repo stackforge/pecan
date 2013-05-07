@@ -3,8 +3,6 @@ from mimetypes import guess_type
 from contextlib import closing
 from base64 import b64encode
 
-import six
-
 from pecan.compat import quote
 
 
