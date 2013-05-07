@@ -1,3 +1,5 @@
+import warnings
+
 from webob import exc
 
 from secure import handle_security, cross_boundary
@@ -42,23 +44,28 @@ def lookup_controller(obj, url_path):
                 else:
                     # Notfound handler is an internal redirect, so continue
                     #   traversal
-                    try:
-                        result = obj(*remainder)
-                        if result:
-                            prev_obj = obj
-                            obj, remainder = result
-                            # crossing controller boundary
-                            cross_boundary(prev_obj, obj)
-                            break
-                    except TypeError, te:
-                        import warnings
-                        msg = 'Got exception calling lookup(): %s (%s)'
-                        warnings.warn(
-                            msg % (te, te.args),
-                            RuntimeWarning
-                        )
+                    result = handle_lookup_traversal(obj, remainder)
+                    if result:
+                        return lookup_controller(*result)
             else:
                 raise exc.HTTPNotFound
+
+
+def handle_lookup_traversal(obj, args):
+    try:
+        result = obj(*args)
+        if result:
+            prev_obj = obj
+            obj, remainder = result
+            # crossing controller boundary
+            cross_boundary(prev_obj, obj)
+            return result
+    except TypeError as te:
+        msg = 'Got exception calling lookup(): %s (%s)'
+        warnings.warn(
+            msg % (te, te.args),
+            RuntimeWarning
+        )
 
 
 def find_object(obj, remainder, notfound_handlers):
