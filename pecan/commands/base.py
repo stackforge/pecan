@@ -1,9 +1,10 @@
 import pkg_resources
-import os.path
 import argparse
 import logging
 import sys
 from warnings import warn
+
+import six
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ class CommandManager(object):
             try:
                 cmd = ep.load()
                 assert hasattr(cmd, 'run')
-            except Exception, e:  # pragma: nocover
+            except Exception as e:  # pragma: nocover
                 warn("Unable to load plugin %s: %s" % (ep, e), RuntimeWarning)
                 continue
             self.add({ep.name: cmd})
@@ -60,9 +61,11 @@ class CommandRunner(object):
 
     def __init__(self):
         self.manager = CommandManager()
-        self.parser = HelpfulArgumentParser(
-            version='Pecan %s' % self.version,
-            add_help=True
+        self.parser = HelpfulArgumentParser(add_help=True)
+        self.parser.add_argument(
+            '--version',
+            action='version',
+            version='Pecan %s' % self.version
         )
         self.parse_sub_commands()
 
@@ -78,7 +81,7 @@ class CommandRunner(object):
             )
             for arg in getattr(cmd, 'arguments', tuple()):
                 arg = arg.copy()
-                if isinstance(arg.get('name'), basestring):
+                if isinstance(arg.get('name'), six.string_types):
                     sub.add_argument(arg.pop('name'), **arg)
                 elif isinstance(arg.get('name'), list):
                     sub.add_argument(*arg.pop('name'), **arg)
@@ -101,7 +104,20 @@ class CommandRunner(object):
         return self.manager.commands
 
 
-class BaseCommand(object):
+class BaseCommandMeta(type):
+
+    @property
+    def summary(cls):
+        """
+        This is used to populate the --help argument on the command line.
+
+        This provides a default behavior which takes the first sentence of the
+        command's docstring and uses it.
+        """
+        return cls.__doc__.strip().splitlines()[0].rstrip('.')
+
+
+class BaseCommandParent(object):
     """
     A base interface for Pecan commands.
 
@@ -126,13 +142,9 @@ class BaseCommand(object):
 
             def run(self, args):
                 super(SomeCommand, self).run(args)
-                print args.extra_arg
+                if args.extra_arg:
+                    pass
     """
-
-    class __metaclass__(type):
-        @property
-        def summary(cls):
-            return cls.__doc__.strip().splitlines()[0].rstrip('.')
 
     arguments = ({
         'name': 'config_file',
@@ -147,3 +159,5 @@ class BaseCommand(object):
     def load_app(self):
         from pecan import load_app
         return load_app(self.args.config_file)
+
+BaseCommand = BaseCommandMeta('BaseCommand', (BaseCommandParent,), {})

@@ -1,3 +1,7 @@
+0.3.0b
+======
+* Pecan now supports Python 2.6, 2.7, 3.2, and 3.3.
+
 0.2.4
 =====
 * Add support for ``_lookup`` methods as a fallback in RestController.

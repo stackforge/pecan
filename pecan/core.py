@@ -1,4 +1,3 @@
-import urllib
 try:
     from simplejson import loads
 except ImportError:             # pragma: no cover
@@ -6,17 +5,19 @@ except ImportError:             # pragma: no cover
 from threading import local
 from itertools import chain
 from mimetypes import guess_type, add_type
-from urlparse import urlsplit, urlunsplit
 from os.path import splitext
 import logging
 import operator
 
+import six
+
 from webob import Request, Response, exc, acceptparse
 
-from templating import RendererFactory
-from routing import lookup_controller, NonCanonicalPath
-from util import _cfg, encode_if_needed
-from middleware.recursive import ForwardRequestException
+from .compat import urlparse, unquote_plus
+from .templating import RendererFactory
+from .routing import lookup_controller, NonCanonicalPath
+from .util import _cfg, encode_if_needed
+from .middleware.recursive import ForwardRequestException
 
 
 # make sure that json is defined in mimetypes
@@ -102,16 +103,16 @@ def redirect(location=None, internal=False, code=None, headers={},
 
     if add_slash:
         if location is None:
-            split_url = list(urlsplit(state.request.url))
+            split_url = list(urlparse.urlsplit(state.request.url))
             new_proto = state.request.environ.get(
                 'HTTP_X_FORWARDED_PROTO', split_url[0]
             )
             split_url[0] = new_proto
         else:
-            split_url = urlsplit(location)
+            split_url = urlparse.urlsplit(location)
 
         split_url[2] = split_url[2].rstrip('/') + '/'
-        location = urlunsplit(split_url)
+        location = urlparse.urlunsplit(split_url)
 
     if not headers:
         headers = {}
@@ -149,7 +150,7 @@ def load_app(config):
 
     returns a pecan.Pecan object
     '''
-    from configuration import _runtime_conf, set_config
+    from .configuration import _runtime_conf, set_config
     set_config(config, overwrite=True)
 
     for package_name in getattr(_runtime_conf.app, 'modules', []):
@@ -198,7 +199,7 @@ class Pecan(object):
                  extra_template_vars={}, force_canonical=True,
                  guess_content_type_from_ext=True):
 
-        if isinstance(root, basestring):
+        if isinstance(root, six.string_types):
             root = self.__translate_root__(root)
 
         self.root = root
@@ -248,7 +249,7 @@ class Pecan(object):
         try:
             node, remainder = lookup_controller(node, path)
             return node, remainder
-        except NonCanonicalPath, e:
+        except NonCanonicalPath as e:
             if self.force_canonical and \
                     not _cfg(e.controller).get('accept_noncanonical', False):
                 if req.method == 'POST':
@@ -310,7 +311,8 @@ class Pecan(object):
         valid_args = argspec[0][1:]
 
         def _decode(x):
-            return urllib.unquote_plus(x) if isinstance(x, basestring) else x
+            return unquote_plus(x) if isinstance(x, six.string_types) \
+                else x
 
         remainder = [_decode(x) for x in remainder]
 
@@ -329,7 +331,7 @@ class Pecan(object):
             valid_args = valid_args[len(args):]
 
         # handle wildcard arguments
-        if filter(None, remainder):
+        if [i for i in remainder if i]:
             if not argspec[1]:
                 abort(404)
             args.extend(remainder)
@@ -351,7 +353,7 @@ class Pecan(object):
 
         # handle wildcard GET/POST params
         if argspec[2]:
-            for name, value in all_params.iteritems():
+            for name, value in six.iteritems(all_params):
                 if name not in argspec[0]:
                     kwargs[encode_if_needed(name)] = value
 
@@ -415,7 +417,7 @@ class Pecan(object):
         # handle generic controllers
         im_self = None
         if cfg.get('generic'):
-            im_self = controller.im_self
+            im_self = six.get_method_self(controller)
             handlers = cfg['generic_handlers']
             controller = handlers.get(req.method, handlers['DEFAULT'])
             cfg = _cfg(controller)
@@ -526,8 +528,8 @@ class Pecan(object):
             testing_variables['controller_output'] = result
 
         # set the body content
-        if isinstance(result, unicode):
-            resp.unicode_body = result
+        if isinstance(result, six.text_type):
+            resp.text = result
         else:
             resp.body = result
 
@@ -555,7 +557,7 @@ class Pecan(object):
             state.request.pecan = dict(content_type=None)
 
             self.handle_request(state.request, state.response)
-        except Exception, e:
+        except Exception as e:
             # if this is an HTTP Exception, set it as the response
             if isinstance(e, exc.HTTPException):
                 state.response = e

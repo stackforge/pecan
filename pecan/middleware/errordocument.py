@@ -1,5 +1,7 @@
 import sys
-from recursive import ForwardRequestException, RecursionLoop
+
+from six import b as b_
+from .recursive import ForwardRequestException, RecursionLoop
 
 
 class StatusPersist(object):
@@ -21,8 +23,8 @@ class StatusPersist(object):
 
         try:
             return self.app(environ, keep_status_start_response)
-        except RecursionLoop, e:
-            environ['wsgi.errors'].write(
+        except RecursionLoop as e:
+            environ['wsgi.errors'].errors.write(
                 'Recursion error getting error page: %s\n' % e
             )
             keep_status_start_response(
@@ -30,9 +32,9 @@ class StatusPersist(object):
                 [('Content-type', 'text/plain')],
                 sys.exc_info()
             )
-            return [
+            return [b_(
                 'Error: %s.  (Error page could not be fetched)' % self.status
-            ]
+            )]
 
 
 class ErrorDocumentMiddleware(object):

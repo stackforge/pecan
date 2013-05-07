@@ -1,5 +1,5 @@
-import cgi
-from jsonify import encode
+from .compat import escape
+from .jsonify import encode
 
 _builtin_renderers = {}
 error_formatters = []
@@ -57,7 +57,10 @@ try:
         Implements ``Genshi`` renderer error formatting.
         '''
         if isinstance(exc_value, (gTemplateError)):
-            retval = '<h4>Genshi error %s</h4>' % cgi.escape(exc_value.message)
+            retval = '<h4>Genshi error %s</h4>' % escape(
+                exc_value.args[0],
+                True
+            )
             retval += format_line_context(exc_value.filename, exc_value.lineno)
             return retval
     error_formatters.append(format_genshi_error)
@@ -193,12 +196,12 @@ def format_line_context(filename, lineno, context=10):
         start_lineno = max(lineno - context, 0)
         end_lineno = lineno + context
 
-        lines = [cgi.escape(l) for l in lines[start_lineno:end_lineno]]
+        lines = [escape(l, True) for l in lines[start_lineno:end_lineno]]
         i = lineno - start_lineno
         lines[i] = '<strong>%s</strong>' % lines[i]
 
     else:
-        lines = [cgi.escape(l) for l in lines[:context]]
+        lines = [escape(l, True) for l in lines[:context]]
     msg = '<pre style="background-color:#ccc;padding:2em;">%s</pre>'
     return msg % ''.join(lines)
 

@@ -1,7 +1,6 @@
 import os
 import sys
 import subprocess
-import urllib2
 import time
 
 
@@ -10,6 +9,9 @@ if sys.version_info < (2, 7):
 else:
     import unittest  # noqa
 
+from six import b as b_
+
+from pecan.compat import urlopen, URLError
 from pecan.tests import PecanTestCase
 
 
@@ -55,10 +57,11 @@ if __name__ == '__main__':
                         )
                     try:
                         # ...and that it's serving (valid) content...
-                        resp = urllib2.urlopen('http://localhost:8080/')
+                        resp = urlopen('http://localhost:8080/')
                         assert resp.getcode() == 200
-                        assert 'This is a sample Pecan project.' in resp.read()
-                    except urllib2.URLError:
+                        assert 'This is a sample Pecan project.' in \
+                            resp.read().decode()
+                    except URLError:
                         pass
                     else:
                         break
@@ -81,11 +84,11 @@ if __name__ == '__main__':
             self.poll(proc)
 
             out, _ = proc.communicate(
-                '{"model" : model, "conf" : conf, "app" : app}'
+                b_('{"model" : model, "conf" : conf, "app" : app}')
             )
-            assert 'testing123.model' in out, out
-            assert 'Config(' in out, out
-            assert 'webtest.app.TestApp' in out, out
+            assert 'testing123.model' in out.decode(), out
+            assert 'Config(' in out.decode(), out
+            assert 'webtest.app.TestApp' in out.decode(), out
 
             try:
                 # just in case stdin doesn't close
@@ -108,10 +111,11 @@ if __name__ == '__main__':
                         )
                     try:
                         # ...and that it's serving (valid) content...
-                        resp = urllib2.urlopen('http://localhost:%d/' % port)
+                        resp = urlopen('http://localhost:%d/' % port)
                         assert resp.getcode() == 200
-                        assert 'This is a sample Pecan project.' in resp.read()
-                    except urllib2.URLError:
+                        assert 'This is a sample Pecan project.' in \
+                            resp.read().decode()
+                    except URLError:
                         pass
                     else:
                         break

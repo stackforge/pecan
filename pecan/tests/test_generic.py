@@ -4,6 +4,8 @@ try:
 except:
     from json import dumps  # noqa
 
+from six import b as b_
+
 from pecan import Pecan, expose
 from pecan.tests import PecanTestCase
 
@@ -27,11 +29,11 @@ class TestGeneric(PecanTestCase):
         app = TestApp(Pecan(RootController()))
         r = app.get('/')
         assert r.status_int == 200
-        assert r.body == 'GET'
+        assert r.body == b_('GET')
 
         r = app.post('/')
         assert r.status_int == 200
-        assert r.body == dumps(dict(result='POST'))
+        assert r.body == b_(dumps(dict(result='POST')))
 
         r = app.get('/do_get', status=404)
         assert r.status_int == 404
