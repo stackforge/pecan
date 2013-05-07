@@ -17,10 +17,6 @@ def load_resource(filename):
         'rb'
     )) as f:
         data = f.read()
-        if six.PY3:
-            data = data.replace(b'\n', b'')  # pragma: nocover
-        else:
-            data.replace('\n', '')
         return 'data:%s;base64,%s' % (
             guess_type(filename)[0],
             quote(b64encode(data))
