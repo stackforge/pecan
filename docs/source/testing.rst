@@ -3,13 +3,14 @@
 Testing Pecan Applications
 ==========================
 Tests can live anywhere in your Pecan project as long as the test runner can
-discover them, though traditionally, they exist in a module at ``myapp.tests``.
+discover them. Traditionally, they exist in a package named ``myapp.tests``.
 
 The suggested mechanism for unit and integration testing of a Pecan application
-is the Python ``unittest`` module.
+is the :mod:`unittest` module.
 
 Test Discovery and Other Tools
 ------------------------------
+
 Tests for a Pecan project can be invoked as simply as ``python setup.py test``,
 though it's possible to run your tests with different discovery and automation
 tools.  In particular, Pecan projects are known to work well with
@@ -28,7 +29,9 @@ the context of a Pecan application, functional tests can be written with the
 help of the ``WebTest`` library.  In this way, it is possible to write tests
 that verify the behavior of an HTTP request life cycle from the controller
 routing down to the HTTP response.  The following is an example that is
-similar to the one included with Pecan's quickstart project::
+similar to the one included with Pecan's quickstart project.
+
+::
 
     # myapp/myapp/tests/__init__.py
 
@@ -52,12 +55,14 @@ similar to the one included with Pecan's quickstart project::
         def tearDown(self):
             set_config({}, overwrite=True)
 
-The testing utility included with Pecan, ``pecan.testing.load_test_app``, can
+The testing utility included with Pecan, :func:`pecan.testing.load_test_app`, can
 be passed a file path representing a Pecan configuration file, and will return
-an instance of the application, wrapped in a ``webtest.TestApp`` environment.  
+an instance of the application, wrapped in a :class:`webtest.TestApp` environment.  
 
-From here, it's possible to extend the ``FunctionalTest`` base class and write
-tests that issue simulated HTTP requests::
+From here, it's possible to extend the :class:`FunctionalTest` base class and write
+tests that issue simulated HTTP requests.
+
+::
 
     class TestIndex(FunctionalTest):
 
@@ -66,17 +71,23 @@ tests that issue simulated HTTP requests::
             assert resp.status_int == 200
             assert 'Hello, World' in resp.body
 
-See the `WebTest <http://pythonpaste.org/webtest/>`_ documentation for further
-information about the methods available to a ``webtest.TestApp`` instance.
+.. seealso::
+
+  See the `WebTest <http://pythonpaste.org/webtest/>`_ documentation
+  for further information about the methods available to a
+  ``webtest.TestApp`` instance.
 
 Special Testing Variables
 -------------------------
+
 Sometimes it's not enough to make assertions about the response body of certain
 requests.  To aid in inspection, Pecan applications provide a special set of
-"testing variables" to any ``webtest.TestResponse`` object.
+"testing variables" to any :class:`webtest.TestResponse` object.
 
 Let's suppose that your Pecan applicaton had some controller which took a 
-``name`` as an optional argument in the URL::
+``name`` as an optional argument in the URL.
+
+::
 
     # myapp/myapp/controllers/root.py
     from pecan import expose
@@ -88,12 +99,16 @@ Let's suppose that your Pecan applicaton had some controller which took a
             """A request to / will access this controller"""
             return dict(name=name)
 
-...and rendered that name in it's template (and thus, the response body)::
+and rendered that name in it's template (and thus, the response body).
+
+::
 
     # myapp/myapp/templates/index.html
     Hello, ${name}!
 
-A functional test for this controller might look something like this::
+A functional test for this controller might look something like
+
+::
 
     class TestIndex(FunctionalTest):
 
@@ -102,10 +117,12 @@ A functional test for this controller might look something like this::
             assert resp.status_int == 200
             assert 'Hello, Joe!' in resp.body
 
-In addition to ``webtest.TestResponse.body``, Pecan also provides
-``webtest.TestResponse.namespace``, which represents the template namespace
-returned from the controller, and ``webtest.TestResponse.template_name``, which
-yields the name of the template used::
+In addition to :attr:`webtest.TestResponse.body`, Pecan also provides
+:attr:`webtest.TestResponse.namespace`, which represents the template namespace
+returned from the controller, and :attr:`webtest.TestResponse.template_name`, which
+contains the name of the template used.
+
+::
 
     class TestIndex(FunctionalTest):
 

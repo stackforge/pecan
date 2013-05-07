@@ -2,30 +2,33 @@
 
 Pecan Hooks
 ===========
-Pecan Hooks are a nice way to interact with the framework itself without having to
-write WSGI middleware.
 
-There is nothing wrong with WSGI Middleware, and actually, it is really easy to
-use middleware with Pecan, but it can be hard (sometimes impossible) to have
-access to Pecan's internals from within middleware.  Hooks make this easier.
+Although it is easy to use WSGI middleware with Pecan, it can be hard
+(sometimes impossible) to have access to Pecan's internals from within
+middleware.  Pecan Hooks are a way to interact with the framework,
+without having to write separate middleware.
 
 Hooks allow you to execute code at key points throughout the life cycle of your request:
 
-* ``on_route``: called before Pecan attempts to route a request to a controller
+* :func:`on_route`: called before Pecan attempts to route a request to a controller
 
-* ``before``: called after routing, but before controller code is run
+* :func:`before`: called after routing, but before controller code is run
 
-* ``after``: called after controller code has been run
+* :func:`after`: called after controller code has been run
 
-* ``on_error``: called when a request generates an exception
+* :func:`on_error`: called when a request generates an exception
 
 Implementating a Pecan Hook
 ---------------------------
-In the below example, we will write a simple hook that will gather
-some information about the request and print it to ``stdout``.
 
-Your hook implementation needs to import ``PecanHook`` so it can be used as a base class.  
-From there, you'll need to override the ``on_route``, ``before``, ``after``, or ``on_error`` methods::
+In the below example, a simple hook will gather some information about
+the request and print it to ``stdout``.
+
+Your hook implementation needs to import :class:`PecanHook` so it can be
+used as a base class.  From there, you'll need to override the
+:func:`on_route`, :func:`before`, :func:`after`, or :func:`on_error` methods.
+
+::
 
     from pecan.hooks import PecanHook
 
@@ -38,16 +41,20 @@ From there, you'll need to override the ``on_route``, ``before``, ``after``, or 
             print "\nmethod: \t %s" % state.request.method
             print "\nresponse: \t %s" % state.response.status
             
-``on_route``, ``before``, and ``after`` are each passed a shared state object which includes useful
-information about the request, such as the request and response object, and which controller
-was chosen by Pecan's routing.
+:func:`on_route`, :func:`before`, and :func:`after` are each passed a shared state
+object which includes useful information, such as
+the request and response objects, and which controller was selected by
+Pecan's routing.
 
-``on_error`` is passed a shared state object **and** the original exception.
+:func:`on_error` is passed a shared state object **and** the original exception.
             
 Attaching Hooks
 ---------------
+
 Hooks can be attached in a project-wide manner by specifying a list of hooks
-in your project's ``app.py`` file::
+in your project's ``app.py`` file.
+
+::
 
     from application.root import RootController
     from my_hooks import SimpleHook
@@ -58,7 +65,9 @@ in your project's ``app.py`` file::
     )
 
 Hooks can also be applied selectively to controllers and their sub-controllers
-using the ``__hooks__`` attribute on one or more controllers::
+using the :attr:`__hooks__` attribute on one or more controllers.
+
+::
 
     from pecan import expose
     from pecan.hooks import HookController
@@ -73,8 +82,10 @@ using the ``__hooks__`` attribute on one or more controllers::
             print "DO SOMETHING!"
             return dict()
 
-Now that our ``SimpleHook`` is included, let's see what happens when we run
-the app and browse the application from our web browser::
+Now that :class:`SimpleHook` is included, let's see what happens when we run
+the app and browse the application from our web browser.
+
+::
 
     pecan serve config.py
     serving on 0.0.0.0:8080 view at http://127.0.0.1:8080
@@ -87,29 +98,34 @@ the app and browse the application from our web browser::
 
 Hooks That Come with Pecan
 --------------------------
-Pecan includes some hooks in its core and are very simple to start using them
-away. This section will describe their different uses, how to configure them
-and examples of common scenarios.
+
+Pecan includes some hooks in its core. This section will describe
+their different uses, how to configure them, and examples of common
+scenarios.
 
 .. _requestviewerhook:
 
 RequestViewerHook
 '''''''''''''''''
+
 This hook is useful for debugging purposes. It has access to every
 attribute the ``response`` object has plus a few others that are specific to
 the framework.
 
 There are two main ways that this hook can provide information about a request:
 
-#. Terminal or logging output (via an file-like stream like `stdout`)
+#. Terminal or logging output (via an file-like stream like ``stdout``)
 #. Custom header keys in the actual response.
 
 By default, both outputs are enabled.
 
-For the actual object reference, please see :ref:`pecan_hooks`.
+.. seealso::
+
+  * :ref:`pecan_hooks`
 
 Enabling RequestViewerHook
 ..........................
+
 This hook can be automatically added to the application itself if a certain
 key, ``requestviewer``, exists in the configuration used for the app, e.g.::
 
@@ -123,6 +139,7 @@ created.
 
 Configuring RequestViewerHook
 .............................
+
 There are a few ways to get this hook properly configured and running. However,
 it is useful to know that no actual configuration is needed to have it up and
 running. 
@@ -136,11 +153,11 @@ By default it will output information about these items:
 * params     : A list of tuples for the params passed in at request time
 * hooks      : Any hooks that are used in the app will be listed here.
 
-No configuration will show those values in the terminal via `stdout` and it
-will also add them to the response headers (in the form of
-`X-Pecan-item_name`).
+The default configuration will show those values in the terminal via
+``stdout`` and it will also add them to the response headers (in the
+form of ``X-Pecan-item_name``).
 
-This is how the terminal output might look for a `/favicon.ico` request ::
+This is how the terminal output might look for a `/favicon.ico` request::
 
     path         - /favicon.ico
     status       - 404 Not Found
@@ -161,13 +178,13 @@ response::
     X-Pecan-hooks	['RequestViewerHook']
 
 The hook can be configured via a dictionary (or Config object from Pecan) when
-adding it to the application or via the `requestviewer` key in the actual
+adding it to the application or via the ``requestviewer`` key in the actual
 configuration being passed to the application.
 
 The configuration dictionary is flexible (none of the keys are required) and
-can hold two keys: `items` and `blacklist`.
+can hold two keys: ``items`` and ``blacklist``.
 
-This is how the hook would look if configured directly when using `make_app`
+This is how the hook would look if configured directly when using ``make_app``
 (shortened for brevity)::
 
     ...
@@ -181,17 +198,19 @@ And the same configuration could be set in the config file like::
 
 Modifying Output Format
 .......................
-Items are the actual information objects that the hook will use to return
-information. Sometimes you will need a specific piece of information or
-a certain bunch of them according to the development need so the defaults will
+
+The ``items`` list specify the information that the hook will return.
+Sometimes you will need a specific piece of information or a certain
+bunch of them according to the development need so the defaults will
 need to be changed and a list of items specified.
 
-.. :note:
+.. note::
+
     When specifying a list of items, this list overrides completely the
     defaults, so if a single item is listed, only that item will be returned by
     the hook.
 
-Remember, the hook has access to every single attribute the request object has
+The hook has access to every single attribute the request object has
 and not only to the default ones that are displayed, so you can fine tune the
 information displayed.
 
@@ -240,7 +259,6 @@ is_body_readable             urlvars
 is_body_seekable             uscript_name                 
 is_xhr                       user_agent                   
 make_body_seekable           
-
 ======================  ==========================
 
 And these are the specific ones from Pecan and the hook:
@@ -252,21 +270,22 @@ And these are the specific ones from Pecan and the hook:
 
 Blacklisting Certain Paths
 ..........................
-Sometimes it's annoying to get information about *every* single request. For this
-purpose, there is a matching list of url paths that you can pass into the hook
-so that paths that do not match are returned.
 
-The matching is done at the start of the url path, so be careful when using
+Sometimes it's annoying to get information about *every* single
+request. To limit the ouptput, pass the list of URL paths for which
+you do not want data as the ``blacklist``.
+
+The matching is done at the start of the URL path, so be careful when using
 this feature. For example, if you pass a configuration like this one::
 
     { 'blacklist': ['/f'] }
 
-It would not show *any* url that starts with `f`, effectively behaving like
+It would not show *any* url that starts with ``f``, effectively behaving like
 a globbing regular expression (but not quite as powerful).
 
 For any number of blocking you may need, just add as many items as wanted::
 
     { 'blacklist' : ['/favicon.ico', '/javascript', '/images'] }
 
-Again, the `blacklist` key can be used along with the `items` key or not (it is
-not required).
+Again, the ``blacklist`` key can be used along with the ``items`` key
+or not (it is not required).
