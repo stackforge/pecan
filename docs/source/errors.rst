@@ -32,7 +32,10 @@ Configure Routing
 Let's configure our application ``test_project`` to route ``HTTP 404 Page 
 Not Found`` messages to a custom controller.
 
-First, let's tweak ``test_project/config.py``::
+First, let's update ``test_project/config.py`` to specify a new
+error-handler.
+
+::
 
     # Pecan Application Configurations
     app = {
@@ -52,18 +55,19 @@ First, let's tweak ``test_project/config.py``::
         }
     }
 
-Instead of the default error page, Pecan will now route 404 messages to our
-very own controller named ``notfound``.
-
-Next, let's implement the ``notfound`` controller.
+Instead of the default error page, Pecan will now route 404 messages
+to the controller method ``notfound``.
 
 .. _controllers:
 
 Write Custom Controllers
 ------------------------
-The easiest way to implement our custom ``notfound`` error controller is to 
-add it to ``test_project.root.RootController`` class
-(typically in ``test_project/controllers/root.py``)::
+
+The easiest way to implement the error handler is to 
+add it to :class:`test_project.root.RootController` class
+(typically in ``test_project/controllers/root.py``).
+
+::
     
     from pecan import expose
     from webob.exc import status_map
@@ -98,14 +102,14 @@ add it to ``test_project.root.RootController`` class
 
 And that's it!
 
-Notice that the only bit of code we added to our RootController was::
+Notice that the only bit of code we added to our :class:`RootController` was::
 
         ## custom handling of '404 Page Not Found' messages
         @expose('error.html')
         def notfound(self):
             return dict(status=404, message="test_project does not have this page")
 
-We simply ``@expose`` the ``notfound`` controller with the ``error.html`` 
+We simply :func:`@expose` the ``notfound`` controller with the ``error.html`` 
 template (which was conveniently generated for us and placed under
 ``test_project/templates/`` when we created ``test_project``).  As with any
 Pecan controller, we return a dictionary of variables for interpolation by the 
@@ -113,4 +117,3 @@ template renderer.
 
 Now we can modify the error template, or write a brand new one to make the 404
 error status page of ``test_project`` as pretty or fancy as we want.
-

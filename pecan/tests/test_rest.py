@@ -943,3 +943,222 @@ class TestRestController(PecanTestCase):
         assert r.status_int == 200
         assert r.namespace['foo'] == 'bar'
         assert r.namespace['spam'] == 'eggs'
+
+    def test_nested_rest_with_lookup(self):
+
+        class SubController(RestController):
+
+            @expose()
+            def get_all(self):
+                return "SUB"
+
+        class FinalController(RestController):
+
+            def __init__(self, id_):
+                self.id_ = id_
+
+            @expose()
+            def get_all(self):
+                return "FINAL-%s" % self.id_
+
+            @expose()
+            def post(self):
+                return "POST-%s" % self.id_
+
+        class LookupController(RestController):
+
+            sub = SubController()
+
+            def __init__(self, id_):
+                self.id_ = id_
+
+            @expose()
+            def _lookup(self, id_, *remainder):
+                return FinalController(id_), remainder
+
+            @expose()
+            def get_all(self):
+                raise AssertionError("Never Reached")
+
+            @expose()
+            def post(self):
+                return "POST-LOOKUP-%s" % self.id_
+
+            @expose()
+            def put(self, id_):
+                return "PUT-LOOKUP-%s-%s" % (self.id_, id_)
+
+            @expose()
+            def delete(self, id_):
+                return "DELETE-LOOKUP-%s-%s" % (self.id_, id_)
+
+        class FooController(RestController):
+
+            @expose()
+            def _lookup(self, id_, *remainder):
+                return LookupController(id_), remainder
+
+            @expose()
+            def get_one(self, id_):
+                return "GET ONE"
+
+            @expose()
+            def get_all(self):
+                return "INDEX"
+
+            @expose()
+            def post(self):
+                return "POST"
+
+            @expose()
+            def put(self, id_):
+                return "PUT-%s" % id_
+
+            @expose()
+            def delete(self, id_):
+                return "DELETE-%s" % id_
+
+        class RootController(RestController):
+            foo = FooController()
+
+        app = TestApp(make_app(RootController()))
+
+        r = app.get('/foo')
+        assert r.status_int == 200
+        assert r.body == 'INDEX'
+
+        r = app.post('/foo')
+        assert r.status_int == 200
+        assert r.body == 'POST'
+
+        r = app.get('/foo/1')
+        assert r.status_int == 200
+        assert r.body == 'GET ONE'
+
+        r = app.post('/foo/1')
+        assert r.status_int == 200
+        assert r.body == 'POST-LOOKUP-1'
+
+        r = app.put('/foo/1')
+        assert r.status_int == 200
+        assert r.body == 'PUT-1'
+
+        r = app.delete('/foo/1')
+        assert r.status_int == 200
+        assert r.body == 'DELETE-1'
+
+        r = app.put('/foo/1/2')
+        assert r.status_int == 200
+        assert r.body == 'PUT-LOOKUP-1-2'
+
+        r = app.delete('/foo/1/2')
+        assert r.status_int == 200
+        assert r.body == 'DELETE-LOOKUP-1-2'
+
+        r = app.get('/foo/1/2')
+        assert r.status_int == 200
+        assert r.body == 'FINAL-2'
+
+        r = app.post('/foo/1/2')
+        assert r.status_int == 200
+        assert r.body == 'POST-2'
+
+    def test_dynamic_rest_lookup(self):
+        class BarController(RestController):
+            @expose()
+            def get_all(self):
+                return "BAR"
+
+            @expose()
+            def put(self):
+                return "PUT_BAR"
+
+            @expose()
+            def delete(self):
+                return "DELETE_BAR"
+
+        class BarsController(RestController):
+            @expose()
+            def _lookup(self, id_, *remainder):
+                return BarController(), remainder
+
+            @expose()
+            def get_all(self):
+                return "BARS"
+
+            @expose()
+            def post(self):
+                return "POST_BARS"
+
+        class FooController(RestController):
+            bars = BarsController()
+
+            @expose()
+            def get_all(self):
+                return "FOO"
+
+            @expose()
+            def put(self):
+                return "PUT_FOO"
+
+            @expose()
+            def delete(self):
+                return "DELETE_FOO"
+
+        class FoosController(RestController):
+            @expose()
+            def _lookup(self, id_, *remainder):
+                return FooController(), remainder
+
+            @expose()
+            def get_all(self):
+                return "FOOS"
+
+            @expose()
+            def post(self):
+                return "POST_FOOS"
+
+        class RootController(RestController):
+            foos = FoosController()
+
+        app = TestApp(make_app(RootController()))
+
+        r = app.get('/foos')
+        assert r.status_int == 200
+        assert r.body == 'FOOS'
+
+        r = app.post('/foos')
+        assert r.status_int == 200
+        assert r.body == 'POST_FOOS'
+
+        r = app.get('/foos/foo')
+        assert r.status_int == 200
+        assert r.body == 'FOO'
+
+        r = app.put('/foos/foo')
+        assert r.status_int == 200
+        assert r.body == 'PUT_FOO'
+
+        r = app.delete('/foos/foo')
+        assert r.status_int == 200
+        assert r.body == 'DELETE_FOO'
+
+        r = app.get('/foos/foo/bars')
+        assert r.status_int == 200
+        assert r.body == 'BARS'
+
+        r = app.post('/foos/foo/bars')
+        assert r.status_int == 200
+        assert r.body == 'POST_BARS'
+
+        r = app.get('/foos/foo/bars/bar')
+        assert r.status_int == 200
+        assert r.body == 'BAR'
+
+        r = app.put('/foos/foo/bars/bar')
+        assert r.status_int == 200
+        assert r.body == 'PUT_BAR'
+
+        r = app.delete('/foos/foo/bars/bar')
+        assert r.status_int == 200
+        assert r.body == 'DELETE_BAR'

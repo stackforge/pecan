@@ -1,3 +1,8 @@
+0.2.4
+=====
+* Add support for ``_lookup`` methods as a fallback in RestController.
+* A variety of improvements to project documentation.
+
 0.2.3
 =====
 * Add a variety of optimizations to ``pecan.core`` that improve request

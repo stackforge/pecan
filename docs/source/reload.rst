@@ -22,4 +22,6 @@ library.  You'll need to install it for development use before continuing::
     Starting server in PID 000.
     serving on 0.0.0.0:8080, view at http://127.0.0.1:8080
 
-As you work, Pecan will listen for any file or directory modification events in your project and silently restart your server process in the background.
+As you work, Pecan will listen for any file or directory modification
+events in your project and silently restart your server process in the
+background.

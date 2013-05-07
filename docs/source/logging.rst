@@ -14,21 +14,26 @@
 
 Logging
 =======
-Pecan hooks into the Python standard library's ``logging`` module by passing
-logging configuration options into the
-`logging.config.dictConfig
-<http://docs.python.org/library/logging.config.html#configuration-dictionary-schema>`_
-function.  The full documentation for the `dictConfig
-<http://docs.python.org/library/logging.config.html#configuration-dictionary-schema>`_
-format is the best source of information for logging configuration, but to get
+
+Pecan uses the Python standard library's :py:mod:`logging` module by passing
+logging configuration options into the `logging.config.dictConfig`_
+function.  The full documentation for the :func:`dictConfig` format is
+the best source of information for logging configuration, but to get
 you started, this chapter will provide you with a few simple examples.
+
+.. _logging.config.dictConfig: http://docs.python.org/library/logging.config.html#configuration-dictionary-schema
 
 Configuring Logging
 -------------------
+
 Sample logging configuration is provided with the quickstart project
-introduced in :ref:`quick_start`::
+introduced in :ref:`quick_start`:
+
+::
 
     $ pecan create myapp
+
+The default configuration defines one handler and two loggers.
 
 ::
 
@@ -57,11 +62,7 @@ introduced in :ref:`quick_start`::
         }
     }
 
-This configuration defines one handler:
-
 * ``console`` logs messages to ``stderr`` using the ``simple`` formatter.
-
-...and two loggers.
 
 * ``myapp`` logs messages sent at a level above or equal to ``DEBUG`` to
   the ``console`` handler
@@ -70,13 +71,16 @@ This configuration defines one handler:
   the ``console`` handler
 
 
-Writing Logs in Your Application
---------------------------------
+Writing Log Messages in Your Application
+----------------------------------------
+
 The logger named ``myapp`` is reserved for your usage in your Pecan
 application.
 
 Once you have configured your logging, you can place logging calls in your
-code.  Using the logging framework is very simple.  Here’s an example::
+code.  Using the logging framework is very simple.
+
+::
 
     # myapp/myapp/controllers/root.py
     from pecan import expose
@@ -91,9 +95,10 @@ code.  Using the logging framework is very simple.  Here’s an example::
                 logger.error('Uh-oh!')
             return dict()
 
-Writing Logs to Files and Other Locations
------------------------------------------
-Python's ``logging`` library defines a variety of handlers that assist in
+Logging to Files and Other Locations
+------------------------------------
+
+Python's :py:mod:`logging` library defines a variety of handlers that assist in
 writing logs to file.  A few interesting ones are:
 
 * |FileHandler|_ - used to log messages to a file on the filesystem
@@ -107,6 +112,7 @@ application's ``logging`` block and assigning it to one of more loggers.
 
 Logging Requests with Paste Translogger
 ---------------------------------------
+
 `Paste <http://pythonpaste.org/>`_ (which is not included with Pecan) includes
 the `TransLogger <http://pythonpaste.org/modules/translogger.html>`_ middleware
 for logging requests in `Apache Combined Log Format

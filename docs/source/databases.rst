@@ -2,15 +2,21 @@
 
 Working with Databases, Transactions, and ORM's
 ===============================================
-Out of the box, Pecan provides no opinionated support for working with databases,
-but it's easy to hook into your ORM of choice with minimal effort.  This article
-details best practices for integrating the popular Python ORM, SQLAlchemy, into
+
+Pecan provides no opinionated support for working with databases, but
+it's easy to hook into your ORM of choice.  This article details best
+practices for integrating the popular Python ORM, SQLAlchemy_, into
 your Pecan project.
+
+.. _SQLAlchemy: http://sqlalchemy.org
 
 ``init_model`` and Preparing Your Model
 ---------------------------------------
-Pecan's default quickstart project includes an empty stub directory for implementing
-your model as you see fit::
+
+Pecan's default quickstart project includes an empty stub directory
+for implementing your model as you see fit.
+
+::
 
     .
     └── test_project
@@ -21,7 +27,9 @@ your model as you see fit::
         │   ├── __init__.py
         └── templates
     
-By default, this module contains a special method, ``init_model``::
+By default, this module contains a special method, :func:`init_model`.
+
+::
 
     from pecan import conf
 
@@ -38,13 +46,18 @@ By default, this module contains a special method, ``init_model``::
         """
         pass
         
-The purpose of this method is to determine bindings from your configuration file and create
-necessary engines, pools, etc... according to your ORM or database toolkit of choice.
+The purpose of this method is to determine bindings from your
+configuration file and create necessary engines, pools,
+etc. according to your ORM or database toolkit of choice.
 
-Additionally, your project's ``model`` module can be used to define functions for common binding
-operations, such as starting transactions, committing or rolling back work, and clearing a Session.
-This is also the location in your project where object and relation definitions should be defined.
-Here's what a sample Pecan configuration file with database bindings might look like::
+Additionally, your project's :py:mod:`model` module can be used to define
+functions for common binding operations, such as starting
+transactions, committing or rolling back work, and clearing a session.
+This is also the location in your project where object and relation
+definitions should be defined.  Here's what a sample Pecan
+configuration file with database bindings might look like.
+
+::
 
     # Server Specific Configurations
     server = {
@@ -65,7 +78,10 @@ Here's what a sample Pecan configuration file with database bindings might look 
         'encoding'      : 'utf-8'
     }
 
-...and a basic model implementation that can be used to configure and bind using SQLAlchemy::
+And a basic model implementation that can be used to configure and
+bind using SQLAlchemy.
+
+::
 
     from pecan                  import conf
     from sqlalchemy             import create_engine, MetaData
@@ -98,11 +114,15 @@ Here's what a sample Pecan configuration file with database bindings might look 
 Binding Within the Application
 ------------------------------
 
-There are several approaches that can be taken to wrap your application's requests with calls
-to appropriate model function calls.  One approach is WSGI middleware.  We also recommend
-Pecan :ref:`hooks`.  Pecan comes with ``TransactionHook``, a hook which can
-be used to wrap requests in database transactions for you.  To use it, simply include it in your
-project's ``app.py`` file and pass it a set of functions related to database binding::
+There are several approaches to wrapping your application's requests
+with calls to appropriate model function calls.  One approach is WSGI
+middleware.  We also recommend Pecan :ref:`hooks`.  Pecan comes with
+:class:`TransactionHook`, a hook which can be used to wrap requests in
+database transactions for you.  To use it, simply include it in your
+project's ``app.py`` file and pass it a set of functions related to
+database binding.
+
+::
 
     from pecan import conf, make_app
     from pecan.hooks import TransactionHook
@@ -124,34 +144,48 @@ project's ``app.py`` file and pass it a set of functions related to database bin
         ]
     )
     
-For the above example, on HTTP POST, PUT, and DELETE requests, ``TransactionHook`` behaves in the
-following manner:
+In the above example, on HTTP ``POST``, ``PUT``, and ``DELETE``
+requests, :class:`TransactionHook` takes care of the transaction
+automatically by following these rules:
 
-#.  Before controller routing has been determined, ``model.start()`` is called.  This function should bind to the appropriate SQLAlchemy engine and start a transaction.
+#.  Before controller routing has been determined, :func:`model.start`
+    is called.  This function should bind to the appropriate
+    SQLAlchemy engine and start a transaction.
 
 #.  Controller code is run and returns.
 
-#.  If your controller or template rendering fails and raises an exception, ``model.rollback()`` is called and the original exception is re-raised.  This allows you to rollback your database transaction to avoid committing work when exceptions occur in your application code.
+#.  If your controller or template rendering fails and raises an
+    exception, :func:`model.rollback` is called and the original
+    exception is re-raised.  This allows you to rollback your database
+    transaction to avoid committing work when exceptions occur in your
+    application code.
 
-#.  If the controller returns successfully, ``model.commit()`` and ``model.clear()`` are called.
+#.  If the controller returns successfully, :func:`model.commit` and
+    :func:`model.clear` are called.
     
-On idempotent operations (like HTTP GET and HEAD requests), TransactionHook behaves in the following
-manner:
+On idempotent operations (like HTTP ``GET`` and ``HEAD`` requests),
+:class:`TransactionHook` handles transactions following different
+rules.
 
-#.  ``model.start_read_only()`` is called.  This function should bind to your SQLAlchemy engine.
+#.  ``model.start_read_only()`` is called.  This function should bind
+    to your SQLAlchemy engine.
 
 #.  Controller code is run and returns.
 
-#.  If the controller returns successfully, ``model.clear()`` is called.
+#.  If the controller returns successfully, ``model.clear()`` is
+    called.
 
-Also note that there is a useful ``@after_commit`` decorator provided in :ref:`pecan_decorators`.
+Also note that there is a useful :func:`@after_commit` decorator provided
+in :ref:`pecan_decorators`.
 
 Splitting Reads and Writes
 --------------------------
 
-Employing the strategy above with ``TransactionHook`` makes it very simple to split database
-reads and writes based upon HTTP methods (i.e., GET/HEAD requests are read-only and would potentially
-be routed to a read-only database slave, while POST/PUT/DELETE requests require writing, and
-would always bind to a master database with read/write privileges).  It's also very easy to extend
-``TransactionHook`` or write your own hook implementation for more refined control over where and
-when database bindings are called.
+Employing the strategy above with :class:`TransactionHook` makes it very
+simple to split database reads and writes based upon HTTP methods
+(i.e., GET/HEAD requests are read-only and would potentially be routed
+to a read-only database slave, while POST/PUT/DELETE requests require
+writing, and would always bind to a master database with read/write
+privileges).  It's also possible to extend :class:`TransactionHook` or
+write your own hook implementation for more refined control over where
+and when database bindings are called.
