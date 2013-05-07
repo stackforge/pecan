@@ -72,7 +72,7 @@ class TestJsonify(PecanTestCase):
 
         r = app.get('/')
         assert r.status_int == 200
-        assert loads(r.body) == {'name': 'Jonathan LaCour'}
+        assert loads(r.body.decode()) == {'name': 'Jonathan LaCour'}
 
 
 class TestJsonifyGenericEncoder(PecanTestCase):
@@ -203,8 +203,8 @@ class TestJsonifySQLAlchemyGenericEncoder(PecanTestCase):
 
         # add some dummy data
         user_table.insert().execute([
-            {'first_name': u'Jonathan', 'last_name': u'LaCour'},
-            {'first_name': u'Yoann', 'last_name': u'Roman'}
+            {'first_name': 'Jonathan', 'last_name': 'LaCour'},
+            {'first_name': 'Yoann', 'last_name': 'Roman'}
         ])
 
         # get the SA objects

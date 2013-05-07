@@ -1,21 +1,21 @@
-from core import (
+from .core import (
     abort, override_template, Pecan, load_app, redirect, render,
     request, response
 )
-from decorators import expose
-from hooks import RequestViewerHook
-from middleware.debug import DebugMiddleware
-from middleware.errordocument import ErrorDocumentMiddleware
-from middleware.recursive import RecursiveMiddleware
-from middleware.static import StaticFileMiddleware
+from .decorators import expose
+from .hooks import RequestViewerHook
+from .middleware.debug import DebugMiddleware
+from .middleware.errordocument import ErrorDocumentMiddleware
+from .middleware.recursive import RecursiveMiddleware
+from .middleware.static import StaticFileMiddleware
 
-from configuration import set_config, Config
-from configuration import _runtime_conf as conf
+from .configuration import set_config, Config
+from .configuration import _runtime_conf as conf
 
 try:
     from logging.config import dictConfig as load_logging_config
 except ImportError:
-    from .compat.dictconfig import dictConfig as load_logging_config  # noqa
+    from logutils.dictconfig import dictConfig as load_logging_config  # noqa
 
 
 __all__ = [

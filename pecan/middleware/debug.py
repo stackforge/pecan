@@ -1,7 +1,8 @@
-from cStringIO import StringIO
 from traceback import print_exc
 from pprint import pformat
 import pdb
+
+from six.moves import cStringIO as StringIO
 
 from mako.template import Template
 from webob import Response

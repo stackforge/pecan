@@ -1,4 +1,4 @@
-from core import load_app
+from .core import load_app
 
 
 def deploy(config):

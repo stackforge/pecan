@@ -2,10 +2,10 @@ from inspect import getargspec, ismethod
 
 from webob import exc
 
-from core import abort, request
-from decorators import expose
-from routing import lookup_controller, handle_lookup_traversal
-from util import iscontroller
+from .core import abort, request
+from .decorators import expose
+from .routing import lookup_controller, handle_lookup_traversal
+from .util import iscontroller
 
 
 class RestController(object):

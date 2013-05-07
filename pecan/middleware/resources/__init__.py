@@ -1,7 +1,9 @@
 import os
-import urllib
 from mimetypes import guess_type
 from contextlib import closing
+from base64 import b64encode
+
+from pecan.compat import quote
 
 
 def load_resource(filename):
@@ -12,11 +14,10 @@ def load_resource(filename):
         ),
         'rb'
     )) as f:
+        data = f.read()
         return 'data:%s;base64,%s' % (
             guess_type(filename)[0],
-            urllib.quote(
-                f.read().encode('base64').replace('\n', '')
-            )
+            quote(b64encode(data))
         )
 
 pecan_image = load_resource('pecan.png')

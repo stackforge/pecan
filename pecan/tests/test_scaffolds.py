@@ -2,7 +2,8 @@ import os
 import sys
 import tempfile
 import shutil
-from cStringIO import StringIO
+
+from six.moves import cStringIO as StringIO
 
 from pecan.tests import PecanTestCase
 
@@ -94,7 +95,6 @@ class TestScaffoldUtils(PecanTestCase):
 
     def test_destination_directory_already_exists(self):
         from pecan.scaffolds import copy_dir
-        from cStringIO import StringIO
         f = StringIO()
         copy_dir(
             (

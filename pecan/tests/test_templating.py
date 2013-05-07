@@ -1,7 +1,9 @@
+import tempfile
+
+from six import b as b_
+
 from pecan.templating import RendererFactory, format_line_context
 from pecan.tests import PecanTestCase
-
-import tempfile
 
 
 class TestTemplate(PecanTestCase):
@@ -42,7 +44,7 @@ class TestTemplateLineFormat(PecanTestCase):
 
     def test_format_line_context(self):
         for i in range(11):
-            self.f.write('Testing Line %d\n' % i)
+            self.f.write(b_('Testing Line %d\n' % i))
         self.f.flush()
 
         assert format_line_context(self.f.name, 0).count('Testing Line') == 10

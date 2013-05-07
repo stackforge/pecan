@@ -1,9 +1,16 @@
 from functools import wraps
-from inspect import getmembers, ismethod, isfunction
+from inspect import getmembers, isfunction
 from webob import exc
 
-from decorators import expose
-from util import _cfg, iscontroller
+import six
+
+if six.PY3:
+    from .compat import is_bound_method as ismethod
+else:
+    from inspect import ismethod
+
+from .decorators import expose
+from .util import _cfg, iscontroller
 
 __all__ = ['unlocked', 'secure', 'SecureController']
 
@@ -18,6 +25,9 @@ class _SecureState(object):
 
     def __nonzero__(self):
         return self.boolean_value
+
+    def __bool__(self):
+        return self.__nonzero__()
 
 Any = _SecureState('Any', False)
 Protected = _SecureState('Protected', True)
@@ -56,7 +66,7 @@ class _SecuredAttribute(object):
         self._parent = None
 
     def _check_permissions(self):
-        if isinstance(self.check_permissions, basestring):
+        if isinstance(self.check_permissions, six.string_types):
             return getattr(self.parent, self.check_permissions)()
         else:
             return self.check_permissions()
@@ -66,7 +76,7 @@ class _SecuredAttribute(object):
 
     def __set_parent(self, parent):
         if ismethod(parent):
-            self._parent = parent.im_self
+            self._parent = six.get_method_self(parent)
         else:
             self._parent = parent
     parent = property(__get_parent, __set_parent)
@@ -82,7 +92,7 @@ def _allowed_check_permissions_types(x):
     return (
         ismethod(x) or
         isfunction(x) or
-        isinstance(x, basestring)
+        isinstance(x, six.string_types)
     )
 
 
@@ -120,7 +130,7 @@ def secure(func_or_obj, check_permissions_for_obj=None):
         return _SecuredAttribute(func_or_obj, check_permissions_for_obj)
 
 
-class SecureController(object):
+class SecureControllerMeta(type):
     """
     Used to apply security to a controller.
     Implementations of SecureController should extend the
@@ -128,46 +138,55 @@ class SecureController(object):
     value (depending on whether or not the user has permissions
     to the controller).
     """
-    class __metaclass__(type):
-        def __init__(cls, name, bases, dict_):
-            cls._pecan = dict(
-                secured=Protected,
-                check_permissions=cls.check_permissions,
-                unlocked=[]
-            )
+    def __init__(cls, name, bases, dict_):
+        cls._pecan = dict(
+            secured=Protected,
+            check_permissions=cls.check_permissions,
+            unlocked=[]
+        )
 
-            for name, value in getmembers(cls)[:]:
-                if ismethod(value):
-                    if iscontroller(value) and value._pecan.get(
-                        'secured'
-                    ) is None:
-                        # Wrap the function so that the security context is
-                        # local to this class definition.  This works around
-                        # the fact that unbound method attributes are shared
-                        # across classes with the same bases.
-                        wrapped = _make_wrapper(value)
-                        wrapped._pecan['secured'] = Protected
-                        wrapped._pecan['check_permissions'] = \
-                            cls.check_permissions
-                        setattr(cls, name, wrapped)
-                elif hasattr(value, '__class__'):
-                    if name.startswith('__') and name.endswith('__'):
-                        continue
-                    if isinstance(value, _UnlockedAttribute):
-                        # mark it as unlocked and remove wrapper
-                        cls._pecan['unlocked'].append(value.obj)
-                        setattr(cls, name, value.obj)
-                    elif isinstance(value, _SecuredAttribute):
-                        # The user has specified a different check_permissions
-                        # than the class level version.  As far as the class
-                        # is concerned, this method is unlocked because
-                        # it is using a check_permissions function embedded in
-                        # the _SecuredAttribute wrapper
-                        cls._pecan['unlocked'].append(value)
+        for name, value in getmembers(cls)[:]:
+            if (isfunction if six.PY3 else ismethod)(value):
+                if iscontroller(value) and value._pecan.get(
+                    'secured'
+                ) is None:
+                    # Wrap the function so that the security context is
+                    # local to this class definition.  This works around
+                    # the fact that unbound method attributes are shared
+                    # across classes with the same bases.
+                    wrapped = _make_wrapper(value)
+                    wrapped._pecan['secured'] = Protected
+                    wrapped._pecan['check_permissions'] = \
+                        cls.check_permissions
+                    setattr(cls, name, wrapped)
+            elif hasattr(value, '__class__'):
+                if name.startswith('__') and name.endswith('__'):
+                    continue
+                if isinstance(value, _UnlockedAttribute):
+                    # mark it as unlocked and remove wrapper
+                    cls._pecan['unlocked'].append(value.obj)
+                    setattr(cls, name, value.obj)
+                elif isinstance(value, _SecuredAttribute):
+                    # The user has specified a different check_permissions
+                    # than the class level version.  As far as the class
+                    # is concerned, this method is unlocked because
+                    # it is using a check_permissions function embedded in
+                    # the _SecuredAttribute wrapper
+                    cls._pecan['unlocked'].append(value)
+
+
+class SecureControllerBase(object):
 
     @classmethod
     def check_permissions(cls):
         return False
+
+
+SecureController = SecureControllerMeta(
+    'SecureController',
+    (SecureControllerBase,),
+    {}
+)
 
 
 def _make_wrapper(f):
@@ -185,8 +204,11 @@ def handle_security(controller):
     if controller._pecan.get('secured', False):
         check_permissions = controller._pecan['check_permissions']
 
-        if isinstance(check_permissions, basestring):
-            check_permissions = getattr(controller.im_self, check_permissions)
+        if isinstance(check_permissions, six.string_types):
+            check_permissions = getattr(
+                six.get_method_self(controller),
+                check_permissions
+            )
 
         if not check_permissions():
             raise exc.HTTPUnauthorized

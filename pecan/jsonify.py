@@ -16,6 +16,7 @@ except ImportError:  # pragma no cover
     from webob.multidict import MultiDict
     webob_dicts = (MultiDict,)
 
+import six
 from simplegeneric import generic
 
 try:
@@ -66,8 +67,8 @@ class GenericJSON(JSONEncoder):
             the entire resultset data, returns the list in a dictionary
             along with the resultset "row" count.
 
-            .. note:: {'count': 5, 'rows': [(u'Ed Jones',), (u'Pete Jones',),
-                (u'Wendy Williams',), (u'Mary Contrary',), (u'Fred Smith',)]}
+            .. note:: {'count': 5, 'rows': [('Ed Jones',), ('Pete Jones',),
+                ('Wendy Williams',), ('Mary Contrary',), ('Fred Smith',)]}
 
         * SQLAlchemy RowProxy objects
             Casts the RowProxy cursor object into a dictionary, probably
@@ -77,7 +78,7 @@ class GenericJSON(JSONEncoder):
             returns webob_dicts.mixed() dictionary, which is guaranteed
             to be JSON-friendly.
         '''
-        if hasattr(obj, '__json__') and callable(obj.__json__):
+        if hasattr(obj, '__json__') and six.callable(obj.__json__):
             return obj.__json__()
         elif isinstance(obj, (date, datetime)):
             return str(obj)

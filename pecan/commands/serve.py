@@ -1,6 +1,7 @@
 """
 Serve command for Pecan.
 """
+from __future__ import print_function
 import os
 import sys
 import time
@@ -42,7 +43,7 @@ class ServeCommand(BaseCommand):
             DirModifiedEvent
         )
 
-        print 'Monitoring for changes...'
+        print('Monitoring for changes...')
         self.create_subprocess()
 
         parent = self
@@ -101,13 +102,15 @@ class ServeCommand(BaseCommand):
         host, port = conf.server.host, int(conf.server.port)
         srv = make_server(host, port, app)
 
-        print 'Starting server in PID %s' % os.getpid()
+        print('Starting server in PID %s' % os.getpid())
 
         if host == '0.0.0.0':
-            print 'serving on 0.0.0.0:%s, view at http://127.0.0.1:%s' % \
+            print(
+                'serving on 0.0.0.0:%s, view at http://127.0.0.1:%s' %
                 (port, port)
+            )
         else:
-            print "serving on http://%s:%s" % (host, port)
+            print("serving on http://%s:%s" % (host, port))
 
         try:
             srv.serve_forever()

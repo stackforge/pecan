@@ -125,9 +125,12 @@ class ShellCommand(BaseCommand):
             locs['model'] = model
 
         # insert the pecan locals
-        exec(
-            'from pecan import abort, conf, redirect, request, response'
-        ) in locs
+        from pecan import abort, conf, redirect, request, response
+        locs['abort'] = abort
+        locs['conf'] = conf
+        locs['redirect'] = redirect
+        locs['request'] = request
+        locs['response'] = response
 
         # prepare the banner
         banner = '  The following objects are available:\n'
@@ -153,7 +156,7 @@ class ShellCommand(BaseCommand):
         shell = self.SHELLS[self.args.shell]
         try:
             shell().invoke(locs, banner)
-        except ImportError, e:
+        except ImportError as e:
             warn((
                 "%s is not installed, `%s`, "
                 "falling back to native shell") % (self.args.shell, e),
