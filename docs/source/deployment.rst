@@ -93,7 +93,7 @@ performance reasons).  There are several popular ways to accomplish this.  Here
 are two:
 
 1.  Set up a proxy server (such as `nginx <http://nginx.org/en>`__, `cherokee
-    <http://www.cherokee-project.com>`__, or `lighttpd
+    <http://www.cherokee-project.com>`__, :ref:`cherrypy`, or `lighttpd
     <http://www.lighttpd.net/>`__) to serve static files and proxy application
     requests through to your WSGI application:
 
@@ -205,6 +205,8 @@ Pecan's default project::
     $ python setup.py develop
     $ gunicorn_pecan config.py
 
+
+.. _cherrypy:
 
 CherryPy
 ++++++++
