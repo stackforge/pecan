@@ -212,8 +212,8 @@ CherryPy
 ++++++++
 
 `CherryPy <http://cherrypy.org/>`__ offers a pure Python HTTP/1.1-compliant WSGI
-thread-pooled webserver. It can support pure WSGI Pecan applications easily and
-even serve static files like a production server would do.
+thread-pooled web server. It can support Pecan applications easily and even
+serve static files like a production server would do.
 
 The examples that follow are geared towards using CherryPy as the server in
 charge of handling a Pecan app along with serving static files.
@@ -226,7 +226,7 @@ charge of handling a Pecan app along with serving static files.
 
 To run with CherryPy, the easiest approach is to create a script in the root of
 the project (alongside ``setup.py``), so that we can describe how our example
-application should be handled::
+application should be served. This is how the script (named ``run.py``) looks::
 
     import os
     import cherrypy
@@ -239,6 +239,7 @@ application should be handled::
     public_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'public'))
 
     # A dummy class for our Root object
+    # necessary for some CherryPy machinery
     class Root(object):
         pass
 
@@ -274,6 +275,6 @@ application should be handled::
         print "Terminating server..."
         server.stop()
 
-To run the above, simply call it with the Python executable::
+To start the server, simply call it with the Python executable::
 
     $ python run.py
