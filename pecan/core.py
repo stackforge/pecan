@@ -299,7 +299,11 @@ class Pecan(object):
             hooks = reversed(state.hooks)
 
         for hook in hooks:
-            getattr(hook, hook_type)(*args)
+            result = getattr(hook, hook_type)(*args)
+            # on_error hooks can choose to return a Response, which will
+            # be used instead of the standard error pages.
+            if hook_type == 'on_error' and isinstance(result, Response):
+                return result
 
     def get_args(self, req, all_params, remainder, argspec, im_self):
         '''
@@ -564,11 +568,16 @@ class Pecan(object):
                 environ['pecan.original_exception'] = e
 
             # if this is not an internal redirect, run error hooks
+            on_error_result = None
             if not isinstance(e, ForwardRequestException):
-                self.handle_hooks('on_error', state, e)
+                on_error_result = self.handle_hooks('on_error', state, e)
 
-            if not isinstance(e, exc.HTTPException):
-                raise
+            # if the on_error handler returned a Response, use it.
+            if isinstance(on_error_result, Response):
+                state.response = on_error_result
+            else:
+                if not isinstance(e, exc.HTTPException):
+                    raise
         finally:
             # handle "after" hooks
             self.handle_hooks('after', state)
