@@ -7,6 +7,10 @@ dependencies.
 .. _travis: http://travis-ci.org/dreamhost/pecan
 .. |travis| image:: https://secure.travis-ci.org/dreamhost/pecan.png
 
+.. image:: https://pypip.in/v/pecan/badge.png
+    :target: https://crate.io/packages/pecan/
+    :alt: Latest PyPI version
+
 |travis|_
 
 Installing

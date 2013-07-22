@@ -46,8 +46,10 @@ object which includes useful information, such as
 the request and response objects, and which controller was selected by
 Pecan's routing.
 
-:func:`on_error` is passed a shared state object **and** the original exception.
-            
+:func:`on_error` is passed a shared state object **and** the original exception. If
+an :func:`on_error` handler returns a Response object, this response will be returned
+to the end user and no furthur :func:`on_error` hooks will be executed.
+
 Attaching Hooks
 ---------------
 

@@ -2,7 +2,7 @@ import sys
 
 from setuptools import setup, find_packages
 
-version = '0.3.0'
+version = '0.3.1'
 
 #
 # determine requirements
@@ -43,7 +43,6 @@ except:
 
 tests_require = requirements + [
     'virtualenv',
-    'Jinja2',
     'gunicorn',
     'mock'
 ]
@@ -57,6 +56,9 @@ if sys.version_info < (3, 0):
 else:
     # Genshi added Python3 support in 0.7
     tests_require += ['Genshi>=0.7']
+
+if sys.version_info < (3, 0) or sys.version_info >= (3, 3):
+    tests_require += ['Jinja2']
 
 #
 # call setup
