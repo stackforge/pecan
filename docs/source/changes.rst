@@ -1,3 +1,8 @@
+0.3.1
+=====
+* ``on_error`` hooks can now return a Pecan Response objects.
+* Minor documentation and release tooling updates.
+
 0.3.0
 =====
 * Pecan now supports Python 2.6, 2.7, 3.2, and 3.3.
