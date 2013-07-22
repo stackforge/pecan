@@ -1,6 +1,9 @@
 from webtest import TestApp
 from six import b as b_
+from six import u as u_
 from six.moves import cStringIO as StringIO
+
+from webob import Response
 
 from pecan import make_app, expose, redirect, abort
 from pecan.hooks import (
@@ -132,6 +135,33 @@ class TestHooks(PecanTestCase):
         assert len(run_hook) == 2
         assert run_hook[0] == 'on_route'
         assert run_hook[1] == 'error'
+
+    def test_on_error_response_hook(self):
+        run_hook = []
+
+        class RootController(object):
+            @expose()
+            def causeerror(self):
+                return [][1]
+
+        class ErrorHook(PecanHook):
+            def on_error(self, state, e):
+                run_hook.append('error')
+
+                r = Response()
+                r.text = u_('on_error')
+
+                return r
+
+        app = TestApp(make_app(RootController(), hooks=[
+            ErrorHook()
+        ]))
+
+        response = app.get('/causeerror')
+
+        assert len(run_hook) == 1
+        assert run_hook[0] == 'error'
+        assert response.text == 'on_error'
 
     def test_prioritized_hooks(self):
         run_hook = []
