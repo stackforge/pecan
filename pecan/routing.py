@@ -46,6 +46,13 @@ def lookup_controller(obj, url_path):
                     #   traversal
                     result = handle_lookup_traversal(obj, remainder)
                     if result:
+                        # If no arguments are passed to the _lookup, yet the
+                        # argspec requires at least one, raise a 404
+                        if (
+                            remainder == ['']
+                            and len(obj._pecan['argspec'].args) > 1
+                        ):
+                            raise
                         return lookup_controller(*result)
             else:
                 raise exc.HTTPNotFound
