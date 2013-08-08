@@ -177,3 +177,27 @@ if you need to prefix the keys in the returned dictionary.
     Config({'app': Config({'errors': {}, 'template_path': '', 'static_root': 'public', [...]
     >>> conf.as_dict('prefixed_')
     {'prefixed_app': {'prefixed_errors': {}, 'prefixed_template_path': '', 'prefixed_static_root': 'prefixed_public', [...]
+
+
+Dotted Keys and Native Dictionaries
+-----------------------------------
+
+Sometimes you want to specify a configuration option that includes dotted keys.
+This is especially common when configuring Python logging.  By passing
+a special key, ``__force_dict__``, individual configuration blocks can be
+treated as native dictionaries.
+
+::
+
+    logging = {
+        'loggers': {
+            'root': {'level': 'INFO', 'handlers': ['console']},
+            'sqlalchemy.engine': {'level': 'INFO', 'handlers': ['console']},
+            '__force_dict__': True
+        }
+    }
+
+    from myapp import conf
+    assert isinstance(conf.logging.loggers, dict)
+    assert isinstance(conf.logging.loggers['root'], dict)
+    assert isinstance(conf.logging.loggers['sqlalchemy.engine'], dict)
