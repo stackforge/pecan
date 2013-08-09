@@ -17,6 +17,8 @@ try:
 except ImportError:
     from logutils.dictconfig import dictConfig as load_logging_config  # noqa
 
+import warnings
+
 
 __all__ = [
     'make_app', 'load_app', 'Pecan', 'request', 'response',
@@ -55,7 +57,22 @@ def make_app(root, **kw):
     '''
     # Pass logging configuration (if it exists) on to the Python logging module
     logging = kw.get('logging', {})
+    debug = kw.get('debug', False)
     if logging:
+        if debug:
+            try:
+                #
+                # By default, Python 2.7+ silences DeprecationWarnings.
+                # However, if conf.app.debug is True, we should probably ensure
+                # that users see these types of warnings.
+                #
+                from logging import captureWarnings
+                captureWarnings(True)
+                warnings.simplefilter("default", DeprecationWarning)
+            except ImportError:
+                # No captureWarnings on Python 2.6, DeprecationWarnings are on
+                pass
+
         if isinstance(logging, Config):
             logging = logging.to_dict()
         if 'version' not in logging:
@@ -80,18 +97,26 @@ def make_app(root, **kw):
 
     # When in debug mode, load our exception dumping middleware
     static_root = kw.get('static_root', None)
-    debug = kw.get('debug', False)
     if debug:
         app = DebugMiddleware(app)
 
         # Support for serving static files (for development convenience)
         if static_root:
             app = StaticFileMiddleware(app, static_root)
+
     elif static_root:
-        from warnings import warn
-        warn(
+        warnings.warn(
             "`static_root` is only used when `debug` is True, ignoring",
             RuntimeWarning
+        )
+
+    if hasattr(conf, 'requestviewer'):
+        warnings.warn(''.join([
+            "`pecan.conf.requestviewer` is deprecated.  To apply the ",
+            "`RequestViewerHook` to your application, add it to ",
+            "`pecan.conf.app.hooks` or manually in your project's `app.py` ",
+            "file."]),
+            DeprecationWarning
         )
 
     return app
