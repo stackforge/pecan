@@ -182,6 +182,35 @@ class TestLookups(PecanTestCase):
             assert r.status_int == 404
 
 
+class TestCanonicalLookups(PecanTestCase):
+
+    @property
+    def app_(self):
+        class LookupController(object):
+            def __init__(self, someID):
+                self.someID = someID
+
+            @expose()
+            def index(self):
+                return self.someID
+
+        class UserController(object):
+            @expose()
+            def _lookup(self, someID, *remainder):
+                return LookupController(someID), remainder
+
+        class RootController(object):
+            users = UserController()
+
+        return TestApp(Pecan(RootController()))
+
+    def test_canonical_lookup(self):
+        assert self.app_.get('/users', expect_errors=404).status_int == 404
+        assert self.app_.get('/users/', expect_errors=404).status_int == 404
+        assert self.app_.get('/users/100').status_int == 302
+        assert self.app_.get('/users/100/').body == b_('100')
+
+
 class TestControllerArguments(PecanTestCase):
 
     @property
