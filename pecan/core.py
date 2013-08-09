@@ -173,11 +173,12 @@ class Pecan(object):
 
     :param root: A string representing a root controller object (e.g.,
                 "myapp.controller.root.RootController")
-    :param default_renderer: The default rendering engine to use. Defaults
-                             to mako.
-    :param template_path: The default relative path to use for templates.
-                          Defaults to 'templates'.
-    :param hooks: A list of Pecan hook objects to use for this application.
+    :param default_renderer: The default template rendering engine to use.
+                             Defaults to mako.
+    :param template_path: A relative file system path (from the project root)
+                          where template files live.  Defaults to 'templates'.
+    :param hooks: A callable which returns a list of
+                  :class:`pecan.hooks.PecanHook`s
     :param custom_renderers: Custom renderer objects, as a dictionary keyed
                              by engine name.
     :param extra_template_vars: Any variables to inject into the template
@@ -195,9 +196,9 @@ class Pecan(object):
     )
 
     def __init__(self, root, default_renderer='mako',
-                 template_path='templates', hooks=[], custom_renderers={},
-                 extra_template_vars={}, force_canonical=True,
-                 guess_content_type_from_ext=True):
+                 template_path='templates', hooks=lambda: [],
+                 custom_renderers={}, extra_template_vars={},
+                 force_canonical=True, guess_content_type_from_ext=True, **kw):
 
         if isinstance(root, six.string_types):
             root = self.__translate_root__(root)
@@ -205,7 +206,11 @@ class Pecan(object):
         self.root = root
         self.renderers = RendererFactory(custom_renderers, extra_template_vars)
         self.default_renderer = default_renderer
+
         # pre-sort these so we don't have to do it per-request
+        if six.callable(hooks):
+            hooks = hooks()
+
         self.hooks = list(sorted(
             hooks,
             key=operator.attrgetter('priority')

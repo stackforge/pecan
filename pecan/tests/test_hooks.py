@@ -1047,21 +1047,6 @@ class TestTransactionHook(PecanTestCase):
 
 class TestRequestViewerHook(PecanTestCase):
 
-    def test_hook_from_config(self):
-        from pecan.configuration import _runtime_conf as conf
-        conf['requestviewer'] = {
-            'blacklist': ['/favicon.ico']
-        }
-
-        class RootController(object):
-            pass
-
-        app = make_app(RootController())
-        while hasattr(app, 'application'):
-            app = app.application
-        del conf.__values__['requestviewer']
-        assert app.hooks
-
     def test_basic_single_default_hook(self):
 
         _stdout = StringIO()
@@ -1073,7 +1058,9 @@ class TestRequestViewerHook(PecanTestCase):
 
         app = TestApp(
             make_app(
-                RootController(), hooks=[RequestViewerHook(writer=_stdout)]
+                RootController(), hooks=lambda: [
+                    RequestViewerHook(writer=_stdout)
+                ]
             )
         )
         response = app.get('/')
@@ -1104,7 +1091,9 @@ class TestRequestViewerHook(PecanTestCase):
 
         app = TestApp(
             make_app(
-                RootController(), hooks=[RequestViewerHook(writer=_stdout)]
+                RootController(), hooks=lambda: [
+                    RequestViewerHook(writer=_stdout)
+                ]
             )
         )
         response = app.get('/404', expect_errors=True)
@@ -1134,7 +1123,7 @@ class TestRequestViewerHook(PecanTestCase):
         app = TestApp(
             make_app(
                 RootController(),
-                hooks=[
+                hooks=lambda: [
                     RequestViewerHook(
                         config={'items': ['path']}, writer=_stdout
                     )
@@ -1169,7 +1158,7 @@ class TestRequestViewerHook(PecanTestCase):
         app = TestApp(
             make_app(
                 RootController(),
-                hooks=[
+                hooks=lambda: [
                     RequestViewerHook(
                         config={'blacklist': ['/']}, writer=_stdout
                     )
@@ -1196,7 +1185,7 @@ class TestRequestViewerHook(PecanTestCase):
         app = TestApp(
             make_app(
                 RootController(),
-                hooks=[
+                hooks=lambda: [
                     RequestViewerHook(
                         config={'items': ['date']}, writer=_stdout
                     )
