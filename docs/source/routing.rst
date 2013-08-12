@@ -8,7 +8,7 @@ HTTP request to a controller, and then the method to call.
 Object-dispatch begins by splitting the path into a list of components
 and then walking an object path, starting at the root controller. You
 can imagine your application's controllers as a tree of objects
-(branches of the object tree map directly to URL paths). 
+(branches of the object tree map directly to URL paths).
 
 Let's look at a simple bookstore application:
 
@@ -90,7 +90,7 @@ type of the response body.
             generic         = False
         )
         def hello(self):
-            return 'Hello World' 
+            return 'Hello World'
 
 
 Let's look at an example using ``template`` and ``content_type``:
@@ -114,21 +114,21 @@ arguments.
         @expose('json')
 
 The first tells Pecan to serialize the response namespace using JSON
-serialization when the client requests ``/hello.json``. 
+serialization when the client requests ``/hello.json``.
 
 ::
 
         @expose('text_template.mako', content_type='text/plain')
 
 The second tells Pecan to use the ``text_template.mako`` template file when the
-client requests ``/hello.txt``. 
+client requests ``/hello.txt``.
 
 ::
 
         @expose('html_template.mako')
 
-The third tells Pecan to use the ``html_template.mako`` template file when the 
-client requests ``/hello.html``. If the client requests ``/hello``, Pecan will 
+The third tells Pecan to use the ``html_template.mako`` template file when the
+client requests ``/hello.html``. If the client requests ``/hello``, Pecan will
 use the ``text/html`` content type by default.
 
 .. seealso::
@@ -141,10 +141,10 @@ Pecan's Routing Algorithm
 -------------------------
 
 Sometimes, the standard object-dispatch routing isn't adequate to properly
-route a URL to a controller. Pecan provides several ways to short-circuit 
+route a URL to a controller. Pecan provides several ways to short-circuit
 the object-dispatch system to process URLs with more control, including the
 special :func:`_lookup`, :func:`_default`, and :func:`_route` methods. Defining these
-methods on your controller objects provides additional flexibility for 
+methods on your controller objects provides additional flexibility for
 processing all or part of a URL.
 
 
@@ -189,7 +189,7 @@ Use the utility function :func:`abort` to raise HTTP errors.
 Routing to Subcontrollers with ``_lookup``
 ------------------------------------------
 
-The :func:`_lookup` special method provides a way to process a portion of a URL, 
+The :func:`_lookup` special method provides a way to process a portion of a URL,
 and then return a new controller object to route to for the remainder.
 
 A :func:`_lookup` method may accept one or more arguments, segments
@@ -232,7 +232,7 @@ where ``primary_key == 8``.
 Falling Back with ``_default``
 ------------------------------
 
-The :func:`_default` method is called as a last resort when no other controller 
+The :func:`_default` method is called as a last resort when no other controller
 methods match the URL via standard object-dispatch.
 
 ::
@@ -253,16 +253,16 @@ methods match the URL via standard object-dispatch.
             return 'I cannot say hello in that language'
 
 
-In the example above, a request to ``/spanish`` would route to 
+In the example above, a request to ``/spanish`` would route to
 :func:`RootController._default`.
-            
+
 
 Defining Customized Routing with ``_route``
 -------------------------------------------
 
-The :func:`_route` method allows a controller to completely override the routing 
+The :func:`_route` method allows a controller to completely override the routing
 mechanism of Pecan. Pecan itself uses the :func:`_route` method to implement its
-:class:`RestController`. If you want to design an alternative routing system on 
+:class:`RestController`. If you want to design an alternative routing system on
 top of Pecan, defining a base controller class that defines a :func:`_route` method
 will enable you to have total control.
 
@@ -329,12 +329,38 @@ The same effect can be achieved with HTTP ``POST`` body variables:
     $ curl -X POST "http://localhost:8080/" -H "Content-Type: application/x-www-form-urlencoded" -d "arg=foo"
     foo
 
+Handling File Uploads
+---------------------
+
+Pecan makes it easy to handle file uploads via standard multipart forms. Simply
+define your form with a file input:
+
+.. code-block:: html
+
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+      <input type="file" name="file" />
+      <button type="submit">Upload</button>
+    </form>
+
+You can then read the uploaded file off of the request object in your
+application's controller:
+
+::
+
+    from pecan import expose, request
+
+    class RootController(object):
+        @expose()
+        def upload(self):
+            assert isinstance(request.POST['file'], cgi.FieldStorage)
+            data = request.POST['file'].file.read()
+
 Helper Functions
 ----------------
 
 Pecan also provides several useful helper functions for moving between
-different routes. The :func:`redirect` function allows you to issue internal or 
-``HTTP 302`` redirects.  
+different routes. The :func:`redirect` function allows you to issue internal or
+``HTTP 302`` redirects.
 
 .. seealso::
 
