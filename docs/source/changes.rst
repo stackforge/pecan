@@ -1,3 +1,10 @@
+0.3.2
+=====
+* Made some changes to simplify how ``pecan.conf.app`` is passed to new apps.
+* Fixed a routing bug for certain ``_lookup`` controller configurations.
+* Improved documentation for handling file uploads.
+* Deprecated the ``pecan.conf.requestviewer`` configuration option.
+
 0.3.1
 =====
 * ``on_error`` hooks can now return a Pecan Response objects.
