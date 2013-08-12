@@ -352,6 +352,7 @@ application's controller:
     class RootController(object):
         @expose()
         def upload(self):
+            assert isinstance(request.POST['file'], cgi.FieldStorage)
             data = request.POST['file'].file.read()
 
 Helper Functions
