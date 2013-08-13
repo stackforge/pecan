@@ -92,7 +92,7 @@ setup(
     keywords='web framework wsgi object-dispatch http',
     author='Jonathan LaCour',
     author_email='info@pecanpy.org',
-    url='http://github.com/dreamhost/pecan',
+    url='http://github.com/stackforge/pecan',
     license='BSD',
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     include_package_data=True,

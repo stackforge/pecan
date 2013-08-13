@@ -4,14 +4,9 @@ Pecan
 A WSGI object-dispatching web framework, designed to be lean and fast with few
 dependencies.
 
-.. _travis: http://travis-ci.org/dreamhost/pecan
-.. |travis| image:: https://secure.travis-ci.org/dreamhost/pecan.png
-
 .. image:: https://pypip.in/v/pecan/badge.png
     :target: https://crate.io/packages/pecan/
     :alt: Latest PyPI version
-
-|travis|_
 
 Installing
 ----------
@@ -22,7 +17,7 @@ Installing
 
 ...or, for the latest (unstable) tip::
 
-    $ git clone https://github.com/dreamhost/pecan.git -b next
+    $ git clone https://github.com/stackforge/pecan.git
     $ cd pecan && python setup.py install
 
 Running Tests
