@@ -7,13 +7,11 @@ version = '0.3.2'
 #
 # determine requirements
 #
-requirements = [
-    "WebOb >= 1.2dev",  # py3 compat
-    "simplegeneric >= 0.8",  # py3 compat
-    "Mako >= 0.4.0",
-    "WebTest >= 1.3.1",  # py3 compat
-    "six"
-]
+with open('requirements.txt') as reqs:
+    requirements = [
+        line for line in reqs.read().split('\n')
+        if (line and not line.startswith('-'))
+    ]
 
 try:
     import json  # noqa
