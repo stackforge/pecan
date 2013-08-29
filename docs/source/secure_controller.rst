@@ -62,7 +62,7 @@ To secure a class, invoke with two arguments::
 
 
 ``SecureController``
--------------------
+--------------------
 
 Alternatively, the same functionality can also be accomplished by
 subclassing Pecan's :class:`SecureController`. Implementations of
