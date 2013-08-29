@@ -96,9 +96,9 @@ if __name__ == '__main__':
             except:
                 pass
 
-    class TestGunicornServeCommand(TestTemplateBuilds):
+    class TestThirdPartyServe(TestTemplateBuilds):
 
-        def poll_gunicorn(self, proc, port):
+        def poll_http(self, name, proc, port):
             try:
                 self.poll(proc)
                 retries = 30
@@ -106,8 +106,8 @@ if __name__ == '__main__':
                     retries -= 1
                     if retries < 0:  # pragma: nocover
                         raise RuntimeError(
-                            "The gunicorn server has not replied within"
-                            " 3 seconds."
+                            "The %s server has not replied within"
+                            " 3 seconds." % name
                         )
                     try:
                         # ...and that it's serving (valid) content...
@@ -123,6 +123,8 @@ if __name__ == '__main__':
             finally:
                 proc.terminate()
 
+    class TestGunicornServeCommand(TestThirdPartyServe):
+
         def test_serve_from_config(self):
             # Start the server
             proc = subprocess.Popen([
@@ -130,7 +132,7 @@ if __name__ == '__main__':
                 'testing123/config.py'
             ])
 
-            self.poll_gunicorn(proc, 8080)
+            self.poll_http('gunicorn', proc, 8080)
 
         def test_serve_with_custom_bind(self):
             # Start the server
@@ -140,7 +142,23 @@ if __name__ == '__main__':
                 'testing123/config.py'
             ])
 
-            self.poll_gunicorn(proc, 9191)
+            self.poll_http('gunicorn', proc, 9191)
+
+    class TestUWSGIServiceCommand(TestThirdPartyServe):
+
+        def test_serve_from_config(self):
+            # Start the server
+            proc = subprocess.Popen([
+                os.path.join(self.bin, 'uwsgi'),
+                '--http-socket',
+                ':8080',
+                '--venv',
+                sys.prefix,
+                '--pecan',
+                'testing123/config.py'
+            ])
+
+            self.poll_http('uwsgi', proc, 8080)
 
     # First, ensure that the `testing123` package has been installed
     args = [
