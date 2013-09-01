@@ -174,21 +174,12 @@ Running Pecan applications with uWSGI is a snap::
     $ pip install uwsgi
     $ pecan create simpleapp && cd simpleapp
     $ python setup.py develop
-
-Next, let's create a new file in the project root::
-
-    # wsgi.py
-    from pecan.deploy import deploy
-    application = deploy('config.py')
-
-and then run it with::
-
-    $ uwsgi --http-socket 127.0.0.1:8000 -H /path/to/virtualenv -w wsgi
+    $ uwsgi --http-socket :8080 --venv /path/to/virtualenv --pecan config.py
 
 or using a Unix socket (that nginx, for example, could be configured to
 `proxy to <http://projects.unbit.it/uwsgi/wiki/RunOnNginx>`_)::
 
-    $ uwsgi -s /tmp/uwsgi.sock -H ../path/to/virtualenv -w wsgi
+    $ uwsgi -s /tmp/uwsgi.sock --venv /path/to/virtualenv --pecan config.py
 
 Gunicorn
 ++++++++
