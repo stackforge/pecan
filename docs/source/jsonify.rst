@@ -9,9 +9,7 @@ JSON. To get started, create a file in your project called
 ``json.py`` and import it in your project's ``app.py``.
 
 Your ``json`` module will contain a series of rules for generating
-JSON from objects you return in your controller, utilizing
-"generic" function support from the 
-`simplegeneric <http://pypi.python.org/pypi/simplegeneric>`_ library.
+JSON from objects you return in your controller.
 
 Let's say that we have a controller in our Pecan application which
 we want to use to return JSON output for a :class:`User` object::
@@ -35,7 +33,7 @@ rule in your ``json.py``::
     from pecan.jsonify import jsonify
     from myproject import model
     
-    @jsonify.when_type(model.User)
+    @jsonify.register(model.User)
     def jsonify_user(user):
         return dict(
             name = user.name,

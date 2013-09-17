@@ -17,18 +17,24 @@ except ImportError:  # pragma no cover
     webob_dicts = (MultiDict,)
 
 import six
-from simplegeneric import generic
+try:
+    from functools import singledispatch
+except ImportError:  # pragma: no cover
+    from singledispatch import singledispatch
 
 try:
-    from sqlalchemy.engine.base import ResultProxy, RowProxy
+    from sqlalchemy.engine.result import ResultProxy, RowProxy
 except ImportError:  # pragma no cover
-    # dummy classes since we don't have SQLAlchemy installed
+    try:
+        from sqlalchemy.engine.base import ResultProxy, RowProxy
+    except ImportError:  # pragma no cover
+        # dummy classes since we don't have SQLAlchemy installed
 
-    class ResultProxy:  # noqa
-        pass
+        class ResultProxy(object):  # noqa
+            pass
 
-    class RowProxy:  # noqa
-        pass
+        class RowProxy(object):  # noqa
+            pass
 
 
 #
@@ -105,11 +111,17 @@ class GenericJSON(JSONEncoder):
         else:
             return JSONEncoder.default(self, obj)
 
-
 _default = GenericJSON()
 
 
-@generic
+def with_when_type(f):
+    # Add some backwards support for simplegeneric's API
+    f.when_type = f.register
+    return f
+
+
+@with_when_type
+@singledispatch
 def jsonify(obj):
     return _default.default(obj)
 

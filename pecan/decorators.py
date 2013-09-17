@@ -33,9 +33,10 @@ def expose(template=None,
                      directory.
     :param content_type: The content-type to use for this template.
     :param generic: A boolean which flags this as a "generic" controller,
-                    which uses generic functions based upon ``simplegeneric``
-                    generic functions.  Allows you to split a single
-                    controller into multiple paths based upon HTTP method.
+                    which uses generic functions based upon
+                    ``functools.singledispatch`` generic functions.  Allows you
+                    to split a single controller into multiple paths based upon
+                    HTTP method.
     '''
 
     if template == 'json':

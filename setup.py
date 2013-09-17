@@ -39,10 +39,21 @@ except:
     #
     requirements.append('argparse')
 
+try:
+    from functools import singledispatch  # noqa
+except:
+    #
+    # This was introduced in Python 3.4 - the singledispatch package contains
+    # a backported replacement for 2.6 through 3.3
+    #
+    requirements.append('singledispatch')
+
+
 tests_require = requirements + [
     'virtualenv',
     'gunicorn',
-    'mock'
+    'mock',
+    'sqlalchemy'
 ]
 if sys.version_info < (2, 7):
     tests_require += ['unittest2']
