@@ -33,6 +33,23 @@ class TestAppRoot(PecanTestCase):
         assert app.root and isinstance(app.root, SampleRootController)
 
 
+class TestEmptyContent(PecanTestCase):
+    @property
+    def app_(self):
+        class RootController(object):
+            @expose()
+            def index(self):
+                pass
+
+        return TestApp(Pecan(RootController()))
+
+    def test_empty_index(self):
+        r = self.app_.get('/')
+        self.assertEqual(r.status_int, 200)
+        self.assertEqual(r.headers['Content-Length'], '0')
+        self.assertEqual(len(r.body), 0)
+
+
 class TestIndexRouting(PecanTestCase):
 
     @property

@@ -539,7 +539,7 @@ class Pecan(object):
         # set the body content
         if isinstance(result, six.text_type):
             resp.text = result
-        else:
+        elif result:
             resp.body = result
 
         # set the content type
