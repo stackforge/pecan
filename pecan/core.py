@@ -13,7 +13,7 @@ import six
 
 from webob import Request, Response, exc, acceptparse
 
-from .compat import urlparse, unquote_plus
+from .compat import urlparse, unquote_plus, izip
 from .templating import RendererFactory
 from .routing import lookup_controller, NonCanonicalPath
 from .util import _cfg, encode_if_needed
@@ -297,7 +297,6 @@ class Pecan(object):
                           ``on_error``, and ``on_route``.
         :param \*args: Arguments to pass to the hooks.
         '''
-
         if hook_type in ['before', 'on_route']:
             hooks = state.hooks
         else:
@@ -310,7 +309,7 @@ class Pecan(object):
             if hook_type == 'on_error' and isinstance(result, Response):
                 return result
 
-    def get_args(self, req, all_params, remainder, argspec, im_self):
+    def get_args(self, pecan_state, all_params, remainder, argspec, im_self):
         '''
         Determines the arguments for a controller based upon parameters
         passed the argument specification for the controller.
@@ -329,9 +328,9 @@ class Pecan(object):
             args.append(im_self)
 
         # grab the routing args from nested REST controllers
-        if 'routing_args' in req.pecan:
-            remainder = req.pecan['routing_args'] + list(remainder)
-            del req.pecan['routing_args']
+        if 'routing_args' in pecan_state:
+            remainder = pecan_state['routing_args'] + list(remainder)
+            del pecan_state['routing_args']
 
         # handle positional arguments
         if valid_args and remainder:
@@ -347,7 +346,7 @@ class Pecan(object):
 
         # get the default positional arguments
         if argspec[3]:
-            defaults = dict(zip(argspec[0][-len(argspec[3]):], argspec[3]))
+            defaults = dict(izip(argspec[0][-len(argspec[3]):], argspec[3]))
         else:
             defaults = dict()
 
@@ -390,23 +389,24 @@ class Pecan(object):
 
         # get a sorted list of hooks, by priority (no controller hooks yet)
         state.hooks = self.hooks
+        pecan_state = req.pecan
 
         # store the routing path for the current application to allow hooks to
         # modify it
-        req.pecan['routing_path'] = req.path_info
+        pecan_state['routing_path'] = path = req.encget('PATH_INFO')
 
         # handle "on_route" hooks
         self.handle_hooks('on_route', state)
 
         # lookup the controller, respecting content-type as requested
         # by the file extension on the URI
-        path = req.pecan['routing_path']
-        req.pecan['extension'] = None
+        pecan_state['extension'] = None
+        content_type = pecan_state['content_type']
 
         # attempt to guess the content type based on the file extension
         if self.guess_content_type_from_ext \
-                and not req.pecan['content_type'] \
-                and '.' in path.split('/')[-1]:
+                and not content_type \
+                and '.' in path:
             new_path, extension = splitext(path)
 
             # preface with a letter to ensure compat for 2.5
@@ -414,8 +414,8 @@ class Pecan(object):
 
             if potential_type is not None:
                 path = new_path
-                req.pecan['extension'] = extension
-                req.pecan['content_type'] = potential_type
+                pecan_state['extension'] = extension
+                content_type = potential_type
 
         controller, remainder = self.route(req, self.root, path)
         cfg = _cfg(controller)
@@ -436,14 +436,14 @@ class Pecan(object):
 
         # if unsure ask the controller for the default content type
         content_types = cfg.get('content_types', {})
-        if not req.pecan['content_type']:
+        if not content_type:
             # attempt to find a best match based on accept headers (if they
             # exist)
-            accept = req.headers.get('Accept', '*/*')
+            accept = getattr(req.accept, 'header_value', '*/*')
             if accept == '*/*' or (
                     accept.startswith('text/html,') and
                     list(content_types.keys()) in self.SIMPLEST_CONTENT_TYPES):
-                req.pecan['content_type'] = cfg.get(
+                content_type = cfg.get(
                     'content_type',
                     'text/html'
                 )
@@ -460,23 +460,22 @@ class Pecan(object):
                     logger.error(
                         msg % (
                             controller.__name__,
-                            req.pecan['content_type'],
+                            content_type,
                             content_types.keys()
                         )
                     )
                     raise exc.HTTPNotAcceptable()
 
-                req.pecan['content_type'] = best_default
+                content_type = best_default
         elif cfg.get('content_type') is not None and \
-                req.pecan['content_type'] not in \
-                content_types:
+                content_type not in content_types:
 
             msg = "Controller '%s' defined does not support content_type " + \
                   "'%s'. Supported type(s): %s"
             logger.error(
                 msg % (
                     controller.__name__,
-                    req.pecan['content_type'],
+                    content_type,
                     content_types.keys()
                 )
             )
@@ -485,15 +484,20 @@ class Pecan(object):
         # get a sorted list of hooks, by priority
         state.hooks = self.determine_hooks(controller)
 
+        pecan_state['content_type'] = content_type
+
         # handle "before" hooks
         self.handle_hooks('before', state)
 
         # fetch any parameters
-        params = dict(req.params)
+        if req.method == 'GET':
+            params = dict(req.GET)
+        else:
+            params = dict(req.params)
 
         # fetch the arguments for the controller
         args, kwargs = self.get_args(
-            req,
+            pecan_state,
             params,
             remainder,
             cfg['argspec'],
@@ -505,27 +509,25 @@ class Pecan(object):
 
         # a controller can return the response object which means they've taken
         # care of filling it out
-        if result == response:
+        if result is response:
             return
 
         raw_namespace = result
 
         # pull the template out based upon content type and handle overrides
-        template = content_types.get(
-            req.pecan['content_type']
-        )
+        template = content_types.get(content_type)
 
         # check if for controller override of template
-        template = req.pecan.get('override_template', template)
-        req.pecan['content_type'] = req.pecan.get(
+        template = pecan_state.get('override_template', template)
+        content_type = pecan_state.get(
             'override_content_type',
-            req.pecan['content_type']
+            content_type
         )
 
         # if there is a template, render it
         if template:
             if template == 'json':
-                req.pecan['content_type'] = 'application/json'
+                content_type = 'application/json'
             result = self.render(template, result)
 
         # If we are in a test request put the namespace where it can be
@@ -543,8 +545,8 @@ class Pecan(object):
             resp.body = result
 
         # set the content type
-        if req.pecan['content_type']:
-            resp.content_type = req.pecan['content_type']
+        if content_type:
+            resp.content_type = content_type
 
     def __call__(self, environ, start_response):
         '''
@@ -553,8 +555,8 @@ class Pecan(object):
         '''
 
         # create the request and response object
-        state.request = Request(environ)
-        state.response = Response()
+        state.request = req = Request(environ)
+        state.response = resp = Response()
         state.hooks = []
         state.app = self
         state.controller = None
@@ -562,10 +564,10 @@ class Pecan(object):
         # handle the request
         try:
             # add context and environment to the request
-            state.request.context = {}
-            state.request.pecan = dict(content_type=None)
+            req.context = {}
+            req.pecan = dict(content_type=None)
 
-            self.handle_request(state.request, state.response)
+            self.handle_request(req, resp)
         except Exception as e:
             # if this is an HTTP Exception, set it as the response
             if isinstance(e, exc.HTTPException):

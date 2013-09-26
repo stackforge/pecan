@@ -8,6 +8,10 @@ from .util import iscontroller
 __all__ = ['lookup_controller', 'find_object']
 
 
+class PecanNotFound(Exception):
+    pass
+
+
 class NonCanonicalPath(Exception):
     '''
     Exception Raised when a non-canonical path is encountered when 'walking'
@@ -19,22 +23,20 @@ class NonCanonicalPath(Exception):
         self.remainder = remainder
 
 
-def lookup_controller(obj, url_path):
+def lookup_controller(obj, remainder):
     '''
     Traverses the requested url path and returns the appropriate controller
     object, including default routes.
 
     Handles common errors gracefully.
     '''
-    remainder = url_path
     notfound_handlers = []
-
     while True:
         try:
             obj, remainder = find_object(obj, remainder, notfound_handlers)
             handle_security(obj)
             return obj, remainder
-        except exc.HTTPNotFound:
+        except PecanNotFound:
             while notfound_handlers:
                 name, obj, remainder = notfound_handlers.pop()
                 if name == '_default':
@@ -52,7 +54,7 @@ def lookup_controller(obj, url_path):
                             remainder == ['']
                             and len(obj._pecan['argspec'].args) > 1
                         ):
-                            raise
+                            raise exc.HTTPNotFound
                         return lookup_controller(*result)
             else:
                 raise exc.HTTPNotFound
@@ -84,22 +86,24 @@ def find_object(obj, remainder, notfound_handlers):
     prev_obj = None
     while True:
         if obj is None:
-            raise exc.HTTPNotFound
+            raise PecanNotFound
         if iscontroller(obj):
             return obj, remainder
 
         # are we traversing to another controller
         cross_boundary(prev_obj, obj)
-
-        if remainder and remainder[0] == '':
-            index = getattr(obj, 'index', None)
-            if iscontroller(index):
-                return index, remainder[1:]
-        elif not remainder:
+        try:
+            next_obj, rest = remainder[0], remainder[1:]
+            if next_obj == '':
+                index = getattr(obj, 'index', None)
+                if iscontroller(index):
+                    return index, rest
+        except IndexError:
             # the URL has hit an index method without a trailing slash
             index = getattr(obj, 'index', None)
             if iscontroller(index):
-                raise NonCanonicalPath(index, remainder[1:])
+                raise NonCanonicalPath(index, [])
+
         default = getattr(obj, '_default', None)
         if iscontroller(default):
             notfound_handlers.append(('_default', default, remainder))
@@ -110,12 +114,12 @@ def find_object(obj, remainder, notfound_handlers):
 
         route = getattr(obj, '_route', None)
         if iscontroller(route):
-            next, next_remainder = route(remainder)
-            cross_boundary(route, next)
-            return next, next_remainder
+            next_obj, next_remainder = route(remainder)
+            cross_boundary(route, next_obj)
+            return next_obj, next_remainder
 
         if not remainder:
-            raise exc.HTTPNotFound
-        next, remainder = remainder[0], remainder[1:]
+            raise PecanNotFound
         prev_obj = obj
-        obj = getattr(obj, next, None)
+        remainder = rest
+        obj = getattr(obj, next_obj, None)
