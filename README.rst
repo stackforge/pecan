@@ -43,6 +43,15 @@ Viewing Documentation
     $ cd docs && make man
     $ man docs/build/man/pecan.1
 
+Contributing
+------------
+For information on contributing to Pecan, please read our `Contributing
+Guidelines <https://github.com/stackforge/pecan/blob/master/CONTRIBUTING.rst>`_.
+
+Bugs should be filed on Launchpad, not GitHub:
+
+https://bugs.launchpad.net/pecan
+
 Additional Help/Support
 -----------------------
 Most Pecan interaction is done via the `pecan-dev Mailing List
