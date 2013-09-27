@@ -1,4 +1,4 @@
-0.4.0
+0.4.1
 =====
 * Moved the project to `StackForge infrastructure
   <http://ci.openstack.org/stackforge.html>`_, including Gerrit code review,
