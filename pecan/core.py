@@ -401,11 +401,10 @@ class Pecan(object):
         # lookup the controller, respecting content-type as requested
         # by the file extension on the URI
         pecan_state['extension'] = None
-        content_type = pecan_state['content_type']
 
         # attempt to guess the content type based on the file extension
         if self.guess_content_type_from_ext \
-                and not content_type \
+                and not pecan_state['content_type'] \
                 and '.' in path:
             new_path, extension = splitext(path)
 
@@ -415,7 +414,7 @@ class Pecan(object):
             if potential_type is not None:
                 path = new_path
                 pecan_state['extension'] = extension
-                content_type = potential_type
+                pecan_state['content_type'] = potential_type
 
         controller, remainder = self.route(req, self.root, path)
         cfg = _cfg(controller)
@@ -436,14 +435,14 @@ class Pecan(object):
 
         # if unsure ask the controller for the default content type
         content_types = cfg.get('content_types', {})
-        if not content_type:
+        if not pecan_state['content_type']:
             # attempt to find a best match based on accept headers (if they
             # exist)
             accept = getattr(req.accept, 'header_value', '*/*')
             if accept == '*/*' or (
                     accept.startswith('text/html,') and
                     list(content_types.keys()) in self.SIMPLEST_CONTENT_TYPES):
-                content_type = cfg.get(
+                pecan_state['content_type'] = cfg.get(
                     'content_type',
                     'text/html'
                 )
@@ -460,22 +459,22 @@ class Pecan(object):
                     logger.error(
                         msg % (
                             controller.__name__,
-                            content_type,
+                            pecan_state['content_type'],
                             content_types.keys()
                         )
                     )
                     raise exc.HTTPNotAcceptable()
 
-                content_type = best_default
+                pecan_state['content_type'] = best_default
         elif cfg.get('content_type') is not None and \
-                content_type not in content_types:
+                pecan_state['content_type'] not in content_types:
 
             msg = "Controller '%s' defined does not support content_type " + \
                   "'%s'. Supported type(s): %s"
             logger.error(
                 msg % (
                     controller.__name__,
-                    content_type,
+                    pecan_state['content_type'],
                     content_types.keys()
                 )
             )
@@ -483,8 +482,6 @@ class Pecan(object):
 
         # get a sorted list of hooks, by priority
         state.hooks = self.determine_hooks(controller)
-
-        pecan_state['content_type'] = content_type
 
         # handle "before" hooks
         self.handle_hooks('before', state)
@@ -515,19 +512,19 @@ class Pecan(object):
         raw_namespace = result
 
         # pull the template out based upon content type and handle overrides
-        template = content_types.get(content_type)
+        template = content_types.get(pecan_state['content_type'])
 
         # check if for controller override of template
         template = pecan_state.get('override_template', template)
-        content_type = pecan_state.get(
+        pecan_state['content_type'] = pecan_state.get(
             'override_content_type',
-            content_type
+            pecan_state['content_type']
         )
 
         # if there is a template, render it
         if template:
             if template == 'json':
-                content_type = 'application/json'
+                pecan_state['content_type'] = 'application/json'
             result = self.render(template, result)
 
         # If we are in a test request put the namespace where it can be
@@ -545,8 +542,8 @@ class Pecan(object):
             resp.body = result
 
         # set the content type
-        if content_type:
-            resp.content_type = content_type
+        if pecan_state['content_type']:
+            resp.content_type = pecan_state['content_type']
 
     def __call__(self, environ, start_response):
         '''
