@@ -1,3 +1,7 @@
+0.4.2
+=====
+* Remove a routing optimization that breaks the WSME pecan plugin.
+
 0.4.1
 =====
 * Moved the project to `StackForge infrastructure
