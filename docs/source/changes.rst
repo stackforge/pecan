@@ -1,3 +1,14 @@
+0.3.3
+=====
+* Moved the project to `StackForge infrastructure
+  <http://ci.openstack.org/stackforge.html>`_, including Gerrit code review,
+  Jenkins continuous integration, and GitHub mirroring.
+* Added a pecan plugin for the popular `uwsgi server
+  <http://uwsgi-docs.readthedocs.org>`_.
+* Replaced the ``simplegeneric`` dependency with the new
+  ``functools.singledispatch`` function in preparation for  Python 3.4 support.
+* Optimized pecan's core dispatch routing for notably faster response times.
+
 0.3.2
 =====
 * Made some changes to simplify how ``pecan.conf.app`` is passed to new apps.
