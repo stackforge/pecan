@@ -1057,6 +1057,23 @@ class TestRestController(PecanTestCase):
         assert r.status_int == 200
         assert r.body == b_('POST-2')
 
+    def test_nested_rest_with_default(self):
+
+        class FooController(RestController):
+
+            @expose()
+            def _default(self, *remainder):
+                return "DEFAULT %s" % remainder
+
+        class RootController(RestController):
+            foo = FooController()
+
+        app = TestApp(make_app(RootController()))
+
+        r = app.get('/foo/missing')
+        assert r.status_int == 200
+        assert r.body == b_("DEFAULT missing")
+
     def test_dynamic_rest_lookup(self):
         class BarController(RestController):
             @expose()

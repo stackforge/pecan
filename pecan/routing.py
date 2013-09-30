@@ -36,7 +36,7 @@ def lookup_controller(obj, remainder):
             obj, remainder = find_object(obj, remainder, notfound_handlers)
             handle_security(obj)
             return obj, remainder
-        except PecanNotFound:
+        except (exc.HTTPNotFound, PecanNotFound):
             while notfound_handlers:
                 name, obj, remainder = notfound_handlers.pop()
                 if name == '_default':
