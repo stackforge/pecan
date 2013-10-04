@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 import warnings
 if sys.version_info < (2, 7):
     import unittest2 as unittest  # pragma: nocover
@@ -871,6 +872,39 @@ class TestRedirect(PecanTestCase):
         ##should add trailing / and changes location to https
         assert res.location == 'https://localhost/child/'
         assert res.request.environ['HTTP_X_FORWARDED_PROTO'] == 'https'
+
+
+class TestInternalRedirectContext(PecanTestCase):
+
+    @property
+    def app_(self):
+        class RootController(object):
+
+            @expose()
+            def redirect_with_context(self):
+                request.context['foo'] = 'bar'
+                redirect('/testing')
+
+            @expose()
+            def internal_with_context(self):
+                request.context['foo'] = 'bar'
+                redirect('/testing', internal=True)
+
+            @expose('json')
+            def testing(self):
+                return request.context
+
+        return TestApp(make_app(RootController(), debug=False))
+
+    def test_internal_with_request_context(self):
+        r = self.app_.get('/internal_with_context')
+        assert r.status_int == 200
+        assert json.loads(r.body.decode()) == {'foo': 'bar'}
+
+    def test_context_does_not_bleed(self):
+        r = self.app_.get('/redirect_with_context').follow()
+        assert r.status_int == 200
+        assert json.loads(r.body.decode()) == {}
 
 
 class TestStreamedResponse(PecanTestCase):

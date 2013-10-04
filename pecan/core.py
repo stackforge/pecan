@@ -119,6 +119,7 @@ def redirect(location=None, internal=False, code=None, headers={},
     if internal:
         if code is not None:
             raise ValueError('Cannot specify a code for internal redirects')
+        request.environ['pecan.recursive.context'] = request.context
         raise ForwardRequestException(location)
     if code is None:
         code = 302
@@ -561,7 +562,7 @@ class Pecan(object):
         # handle the request
         try:
             # add context and environment to the request
-            req.context = {}
+            req.context = environ.get('pecan.recursive.context', {})
             req.pecan = dict(content_type=None)
 
             self.handle_request(req, resp)
