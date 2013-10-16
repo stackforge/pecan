@@ -174,6 +174,134 @@ class TestSecure(PecanTestCase):
         assert response.status_int == 200
         assert response.body == b_('Hello from sub!')
 
+    def test_secured_generic_controller(self):
+        authorized = False
+
+        class RootController(object):
+
+            @classmethod
+            def check_permissions(cls):
+                return authorized
+
+            @expose(generic=True)
+            def index(self):
+                return 'Index'
+
+            @secure('check_permissions')
+            @index.when(method='POST')
+            def index_post(self):
+                return 'I should not be allowed'
+
+            @secure('check_permissions')
+            @expose(generic=True)
+            def secret(self):
+                return 'I should not be allowed'
+
+        app = TestApp(make_app(
+            RootController(),
+            debug=True,
+            static_root='tests/static'
+        ))
+        response = app.get('/')
+        assert response.status_int == 200
+        response = app.post('/', expect_errors=True)
+        assert response.status_int == 401
+        response = app.get('/secret/', expect_errors=True)
+        assert response.status_int == 401
+
+    def test_secured_generic_controller_lambda(self):
+        authorized = False
+
+        class RootController(object):
+
+            @expose(generic=True)
+            def index(self):
+                return 'Index'
+
+            @secure(lambda: authorized)
+            @index.when(method='POST')
+            def index_post(self):
+                return 'I should not be allowed'
+
+            @secure(lambda: authorized)
+            @expose(generic=True)
+            def secret(self):
+                return 'I should not be allowed'
+
+        app = TestApp(make_app(
+            RootController(),
+            debug=True,
+            static_root='tests/static'
+        ))
+        response = app.get('/')
+        assert response.status_int == 200
+        response = app.post('/', expect_errors=True)
+        assert response.status_int == 401
+        response = app.get('/secret/', expect_errors=True)
+        assert response.status_int == 401
+
+    def test_secured_generic_controller_secure_attribute(self):
+        authorized = False
+
+        class SecureController(object):
+
+            @expose(generic=True)
+            def index(self):
+                return 'I should not be allowed'
+
+            @index.when(method='POST')
+            def index_post(self):
+                return 'I should not be allowed'
+
+            @expose(generic=True)
+            def secret(self):
+                return 'I should not be allowed'
+
+        class RootController(object):
+            sub = secure(SecureController(), lambda: authorized)
+
+        app = TestApp(make_app(
+            RootController(),
+            debug=True,
+            static_root='tests/static'
+        ))
+        response = app.get('/sub/', expect_errors=True)
+        assert response.status_int == 401
+        response = app.post('/sub/', expect_errors=True)
+        assert response.status_int == 401
+        response = app.get('/sub/secret/', expect_errors=True)
+        assert response.status_int == 401
+
+    def test_secured_generic_controller_secure_attribute_with_unlocked(self):
+
+        class RootController(SecureController):
+
+            @unlocked
+            @expose(generic=True)
+            def index(self):
+                return 'Unlocked!'
+
+            @unlocked
+            @index.when(method='POST')
+            def index_post(self):
+                return 'Unlocked!'
+
+            @expose(generic=True)
+            def secret(self):
+                return 'I should not be allowed'
+
+        app = TestApp(make_app(
+            RootController(),
+            debug=True,
+            static_root='tests/static'
+        ))
+        response = app.get('/')
+        assert response.status_int == 200
+        response = app.post('/')
+        assert response.status_int == 200
+        response = app.get('/secret/', expect_errors=True)
+        assert response.status_int == 401
+
     def test_state_attribute(self):
         from pecan.secure import Any, Protected
         assert repr(Any) == '<SecureState Any>'

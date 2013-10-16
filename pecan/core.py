@@ -14,6 +14,7 @@ import six
 from webob import Request, Response, exc, acceptparse
 
 from .compat import urlparse, unquote_plus, izip
+from .secure import handle_security
 from .templating import RendererFactory
 from .routing import lookup_controller, NonCanonicalPath
 from .util import _cfg, encode_if_needed
@@ -428,6 +429,7 @@ class Pecan(object):
             im_self = six.get_method_self(controller)
             handlers = cfg['generic_handlers']
             controller = handlers.get(req.method, handlers['DEFAULT'])
+            handle_security(controller, im_self)
             cfg = _cfg(controller)
 
         # add the controller to the state so that hooks can use it
