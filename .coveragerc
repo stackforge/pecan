@@ -1,3 +1,2 @@
 [run]
 source=pecan
-omit=pecan/compat/dictconfig.py

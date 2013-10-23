@@ -1,7 +1,9 @@
 import os
 import sys
+import tempfile
 
 from pecan.tests import PecanTestCase
+from six import b as b_
 
 
 __here__ = os.path.dirname(__file__)
@@ -131,14 +133,16 @@ class TestConf(PecanTestCase):
 
     def test_config_with_syntax_error(self):
         from pecan import configuration
-        path = ('bad', 'syntaxerror.py')
-        configuration.Config({})
+        with tempfile.NamedTemporaryFile('wb') as f:
+            f.write(b_('\n'.join(['if false', 'var = 3'])))
+            f.flush()
+            configuration.Config({})
 
-        self.assertRaises(
-            SyntaxError,
-            configuration.conf_from_file,
-            os.path.join(__here__, 'config_fixtures', *path)
-        )
+            self.assertRaises(
+                SyntaxError,
+                configuration.conf_from_file,
+                f.name
+            )
 
     def test_config_with_bad_import(self):
         from pecan import configuration
