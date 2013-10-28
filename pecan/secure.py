@@ -119,7 +119,6 @@ def secure(func_or_obj, check_permissions_for_obj=None):
     To secure a class, invoke with two arguments:
         secure(<obj instance>, <check_permissions_method>)
     """
-
     if _allowed_check_permissions_types(func_or_obj):
         return _secure_method(func_or_obj)
     else:
@@ -199,14 +198,14 @@ def _make_wrapper(f):
 
 
 # methods to evaluate security during routing
-def handle_security(controller):
+def handle_security(controller, im_self=None):
     """ Checks the security of a controller.  """
     if controller._pecan.get('secured', False):
         check_permissions = controller._pecan['check_permissions']
 
         if isinstance(check_permissions, six.string_types):
             check_permissions = getattr(
-                six.get_method_self(controller),
+                im_self or six.get_method_self(controller),
                 check_permissions
             )
 
