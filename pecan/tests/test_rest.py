@@ -670,6 +670,67 @@ class TestRestController(PecanTestCase):
             r = app.request('/things', method='RESET', status=404)
             assert r.status_int == 404
 
+    def test_custom_with_trailing_slash(self):
+
+        class CustomController(RestController):
+
+            _custom_actions = {
+                'detail': ['GET'],
+                'create': ['POST'],
+                'update': ['PUT'],
+                'remove': ['DELETE'],
+            }
+
+            @expose()
+            def detail(self):
+                return 'DETAIL'
+
+            @expose()
+            def create(self):
+                return 'CREATE'
+
+            @expose()
+            def update(self, id):
+                return id
+
+            @expose()
+            def remove(self, id):
+                return id
+
+        app = TestApp(make_app(CustomController()))
+
+        r = app.get('/detail')
+        assert r.status_int == 200
+        assert r.body == b_('DETAIL')
+
+        r = app.get('/detail/')
+        assert r.status_int == 200
+        assert r.body == b_('DETAIL')
+
+        r = app.post('/create')
+        assert r.status_int == 200
+        assert r.body == b_('CREATE')
+
+        r = app.post('/create/')
+        assert r.status_int == 200
+        assert r.body == b_('CREATE')
+
+        r = app.put('/update/123')
+        assert r.status_int == 200
+        assert r.body == b_('123')
+
+        r = app.put('/update/123/')
+        assert r.status_int == 200
+        assert r.body == b_('123')
+
+        r = app.delete('/remove/456')
+        assert r.status_int == 200
+        assert r.body == b_('456')
+
+        r = app.delete('/remove/456/')
+        assert r.status_int == 200
+        assert r.body == b_('456')
+
     def test_custom_delete(self):
 
         class OthersController(object):

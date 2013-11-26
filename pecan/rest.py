@@ -54,7 +54,11 @@ class RestController(object):
             return result
 
         # handle the request
-        handler = getattr(self, '_handle_%s' % method, self._handle_custom)
+        handler = getattr(
+            self,
+            '_handle_%s' % method,
+            self._handle_unknown_method
+        )
 
         try:
             result = handler(method, args)
@@ -140,9 +144,9 @@ class RestController(object):
                     remainder[fixed_args + 1:]
                 )
 
-    def _handle_custom(self, method, remainder):
+    def _handle_unknown_method(self, method, remainder):
         '''
-        Routes ``_custom`` actions to the appropriate controller.
+        Routes undefined actions (like RESET) to the appropriate controller.
         '''
         # try finding a post_{custom} or {custom} method first
         controller = self._find_controller('post_%s' % method, method)
@@ -180,14 +184,10 @@ class RestController(object):
             if controller:
                 return controller, remainder[:-1]
 
-        # check for custom GET requests
-        if method.upper() in self._custom_actions.get(method_name, []):
-            controller = self._find_controller(
-                'get_%s' % method_name,
-                method_name
-            )
-            if controller:
-                return controller, remainder[:-1]
+        match = self._handle_custom_action(method, remainder)
+        if match:
+            return match
+
         controller = getattr(self, remainder[0], None)
         if controller and not ismethod(controller):
             return lookup_controller(controller, remainder[1:])
@@ -204,6 +204,10 @@ class RestController(object):
         Routes ``DELETE`` actions to the appropriate controller.
         '''
         if remainder:
+            match = self._handle_custom_action(method, remainder)
+            if match:
+                return match
+
             controller = getattr(self, remainder[0], None)
             if controller and not ismethod(controller):
                 return lookup_controller(controller, remainder[1:])
@@ -230,14 +234,10 @@ class RestController(object):
         '''
         # check for custom POST/PUT requests
         if remainder:
-            method_name = remainder[-1]
-            if method.upper() in self._custom_actions.get(method_name, []):
-                controller = self._find_controller(
-                    '%s_%s' % (method, method_name),
-                    method_name
-                )
-                if controller:
-                    return controller, remainder[:-1]
+            match = self._handle_custom_action(method, remainder)
+            if match:
+                return match
+
             controller = getattr(self, remainder[0], None)
             if controller and not ismethod(controller):
                 return lookup_controller(controller, remainder[1:])
@@ -251,6 +251,25 @@ class RestController(object):
 
     def _handle_put(self, method, remainder):
         return self._handle_post(method, remainder)
+
+    def _handle_custom_action(self, method, remainder):
+        remainder = [r for r in remainder if r]
+        if remainder:
+            if method in ('put', 'delete'):
+                # For PUT and DELETE, additional arguments are supplied, e.g.,
+                # DELETE /foo/XYZ
+                method_name = remainder[0]
+                remainder = remainder[1:]
+            else:
+                method_name = remainder[-1]
+                remainder = remainder[:-1]
+            if method.upper() in self._custom_actions.get(method_name, []):
+                controller = self._find_controller(
+                    '%s_%s' % (method, method_name),
+                    method_name
+                )
+                if controller:
+                    return controller, remainder
 
     def _set_routing_args(self, args):
         '''
