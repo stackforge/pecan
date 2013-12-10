@@ -18,7 +18,7 @@ probably vary.
 Installing Pecan
 ----------------
 
-A few popular options are avaliable for installing Pecan in production
+A few popular options are available for installing Pecan in production
 environments:
 
 *  Using `setuptools/distribute
@@ -249,7 +249,7 @@ application should be served. This is how the script (named ``run.py``) looks::
         }
         return cherrypy.tree.mount(Root(), '/', config=configuration)
 
-    # Assuming your app has media on diferent paths, like 'css', and 'images'
+    # Assuming your app has media on different paths, like 'css', and 'images'
     application = wsgiserver.WSGIPathInfoDispatcher({
         '/': simpleapp_wsgi_app,
         '/css': make_static_config('css'),

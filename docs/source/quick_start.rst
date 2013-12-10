@@ -230,7 +230,7 @@ now, let's examine the sample project, controller by controller::
     def index(self):
         return dict()
 
-The :func:`index` method is marked as *publically available* via the :func:`@expose`
+The :func:`index` method is marked as *publicly available* via the :func:`@expose`
 decorator (which in turn uses the ``index.html`` template) at the root of the
 application (http://127.0.0.1:8080/), so any HTTP ``GET`` that hits the root of
 your application (``/``) will be routed to this method.

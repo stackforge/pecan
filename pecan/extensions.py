@@ -31,7 +31,7 @@ class PecanExtensionImporter(object):
 
     This is mostly for convenience and consistency.  In this way, Pecan can
     maintain an ecosystem of extensions that share a common namespace,
-    ``pecan.ext``, while still maintaining backwards compatability for simple
+    ``pecan.ext``, while still maintaining backwards compatibility for simple
     package names (e.g., ``pecancelery``).
     """
 
