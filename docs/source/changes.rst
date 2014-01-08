@@ -1,3 +1,8 @@
+0.4.4
+=====
+* Removed memoization of certain controller attributes, which can lead to
+  a memory leak in dynamic controller lookups.
+
 0.4.3
 =====
 * Fixed several bugs for RestController.
