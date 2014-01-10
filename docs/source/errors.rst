@@ -109,11 +109,11 @@ Notice that the only bit of code we added to our :class:`RootController` was::
         def notfound(self):
             return dict(status=404, message="test_project does not have this page")
 
-We simply :func:`@expose` the ``notfound`` controller with the ``error.html`` 
-template (which was conveniently generated for us and placed under
-``test_project/templates/`` when we created ``test_project``).  As with any
-Pecan controller, we return a dictionary of variables for interpolation by the 
-template renderer.  
+We simply :func:`~pecan.decorators.expose` the ``notfound`` controller with the
+``error.html`` template (which was conveniently generated for us and placed
+under ``test_project/templates/`` when we created ``test_project``).  As with
+any Pecan controller, we return a dictionary of variables for interpolation by
+the template renderer.
 
 Now we can modify the error template, or write a brand new one to make the 404
 error status page of ``test_project`` as pretty or fancy as we want.

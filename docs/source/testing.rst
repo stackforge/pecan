@@ -26,7 +26,7 @@ source code is tested.
 
 A healthy suite of tests combines **unit tests** with **functional tests**.  In
 the context of a Pecan application, functional tests can be written with the
-help of the ``WebTest`` library.  In this way, it is possible to write tests
+help of the :mod:`webtest` library.  In this way, it is possible to write tests
 that verify the behavior of an HTTP request life cycle from the controller
 routing down to the HTTP response.  The following is an example that is
 similar to the one included with Pecan's quickstart project.
@@ -57,7 +57,8 @@ similar to the one included with Pecan's quickstart project.
 
 The testing utility included with Pecan, :func:`pecan.testing.load_test_app`, can
 be passed a file path representing a Pecan configuration file, and will return
-an instance of the application, wrapped in a :class:`webtest.TestApp` environment.  
+an instance of the application, wrapped in a :class:`~webtest.app.TestApp`
+environment.
 
 From here, it's possible to extend the :class:`FunctionalTest` base class and write
 tests that issue simulated HTTP requests.
@@ -73,16 +74,16 @@ tests that issue simulated HTTP requests.
 
 .. seealso::
 
-  See the `WebTest <http://pythonpaste.org/webtest/>`_ documentation
+  See the :mod:`webtest` documentation
   for further information about the methods available to a
-  ``webtest.TestApp`` instance.
+  :class:`~webtest.app.TestApp` instance.
 
 Special Testing Variables
 -------------------------
 
 Sometimes it's not enough to make assertions about the response body of certain
 requests.  To aid in inspection, Pecan applications provide a special set of
-"testing variables" to any :class:`webtest.TestResponse` object.
+"testing variables" to any :class:`~webtest.response.TestResponse` object.
 
 Let's suppose that your Pecan applicaton had some controller which took a 
 ``name`` as an optional argument in the URL.

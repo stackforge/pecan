@@ -40,15 +40,13 @@ class HookControllerMeta(type):
         walk_controller(cls, cls, dict_.get('__hooks__', []))
 
 
-'''
-A base class for controllers that would like to specify hooks on
-their controller methods. Simply create a list of hook objects
-called ``__hooks__`` as a member of the controller's namespace.
-'''
 HookController = HookControllerMeta(
     'HookController',
     (object,),
-    {}
+    {'__doc__': ("A base class for controllers that would like to specify "
+                 "hooks on their controller methods. Simply create a list "
+                 "of hook objects called ``__hooks__`` as a class attribute "
+                 "of your controller.")}
 )
 
 

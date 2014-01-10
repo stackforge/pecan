@@ -17,7 +17,7 @@ There are several approaches that can be taken to set up session management.
 One approach is WSGI middleware.  Another is Pecan :ref:`hooks`.
 
 Here's an example of wrapping your WSGI application with Beaker's
-:class:`SessionMiddleware` in your project's ``app.py``.
+:class:`~beaker.middleware.SessionMiddleware` in your project's ``app.py``.
 
 ::
 

@@ -5,10 +5,11 @@ Reloading Automatically as Files Change
 ---------------------------------------
 
 Pausing to restart your development server as you work can be interruptive, so
-``pecan serve`` provides a ``--reload`` flag to make life easier.
+:command:`pecan serve` provides a ``--reload`` flag to make life easier.
 
-To provide this functionality, Pecan makes use of the Python ``watchdog``
-library.  You'll need to install it for development use before continuing::
+To provide this functionality, Pecan makes use of the Python
+`watchdog <https://pypi.python.org/pypi/watchdog>`_ library.  You'll need to
+install it for development use before continuing::
 
     $ pip install watchdog
     Downloading/unpacking watchdog

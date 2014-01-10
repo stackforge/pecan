@@ -6,9 +6,10 @@ Installation
 Stable Version
 --------------
 
-We recommend installing Pecan with ``pip``, but you can also try with
-``easy_install``. Creating a spot in your environment where
-Pecan can be isolated from other packages is best practice.
+We recommend installing Pecan with `pip
+<http://www.pip-installer.org/>`_, but you
+can also try with :command:`easy_install`. Creating a spot in your environment
+where Pecan can be isolated from other packages is best practice.
 
 To get started with an environment for Pecan, we recommend creating a new
 `virtual environment <http://www.virtualenv.org>`_ using `virtualenv 

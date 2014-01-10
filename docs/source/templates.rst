@@ -35,11 +35,11 @@ configuration::
 Using Template Renderers
 ------------------------
 
-:py:mod:`pecan.decorators` defines a decorator called :func:`@expose`, which
-is used to flag a method as a public controller. The :func:`@expose`
-decorator takes a ``template`` argument, which can be used to specify
-the path to the template file to use for the controller method being
-exposed.
+:py:mod:`pecan.decorators` defines a decorator called
+:func:`~pecan.decorators.expose`, which is used to flag a method as a public
+controller. The :func:`~pecan.decorators.expose` decorator takes a ``template``
+argument, which can be used to specify the path to the template file to use for
+the controller method being exposed.
 
 ::
 
@@ -48,8 +48,8 @@ exposed.
         def index(self):
             return dict(message='I am a mako template')
 
-:func:`@expose` will use the default template engine unless the path
-is prefixed by another renderer name.
+:func:`~pecan.decorators.expose` will use the default template engine unless
+the path is prefixed by another renderer name.
 
 ::
 
@@ -67,11 +67,11 @@ is prefixed by another renderer name.
 Overriding Templates
 --------------------
 
-:func:`override_template` allows you to override the template set for
-a controller method when it is exposed.  When
-:func:`override_template` is called within the body of the controller
-method, it changes the template that will be used for that invocation
-of the method.
+:func:`~pecan.core.override_template` allows you to override the template set
+for a controller method when it is exposed.  When
+:func:`~pecan.core.override_template` is called within the body of the
+controller method, it changes the template that will be used for that
+invocation of the method.
 
 ::
 
@@ -85,9 +85,9 @@ of the method.
 Manual Rendering
 ----------------
 
-:func:`render` allows you to manually render output using the Pecan
+:func:`~pecan.core.render` allows you to manually render output using the Pecan
 templating framework. Pass the template path and values to go into the
-template, and :func:`render` returns the rendered output as text.
+template, and :func:`~pecan.core.render` returns the rendered output as text.
 
 ::
 

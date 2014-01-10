@@ -78,7 +78,8 @@ Let's look at each value and what it means:
   the project root).
 
 **debug**
-  Enables ``WebError`` to display tracebacks in the browser 
+  Enables the ability to display tracebacks in the browser and interactively
+  debug during development.
 
 .. warning::
 
@@ -149,33 +150,35 @@ Dictionary Conversion
 ---------------------
 
 In certain situations you might want to deal with keys and values, but in strict
-dictionary form. The :class:`Config` object has a helper method for this purpose
-that will return a dictionary representation of the configuration, including nested values.
+dictionary form. The :class:`~pecan.configuration.Config` object has a helper
+method for this purpose that will return a dictionary representation of the
+configuration, including nested values.
 
-Below is a representation of how you can access the :func:`as_dict` method and what
-it returns as a result (shortened for brevity):
+Below is a representation of how you can access the
+:meth:`~pecan.configuration.Config.to_dict` method and what it returns as
+a result (shortened for brevity):
 
 ::
 
     >>> from pecan import conf
     >>> conf
     Config({'app': Config({'errors': {}, 'template_path': '', 'static_root': 'public', [...]
-    >>> conf.as_dict()
+    >>> conf.to_dict()
     {'app': {'errors': {}, 'template_path': '', 'static_root': 'public', [...]
     
 
 Prefixing Dictionary Keys
 -------------------------
 
-:func:`Config.as_dict` allows you to pass an optional string argument
-if you need to prefix the keys in the returned dictionary.
+:func:`~pecan.configuration.Config.to_dict` allows you to pass an optional
+string argument if you need to prefix the keys in the returned dictionary.
 
 ::
 
     >>> from pecan import conf
     >>> conf
     Config({'app': Config({'errors': {}, 'template_path': '', 'static_root': 'public', [...]
-    >>> conf.as_dict('prefixed_')
+    >>> conf.to_dict('prefixed_')
     {'prefixed_app': {'prefixed_errors': {}, 'prefixed_template_path': '', 'prefixed_static_root': 'prefixed_public', [...]
 
 

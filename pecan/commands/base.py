@@ -154,10 +154,13 @@ class BaseCommandParent(object):
     },)
 
     def run(self, args):
+        """To be implemented by subclasses."""
         self.args = args
 
     def load_app(self):
         from pecan import load_app
         return load_app(self.args.config_file)
 
-BaseCommand = BaseCommandMeta('BaseCommand', (BaseCommandParent,), {})
+BaseCommand = BaseCommandMeta('BaseCommand', (BaseCommandParent,), {
+    '__doc__': BaseCommandParent.__doc__
+})

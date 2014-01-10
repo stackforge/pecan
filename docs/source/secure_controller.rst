@@ -11,7 +11,7 @@ authorization as you see fit.
 ---------------------------
 
 You can wrap entire controller subtrees *or* individual method calls
-with access controls using the :func:`secure` decorator.
+with access controls using the :func:`~pecan.secure.secure` decorator.
 
 To decorate a method, use one argument::
 
@@ -65,10 +65,11 @@ To secure a class, invoke with two arguments::
 --------------------
 
 Alternatively, the same functionality can also be accomplished by
-subclassing Pecan's :class:`SecureController`. Implementations of
-:class:`SecureController` should extend the :func:`check_permissions`
-class method to return ``True`` if the user has permissions to the
-controller branch and ``False`` if they do not.
+subclassing Pecan's :class:`~pecan.secure.SecureController`. Implementations of
+:class:`~pecan.secure.SecureController` should extend the
+:meth:`~pecan.secure.SecureControllerBase.check_permissions` class method to
+return ``True`` if the user has permissions to the controller branch and
+``False`` if they do not.
 
 ::
 
@@ -110,31 +111,32 @@ controller branch and ``False`` if they do not.
         unclassified = unlocked(UnclassifiedController())
 
 
-Also note the use of the :func:`@unlocked` decorator in the above example, which 
-can be used similarly to explicitly unlock a controller for public access 
-without any security checks.
+Also note the use of the :func:`~pecan.secure.unlocked` decorator in the above
+example, which can be used similarly to explicitly unlock a controller for
+public access without any security checks.
 
 
 Writing Authentication/Authorization Methods
 --------------------------------------------
 
-The :func:`check_permissions` method should be used to determine user 
-authentication and authorization.  The code you implement here could range 
-from simple session assertions (the existing user is authenticated as an 
-administrator) to connecting to an LDAP service.
+The :meth:`~pecan.secure.SecureControllerBase.check_permissions` method should
+be used to determine user authentication and authorization.  The code you
+implement here could range from simple session assertions (the existing user is
+authenticated as an administrator) to connecting to an LDAP service.
 
 
 More on ``secure``
 ------------------
 
-The :func:`secure` method has several advanced uses that allow you to create
-robust security policies for your application.
+The :func:`~pecan.secure.secure` method has several advanced uses that allow
+you to create robust security policies for your application.
 
 First, you can pass via a string the name of either a class method or an 
-instance method of the controller to use as the :func:`check_permission` method.
-Instance methods are particularly useful if you wish to authorize access to
-attributes of a model instance.  Consider the following example
-of a basic virtual filesystem.
+instance method of the controller to use as the
+:meth:`~pecan.secure.SecureControllerBase.check_permissions` method.  Instance
+methods are particularly useful if you wish to authorize access to attributes
+of a model instance.  Consider the following example of a basic virtual
+filesystem.
 
 ::
 
@@ -170,7 +172,7 @@ of a basic virtual filesystem.
             return FileController(name), remainder
 
 
-The :func:`secure` method also accepts a function argument. When 
+The :func:`~pecan.secure.secure` method also accepts a function argument. When
 passing a function,  make sure that the function is imported from another 
 file or defined in the same file before the class definition, otherwise 
 you will likely get error during module import.
@@ -189,11 +191,11 @@ you will likely get error during module import.
             return 'Logged in'
 
 
-You can also use the :func:`secure` method to change the behavior of a 
-:class:`SecureController`. Decorating a method or wrapping a subcontroller tells 
-Pecan to use another security function other than the default controller 
-method. This is useful for situations where you want a different level or 
-type of security.
+You can also use the :func:`~pecan.secure.secure` method to change the behavior
+of a :class:`~pecan.secure.SecureController`. Decorating a method or wrapping
+a subcontroller tells Pecan to use another security function other than the
+default controller method. This is useful for situations where you want
+a different level or type of security.
 
 ::
 
@@ -230,8 +232,10 @@ Multiple Secure Controllers
 Secure controllers can be nested to provide increasing levels of
 security on subcontrollers. In the example below, when a request is
 made for ``/admin/index/``, Pecan first calls
-:func:`check_permissions` on the :class:`RootController` and then
-calls :func:`check_permissions` on the :class:`AdminController`.
+:func:`~pecan.secure.SecureControllerBase.check_permissions` on the
+:class:`RootController` and then
+calls :func:`~pecan.secure.SecureControllerBase.check_permissions` on the
+:class:`AdminController`.
 
 ::
 

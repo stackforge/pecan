@@ -27,7 +27,7 @@ Go ahead and change into your newly created project directory.::
     $ cd test_project
 
 You'll want to deploy it in "development mode", such that it’s
-available on ``sys.path``, yet can still be edited directly from its
+available on :mod:`sys.path`, yet can still be edited directly from its
 source distribution::
 
     $ python setup.py develop
@@ -117,7 +117,7 @@ basic settings you need to run your Pecan application in
 on, the location where your controllers and templates are stored on
 disk, and the name of the directory containing any static files.
 
-If you just run ``pecan serve``, passing ``config.py`` as the
+If you just run :command:`pecan serve`, passing ``config.py`` as the
 configuration file, it will bring up the development server and serve
 the app::
 
@@ -126,7 +126,7 @@ the app::
     serving on 0.0.0.0:8080, view at http://127.0.0.1:8080
 
 The location for the configuration file and the argument itself are very
-flexible--you can pass an absolute or relative path to the file.
+flexible - you can pass an absolute or relative path to the file.
 
 .. _python_based_config:
 
@@ -230,10 +230,11 @@ now, let's examine the sample project, controller by controller::
     def index(self):
         return dict()
 
-The :func:`index` method is marked as *publicly available* via the :func:`@expose`
-decorator (which in turn uses the ``index.html`` template) at the root of the
-application (http://127.0.0.1:8080/), so any HTTP ``GET`` that hits the root of
-your application (``/``) will be routed to this method.
+The :func:`index` method is marked as *publicly available* via the
+:func:`~pecan.decorators.expose` decorator (which in turn uses the
+``index.html`` template) at the root of the application
+(http://127.0.0.1:8080/), so any HTTP ``GET`` that hits the root of your
+application (``/``) will be routed to this method.
 
 Notice that the :func:`index` method returns a Python dictionary. This dictionary
 is used as a namespace to render the specified template (``index.html``) into

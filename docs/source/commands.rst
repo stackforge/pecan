@@ -1,8 +1,5 @@
 .. _commands:
 
-.. |argparse| replace:: ``argparse``
-.. _argparse: http://docs.python.org/dev/library/argparse.html
-
 Command Line Pecan
 ==================
 
@@ -15,7 +12,7 @@ Serving a Pecan App For Development
 -----------------------------------
 
 Pecan comes bundled with a lightweight WSGI development server based on
-Python's :py:mod:`wsgiref.simpleserver` module.
+Python's :py:mod:`wsgiref.simple_server` module.
 
 Serving your Pecan app is as simple as invoking the ``pecan serve`` command::
 
@@ -161,28 +158,28 @@ Let's analyze this piece-by-piece.
 Overriding the ``run`` Method
 ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 
-First, we're subclassing :class:`pecan.commands.BaseCommand` and extending
-the :func:`run` method to:
+First, we're subclassing :class:`~pecan.commands.base.BaseCommand` and extending
+the :func:`~pecan.commands.base.BaseCommandParent.run` method to:
 
-* Load a Pecan application - ``self.load_app()``
-* Wrap it in a fake WGSI environment - ``webtest.TestApp()``
-* Issue an HTTP GET request against it - ``app.get(args.path)``
+* Load a Pecan application - :func:`~pecan.core.load_app`
+* Wrap it in a fake WGSI environment - :class:`~webtest.app.TestApp`
+* Issue an HTTP GET request against it - :meth:`~webtest.app.TestApp.get`
 
 Defining Custom Arguments
 ,,,,,,,,,,,,,,,,,,,,,,,,,
 
 The :attr:`arguments` class attribute is used to define command line arguments
 specific to your custom command.  You'll notice in this example that we're
-*adding* to the arguments list provided by :class:`pecan.commands.BaseCommand`
+*adding* to the arguments list provided by :class:`~pecan.commands.base.BaseCommand`
 (which already provides an argument for the ``config_file``), rather
 than overriding it entirely.
 
-The format of the :attr:`arguments` class attribute is a :class:`tuple` of dictionaries,
-with each dictionary representing an argument definition in the
-same format accepted by Python's |argparse|_ module (more specifically,
-:func:`argparse.ArgumentParser.add_argument`).  By providing a list of arguments in
-this format, the :command:`pecan` command can include your custom commands in the help
-and usage output it provides.
+The format of the :attr:`arguments` class attribute is a :class:`tuple` of
+dictionaries, with each dictionary representing an argument definition in the
+same format accepted by Python's :py:mod:`argparse` module (more specifically,
+:meth:`~argparse.ArgumentParser.add_argument`).  By providing a list of
+arguments in this format, the :command:`pecan` command can include your custom
+commands in the help and usage output it provides.
 
 ::
 
@@ -211,7 +208,7 @@ Registering a Custom Command
 
 Now that you've written your custom command, you’ll need to tell your
 distribution’s ``setup.py`` about its existence and reinstall.  Within your
-distribution’s ``setup.py`` file, you'll find a call to :func:`setuptools.setup`.
+distribution’s ``setup.py`` file, you'll find a call to :func:`~setuptools.setup`.
 
 ::
 
@@ -225,7 +222,7 @@ distribution’s ``setup.py`` file, you'll find a call to :func:`setuptools.setu
     )
 
 Assuming it doesn't exist already, we'll add the ``entry_points`` argument
-to the :func:`setup` call, and define a ``[pecan.command]`` definition for your custom
+to the :func:`~setuptools.setup` call, and define a ``[pecan.command]`` definition for your custom
 command::
 
 

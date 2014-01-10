@@ -117,9 +117,9 @@ Binding Within the Application
 There are several approaches to wrapping your application's requests
 with calls to appropriate model function calls.  One approach is WSGI
 middleware.  We also recommend Pecan :ref:`hooks`.  Pecan comes with
-:class:`TransactionHook`, a hook which can be used to wrap requests in
-database transactions for you.  To use it, simply include it in your
-project's ``app.py`` file and pass it a set of functions related to
+:class:`~pecan.hooks.TransactionHook`, a hook which can be used to wrap
+requests in database transactions for you.  To use it, simply include it in
+your project's ``app.py`` file and pass it a set of functions related to
 database binding.
 
 ::
@@ -145,7 +145,7 @@ database binding.
     )
     
 In the above example, on HTTP ``POST``, ``PUT``, and ``DELETE``
-requests, :class:`TransactionHook` takes care of the transaction
+requests, :class:`~pecan.hooks.TransactionHook` takes care of the transaction
 automatically by following these rules:
 
 #.  Before controller routing has been determined, :func:`model.start`
@@ -164,7 +164,7 @@ automatically by following these rules:
     :func:`model.clear` are called.
     
 On idempotent operations (like HTTP ``GET`` and ``HEAD`` requests),
-:class:`TransactionHook` handles transactions following different
+:class:`~pecan.hooks.TransactionHook` handles transactions following different
 rules.
 
 #.  ``model.start_read_only()`` is called.  This function should bind
@@ -175,17 +175,17 @@ rules.
 #.  If the controller returns successfully, ``model.clear()`` is
     called.
 
-Also note that there is a useful :func:`@after_commit` decorator provided
-in :ref:`pecan_decorators`.
+Also note that there is a useful :func:`~pecan.decorators.after_commit`
+decorator provided in :ref:`pecan_decorators`.
 
 Splitting Reads and Writes
 --------------------------
 
-Employing the strategy above with :class:`TransactionHook` makes it very
-simple to split database reads and writes based upon HTTP methods
+Employing the strategy above with :class:`~pecan.hooks.TransactionHook` makes
+it very simple to split database reads and writes based upon HTTP methods
 (i.e., GET/HEAD requests are read-only and would potentially be routed
 to a read-only database slave, while POST/PUT/DELETE requests require
 writing, and would always bind to a master database with read/write
-privileges).  It's also possible to extend :class:`TransactionHook` or
-write your own hook implementation for more refined control over where
-and when database bindings are called.
+privileges).  It's also possible to extend
+:class:`~pecan.hooks.TransactionHook` or write your own hook implementation for
+more refined control over where and when database bindings are called.

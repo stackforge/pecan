@@ -74,10 +74,10 @@ Exposing Controllers
 --------------------
 
 You tell Pecan which methods in a class are publically-visible via
-:func:`@expose`. If a method is *not* decorated with :func:`@expose`,
-Pecan will never route a request to it. :func:`@expose` accepts three
-optional parameters, some of which can impact routing and the content
-type of the response body.
+:func:`~pecan.decorators.expose`. If a method is *not* decorated with
+:func:`~pecan.decorators.expose`, Pecan will never route a request to it.
+:func:`~pecan.decorators.expose` accepts three optional parameters, some of
+which can impact routing and the content type of the response body.
 
 ::
 
@@ -106,8 +106,8 @@ Let's look at an example using ``template`` and ``content_type``:
         def hello(self):
             return {'msg': 'Hello!'}
 
-You'll notice that we called :func:`expose` three times, with different
-arguments.
+You'll notice that we called :func:`~pecan.decoators.expose` three times, with
+different arguments.
 
 ::
 
@@ -143,8 +143,8 @@ Pecan's Routing Algorithm
 Sometimes, the standard object-dispatch routing isn't adequate to properly
 route a URL to a controller. Pecan provides several ways to short-circuit
 the object-dispatch system to process URLs with more control, including the
-special :func:`_lookup`, :func:`_default`, and :func:`_route` methods. Defining these
-methods on your controller objects provides additional flexibility for
+special :func:`_lookup`, :func:`_default`, and :func:`_route` methods. Defining
+these methods on your controller objects provides additional flexibility for
 processing all or part of a URL.
 
 
@@ -165,7 +165,7 @@ modifying the ``status`` attribute of the response object.
             response.status = 201
             return {'foo': 'bar'}
 
-Use the utility function :func:`abort` to raise HTTP errors.
+Use the utility function :func:`~pecan.core.abort` to raise HTTP errors.
 
 ::
 
@@ -178,8 +178,8 @@ Use the utility function :func:`abort` to raise HTTP errors.
             abort(404)
 
 
-:func:`abort` raises an instance of
-:class:`webob.exc.WSGIHTTPException` which is used by Pecan to render
+:func:`~pecan.core.abort` raises an instance of
+:class:`~webob.exc.WSGIHTTPException` which is used by Pecan to render
 :default response bodies for HTTP errors.  This exception is stored in
 :the WSGI request environ at ``pecan.original_exception``, where it
 :can be accessed later in the request cycle (by, for example, other
@@ -262,9 +262,9 @@ Defining Customized Routing with ``_route``
 
 The :func:`_route` method allows a controller to completely override the routing
 mechanism of Pecan. Pecan itself uses the :func:`_route` method to implement its
-:class:`RestController`. If you want to design an alternative routing system on
-top of Pecan, defining a base controller class that defines a :func:`_route` method
-will enable you to have total control.
+:class:`~pecan.rest.RestController`. If you want to design an alternative
+routing system on top of Pecan, defining a base controller class that defines
+a :func:`_route` method will enable you to have total control.
 
 
 Mapping Controller Arguments
@@ -359,8 +359,8 @@ Helper Functions
 ----------------
 
 Pecan also provides several useful helper functions for moving between
-different routes. The :func:`redirect` function allows you to issue internal or
-``HTTP 302`` redirects.
+different routes. The :func:`~pecan.core.redirect` function allows you to issue
+internal or ``HTTP 302`` redirects.
 
 .. seealso::
 

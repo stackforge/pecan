@@ -178,13 +178,17 @@ class SecureControllerBase(object):
 
     @classmethod
     def check_permissions(cls):
+        """
+        Returns `True` or `False` to grant access.  Implemented in subclasses
+        of :class:`SecureController`.
+        """
         return False
 
 
 SecureController = SecureControllerMeta(
     'SecureController',
     (SecureControllerBase,),
-    {}
+    {'__doc__': SecureControllerMeta.__doc__}
 )
 
 

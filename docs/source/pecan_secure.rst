@@ -9,3 +9,11 @@ security into your applications.
 .. automodule:: pecan.secure
   :members:
   :show-inheritance:
+
+.. autoclass:: pecan.secure.SecureControllerBase
+  :members:
+  :show-inheritance:
+
+.. autoclass:: pecan.secure.SecureController
+  :members:
+  :show-inheritance:

@@ -10,13 +10,17 @@ without having to write separate middleware.
 
 Hooks allow you to execute code at key points throughout the life cycle of your request:
 
-* :func:`on_route`: called before Pecan attempts to route a request to a controller
+* :func:`~pecan.hooks.PecanHook.on_route`: called before Pecan attempts to
+  route a request to a controller
 
-* :func:`before`: called after routing, but before controller code is run
+* :func:`~pecan.hooks.PecanHook.before`: called after routing, but before
+  controller code is run
 
-* :func:`after`: called after controller code has been run
+* :func:`~pecan.hooks.PecanHook.after`: called after controller code has been
+  run
 
-* :func:`on_error`: called when a request generates an exception
+* :func:`~pecan.hooks.PecanHook.on_error`: called when a request generates an
+  exception
 
 Implementating a Pecan Hook
 ---------------------------
@@ -24,9 +28,12 @@ Implementating a Pecan Hook
 In the below example, a simple hook will gather some information about
 the request and print it to ``stdout``.
 
-Your hook implementation needs to import :class:`PecanHook` so it can be
-used as a base class.  From there, you'll need to override the
-:func:`on_route`, :func:`before`, :func:`after`, or :func:`on_error` methods.
+Your hook implementation needs to import :class:`~pecan.hooks.PecanHook` so it
+can be used as a base class.  From there, you'll want to override the
+:func:`~pecan.hooks.PecanHook.on_route`, :func:`~pecan.hooks.PecanHook.before`,
+:func:`~pecan.hooks.PecanHook.after`, or
+:func:`~pecan.hooks.PecanHook.on_error` methods to
+define behavior.
 
 ::
 
@@ -41,14 +48,44 @@ used as a base class.  From there, you'll need to override the
             print "\nmethod: \t %s" % state.request.method
             print "\nresponse: \t %s" % state.response.status
             
-:func:`on_route`, :func:`before`, and :func:`after` are each passed a shared state
-object which includes useful information, such as
-the request and response objects, and which controller was selected by
-Pecan's routing.
+:func:`~pecan.hooks.PecanHook.on_route`, :func:`~pecan.hooks.PecanHook.before`,
+and :func:`~pecan.hooks.PecanHook.after` are each passed a shared
+state object which includes useful information, such as the request and
+response objects, and which controller was selected by Pecan's routing::
 
-:func:`on_error` is passed a shared state object **and** the original exception. If
-an :func:`on_error` handler returns a Response object, this response will be returned
-to the end user and no furthur :func:`on_error` hooks will be executed.
+    class SimpleHook(PecanHook):
+
+        def on_route(self, state):
+            print "\nabout to map the URL to a Python method (controller)..."
+            assert state.controller is None  # Routing hasn't occurred yet
+            assert isinstance(state.request, webob.Request)
+            assert isinstance(state.response, webob.Response)
+            assert isinstance(state.hooks, list)  # A list of hooks to apply
+
+        def before(self, state):
+            print "\nabout to enter the controller..."
+            if state.request.path == '/':
+                #
+                # `state.controller` is a reference to the actual
+                # `@pecan.expose()`-ed controller that will be routed to
+                # and used to generate the response body
+                #
+                assert state.controller.__func__ is RootController.index.__func__
+            assert isinstance(state.request, webob.Request)
+            assert isinstance(state.response, webob.Response)
+            assert isinstance(state.hooks, list)
+
+
+:func:`~pecan.hooks.PecanHook.on_error` is passed a shared state object **and**
+the original exception. If an :func:`~pecan.hooks.PecanHook.on_error` handler
+returns a Response object, this response will be returned to the end user and
+no furthur :func:`~pecan.hooks.PecanHook.on_error` hooks will be executed::
+
+    class CustomErrorHook(PecanHook):
+
+        def on_error(self, state, exc):
+            if isinstance(exc, SomeExceptionType):
+                return webob.Response('Custom Error!', status=500)
 
 Attaching Hooks
 ---------------
@@ -65,7 +102,8 @@ in your project's configuration file.
     }
 
 Hooks can also be applied selectively to controllers and their sub-controllers
-using the :attr:`__hooks__` attribute on one or more controllers.
+using the :attr:`__hooks__` attribute on one or more controllers and
+subclassing :class:`~pecan.hooks.HookController`.
 
 ::
 
@@ -82,8 +120,8 @@ using the :attr:`__hooks__` attribute on one or more controllers.
             print "DO SOMETHING!"
             return dict()
 
-Now that :class:`SimpleHook` is included, let's see what happens when we run
-the app and browse the application from our web browser.
+Now that :class:`SimpleHook` is included, let's see what happens
+when we run the app and browse the application from our web browser.
 
 ::
 

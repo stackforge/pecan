@@ -1,15 +1,3 @@
-.. |FileHandler| replace:: ``FileHandler``
-.. _FileHandler: http://docs.python.org/dev/library/logging.handlers.html#filehandler
-
-.. |RotatingFileHandler| replace:: ``RotatingFileHandler``
-.. _RotatingFileHandler: http://docs.python.org/dev/library/logging.handlers.html#rotatingfilehandler
-
-.. |SysLogHandler| replace:: ``SysLogHandler``
-.. _SysLogHandler: http://docs.python.org/dev/library/logging.handlers.html#sysloghandler
-
-.. |SMTPHandler| replace:: ``SMTPHandler``
-.. _SMTPHandler: http://docs.python.org/dev/library/logging.handlers.html#smtphandler
-
 .. _logging:
 
 Logging
@@ -101,11 +89,13 @@ Logging to Files and Other Locations
 Python's :py:mod:`logging` library defines a variety of handlers that assist in
 writing logs to file.  A few interesting ones are:
 
-* |FileHandler|_ - used to log messages to a file on the filesystem
-* |RotatingFileHandler|_ - similar to |FileHandler|_, but also rotates logs
+* :class:`~logging.FileHandler` - used to log messages to a file on the filesystem
+* :class:`~logging.handlers.RotatingFileHandler` - similar to
+  :class:`~logging.FileHandler`, but also rotates logs
   periodically
-* |SysLogHandler|_ - used to log messages to a UNIX syslog
-* |SMTPHandler|_ - used to log messages to an email address via SMTP
+* :class:`~logging.handlers.SysLogHandler` - used to log messages to a UNIX syslog
+* :class:`~logging.handlers.SMTPHandler` - used to log messages to an email
+  address via SMTP
 
 Using any of them is as simple as defining a new handler in your
 application's ``logging`` block and assigning it to one of more loggers.
@@ -114,7 +104,7 @@ Logging Requests with Paste Translogger
 ---------------------------------------
 
 `Paste <http://pythonpaste.org/>`_ (which is not included with Pecan) includes
-the `TransLogger <http://pythonpaste.org/modules/translogger.html>`_ middleware
+the :class:`~paste.translogger.TransLogger` middleware
 for logging requests in `Apache Combined Log Format
 <http://httpd.apache.org/docs/2.2/logs.html#combined>`_. Combined with
 file-based logging, TransLogger can be used to create an ``access.log`` file
@@ -136,9 +126,9 @@ project's ``app.py`` as follows::
         app = TransLogger(app, setup_console_handler=False)
         return app
 
-By default, ``TransLogger`` creates a logger named ``wsgi``, so you'll need to
-specify a new (file-based) handler for this logger in our Pecan configuration
-file::
+By default, :class:`~paste.translogger.TransLogger` creates a logger named
+``wsgi``, so you'll need to specify a new (file-based) handler for this logger
+in our Pecan configuration file::
 
     # myapp/config.py
 
