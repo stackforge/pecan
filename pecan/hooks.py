@@ -242,14 +242,14 @@ class RequestViewerHook(PecanHook):
     **blacklist**
 
     This key holds items that will be blacklisted based on ``url``. If
-    there is a need to ommit urls that start with `/javascript`, then this
+    there is a need to omit urls that start with `/javascript`, then this
     key would look like::
 
         'blacklist': ['/javascript']
 
     As many blacklisting items as needed can be contained in the list. The hook
     will verify that the url is not starting with items in this list to display
-    results, otherwise it will get ommited.
+    results, otherwise it will get omitted.
 
     .. note::
         This key should always use a ``list`` of items to use.
