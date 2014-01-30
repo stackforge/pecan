@@ -15,6 +15,7 @@ logging = {
     'loggers': {
         'root': {'level': 'INFO', 'handlers': ['console']},
         '${package}': {'level': 'DEBUG', 'handlers': ['console']},
+        'pecan.commands.serve': {'level': 'DEBUG', 'handlers': ['console']},
         'py.warnings': {'handlers': ['console']},
         '__force_dict__': True
     },
@@ -22,13 +23,19 @@ logging = {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'simple'
+            'formatter': 'color'
         }
     },
     'formatters': {
         'simple': {
             'format': ('%(asctime)s %(levelname)-5.5s [%(name)s]'
                        '[%(threadName)s] %(message)s')
+        },
+        'color': {
+            '()': 'pecan.log.ColorFormatter',
+            'format': ('%(asctime)s [%(padded_color_levelname)s] [%(name)s]'
+                       '[%(threadName)s] %(message)s'),
+        '__force_dict__': True
         }
     }
 }
