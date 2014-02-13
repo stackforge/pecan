@@ -289,6 +289,45 @@ class TestRestController(PecanTestCase):
         assert r.status_int == 200
         assert r.body == b_(dumps(dict(items=ThingsController.data)))
 
+    def test_getall_with_lookup(self):
+
+        class LookupController(RestController):
+
+            def __init__(self, _id):
+                self._id = _id
+
+            @expose()
+            def get_all(self):
+                return 'ID: %s' % self._id
+
+        class ThingsController(RestController):
+
+            data = ['zero', 'one', 'two', 'three']
+
+            @expose()
+            def _lookup(self, _id, *remainder):
+                return LookupController(_id), remainder
+
+            @expose('json')
+            def get_all(self):
+                return dict(items=self.data)
+
+        class RootController(object):
+            things = ThingsController()
+
+        # create the app
+        app = TestApp(make_app(RootController()))
+
+        # test get_all
+        for path in ('/things', '/things/'):
+            r = app.get(path)
+            assert r.status_int == 200
+            assert r.body == b_(dumps(dict(items=ThingsController.data)))
+
+        r = app.get('/things/foo')
+        assert r.status_int == 200
+        assert r.body == b_('ID: foo')
+
     def test_simple_nested_rest(self):
 
         class BarController(RestController):

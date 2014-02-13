@@ -1,6 +1,7 @@
 from inspect import getargspec, ismethod
 
 from webob import exc
+import six
 
 from .core import abort, request
 from .decorators import expose
@@ -62,6 +63,9 @@ class RestController(object):
 
         try:
             result = handler(method, args)
+
+            # filter empty strings from the arg list
+            args = list(six.moves.filter(bool, args))
 
             #
             # If the signature of the handler does not match the number
