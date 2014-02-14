@@ -598,3 +598,4 @@ class Pecan(object):
             del state.request
             del state.response
             del state.controller
+            del state.app

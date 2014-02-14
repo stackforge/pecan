@@ -972,7 +972,7 @@ class TestThreadLocalState(PecanTestCase):
         assert r.status_int == 200
         assert r.body == b_('/')
 
-        assert list(state.__dict__.keys()) == ['app']
+        assert state.__dict__ == {}
 
 
 class TestFileTypeExtensions(PecanTestCase):
