@@ -267,6 +267,34 @@ routing system on top of Pecan, defining a base controller class that defines
 a :func:`_route` method will enable you to have total control.
 
 
+Interacting with the Request and Response Object
+------------------------------------------------
+
+For every HTTP request, Pecan maintains a thread-local reference to the request
+and response object, ``pecan.request`` and ``pecan.response``.  These are
+instances of :class:`webob.request.BaseRequest` and
+:class:`webob.response.Response`, respectively, and can be interacted with from
+within Pecan controller code::
+
+    @pecan.expose()
+    def login(self):
+        assert pecan.request.path == '/login'
+        username = pecan.request.POST.get('username')
+        password = pecan.request.POST.get('password')
+
+        pecan.response.status_int = 403
+        pecan.response.body = 'Bad Login!'
+
+While Pecan abstracts away much of the need to interact with these objects
+directly, there may be situations where you want to access them, such as:
+
+* Inspecting components of the URI
+* Determining aspects of the request, such as the user's IP address, or the
+  referer header
+* Setting specific response headers
+* Manually rendering a response body
+
+
 Mapping Controller Arguments
 ----------------------------
 
