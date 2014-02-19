@@ -1,3 +1,11 @@
+0.4.5
+=====
+* Fixed a trailing slash bug for `RestController`s that have a `_lookup` method.
+* Cleaned up the WSGI app reference from the threadlocal state on every request
+  (to avoid potential memory leaks, especially when testing).
+* Improved pecan documentation and correctd intersphinx references.
+* pecan supports Python 3.4.
+
 0.4.4
 =====
 * Removed memoization of certain controller attributes, which can lead to
