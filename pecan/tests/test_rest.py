@@ -289,6 +289,38 @@ class TestRestController(PecanTestCase):
         assert r.status_int == 200
         assert r.body == b_(dumps(dict(items=ThingsController.data)))
 
+    def test_404_with_lookup(self):
+
+        class LookupController(RestController):
+
+            def __init__(self, _id):
+                self._id = _id
+
+            @expose()
+            def get_all(self):
+                return 'ID: %s' % self._id
+
+        class ThingsController(RestController):
+
+            @expose()
+            def _lookup(self, _id, *remainder):
+                return LookupController(_id), remainder
+
+        class RootController(object):
+            things = ThingsController()
+
+        # create the app
+        app = TestApp(make_app(RootController()))
+
+        # these should 404
+        for path in ('/things', '/things/'):
+            r = app.get(path, expect_errors=True)
+            assert r.status_int == 404
+
+        r = app.get('/things/foo')
+        assert r.status_int == 200
+        assert r.body == b_('ID: foo')
+
     def test_getall_with_lookup(self):
 
         class LookupController(RestController):

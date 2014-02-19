@@ -64,9 +64,6 @@ class RestController(object):
         try:
             result = handler(method, args)
 
-            # filter empty strings from the arg list
-            args = list(six.moves.filter(bool, args))
-
             #
             # If the signature of the handler does not match the number
             # of remaining positional arguments, attempt to handle
@@ -92,6 +89,9 @@ class RestController(object):
         return result
 
     def _handle_lookup(self, args):
+        # filter empty strings from the arg list
+        args = list(six.moves.filter(bool, args))
+
         # check for lookup controllers
         lookup = getattr(self, '_lookup', None)
         if args and iscontroller(lookup):
