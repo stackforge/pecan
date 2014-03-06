@@ -118,6 +118,7 @@ setup(
     create = pecan.commands:CreateCommand
     [pecan.scaffold]
     base = pecan.scaffolds:BaseScaffold
+    rest-api = pecan.scaffolds:RestAPIScaffold
     [console_scripts]
     pecan = pecan.commands:CommandRunner.handle_command_line
     gunicorn_pecan = pecan.commands.serve:gunicorn_run

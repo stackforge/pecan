@@ -1,0 +1,6 @@
+[nosetests]
+match=^test
+where=${package}
+nocapture=1
+cover-package=${package}
+cover-erase=1

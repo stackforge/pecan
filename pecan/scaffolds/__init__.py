@@ -42,6 +42,10 @@ class BaseScaffold(PecanScaffold):
     _scaffold_dir = ('pecan', os.path.join('scaffolds', 'base'))
 
 
+class RestAPIScaffold(PecanScaffold):
+    _scaffold_dir = ('pecan', os.path.join('scaffolds', 'rest-api'))
+
+
 def copy_dir(source, dest, variables, out_=sys.stdout, i=0):
     """
     Copies the ``source`` directory to the ``dest`` directory, where

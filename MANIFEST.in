@@ -1,4 +1,6 @@
 recursive-include pecan/scaffolds/base *
 include pecan/scaffolds/base/*
+recursive-include pecan/scaffolds/rest-api *
+include pecan/scaffolds/rest-api/*
 include pecan/middleware/resources/*
 include LICENSE README.rst requirements.txt
