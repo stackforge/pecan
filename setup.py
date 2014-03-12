@@ -1,4 +1,5 @@
 import sys
+import platform
 
 from setuptools import setup, find_packages
 
@@ -60,7 +61,9 @@ if sys.version_info < (2, 7):
 
 if sys.version_info < (3, 0):
     # These don't support Python3 yet - don't run their tests
-    tests_require += ['Kajiki']
+    if platform.python_implementation() != 'PyPy':
+        # Kajiki is not pypy-compatible
+        tests_require += ['Kajiki']
     tests_require += ['Genshi']
 else:
     # Genshi added Python3 support in 0.7
@@ -96,6 +99,7 @@ setup(
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Internet :: WWW/HTTP :: WSGI',
         'Topic :: Software Development :: Libraries :: Application Frameworks'
     ],
