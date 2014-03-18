@@ -2,7 +2,6 @@ try:
     from simplejson import loads
 except ImportError:             # pragma: no cover
     from json import loads      # noqa
-from threading import local
 from itertools import chain
 from mimetypes import guess_type, add_type
 from os.path import splitext
@@ -24,7 +23,7 @@ from .middleware.recursive import ForwardRequestException
 # make sure that json is defined in mimetypes
 add_type('application/json', '.json', True)
 
-state = local()
+state = None
 logger = logging.getLogger(__name__)
 
 
@@ -200,7 +199,10 @@ class Pecan(object):
     def __init__(self, root, default_renderer='mako',
                  template_path='templates', hooks=lambda: [],
                  custom_renderers={}, extra_template_vars={},
-                 force_canonical=True, guess_content_type_from_ext=True, **kw):
+                 force_canonical=True, guess_content_type_from_ext=True,
+                 context_local_factory=None, **kw):
+
+        self.init_context_local(context_local_factory)
 
         if isinstance(root, six.string_types):
             root = self.__translate_root__(root)
@@ -220,6 +222,12 @@ class Pecan(object):
         self.template_path = template_path
         self.force_canonical = force_canonical
         self.guess_content_type_from_ext = guess_content_type_from_ext
+
+    def init_context_local(self, local_factory):
+        global state
+        if local_factory is None:
+            from threading import local as local_factory
+        state = local_factory()
 
     def __translate_root__(self, item):
         '''
