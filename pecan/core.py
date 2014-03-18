@@ -142,7 +142,7 @@ def render(template, namespace):
     return state.app.render(template, namespace)
 
 
-def load_app(config):
+def load_app(config, **kwargs):
     '''
     Used to load a ``Pecan`` application and its environment based on passed
     configuration.
@@ -158,7 +158,7 @@ def load_app(config):
     for package_name in getattr(_runtime_conf.app, 'modules', []):
         module = __import__(package_name, fromlist=['app'])
         if hasattr(module, 'app') and hasattr(module.app, 'setup_app'):
-            app = module.app.setup_app(_runtime_conf)
+            app = module.app.setup_app(_runtime_conf, **kwargs)
             app.config = _runtime_conf
             return app
     raise RuntimeError(
