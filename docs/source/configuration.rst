@@ -182,13 +182,14 @@ string argument if you need to prefix the keys in the returned dictionary.
     {'prefixed_app': {'prefixed_errors': {}, 'prefixed_template_path': '', 'prefixed_static_root': 'prefixed_public', [...]
 
 
-Dotted Keys and Native Dictionaries
------------------------------------
+Dotted Keys, Non-Python Idenfitiers, and Native Dictionaries
+------------------------------------------------------------
 
-Sometimes you want to specify a configuration option that includes dotted keys.
-This is especially common when configuring Python logging.  By passing
-a special key, ``__force_dict__``, individual configuration blocks can be
-treated as native dictionaries.
+Sometimes you want to specify a configuration option that includes dotted keys
+or is not a valid Python idenfitier, such as ``()``.  These situations are
+especially common when configuring Python logging.  By passing a special key,
+``__force_dict__``, individual configuration blocks can be treated as native
+dictionaries.
 
 ::
 
@@ -197,6 +198,11 @@ treated as native dictionaries.
             'root': {'level': 'INFO', 'handlers': ['console']},
             'sqlalchemy.engine': {'level': 'INFO', 'handlers': ['console']},
             '__force_dict__': True
+        },
+        'formatters': {
+            'custom': {
+                '()': 'my.package.customFormatter'
+            }
         }
     }
 
