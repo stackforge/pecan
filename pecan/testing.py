@@ -2,7 +2,7 @@ from pecan import load_app
 from webtest import TestApp
 
 
-def load_test_app(config=None):
+def load_test_app(config=None, **kwargs):
     """
     Used for functional tests where you need to test your
     literal application and its integration with the framework.
@@ -32,4 +32,4 @@ def load_test_app(config=None):
         resp = app.get('/path/to/some/resource').status_int
         assert resp.status_int == 200
     """
-    return TestApp(load_app(config))
+    return TestApp(load_app(config, **kwargs))
