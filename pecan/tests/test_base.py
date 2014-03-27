@@ -867,9 +867,9 @@ class TestRedirect(PecanTestCase):
         res = app.get(
             '/child', extra_environ=dict(HTTP_X_FORWARDED_PROTO='https')
         )
-        ##non-canonical url will redirect, so we won't get a 301
+        # non-canonical url will redirect, so we won't get a 301
         assert res.status_int == 302
-        ##should add trailing / and changes location to https
+        # should add trailing / and changes location to https
         assert res.location == 'https://localhost/child/'
         assert res.request.environ['HTTP_X_FORWARDED_PROTO'] == 'https'
 

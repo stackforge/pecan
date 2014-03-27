@@ -142,7 +142,7 @@ class ForwardRequestException(Exception):
             self.path_info = path_info
 
         # If the url can be treated as a path_info do that
-        if url and not '?' in str(url):
+        if url and '?' not in str(url):
             self.path_info = url
 
         # Base middleware

@@ -89,9 +89,9 @@ class GenericJSON(JSONEncoder):
         elif isinstance(obj, (date, datetime)):
             return str(obj)
         elif isinstance(obj, Decimal):
-              # XXX What to do about JSONEncoder crappy handling of Decimals?
-              # SimpleJSON has better Decimal encoding than the std lib
-              # but only in recent versions
+            # XXX What to do about JSONEncoder crappy handling of Decimals?
+            # SimpleJSON has better Decimal encoding than the std lib
+            # but only in recent versions
             return float(obj)
         elif is_saobject(obj):
             props = {}
