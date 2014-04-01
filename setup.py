@@ -3,7 +3,7 @@ import platform
 
 from setuptools import setup, find_packages
 
-version = '0.4.5'
+version = '0.5.0'
 
 #
 # determine requirements

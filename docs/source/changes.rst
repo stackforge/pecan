@@ -1,9 +1,22 @@
+0.5.0
+=====
+* This release adds formal support for pypy.
+* Added colored request logging to the `pecan serve` command.
+* Added a scaffold for easily generating a basic REST API.
+* Added the ability to pass arbitrary keyword arguments to
+  `pecan.testing.load_test_app`.
+* Fixed a recursion-related bug in the error document middleware.
+* Fixed a bug in the `gunicorn_pecan` command that caused `threading.local`
+  data to leak between eventlet/gevent green threads.
+* Improved documentation through fixes and narrative tutorials for sample pecan
+  applications.
+
 0.4.5
 =====
 * Fixed a trailing slash bug for `RestController`s that have a `_lookup` method.
 * Cleaned up the WSGI app reference from the threadlocal state on every request
   (to avoid potential memory leaks, especially when testing).
-* Improved pecan documentation and correctd intersphinx references.
+* Improved pecan documentation and corrected intersphinx references.
 * pecan supports Python 3.4.
 
 0.4.4
