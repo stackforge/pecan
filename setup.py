@@ -23,15 +23,6 @@ except:
         requirements.append("simplejson >= 2.1.1")
 
 try:
-    from logging.config import dictConfig  # noqa
-except ImportError:
-    #
-    # This was introduced in Python 2.7 - the logutils package contains
-    # a backported replacement for 2.6
-    #
-    requirements.append('logutils')
-
-try:
     import argparse  # noqa
 except:
     #

@@ -2,12 +2,19 @@
 Serve command for Pecan.
 """
 from __future__ import print_function
+import logging
 import os
 import sys
 import time
 import subprocess
+from wsgiref.simple_server import WSGIRequestHandler
+
 
 from pecan.commands import BaseCommand
+from pecan import util
+
+
+logger = logging.getLogger(__name__)
 
 
 class ServeCommand(BaseCommand):
@@ -100,7 +107,12 @@ class ServeCommand(BaseCommand):
         from wsgiref.simple_server import make_server
 
         host, port = conf.server.host, int(conf.server.port)
-        srv = make_server(host, port, app)
+        srv = make_server(
+            host,
+            port,
+            app,
+            handler_class=PecanWSGIRequestHandler,
+        )
 
         print('Starting server in PID %s' % os.getpid())
 
@@ -178,3 +190,34 @@ def gunicorn_run():
             return deploy(self.cfgfname)
 
     PecanApplication("%(prog)s [OPTIONS] config.py").run()
+
+
+class PecanWSGIRequestHandler(WSGIRequestHandler, object):
+    """
+    A wsgiref request handler class that allows actual log output depending on
+    the application configuration.
+    """
+
+    def __init__(self, *args, **kwargs):
+        # We set self.path to avoid crashes in log_message() on unsupported
+        # requests (like "OPTIONS").
+        self.path = ''
+        super(PecanWSGIRequestHandler, self).__init__(*args, **kwargs)
+
+    def log_message(self, format, *args):
+        """
+        overrides the ``log_message`` method from the wsgiref server so that
+        normal logging works with whatever configuration the application has
+        been set to.
+
+        Levels are inferred from the HTTP status code, 4XX codes are treated as
+        warnings, 5XX as errors and everything else as INFO level.
+        """
+        code = args[1][0]
+        levels = {
+            '4': 'warning',
+            '5': 'error'
+        }
+
+        log_handler = getattr(logger, levels.get(code, 'info'))
+        log_handler(format % args)
