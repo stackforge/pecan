@@ -4,8 +4,8 @@ Pecan
 A WSGI object-dispatching web framework, designed to be lean and fast with few
 dependencies.
 
-.. image:: https://pypip.in/v/pecan/badge.png
-    :target: https://crate.io/packages/pecan/
+.. image:: https://badge.fury.io/py/pecan.svg
+    :target: https://pypi.python.org/pypi/pecan/
     :alt: Latest PyPI version
 
 Installing
