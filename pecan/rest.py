@@ -176,6 +176,12 @@ class RestController(object):
         if not remainder or remainder == ['']:
             controller = self._find_controller('get_all', 'get')
             if controller:
+                argspec = getargspec(controller)
+                fixed_args = len(argspec.args[1:]) - len(
+                    request.pecan.get('routing_args', [])
+                )
+                if len(remainder) < fixed_args:
+                    abort(404)
                 return controller, []
             abort(404)
 

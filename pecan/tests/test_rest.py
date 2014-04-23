@@ -741,6 +741,49 @@ class TestRestController(PecanTestCase):
             r = app.request('/things', method='RESET', status=404)
             assert r.status_int == 404
 
+    def test_nested_rest_with_missing_intermediate_id(self):
+
+        class BarsController(RestController):
+
+            data = [['zero-zero', 'zero-one'], ['one-zero', 'one-one']]
+
+            @expose('json')
+            def get_all(self, foo_id):
+                return dict(items=self.data[int(foo_id)])
+
+        class FoosController(RestController):
+
+            data = ['zero', 'one']
+
+            bars = BarsController()
+
+            @expose()
+            def get_one(self, id):
+                return self.data[int(id)]
+
+            @expose('json')
+            def get_all(self):
+                return dict(items=self.data)
+
+        class RootController(object):
+            foos = FoosController()
+
+        # create the app
+        app = TestApp(make_app(RootController()))
+
+        # test get_all
+        r = app.get('/foos')
+        assert r.status_int == 200
+        assert r.body == b_(dumps(dict(items=FoosController.data)))
+
+        # test nested get_all
+        r = app.get('/foos/1/bars')
+        assert r.status_int == 200
+        assert r.body == b_(dumps(dict(items=BarsController.data[1])))
+
+        r = app.get('/foos/bars', expect_errors=True)
+        assert r.status_int == 404
+
     def test_custom_with_trailing_slash(self):
 
         class CustomController(RestController):
