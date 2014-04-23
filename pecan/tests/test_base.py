@@ -46,7 +46,7 @@ class TestEmptyContent(PecanTestCase):
 
     def test_empty_index(self):
         r = self.app_.get('/')
-        self.assertEqual(r.status_int, 200)
+        self.assertEqual(r.status_int, 204)
         self.assertEqual(r.headers['Content-Length'], '0')
         self.assertEqual(len(r.body), 0)
 
@@ -1005,7 +1005,7 @@ class TestFileTypeExtensions(PecanTestCase):
 
     def test_hidden_file(self):
         r = self.app_.get('/.vimrc')
-        assert r.status_int == 200
+        assert r.status_int == 204
         assert r.body == b_('')
 
     def test_multi_dot_extension(self):

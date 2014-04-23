@@ -547,10 +547,12 @@ class Pecan(object):
             testing_variables['controller_output'] = result
 
         # set the body content
-        if isinstance(result, six.text_type):
+        if result and isinstance(result, six.text_type):
             resp.text = result
         elif result:
             resp.body = result
+        elif response.status_int == 200:
+            response.status = 204
 
         # set the content type
         if pecan_state['content_type']:
