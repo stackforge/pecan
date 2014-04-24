@@ -47,6 +47,7 @@ class TestEmptyContent(PecanTestCase):
     def test_empty_index(self):
         r = self.app_.get('/')
         self.assertEqual(r.status_int, 204)
+        self.assertNotIn('Content-Type', r.headers)
         self.assertEqual(r.headers['Content-Length'], '0')
         self.assertEqual(len(r.body), 0)
 

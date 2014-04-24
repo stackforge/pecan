@@ -552,10 +552,12 @@ class Pecan(object):
         elif result:
             resp.body = result
         elif response.status_int == 200:
-            response.status = 204
+            resp.status = 204
 
-        # set the content type
-        if pecan_state['content_type']:
+        if resp.status_int in (204, 304):
+            resp.content_type = None
+        elif pecan_state['content_type']:
+            # set the content type
             resp.content_type = pecan_state['content_type']
 
     def __call__(self, environ, start_response):
