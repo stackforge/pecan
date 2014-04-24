@@ -27,7 +27,7 @@ class TestRootController(FunctionalTest):
 
     def test_delete(self):
         response = self.app.delete('/people/1')
-        assert response.status_int == 200
+        assert response.status_int == 204
 
     def test_not_found(self):
         response = self.app.get('/missing/', expect_errors=True)
