@@ -1,56 +1,40 @@
-import sys
-import os
-import json
+from json import dumps
 import warnings
-if sys.version_info < (2, 7):
-    import unittest2 as unittest  # pragma: nocover
-else:
-    import unittest  # pragma: nocover
 
-import webob
 from webtest import TestApp
-import six
 from six import b as b_
-from six.moves import cStringIO as StringIO
+from six import u as u_
+import webob
+import mock
 
-from pecan import (
-    Pecan, expose, request, response, redirect, abort, make_app,
-    override_template, render
-)
-from pecan.templating import (
-    _builtin_renderers as builtin_renderers, error_formatters
-)
-from pecan.decorators import accept_noncanonical
+from pecan import Pecan, expose, abort
+from pecan.rest import RestController
+from pecan.hooks import PecanHook, HookController
 from pecan.tests import PecanTestCase
 
 
-class SampleRootController(object):
-    pass
+class TestThreadingLocalUsage(PecanTestCase):
 
-
-class TestAppRoot(PecanTestCase):
-
-    def test_controller_lookup_by_string_path(self):
-        app = Pecan('pecan.tests.test_base.SampleRootController')
-        assert app.root and isinstance(app.root, SampleRootController)
-
-
-class TestEmptyContent(PecanTestCase):
     @property
-    def app_(self):
+    def root(self):
         class RootController(object):
             @expose()
-            def index(self):
-                pass
+            def index(self, req, resp):
+                assert isinstance(req, webob.BaseRequest)
+                assert isinstance(resp, webob.Response)
+                return 'Hello, World!'
 
-        return TestApp(Pecan(RootController()))
+        return RootController
 
-    def test_empty_index(self):
-        r = self.app_.get('/')
-        self.assertEqual(r.status_int, 204)
-        self.assertNotIn('Content-Type', r.headers)
-        self.assertEqual(r.headers['Content-Length'], '0')
-        self.assertEqual(len(r.body), 0)
+    def test_locals_are_not_used(self):
+        with mock.patch('threading.local', side_effect=AssertionError()):
+
+            app = TestApp(Pecan(self.root(), use_context_locals=False))
+            r = app.get('/')
+            assert r.status_int == 200
+            assert r.body == b_('Hello, World!')
+
+            self.assertRaises(AssertionError, Pecan, self.root)
 
 
 class TestIndexRouting(PecanTestCase):
@@ -59,10 +43,12 @@ class TestIndexRouting(PecanTestCase):
     def app_(self):
         class RootController(object):
             @expose()
-            def index(self):
+            def index(self, req, resp):
+                assert isinstance(req, webob.BaseRequest)
+                assert isinstance(resp, webob.Response)
                 return 'Hello, World!'
 
-        return TestApp(Pecan(RootController()))
+        return TestApp(Pecan(RootController(), use_context_locals=False))
 
     def test_empty_root(self):
         r = self.app_.get('/')
@@ -80,42 +66,70 @@ class TestIndexRouting(PecanTestCase):
         assert r.body == b_('Hello, World!')
 
 
-class TestObjectDispatch(PecanTestCase):
+class TestManualResponse(PecanTestCase):
+
+    def test_manual_response(self):
+
+        class RootController(object):
+            @expose()
+            def index(self, req, resp):
+                resp = webob.Response(resp.environ)
+                resp.body = b_('Hello, World!')
+                return resp
+
+        app = TestApp(Pecan(RootController(), use_context_locals=False))
+        r = app.get('/')
+        assert r.body == b_('Hello, World!'), r.body
+
+
+class TestDispatch(PecanTestCase):
 
     @property
     def app_(self):
         class SubSubController(object):
             @expose()
-            def index(self):
+            def index(self, req, resp):
+                assert isinstance(req, webob.BaseRequest)
+                assert isinstance(resp, webob.Response)
                 return '/sub/sub/'
 
             @expose()
-            def deeper(self):
+            def deeper(self, req, resp):
+                assert isinstance(req, webob.BaseRequest)
+                assert isinstance(resp, webob.Response)
                 return '/sub/sub/deeper'
 
         class SubController(object):
             @expose()
-            def index(self):
+            def index(self, req, resp):
+                assert isinstance(req, webob.BaseRequest)
+                assert isinstance(resp, webob.Response)
                 return '/sub/'
 
             @expose()
-            def deeper(self):
+            def deeper(self, req, resp):
+                assert isinstance(req, webob.BaseRequest)
+                assert isinstance(resp, webob.Response)
                 return '/sub/deeper'
 
             sub = SubSubController()
 
         class RootController(object):
             @expose()
-            def index(self):
+            def index(self, req, resp):
+                assert isinstance(req, webob.BaseRequest)
+                assert isinstance(resp, webob.Response)
                 return '/'
 
             @expose()
-            def deeper(self):
+            def deeper(self, req, resp):
+                assert isinstance(req, webob.BaseRequest)
+                assert isinstance(resp, webob.Response)
                 return '/deeper'
 
             sub = SubController()
 
-        return TestApp(Pecan(RootController()))
+        return TestApp(Pecan(RootController(), use_context_locals=False))
 
     def test_index(self):
         r = self.app_.get('/')
@@ -156,23 +170,23 @@ class TestLookups(PecanTestCase):
                 self.someID = someID
 
             @expose()
-            def index(self):
+            def index(self, req, resp):
                 return '/%s' % self.someID
 
             @expose()
-            def name(self):
+            def name(self, req, resp):
                 return '/%s/name' % self.someID
 
         class RootController(object):
             @expose()
-            def index(self):
+            def index(self, req, resp):
                 return '/'
 
             @expose()
             def _lookup(self, someID, *remainder):
                 return LookupController(someID), remainder
 
-        return TestApp(Pecan(RootController()))
+        return TestApp(Pecan(RootController(), use_context_locals=False))
 
     def test_index(self):
         r = self.app_.get('/')
@@ -197,7 +211,7 @@ class TestLookups(PecanTestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            app = TestApp(Pecan(RootController()))
+            app = TestApp(Pecan(RootController(), use_context_locals=False))
             r = app.get('/foo/bar', expect_errors=True)
             assert r.status_int == 404
 
@@ -211,7 +225,7 @@ class TestCanonicalLookups(PecanTestCase):
                 self.someID = someID
 
             @expose()
-            def index(self):
+            def index(self, req, resp):
                 return self.someID
 
         class UserController(object):
@@ -222,7 +236,7 @@ class TestCanonicalLookups(PecanTestCase):
         class RootController(object):
             users = UserController()
 
-        return TestApp(Pecan(RootController()))
+        return TestApp(Pecan(RootController(), use_context_locals=False))
 
     def test_canonical_lookup(self):
         assert self.app_.get('/users', expect_errors=404).status_int == 404
@@ -237,27 +251,28 @@ class TestControllerArguments(PecanTestCase):
     def app_(self):
         class RootController(object):
             @expose()
-            def index(self, id):
+            def index(self, req, resp, id):
                 return 'index: %s' % id
 
             @expose()
-            def multiple(self, one, two):
+            def multiple(self, req, resp, one, two):
                 return 'multiple: %s, %s' % (one, two)
 
             @expose()
-            def optional(self, id=None):
+            def optional(self, req, resp, id=None):
                 return 'optional: %s' % str(id)
 
             @expose()
-            def multiple_optional(self, one=None, two=None, three=None):
+            def multiple_optional(self, req, resp, one=None, two=None,
+                                  three=None):
                 return 'multiple_optional: %s, %s, %s' % (one, two, three)
 
             @expose()
-            def variable_args(self, *args):
+            def variable_args(self, req, resp, *args):
                 return 'variable_args: %s' % ', '.join(args)
 
             @expose()
-            def variable_kwargs(self, **kwargs):
+            def variable_kwargs(self, req, resp, **kwargs):
                 data = [
                     '%s=%s' % (key, kwargs[key])
                     for key in sorted(kwargs.keys())
@@ -265,7 +280,7 @@ class TestControllerArguments(PecanTestCase):
                 return 'variable_kwargs: %s' % ', '.join(data)
 
             @expose()
-            def variable_all(self, *args, **kwargs):
+            def variable_all(self, req, resp, *args, **kwargs):
                 data = [
                     '%s=%s' % (key, kwargs[key])
                     for key in sorted(kwargs.keys())
@@ -273,7 +288,7 @@ class TestControllerArguments(PecanTestCase):
                 return 'variable_all: %s' % ', '.join(list(args) + data)
 
             @expose()
-            def eater(self, id, dummy=None, *args, **kwargs):
+            def eater(self, req, resp, id, dummy=None, *args, **kwargs):
                 data = [
                     '%s=%s' % (key, kwargs[key])
                     for key in sorted(kwargs.keys())
@@ -291,7 +306,7 @@ class TestControllerArguments(PecanTestCase):
                 else:
                     return self.index, args
 
-        return TestApp(Pecan(RootController()))
+        return TestApp(Pecan(RootController(), use_context_locals=False))
 
     def test_required_argument(self):
         try:
@@ -300,7 +315,7 @@ class TestControllerArguments(PecanTestCase):
         except Exception as ex:
             assert type(ex) == TypeError
             assert ex.args[0] in (
-                "index() takes exactly 2 arguments (1 given)",
+                "index() takes exactly 4 arguments (3 given)",
                 "index() missing 1 required positional argument: 'id'"
             )  # this messaging changed in Python 3.3
 
@@ -702,7 +717,7 @@ class TestControllerArguments(PecanTestCase):
         except Exception as ex:
             assert type(ex) == TypeError
             assert ex.args[0] in (
-                "eater() takes at least 2 arguments (1 given)",
+                "eater() takes at least 4 arguments (3 given)",
                 "eater() missing 1 required positional argument: 'id'"
             )  # this messaging changed in Python 3.3
 
@@ -760,786 +775,538 @@ class TestControllerArguments(PecanTestCase):
         assert r.body == b_('eater: 10, dummy, day=12, month=1')
 
 
-class TestAbort(PecanTestCase):
+class TestRestController(PecanTestCase):
 
-    def test_abort(self):
-        class RootController(object):
+    @property
+    def app_(self):
+
+        class OthersController(object):
+
             @expose()
-            def index(self):
-                abort(404)
+            def index(self, req, resp):
+                return 'OTHERS'
 
-        app = TestApp(Pecan(RootController()))
-        r = app.get('/', status=404)
+            @expose()
+            def echo(self, req, resp, value):
+                return str(value)
+
+        class ThingsController(RestController):
+            data = ['zero', 'one', 'two', 'three']
+
+            _custom_actions = {'count': ['GET'], 'length': ['GET', 'POST']}
+
+            others = OthersController()
+
+            @expose()
+            def get_one(self, req, resp, id):
+                return self.data[int(id)]
+
+            @expose('json')
+            def get_all(self, req, resp):
+                return dict(items=self.data)
+
+            @expose()
+            def length(self, req, resp, id, value=None):
+                length = len(self.data[int(id)])
+                if value:
+                    length += len(value)
+                return str(length)
+
+            @expose()
+            def post(self, req, resp, value):
+                self.data.append(value)
+                resp.status = 302
+                return 'CREATED'
+
+            @expose()
+            def edit(self, req, resp, id):
+                return 'EDIT %s' % self.data[int(id)]
+
+            @expose()
+            def put(self, req, resp, id, value):
+                self.data[int(id)] = value
+                return 'UPDATED'
+
+            @expose()
+            def get_delete(self, req, resp, id):
+                return 'DELETE %s' % self.data[int(id)]
+
+            @expose()
+            def delete(self, req, resp, id):
+                del self.data[int(id)]
+                return 'DELETED'
+
+            @expose()
+            def reset(self, req, resp):
+                return 'RESET'
+
+            @expose()
+            def post_options(self, req, resp):
+                return 'OPTIONS'
+
+            @expose()
+            def options(self, req, resp):
+                abort(500)
+
+            @expose()
+            def other(self, req, resp):
+                abort(500)
+
+        class RootController(object):
+            things = ThingsController()
+
+        # create the app
+        return TestApp(Pecan(RootController(), use_context_locals=False))
+
+    def test_get_all(self):
+        r = self.app_.get('/things')
+        assert r.status_int == 200
+        assert r.body == b_(dumps(dict(items=['zero', 'one', 'two', 'three'])))
+
+    def test_get_one(self):
+        for i, value in enumerate(['zero', 'one', 'two', 'three']):
+            r = self.app_.get('/things/%d' % i)
+            assert r.status_int == 200
+            assert r.body == b_(value)
+
+    def test_post(self):
+        r = self.app_.post('/things', {'value': 'four'})
+        assert r.status_int == 302
+        assert r.body == b_('CREATED')
+
+    def test_custom_action(self):
+        r = self.app_.get('/things/3/edit')
+        assert r.status_int == 200
+        assert r.body == b_('EDIT three')
+
+    def test_put(self):
+        r = self.app_.put('/things/3', {'value': 'THREE!'})
+        assert r.status_int == 200
+        assert r.body == b_('UPDATED')
+
+    def test_put_with_method_parameter_and_get(self):
+        r = self.app_.get('/things/3?_method=put', {'value': 'X'}, status=405)
+        assert r.status_int == 405
+
+    def test_put_with_method_parameter_and_post(self):
+        r = self.app_.post('/things/3?_method=put', {'value': 'THREE!'})
+        assert r.status_int == 200
+        assert r.body == b_('UPDATED')
+
+    def test_get_delete(self):
+        r = self.app_.get('/things/3/delete')
+        assert r.status_int == 200
+        assert r.body == b_('DELETE three')
+
+    def test_delete_method(self):
+        r = self.app_.delete('/things/3')
+        assert r.status_int == 200
+        assert r.body == b_('DELETED')
+
+    def test_delete_with_method_parameter(self):
+        r = self.app_.get('/things/3?_method=DELETE', status=405)
+        assert r.status_int == 405
+
+    def test_delete_with_method_parameter_and_post(self):
+        r = self.app_.post('/things/3?_method=DELETE')
+        assert r.status_int == 200
+        assert r.body == b_('DELETED')
+
+    def test_custom_method_type(self):
+        r = self.app_.request('/things', method='RESET')
+        assert r.status_int == 200
+        assert r.body == b_('RESET')
+
+    def test_custom_method_type_with_method_parameter(self):
+        r = self.app_.get('/things?_method=RESET')
+        assert r.status_int == 200
+        assert r.body == b_('RESET')
+
+    def test_options(self):
+        r = self.app_.request('/things', method='OPTIONS')
+        assert r.status_int == 200
+        assert r.body == b_('OPTIONS')
+
+    def test_options_with_method_parameter(self):
+        r = self.app_.post('/things', {'_method': 'OPTIONS'})
+        assert r.status_int == 200
+        assert r.body == b_('OPTIONS')
+
+    def test_other_custom_action(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            r = self.app_.request('/things/other', method='MISC', status=405)
+            assert r.status_int == 405
+
+    def test_other_custom_action_with_method_parameter(self):
+        r = self.app_.post('/things/other', {'_method': 'MISC'}, status=405)
+        assert r.status_int == 405
+
+    def test_nested_controller_with_trailing_slash(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            r = self.app_.request('/things/others/', method='MISC')
+            assert r.status_int == 200
+            assert r.body == b_('OTHERS')
+
+    def test_nested_controller_without_trailing_slash(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            r = self.app_.request('/things/others', method='MISC', status=302)
+            assert r.status_int == 302
+
+    def test_invalid_custom_action(self):
+        r = self.app_.get('/things?_method=BAD', status=404)
         assert r.status_int == 404
 
-    def test_abort_with_detail(self):
-        class RootController(object):
-            @expose()
-            def index(self):
-                abort(status_code=401, detail='Not Authorized')
-
-        app = TestApp(Pecan(RootController()))
-        r = app.get('/', status=401)
-        assert r.status_int == 401
-
-
-class TestScriptName(PecanTestCase):
-
-    def setUp(self):
-        super(TestScriptName, self).setUp()
-        self.environ = {'SCRIPT_NAME': '/foo'}
-
-    def test_handle_script_name(self):
-        class RootController(object):
-            @expose()
-            def index(self):
-                return 'Root Index'
-
-        app = TestApp(Pecan(RootController()), extra_environ=self.environ)
-        r = app.get('/foo/')
+    def test_named_action(self):
+        # test custom "GET" request "length"
+        r = self.app_.get('/things/1/length')
         assert r.status_int == 200
+        assert r.body == b_(str(len('one')))
 
-
-class TestRedirect(PecanTestCase):
-
-    @property
-    def app_(self):
-        class RootController(object):
-            @expose()
-            def index(self):
-                redirect('/testing')
-
-            @expose()
-            def internal(self):
-                redirect('/testing', internal=True)
-
-            @expose()
-            def bad_internal(self):
-                redirect('/testing', internal=True, code=301)
-
-            @expose()
-            def permanent(self):
-                redirect('/testing', code=301)
-
-            @expose()
-            def testing(self):
-                return 'it worked!'
-
-        return TestApp(make_app(RootController(), debug=False))
-
-    def test_index(self):
-        r = self.app_.get('/')
-        assert r.status_int == 302
-        r = r.follow()
+    def test_named_nested_action(self):
+        # test custom "GET" request through subcontroller
+        r = self.app_.get('/things/others/echo?value=test')
         assert r.status_int == 200
-        assert r.body == b_('it worked!')
+        assert r.body == b_('test')
 
-    def test_internal(self):
-        r = self.app_.get('/internal')
+    def test_nested_post(self):
+        # test custom "POST" request through subcontroller
+        r = self.app_.post('/things/others/echo', {'value': 'test'})
         assert r.status_int == 200
-        assert r.body == b_('it worked!')
+        assert r.body == b_('test')
 
-    def test_internal_with_301(self):
-        self.assertRaises(ValueError, self.app_.get, '/bad_internal')
 
-    def test_permanent_redirect(self):
-        r = self.app_.get('/permanent')
-        assert r.status_int == 301
-        r = r.follow()
-        assert r.status_int == 200
-        assert r.body == b_('it worked!')
+class TestHooks(PecanTestCase):
 
-    def test_x_forward_proto(self):
-        class ChildController(object):
-            @expose()
-            def index(self):
-                redirect('/testing')  # pragma: nocover
+    def test_basic_single_hook(self):
+        run_hook = []
 
         class RootController(object):
             @expose()
-            def index(self):
-                redirect('/testing')  # pragma: nocover
+            def index(self, req, resp):
+                run_hook.append('inside')
+                return 'Hello, World!'
 
-            @expose()
-            def testing(self):
-                return 'it worked!'  # pragma: nocover
-            child = ChildController()
+        class SimpleHook(PecanHook):
+            def on_route(self, state):
+                run_hook.append('on_route')
 
-        app = TestApp(make_app(RootController(), debug=True))
-        res = app.get(
-            '/child', extra_environ=dict(HTTP_X_FORWARDED_PROTO='https')
-        )
-        # non-canonical url will redirect, so we won't get a 301
-        assert res.status_int == 302
-        # should add trailing / and changes location to https
-        assert res.location == 'https://localhost/child/'
-        assert res.request.environ['HTTP_X_FORWARDED_PROTO'] == 'https'
+            def before(self, state):
+                run_hook.append('before')
 
+            def after(self, state):
+                run_hook.append('after')
 
-class TestInternalRedirectContext(PecanTestCase):
+            def on_error(self, state, e):
+                run_hook.append('error')
 
-    @property
-    def app_(self):
-        class RootController(object):
+        app = TestApp(Pecan(
+            RootController(),
+            hooks=[SimpleHook()],
+            use_context_locals=False
+        ))
+        response = app.get('/')
+        assert response.status_int == 200
+        assert response.body == b_('Hello, World!')
 
-            @expose()
-            def redirect_with_context(self):
-                request.context['foo'] = 'bar'
-                redirect('/testing')
+        assert len(run_hook) == 4
+        assert run_hook[0] == 'on_route'
+        assert run_hook[1] == 'before'
+        assert run_hook[2] == 'inside'
+        assert run_hook[3] == 'after'
 
-            @expose()
-            def internal_with_context(self):
-                request.context['foo'] = 'bar'
-                redirect('/testing', internal=True)
-
-            @expose('json')
-            def testing(self):
-                return request.context
-
-        return TestApp(make_app(RootController(), debug=False))
-
-    def test_internal_with_request_context(self):
-        r = self.app_.get('/internal_with_context')
-        assert r.status_int == 200
-        assert json.loads(r.body.decode()) == {'foo': 'bar'}
-
-    def test_context_does_not_bleed(self):
-        r = self.app_.get('/redirect_with_context').follow()
-        assert r.status_int == 200
-        assert json.loads(r.body.decode()) == {}
-
-
-class TestStreamedResponse(PecanTestCase):
-
-    def test_streaming_response(self):
-
-        class RootController(object):
-            @expose(content_type='text/plain')
-            def test(self, foo):
-                if foo == 'stream':
-                    # mimic large file
-                    contents = six.BytesIO(b_('stream'))
-                    response.content_type = 'application/octet-stream'
-                    contents.seek(0, os.SEEK_END)
-                    response.content_length = contents.tell()
-                    contents.seek(0, os.SEEK_SET)
-                    response.app_iter = contents
-                    return response
-                else:
-                    return 'plain text'
-
-        app = TestApp(Pecan(RootController()))
-        r = app.get('/test/stream')
-        assert r.content_type == 'application/octet-stream'
-        assert r.body == b_('stream')
-
-        r = app.get('/test/plain')
-        assert r.content_type == 'text/plain'
-        assert r.body == b_('plain text')
-
-
-class TestManualResponse(PecanTestCase):
-
-    def test_manual_response(self):
+    def test_basic_multi_hook(self):
+        run_hook = []
 
         class RootController(object):
             @expose()
-            def index(self):
-                resp = webob.Response(response.environ)
-                resp.body = b_('Hello, World!')
-                return resp
+            def index(self, req, resp):
+                run_hook.append('inside')
+                return 'Hello, World!'
 
-        app = TestApp(Pecan(RootController()))
-        r = app.get('/')
-        assert r.body == b_('Hello, World!')
+        class SimpleHook(PecanHook):
+            def __init__(self, id):
+                self.id = str(id)
 
+            def on_route(self, state):
+                run_hook.append('on_route' + self.id)
 
-class TestThreadLocalState(PecanTestCase):
+            def before(self, state):
+                run_hook.append('before' + self.id)
 
-    def test_thread_local_dir(self):
-        """
-        Threadlocal proxies for request and response should properly
-        proxy ``dir()`` calls to the underlying webob class.
-        """
-        class RootController(object):
-            @expose()
-            def index(self):
-                assert 'method' in dir(request)
-                assert 'status' in dir(response)
-                return '/'
+            def after(self, state):
+                run_hook.append('after' + self.id)
 
-        app = TestApp(Pecan(RootController()))
-        r = app.get('/')
-        assert r.status_int == 200
-        assert r.body == b_('/')
+            def on_error(self, state, e):
+                run_hook.append('error' + self.id)
 
-    def test_request_state_cleanup(self):
-        """
-        After a request, the state local() should be totally clean
-        except for state.app (so that objects don't leak between requests)
-        """
-        from pecan.core import state
+        app = TestApp(Pecan(RootController(), hooks=[
+            SimpleHook(1), SimpleHook(2), SimpleHook(3)
+        ], use_context_locals=False))
+        response = app.get('/')
+        assert response.status_int == 200
+        assert response.body == b_('Hello, World!')
 
-        class RootController(object):
-            @expose()
-            def index(self):
-                return '/'
+        assert len(run_hook) == 10
+        assert run_hook[0] == 'on_route1'
+        assert run_hook[1] == 'on_route2'
+        assert run_hook[2] == 'on_route3'
+        assert run_hook[3] == 'before1'
+        assert run_hook[4] == 'before2'
+        assert run_hook[5] == 'before3'
+        assert run_hook[6] == 'inside'
+        assert run_hook[7] == 'after3'
+        assert run_hook[8] == 'after2'
+        assert run_hook[9] == 'after1'
 
-        app = TestApp(Pecan(RootController()))
-        r = app.get('/')
-        assert r.status_int == 200
-        assert r.body == b_('/')
-
-        assert state.__dict__ == {}
-
-
-class TestFileTypeExtensions(PecanTestCase):
-
-    @property
-    def app_(self):
-        """
-        Test extension splits
-        """
-        class RootController(object):
-            @expose(content_type=None)
-            def _default(self, *args):
-                ext = request.pecan['extension']
-                assert len(args) == 1
-                if ext:
-                    assert ext not in args[0]
-                return ext or ''
-
-        return TestApp(Pecan(RootController()))
-
-    def test_html_extension(self):
-        r = self.app_.get('/index.html')
-        assert r.status_int == 200
-        assert r.body == b_('.html')
-
-    def test_image_extension(self):
-        r = self.app_.get('/image.png')
-        assert r.status_int == 200
-        assert r.body == b_('.png')
-
-    def test_hidden_file(self):
-        r = self.app_.get('/.vimrc')
-        assert r.status_int == 204
-        assert r.body == b_('')
-
-    def test_multi_dot_extension(self):
-        r = self.app_.get('/gradient.min.js')
-        assert r.status_int == 200
-        assert r.body == b_('.js')
-
-    def test_bad_content_type(self):
-        class RootController(object):
-            @expose()
-            def index(self):
-                return '/'
-
-        app = TestApp(Pecan(RootController()))
-        r = app.get('/')
-        assert r.status_int == 200
-        assert r.body == b_('/')
-
-        r = app.get('/index.html', expect_errors=True)
-        assert r.status_int == 200
-        assert r.body == b_('/')
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            r = app.get('/index.txt', expect_errors=True)
-            assert r.status_int == 404
-
-    def test_unknown_file_extension(self):
-        class RootController(object):
-            @expose(content_type=None)
-            def _default(self, *args):
-                assert 'example:x.tiny' in args
-                assert request.pecan['extension'] is None
-                return 'SOME VALUE'
-
-        app = TestApp(Pecan(RootController()))
-
-        r = app.get('/example:x.tiny')
-        assert r.status_int == 200
-        assert r.body == b_('SOME VALUE')
-
-    def test_guessing_disabled(self):
-        class RootController(object):
-            @expose(content_type=None)
-            def _default(self, *args):
-                assert 'index.html' in args
-                assert request.pecan['extension'] is None
-                return 'SOME VALUE'
-
-        app = TestApp(Pecan(RootController(),
-                            guess_content_type_from_ext=False))
-
-        r = app.get('/index.html')
-        assert r.status_int == 200
-        assert r.body == b_('SOME VALUE')
-
-
-class TestContentTypeByAcceptHeaders(PecanTestCase):
-
-    @property
-    def app_(self):
-        """
-        Test that content type is set appropriately based on Accept headers.
-        """
-        class RootController(object):
-
-            @expose(content_type='text/html')
-            @expose(content_type='application/json')
-            def index(self, *args):
-                return 'Foo'
-
-        return TestApp(Pecan(RootController()))
-
-    def test_quality(self):
-        r = self.app_.get('/', headers={
-            'Accept': 'text/html,application/json;q=0.9,*/*;q=0.8'
-        })
-        assert r.status_int == 200
-        assert r.content_type == 'text/html'
-
-        r = self.app_.get('/', headers={
-            'Accept': 'application/json,text/html;q=0.9,*/*;q=0.8'
-        })
-        assert r.status_int == 200
-        assert r.content_type == 'application/json'
-
-    def test_file_extension_has_higher_precedence(self):
-        r = self.app_.get('/index.html', headers={
-            'Accept': 'application/json,text/html;q=0.9,*/*;q=0.8'
-        })
-        assert r.status_int == 200
-        assert r.content_type == 'text/html'
-
-    def test_not_acceptable(self):
-        r = self.app_.get('/', headers={
-            'Accept': 'application/xml',
-        }, status=406)
-        assert r.status_int == 406
-
-    def test_accept_header_missing(self):
-        r = self.app_.get('/')
-        assert r.status_int == 200
-        assert r.content_type == 'text/html'
-
-
-class TestCanonicalRouting(PecanTestCase):
-
-    @property
-    def app_(self):
-        class ArgSubController(object):
-            @expose()
-            def index(self, arg):
-                return arg
-
-        class AcceptController(object):
-            @accept_noncanonical
-            @expose()
-            def index(self):
-                return 'accept'
-
-        class SubController(object):
-            @expose()
-            def index(self, **kw):
-                return 'subindex'
+    def test_partial_hooks(self):
+        run_hook = []
 
         class RootController(object):
             @expose()
-            def index(self):
-                return 'index'
+            def index(self, req, resp):
+                run_hook.append('inside')
+                return 'Hello World!'
+
+            @expose()
+            def causeerror(self, req, resp):
+                return [][1]
+
+        class ErrorHook(PecanHook):
+            def on_error(self, state, e):
+                run_hook.append('error')
+
+        class OnRouteHook(PecanHook):
+            def on_route(self, state):
+                run_hook.append('on_route')
+
+        app = TestApp(Pecan(RootController(), hooks=[
+            ErrorHook(), OnRouteHook()
+        ], use_context_locals=False))
+
+        response = app.get('/')
+        assert response.status_int == 200
+        assert response.body == b_('Hello World!')
+
+        assert len(run_hook) == 2
+        assert run_hook[0] == 'on_route'
+        assert run_hook[1] == 'inside'
+
+        run_hook = []
+        try:
+            response = app.get('/causeerror')
+        except Exception as e:
+            assert isinstance(e, IndexError)
+
+        assert len(run_hook) == 2
+        assert run_hook[0] == 'on_route'
+        assert run_hook[1] == 'error'
+
+    def test_on_error_response_hook(self):
+        run_hook = []
+
+        class RootController(object):
+            @expose()
+            def causeerror(self, req, resp):
+                return [][1]
+
+        class ErrorHook(PecanHook):
+            def on_error(self, state, e):
+                run_hook.append('error')
+
+                r = webob.Response()
+                r.text = u_('on_error')
+
+                return r
+
+        app = TestApp(Pecan(RootController(), hooks=[
+            ErrorHook()
+        ], use_context_locals=False))
+
+        response = app.get('/causeerror')
+
+        assert len(run_hook) == 1
+        assert run_hook[0] == 'error'
+        assert response.text == 'on_error'
+
+    def test_prioritized_hooks(self):
+        run_hook = []
+
+        class RootController(object):
+            @expose()
+            def index(self, req, resp):
+                run_hook.append('inside')
+                return 'Hello, World!'
+
+        class SimpleHook(PecanHook):
+            def __init__(self, id, priority=None):
+                self.id = str(id)
+                if priority:
+                    self.priority = priority
+
+            def on_route(self, state):
+                run_hook.append('on_route' + self.id)
+
+            def before(self, state):
+                run_hook.append('before' + self.id)
+
+            def after(self, state):
+                run_hook.append('after' + self.id)
+
+            def on_error(self, state, e):
+                run_hook.append('error' + self.id)
+
+        papp = Pecan(RootController(), hooks=[
+            SimpleHook(1, 3), SimpleHook(2, 2), SimpleHook(3, 1)
+        ], use_context_locals=False)
+        app = TestApp(papp)
+        response = app.get('/')
+        assert response.status_int == 200
+        assert response.body == b_('Hello, World!')
+
+        assert len(run_hook) == 10
+        assert run_hook[0] == 'on_route3'
+        assert run_hook[1] == 'on_route2'
+        assert run_hook[2] == 'on_route1'
+        assert run_hook[3] == 'before3'
+        assert run_hook[4] == 'before2'
+        assert run_hook[5] == 'before1'
+        assert run_hook[6] == 'inside'
+        assert run_hook[7] == 'after1'
+        assert run_hook[8] == 'after2'
+        assert run_hook[9] == 'after3'
+
+    def test_basic_isolated_hook(self):
+        run_hook = []
+
+        class SimpleHook(PecanHook):
+            def on_route(self, state):
+                run_hook.append('on_route')
+
+            def before(self, state):
+                run_hook.append('before')
+
+            def after(self, state):
+                run_hook.append('after')
+
+            def on_error(self, state, e):
+                run_hook.append('error')
+
+        class SubSubController(object):
+            @expose()
+            def index(self, req, resp):
+                run_hook.append('inside_sub_sub')
+                return 'Deep inside here!'
+
+        class SubController(HookController):
+            __hooks__ = [SimpleHook()]
+
+            @expose()
+            def index(self, req, resp):
+                run_hook.append('inside_sub')
+                return 'Inside here!'
+
+            sub = SubSubController()
+
+        class RootController(object):
+            @expose()
+            def index(self, req, resp):
+                run_hook.append('inside')
+                return 'Hello, World!'
 
             sub = SubController()
-            arg = ArgSubController()
-            accept = AcceptController()
 
-        return TestApp(Pecan(RootController()))
+        app = TestApp(Pecan(RootController(), use_context_locals=False))
+        response = app.get('/')
+        assert response.status_int == 200
+        assert response.body == b_('Hello, World!')
 
-    def test_root(self):
-        r = self.app_.get('/')
-        assert r.status_int == 200
-        assert b_('index') in r.body
+        assert len(run_hook) == 1
+        assert run_hook[0] == 'inside'
 
-    def test_index(self):
-        r = self.app_.get('/index')
-        assert r.status_int == 200
-        assert b_('index') in r.body
+        run_hook = []
 
-    def test_broken_clients(self):
-        # for broken clients
-        r = self.app_.get('', status=302)
-        assert r.status_int == 302
-        assert r.location == 'http://localhost/'
+        response = app.get('/sub/')
+        assert response.status_int == 200
+        assert response.body == b_('Inside here!')
 
-    def test_sub_controller_with_trailing(self):
-        r = self.app_.get('/sub/')
-        assert r.status_int == 200
-        assert b_('subindex') in r.body
+        assert len(run_hook) == 3
+        assert run_hook[0] == 'before'
+        assert run_hook[1] == 'inside_sub'
+        assert run_hook[2] == 'after'
 
-    def test_sub_controller_redirect(self):
-        r = self.app_.get('/sub', status=302)
-        assert r.status_int == 302
-        assert r.location == 'http://localhost/sub/'
+        run_hook = []
+        response = app.get('/sub/sub/')
+        assert response.status_int == 200
+        assert response.body == b_('Deep inside here!')
 
-    def test_with_query_string(self):
-        # try with query string
-        r = self.app_.get('/sub?foo=bar', status=302)
-        assert r.status_int == 302
-        assert r.location == 'http://localhost/sub/?foo=bar'
+        assert len(run_hook) == 3
+        assert run_hook[0] == 'before'
+        assert run_hook[1] == 'inside_sub_sub'
+        assert run_hook[2] == 'after'
 
-    def test_posts_fail(self):
-        try:
-            self.app_.post('/sub', dict(foo=1))
-            raise Exception("Post should fail")  # pragma: nocover
-        except Exception as e:
-            assert isinstance(e, RuntimeError)
+    def test_isolated_hook_with_global_hook(self):
+        run_hook = []
 
-    def test_with_args(self):
-        r = self.app_.get('/arg/index/foo')
-        assert r.status_int == 200
-        assert r.body == b_('foo')
+        class SimpleHook(PecanHook):
+            def __init__(self, id):
+                self.id = str(id)
 
-    def test_accept_noncanonical(self):
-        r = self.app_.get('/accept/')
-        assert r.status_int == 200
-        assert r.body == b_('accept')
+            def on_route(self, state):
+                run_hook.append('on_route' + self.id)
 
-    def test_accept_noncanonical_no_trailing_slash(self):
-        r = self.app_.get('/accept')
-        assert r.status_int == 200
-        assert r.body == b_('accept')
+            def before(self, state):
+                run_hook.append('before' + self.id)
 
+            def after(self, state):
+                run_hook.append('after' + self.id)
 
-class TestNonCanonical(PecanTestCase):
+            def on_error(self, state, e):
+                run_hook.append('error' + self.id)
 
-    @property
-    def app_(self):
-        class ArgSubController(object):
+        class SubController(HookController):
+            __hooks__ = [SimpleHook(2)]
+
             @expose()
-            def index(self, arg):
-                return arg  # pragma: nocover
-
-        class AcceptController(object):
-            @accept_noncanonical
-            @expose()
-            def index(self):
-                return 'accept'  # pragma: nocover
-
-        class SubController(object):
-            @expose()
-            def index(self, **kw):
-                return 'subindex'
+            def index(self, req, resp):
+                run_hook.append('inside_sub')
+                return 'Inside here!'
 
         class RootController(object):
             @expose()
-            def index(self):
-                return 'index'
+            def index(self, req, resp):
+                run_hook.append('inside')
+                return 'Hello, World!'
 
             sub = SubController()
-            arg = ArgSubController()
-            accept = AcceptController()
 
-        return TestApp(Pecan(RootController(), force_canonical=False))
+        app = TestApp(Pecan(
+            RootController(),
+            hooks=[SimpleHook(1)],
+            use_context_locals=False
+        ))
+        response = app.get('/')
+        assert response.status_int == 200
+        assert response.body == b_('Hello, World!')
 
-    def test_index(self):
-        r = self.app_.get('/')
-        assert r.status_int == 200
-        assert b_('index') in r.body
+        assert len(run_hook) == 4
+        assert run_hook[0] == 'on_route1'
+        assert run_hook[1] == 'before1'
+        assert run_hook[2] == 'inside'
+        assert run_hook[3] == 'after1'
 
-    def test_subcontroller(self):
-        r = self.app_.get('/sub')
-        assert r.status_int == 200
-        assert b_('subindex') in r.body
+        run_hook = []
 
-    def test_subcontroller_with_kwargs(self):
-        r = self.app_.post('/sub', dict(foo=1))
-        assert r.status_int == 200
-        assert b_('subindex') in r.body
+        response = app.get('/sub/')
+        assert response.status_int == 200
+        assert response.body == b_('Inside here!')
 
-    def test_sub_controller_with_trailing(self):
-        r = self.app_.get('/sub/')
-        assert r.status_int == 200
-        assert b_('subindex') in r.body
-
-    def test_proxy(self):
-        class RootController(object):
-            @expose()
-            def index(self):
-                request.testing = True
-                assert request.testing is True
-                del request.testing
-                assert hasattr(request, 'testing') is False
-                return '/'
-
-        app = TestApp(make_app(RootController(), debug=True))
-        r = app.get('/')
-        assert r.status_int == 200
-
-    def test_app_wrap(self):
-        class RootController(object):
-            pass
-
-        wrapped_apps = []
-
-        def wrap(app):
-            wrapped_apps.append(app)
-            return app
-
-        make_app(RootController(), wrap_app=wrap, debug=True)
-        assert len(wrapped_apps) == 1
-
-
-class TestLogging(PecanTestCase):
-
-    def test_logging_setup(self):
-        class RootController(object):
-            @expose()
-            def index(self):
-                import logging
-                logging.getLogger('pecantesting').info('HELLO WORLD')
-                return "HELLO WORLD"
-
-        f = StringIO()
-
-        app = TestApp(make_app(RootController(), logging={
-            'loggers': {
-                'pecantesting': {
-                    'level': 'INFO', 'handlers': ['memory']
-                }
-            },
-            'handlers': {
-                'memory': {
-                    'level': 'INFO',
-                    'class': 'logging.StreamHandler',
-                    'stream': f
-                }
-            }
-        }))
-
-        app.get('/')
-        assert f.getvalue() == 'HELLO WORLD\n'
-
-    def test_logging_setup_with_config_obj(self):
-        class RootController(object):
-            @expose()
-            def index(self):
-                import logging
-                logging.getLogger('pecantesting').info('HELLO WORLD')
-                return "HELLO WORLD"
-
-        f = StringIO()
-
-        from pecan.configuration import conf_from_dict
-        app = TestApp(make_app(RootController(), logging=conf_from_dict({
-            'loggers': {
-                'pecantesting': {
-                    'level': 'INFO', 'handlers': ['memory']
-                }
-            },
-            'handlers': {
-                'memory': {
-                    'level': 'INFO',
-                    'class': 'logging.StreamHandler',
-                    'stream': f
-                }
-            }
-        })))
-
-        app.get('/')
-        assert f.getvalue() == 'HELLO WORLD\n'
-
-
-class TestEngines(PecanTestCase):
-
-    template_path = os.path.join(os.path.dirname(__file__), 'templates')
-
-    @unittest.skipIf('genshi' not in builtin_renderers, 'Genshi not installed')
-    def test_genshi(self):
-
-        class RootController(object):
-            @expose('genshi:genshi.html')
-            def index(self, name='Jonathan'):
-                return dict(name=name)
-
-            @expose('genshi:genshi_bad.html')
-            def badtemplate(self):
-                return dict()
-
-        app = TestApp(
-            Pecan(RootController(), template_path=self.template_path)
-        )
-        r = app.get('/')
-        assert r.status_int == 200
-        assert b_("<h1>Hello, Jonathan!</h1>") in r.body
-
-        r = app.get('/index.html?name=World')
-        assert r.status_int == 200
-        assert b_("<h1>Hello, World!</h1>") in r.body
-
-        error_msg = None
-        try:
-            r = app.get('/badtemplate.html')
-        except Exception as e:
-            for error_f in error_formatters:
-                error_msg = error_f(e)
-                if error_msg:
-                    break
-        assert error_msg is not None
-
-    @unittest.skipIf('kajiki' not in builtin_renderers, 'Kajiki not installed')
-    def test_kajiki(self):
-
-        class RootController(object):
-            @expose('kajiki:kajiki.html')
-            def index(self, name='Jonathan'):
-                return dict(name=name)
-
-        app = TestApp(
-            Pecan(RootController(), template_path=self.template_path)
-        )
-        r = app.get('/')
-        assert r.status_int == 200
-        assert b_("<h1>Hello, Jonathan!</h1>") in r.body
-
-        r = app.get('/index.html?name=World')
-        assert r.status_int == 200
-        assert b_("<h1>Hello, World!</h1>") in r.body
-
-    @unittest.skipIf('jinja' not in builtin_renderers, 'Jinja not installed')
-    def test_jinja(self):
-
-        class RootController(object):
-            @expose('jinja:jinja.html')
-            def index(self, name='Jonathan'):
-                return dict(name=name)
-
-            @expose('jinja:jinja_bad.html')
-            def badtemplate(self):
-                return dict()
-
-        app = TestApp(
-            Pecan(RootController(), template_path=self.template_path)
-        )
-        r = app.get('/')
-        assert r.status_int == 200
-        assert b_("<h1>Hello, Jonathan!</h1>") in r.body
-
-        error_msg = None
-        try:
-            r = app.get('/badtemplate.html')
-        except Exception as e:
-            for error_f in error_formatters:
-                error_msg = error_f(e)
-                if error_msg:
-                    break
-        assert error_msg is not None
-
-    @unittest.skipIf('mako' not in builtin_renderers, 'Mako not installed')
-    def test_mako(self):
-
-        class RootController(object):
-            @expose('mako:mako.html')
-            def index(self, name='Jonathan'):
-                return dict(name=name)
-
-            @expose('mako:mako_bad.html')
-            def badtemplate(self):
-                return dict()
-
-        app = TestApp(
-            Pecan(RootController(), template_path=self.template_path)
-        )
-        r = app.get('/')
-        assert r.status_int == 200
-        assert b_("<h1>Hello, Jonathan!</h1>") in r.body
-
-        r = app.get('/index.html?name=World')
-        assert r.status_int == 200
-        assert b_("<h1>Hello, World!</h1>") in r.body
-
-        error_msg = None
-        try:
-            r = app.get('/badtemplate.html')
-        except Exception as e:
-            for error_f in error_formatters:
-                error_msg = error_f(e)
-                if error_msg:
-                    break
-        assert error_msg is not None
-
-    def test_json(self):
-        try:
-            from simplejson import loads
-        except:
-            from json import loads  # noqa
-
-        expected_result = dict(
-            name='Jonathan',
-            age=30, nested=dict(works=True)
-        )
-
-        class RootController(object):
-            @expose('json')
-            def index(self):
-                return expected_result
-
-        app = TestApp(Pecan(RootController()))
-        r = app.get('/')
-        assert r.status_int == 200
-        result = dict(loads(r.body.decode()))
-        assert result == expected_result
-
-    def test_override_template(self):
-        class RootController(object):
-            @expose('foo.html')
-            def index(self):
-                override_template(None, content_type='text/plain')
-                return 'Override'
-
-        app = TestApp(Pecan(RootController()))
-        r = app.get('/')
-        assert r.status_int == 200
-        assert b_('Override') in r.body
-        assert r.content_type == 'text/plain'
-
-    def test_render(self):
-        class RootController(object):
-            @expose()
-            def index(self, name='Jonathan'):
-                return render('mako.html', dict(name=name))
-
-        app = TestApp(
-            Pecan(RootController(), template_path=self.template_path)
-        )
-        r = app.get('/')
-        assert r.status_int == 200
-        assert b_("<h1>Hello, Jonathan!</h1>") in r.body
-
-
-class TestDeprecatedRouteMethod(PecanTestCase):
-
-    @property
-    def app_(self):
-        class RootController(object):
-
-            @expose()
-            def index(self, *args):
-                return ', '.join(args)
-
-            @expose()
-            def _route(self, args):
-                return self.index, args
-
-        return TestApp(Pecan(RootController()))
-
-    def test_required_argument(self):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            r = self.app_.get('/foo/bar/')
-            assert r.status_int == 200
-            assert b_('foo, bar') in r.body
+        assert len(run_hook) == 6
+        assert run_hook[0] == 'on_route1'
+        assert run_hook[1] == 'before2'
+        assert run_hook[2] == 'before1'
+        assert run_hook[3] == 'inside_sub'
+        assert run_hook[4] == 'after1'
+        assert run_hook[5] == 'after2'

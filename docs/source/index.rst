@@ -38,6 +38,7 @@ Narrative Documentation
    secure_controller.rst
    hooks.rst
    jsonify.rst
+   contextlocals.rst
    commands.rst
    development.rst
    deployment.rst
