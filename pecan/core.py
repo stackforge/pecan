@@ -519,6 +519,9 @@ class Pecan(object):
         # care of filling it out
         if result is response:
             return
+        elif isinstance(result, Response):
+            state.response = result
+            return
 
         raw_namespace = result
 

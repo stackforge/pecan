@@ -7,6 +7,7 @@ if sys.version_info < (2, 7):
 else:
     import unittest  # pragma: nocover
 
+import webob
 from webtest import TestApp
 import six
 from six import b as b_
@@ -935,6 +936,22 @@ class TestStreamedResponse(PecanTestCase):
         r = app.get('/test/plain')
         assert r.content_type == 'text/plain'
         assert r.body == b_('plain text')
+
+
+class TestManualResponse(PecanTestCase):
+
+    def test_manual_response(self):
+
+        class RootController(object):
+            @expose()
+            def index(self):
+                resp = webob.Response(response.environ)
+                resp.body = b_('Hello, World!')
+                return resp
+
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/')
+        assert r.body == b_('Hello, World!')
 
 
 class TestThreadLocalState(PecanTestCase):
