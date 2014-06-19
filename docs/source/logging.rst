@@ -72,6 +72,7 @@ code.  Using the logging framework is very simple.
 
     # myapp/myapp/controllers/root.py
     from pecan import expose
+    import logging
 
     logger = logging.getLogger(__name__)
 
