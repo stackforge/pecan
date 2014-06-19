@@ -282,8 +282,8 @@ within Pecan controller code::
         username = pecan.request.POST.get('username')
         password = pecan.request.POST.get('password')
 
-        pecan.response.status_int = 403
-        pecan.response.body = 'Bad Login!'
+        pecan.response.status = 403
+        pecan.response.text = 'Bad Login!'
 
 While Pecan abstracts away much of the need to interact with these objects
 directly, there may be situations where you want to access them, such as:
