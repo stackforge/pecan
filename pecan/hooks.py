@@ -13,6 +13,10 @@ __all__ = [
 
 def walk_controller(root_class, controller, hooks):
     if not isinstance(controller, (int, dict)):
+        for hook in getattr(controller, '__hooks__', []):
+            # Append hooks from controller class definition
+            hooks.add(hook)
+
         for name, value in getmembers(controller):
             if name == 'controller':
                 continue
@@ -21,7 +25,7 @@ def walk_controller(root_class, controller, hooks):
 
             if iscontroller(value):
                 for hook in hooks:
-                    value._pecan.setdefault('hooks', []).append(hook)
+                    value._pecan.setdefault('hooks', set()).add(hook)
             elif hasattr(value, '__class__'):
                 if name.startswith('__') and name.endswith('__'):
                     continue
@@ -36,7 +40,12 @@ class HookControllerMeta(type):
     '''
 
     def __init__(cls, name, bases, dict_):
-        walk_controller(cls, cls, dict_.get('__hooks__', []))
+        hooks = set(dict_.get('__hooks__', []))
+        for base in bases:
+            # Add hooks from parent class and mixins
+            for hook in getattr(base, '__hooks__', []):
+                hooks.add(hook)
+        walk_controller(cls, cls, hooks)
 
 
 HookController = HookControllerMeta(

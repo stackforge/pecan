@@ -130,9 +130,106 @@ when we run the app and browse the application from our web browser.
 
     about to enter the controller...
     DO SOMETHING!
-    method: 	 GET
-    response: 	 200 OK
+    method:      GET
+    response:    200 OK
 
+Hooks can be inherited from parent class or mixins. Just make sure to
+subclass from :class:`~pecan.hooks.HookController`.
+
+::
+
+    from pecan import expose
+    from pecan.hooks import PecanHook, HookController
+
+    class ParentHook(PecanHook):
+
+        priority = 1
+
+        def before(self, state):
+            print "\nabout to enter the parent controller..."
+
+    class CommonHook(PecanHook):
+
+        priority = 2
+
+        def before(self, state):
+            print "\njust a common hook..."
+
+    class SubHook(PecanHook):
+
+        def before(self, state):
+            print "\nabout to enter the subcontroller..."
+
+    class SubMixin(object):
+        __hooks__ = [SubHook()]
+
+    # We'll use the same instance for both controllers,
+    # to avoid double calls
+    common = CommonHook()
+
+    class SubController(HookController, SubMixin):
+
+        __hooks__ = [common]
+
+        @expose('json')
+        def index(self):
+            print "\nI AM THE SUB!"
+            return dict()
+
+    class RootController(HookController):
+
+        __hooks__ = [common, ParentHook()]
+
+        @expose('json')
+        def index(self):
+            print "\nI AM THE ROOT!"
+            return dict()
+
+        sub = SubController()
+
+Let's see what happens when we run the app.
+First loading the root controller:
+
+::
+
+    pecan serve config.py
+    serving on 0.0.0.0:8080 view at http://127.0.0.1:8080
+
+    GET / HTTP/1.1" 200
+
+    about to enter the parent controller...
+
+    just a common hook
+
+    I AM THE ROOT!
+
+Then loading the sub controller:
+
+::
+
+    pecan serve config.py
+    serving on 0.0.0.0:8080 view at http://127.0.0.1:8080
+
+    GET /sub HTTP/1.1" 200
+
+    about to enter the parent controller...
+
+    just a common hook
+
+    about to enter the subcontroller...
+
+    I AM THE SUB!
+
+.. note::
+
+    Make sure to set proper priority values for nested hooks in order
+    to get them executed in the desired order.
+
+.. warning::
+
+    Two hooks of the same type will be added/executed twice, if passed as
+    different instances to a parent and a child controller.
+    If passed as one instance variable - will be invoked once for both controllers.
 
 Hooks That Come with Pecan
 --------------------------
