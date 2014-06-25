@@ -1,7 +1,7 @@
 try:
-    from simplejson import loads
-except ImportError:             # pragma: no cover
-    from json import loads      # noqa
+    from simplejson import dumps, loads
+except ImportError:  # pragma: no cover
+    from json import dumps, loads  # noqa
 from itertools import chain
 from mimetypes import guess_type, add_type
 from os.path import splitext
@@ -597,7 +597,22 @@ class PecanBase(object):
         except Exception as e:
             # if this is an HTTP Exception, set it as the response
             if isinstance(e, exc.HTTPException):
+                # if the client asked for JSON, do our best to provide it
+                best_match = acceptparse.MIMEAccept(
+                    getattr(req.accept, 'header_value', '*/*')
+                ).best_match(('text/plain', 'text/html', 'application/json'))
                 state.response = e
+                if best_match == 'application/json':
+                    json_body = dumps({
+                        'code': e.status_int,
+                        'title': e.title,
+                        'description': e.detail
+                    })
+                    if isinstance(json_body, six.text_type):
+                        e.text = json_body
+                    else:
+                        e.body = json_body
+                    state.response.content_type = best_match
                 environ['pecan.original_exception'] = e
 
             # if this is not an internal redirect, run error hooks

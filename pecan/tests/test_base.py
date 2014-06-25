@@ -8,6 +8,7 @@ else:
     import unittest  # pragma: nocover
 
 import webob
+from webob.exc import HTTPNotFound
 from webtest import TestApp
 import six
 from six import b as b_
@@ -758,6 +759,42 @@ class TestControllerArguments(PecanTestCase):
         )
         assert r.status_int == 200
         assert r.body == b_('eater: 10, dummy, day=12, month=1')
+
+
+class TestDefaultErrorRendering(PecanTestCase):
+
+    def test_plain_error(self):
+        class RootController(object):
+            pass
+
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/', status=404)
+        assert r.status_int == 404
+        assert r.content_type == 'text/plain'
+        assert r.body == b_(HTTPNotFound().plain_body({}))
+
+    def test_html_error(self):
+        class RootController(object):
+            pass
+
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/', headers={'Accept': 'text/html'}, status=404)
+        assert r.status_int == 404
+        assert r.content_type == 'text/html'
+        assert r.body == b_(HTTPNotFound().html_body({}))
+
+    def test_json_error(self):
+        class RootController(object):
+            pass
+
+        app = TestApp(Pecan(RootController()))
+        r = app.get('/', headers={'Accept': 'application/json'}, status=404)
+        assert r.status_int == 404
+        json_resp = json.loads(r.body.decode())
+        assert json_resp['code'] == 404
+        assert json_resp['description'] is None
+        assert json_resp['title'] == 'Not Found'
+        assert r.content_type == 'application/json'
 
 
 class TestAbort(PecanTestCase):
