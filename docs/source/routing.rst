@@ -270,11 +270,11 @@ a :func:`_route` method will enable you to have total control.
 Interacting with the Request and Response Object
 ------------------------------------------------
 
-For every HTTP request, Pecan maintains a thread-local reference to the request
-and response object, ``pecan.request`` and ``pecan.response``.  These are
-instances of :class:`webob.request.BaseRequest` and
-:class:`webob.response.Response`, respectively, and can be interacted with from
-within Pecan controller code::
+For every HTTP request, Pecan maintains a :ref:`thread-local reference
+<contextlocals>` to the request and response object, ``pecan.request`` and
+``pecan.response``.  These are instances of :class:`webob.request.BaseRequest`
+and :class:`webob.response.Response`, respectively, and can be interacted with
+from within Pecan controller code::
 
     @pecan.expose()
     def login(self):

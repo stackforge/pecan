@@ -1,4 +1,5 @@
 import warnings
+from inspect import getargspec
 
 from webob import exc
 
@@ -23,7 +24,7 @@ class NonCanonicalPath(Exception):
         self.remainder = remainder
 
 
-def lookup_controller(obj, remainder):
+def lookup_controller(obj, remainder, request):
     '''
     Traverses the requested url path and returns the appropriate controller
     object, including default routes.
@@ -33,7 +34,8 @@ def lookup_controller(obj, remainder):
     notfound_handlers = []
     while True:
         try:
-            obj, remainder = find_object(obj, remainder, notfound_handlers)
+            obj, remainder = find_object(obj, remainder, notfound_handlers,
+                                         request)
             handle_security(obj)
             return obj, remainder
         except (exc.HTTPNotFound, PecanNotFound):
@@ -55,7 +57,8 @@ def lookup_controller(obj, remainder):
                             and len(obj._pecan['argspec'].args) > 1
                         ):
                             raise exc.HTTPNotFound
-                        return lookup_controller(*result)
+                        obj_, remainder_ = result
+                        return lookup_controller(obj_, remainder_, request)
             else:
                 raise exc.HTTPNotFound
 
@@ -77,7 +80,7 @@ def handle_lookup_traversal(obj, args):
         )
 
 
-def find_object(obj, remainder, notfound_handlers):
+def find_object(obj, remainder, notfound_handlers, request):
     '''
     'Walks' the url path in search of an action for which a controller is
     implemented and returns that controller object along with what's left
@@ -114,7 +117,21 @@ def find_object(obj, remainder, notfound_handlers):
 
         route = getattr(obj, '_route', None)
         if iscontroller(route):
-            next_obj, next_remainder = route(remainder)
+            if len(getargspec(route).args) == 2:
+                warnings.warn(
+                    (
+                        "The function signature for %s.%s._route is changing "
+                        "in the next version of pecan.\nPlease update to: "
+                        "`def _route(self, args, request)`." % (
+                            obj.__class__.__module__,
+                            obj.__class__.__name__
+                        )
+                    ),
+                    DeprecationWarning
+                )
+                next_obj, next_remainder = route(remainder)
+            else:
+                next_obj, next_remainder = route(remainder, request)
             cross_boundary(route, next_obj)
             return next_obj, next_remainder
 

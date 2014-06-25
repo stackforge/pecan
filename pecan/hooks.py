@@ -4,7 +4,6 @@ from inspect import getmembers
 from webob.exc import HTTPFound
 
 from .util import iscontroller, _cfg
-from .routing import lookup_controller
 
 __all__ = [
     'PecanHook', 'TransactionHook', 'HookController',
@@ -334,8 +333,7 @@ class RequestViewerHook(PecanHook):
         Specific to Pecan (not available in the request object)
         '''
         path = state.request.pecan['routing_path'].split('/')[1:]
-        controller, reminder = lookup_controller(state.app.root, path)
-        return controller.__str__().split()[2]
+        return state.controller.__str__().split()[2]
 
     def format_hooks(self, hooks):
         '''
