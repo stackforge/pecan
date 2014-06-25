@@ -14,8 +14,8 @@ from six import b as b_
 from six.moves import cStringIO as StringIO
 
 from pecan import (
-    Pecan, expose, request, response, redirect, abort, make_app,
-    override_template, render
+    Pecan, Request, Response, expose, request, response, redirect,
+    abort, make_app, override_template, render
 )
 from pecan.templating import (
     _builtin_renderers as builtin_renderers, error_formatters
@@ -952,6 +952,41 @@ class TestManualResponse(PecanTestCase):
         app = TestApp(Pecan(RootController()))
         r = app.get('/')
         assert r.body == b_('Hello, World!')
+
+
+class TestCustomResponseandRequest(PecanTestCase):
+
+    def test_custom_objects(self):
+
+        class CustomRequest(Request):
+
+            @property
+            def headers(self):
+                headers = super(CustomRequest, self).headers
+                headers['X-Custom-Request'] = 'ABC'
+                return headers
+
+        class CustomResponse(Response):
+
+            @property
+            def headers(self):
+                headers = super(CustomResponse, self).headers
+                headers['X-Custom-Response'] = 'XYZ'
+                return headers
+
+        class RootController(object):
+            @expose()
+            def index(self):
+                return request.headers.get('X-Custom-Request')
+
+        app = TestApp(Pecan(
+            RootController(),
+            request_cls=CustomRequest,
+            response_cls=CustomResponse
+        ))
+        r = app.get('/')
+        assert r.body == b_('ABC')
+        assert r.headers.get('X-Custom-Response') == 'XYZ'
 
 
 class TestThreadLocalState(PecanTestCase):

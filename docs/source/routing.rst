@@ -272,8 +272,8 @@ Interacting with the Request and Response Object
 
 For every HTTP request, Pecan maintains a :ref:`thread-local reference
 <contextlocals>` to the request and response object, ``pecan.request`` and
-``pecan.response``.  These are instances of :class:`webob.request.BaseRequest`
-and :class:`webob.response.Response`, respectively, and can be interacted with
+``pecan.response``.  These are instances of :class:`pecan.Request`
+and :class:`pecan.Response`, respectively, and can be interacted with
 from within Pecan controller code::
 
     @pecan.expose()
@@ -294,6 +294,34 @@ directly, there may be situations where you want to access them, such as:
 * Setting specific response headers
 * Manually rendering a response body
 
+
+Extending Pecan's Request and Response Object
+---------------------------------------------
+
+The request and response implementations provided by WebOb are powerful, but
+at times, it may be useful to extend application-specific behavior onto your
+request and response (such as specialized parsing of request headers or
+customized response body serialization).  To do so, define custom classes that
+inherit from ``pecan.Request`` and ``pecan.Response``, respectively::
+
+    class MyRequest(pecan.Request):
+        pass
+
+    class MyResponse(pecan.Response):
+        pass
+
+and modify your application configuration to use them::
+
+    from myproject import MyRequest, MyResponse
+
+    app = {
+        'root' : 'project.controllers.root.RootController',
+        'modules' : ['project'],
+        'static_root'   : '%(confdir)s/public',
+        'template_path' : '%(confdir)s/project/templates',
+        'request_cls': MyRequest,
+        'response_cls': MyResponse
+    }
 
 Mapping Controller Arguments
 ----------------------------

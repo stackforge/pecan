@@ -10,7 +10,8 @@ import operator
 
 import six
 
-from webob import Request, Response, exc, acceptparse
+from webob import (Request as WebObRequest, Response as WebObResponse, exc,
+                   acceptparse)
 
 from .compat import urlparse, unquote_plus, izip
 from .secure import handle_security
@@ -35,6 +36,14 @@ class RoutingState(object):
         self.app = app
         self.hooks = hooks
         self.controller = controller
+
+
+class Request(WebObRequest):
+    pass
+
+
+class Response(WebObResponse):
+    pass
 
 
 def proxy(key):
@@ -120,7 +129,7 @@ def redirect(location=None, internal=False, code=None, headers={},
     :param code: The HTTP status code to use for the redirect. Defaults to 302.
     :param headers: Any HTTP headers to send with the response, as a
                     dictionary.
-    :param request: The :class:`webob.request.BaseRequest` instance to use.
+    :param request: The :class:`pecan.Request` instance to use.
     '''
     request = request or state.request
 
@@ -200,11 +209,14 @@ class PecanBase(object):
                  template_path='templates', hooks=lambda: [],
                  custom_renderers={}, extra_template_vars={},
                  force_canonical=True, guess_content_type_from_ext=True,
-                 context_local_factory=None, **kw):
+                 context_local_factory=None, request_cls=Request,
+                 response_cls=Response, **kw):
         if isinstance(root, six.string_types):
             root = self.__translate_root__(root)
 
         self.root = root
+        self.request_cls = request_cls
+        self.response_cls = response_cls
         self.renderers = RendererFactory(custom_renderers, extra_template_vars)
         self.default_renderer = default_renderer
 
@@ -304,7 +316,7 @@ class PecanBase(object):
             result = getattr(hook, hook_type)(*args)
             # on_error hooks can choose to return a Response, which will
             # be used instead of the standard error pages.
-            if hook_type == 'on_error' and isinstance(result, Response):
+            if hook_type == 'on_error' and isinstance(result, WebObResponse):
                 return result
 
     def get_args(self, state, all_params, remainder, argspec, im_self):
@@ -516,7 +528,7 @@ class PecanBase(object):
         # care of filling it out
         if result is response:
             return
-        elif isinstance(result, Response):
+        elif isinstance(result, WebObResponse):
             state.response = result
             return
 
@@ -569,8 +581,8 @@ class PecanBase(object):
         '''
 
         # create the request and response object
-        req = Request(environ)
-        resp = Response()
+        req = self.request_cls(environ)
+        resp = self.response_cls()
         state = RoutingState(req, resp, self)
         controller = None
 
@@ -599,7 +611,7 @@ class PecanBase(object):
                 )
 
             # if the on_error handler returned a Response, use it.
-            if isinstance(on_error_result, Response):
+            if isinstance(on_error_result, WebObResponse):
                 state.response = on_error_result
             else:
                 if not isinstance(e, exc.HTTPException):
@@ -672,6 +684,10 @@ class Pecan(PecanBase):
     :param use_context_locals: When `True`, `pecan.request` and
                                `pecan.response` will be available as
                                thread-local references.
+    :param request_cls: Can be used to specify a custom `pecan.request` object.
+                        Defaults to `pecan.Request`.
+    :param response_cls: Can be used to specify a custom `pecan.response`
+                         object.  Defaults to `pecan.Response`.
     '''
 
     def __new__(cls, *args, **kw):
