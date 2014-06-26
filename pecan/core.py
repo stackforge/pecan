@@ -631,6 +631,12 @@ class PecanBase(object):
             else:
                 if not isinstance(e, exc.HTTPException):
                     raise
+
+            # if this is an HTTP 405, attempt to specify an Allow header
+            if isinstance(e, exc.HTTPMethodNotAllowed) and controller:
+                allowed_methods = _cfg(controller).get('allowed_methods', [])
+                if allowed_methods:
+                    state.response.allow = sorted(allowed_methods)
         finally:
             # handle "after" hooks
             self.handle_hooks(

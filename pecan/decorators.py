@@ -16,6 +16,7 @@ def when_for(controller):
             expose(**kw)(f)
             _cfg(f)['generic_handler'] = True
             controller._pecan['generic_handlers'][method.upper()] = f
+            controller._pecan['allowed_methods'].append(method.upper())
             return f
         return decorate
     return when
@@ -56,6 +57,7 @@ def expose(template=None,
         if generic:
             cfg['generic'] = True
             cfg['generic_handlers'] = dict(DEFAULT=f)
+            cfg['allowed_methods'] = []
             f.when = when_for(f)
 
         # store the arguments for this controller method

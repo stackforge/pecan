@@ -6,7 +6,7 @@ except:
 
 from six import b as b_
 
-from pecan import Pecan, expose
+from pecan import Pecan, expose, abort
 from pecan.tests import PecanTestCase
 
 
@@ -37,3 +37,26 @@ class TestGeneric(PecanTestCase):
 
         r = app.get('/do_get', status=404)
         assert r.status_int == 404
+
+    def test_generic_allow_header(self):
+        class RootController(object):
+            @expose(generic=True)
+            def index(self):
+                abort(405)
+
+            @index.when(method='POST', template='json')
+            def do_post(self):
+                return dict(result='POST')
+
+            @index.when(method='GET')
+            def do_get(self):
+                return 'GET'
+
+            @index.when(method='PATCH')
+            def do_patch(self):
+                return 'PATCH'
+
+        app = TestApp(Pecan(RootController()))
+        r = app.delete('/', expect_errors=True)
+        assert r.status_int == 405
+        assert r.headers['Allow'] == 'GET, PATCH, POST'
