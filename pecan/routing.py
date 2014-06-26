@@ -24,13 +24,25 @@ class NonCanonicalPath(Exception):
         self.remainder = remainder
 
 
-def lookup_controller(obj, remainder, request):
+def lookup_controller(obj, remainder, request=None):
     '''
     Traverses the requested url path and returns the appropriate controller
     object, including default routes.
 
     Handles common errors gracefully.
     '''
+    if request is None:
+        warnings.warn(
+            (
+                "The function signature for %s.lookup_controller is changing "
+                "in the next version of pecan.\nPlease update to: "
+                "`lookup_controller(self, obj, remainder, request)`." % (
+                    __name__,
+                )
+            ),
+            DeprecationWarning
+        )
+
     notfound_handlers = []
     while True:
         try:
