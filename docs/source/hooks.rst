@@ -87,6 +87,8 @@ no furthur :func:`~pecan.hooks.PecanHook.on_error` hooks will be executed::
             if isinstance(exc, SomeExceptionType):
                 return webob.Response('Custom Error!', status=500)
 
+.. _attaching_hooks:
+
 Attaching Hooks
 ---------------
 
