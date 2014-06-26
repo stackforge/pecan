@@ -73,7 +73,10 @@ class RestController(object):
         )
 
         try:
-            result = handler(method, args, request)
+            if len(getargspec(handler).args) == 3:
+                result = handler(method, args)
+            else:
+                result = handler(method, args, request)
 
             #
             # If the signature of the handler does not match the number
@@ -99,7 +102,10 @@ class RestController(object):
         # return the result
         return result
 
-    def _handle_lookup(self, args, request):
+    def _handle_lookup(self, args, request=None):
+        if request is None:
+            self._raise_method_deprecation_warning(self.handle_lookup)
+
         # filter empty strings from the arg list
         args = list(six.moves.filter(bool, args))
 
@@ -162,10 +168,13 @@ class RestController(object):
                     request
                 )
 
-    def _handle_unknown_method(self, method, remainder, request):
+    def _handle_unknown_method(self, method, remainder, request=None):
         '''
         Routes undefined actions (like RESET) to the appropriate controller.
         '''
+        if request is None:
+            self._raise_method_deprecation_warning(self._handle_unknown_method)
+
         # try finding a post_{custom} or {custom} method first
         controller = self._find_controller('post_%s' % method, method)
         if controller:
@@ -183,10 +192,13 @@ class RestController(object):
 
         abort(404)
 
-    def _handle_get(self, method, remainder, request):
+    def _handle_get(self, method, remainder, request=None):
         '''
         Routes ``GET`` actions to the appropriate controller.
         '''
+        if request is None:
+            self._raise_method_deprecation_warning(self._handle_get)
+
         # route to a get_all or get if no additional parts are available
         if not remainder or remainder == ['']:
             controller = self._find_controller('get_all', 'get')
@@ -224,10 +236,13 @@ class RestController(object):
 
         abort(404)
 
-    def _handle_delete(self, method, remainder, request):
+    def _handle_delete(self, method, remainder, request=None):
         '''
         Routes ``DELETE`` actions to the appropriate controller.
         '''
+        if request is None:
+            self._raise_method_deprecation_warning(self._handle_delete)
+
         if remainder:
             match = self._handle_custom_action(method, remainder, request)
             if match:
@@ -254,10 +269,13 @@ class RestController(object):
 
         abort(404)
 
-    def _handle_post(self, method, remainder, request):
+    def _handle_post(self, method, remainder, request=None):
         '''
         Routes ``POST`` requests.
         '''
+        if request is None:
+            self._raise_method_deprecation_warning(self._handle_post)
+
         # check for custom POST/PUT requests
         if remainder:
             match = self._handle_custom_action(method, remainder, request)
@@ -275,10 +293,13 @@ class RestController(object):
 
         abort(404)
 
-    def _handle_put(self, method, remainder, request):
+    def _handle_put(self, method, remainder, request=None):
         return self._handle_post(method, remainder, request)
 
-    def _handle_custom_action(self, method, remainder, request):
+    def _handle_custom_action(self, method, remainder, request=None):
+        if request is None:
+            self._raise_method_deprecation_warning(self._handle_custom_action)
+
         remainder = [r for r in remainder if r]
         if remainder:
             if method in ('put', 'delete'):
@@ -302,3 +323,18 @@ class RestController(object):
         Sets default routing arguments.
         '''
         request.pecan.setdefault('routing_args', []).extend(args)
+
+    def _raise_method_deprecation_warning(self, handler):
+        warnings.warn(
+            (
+                "The function signature for %s.%s.%s is changing "
+                "in the next version of pecan.\nPlease update to: "
+                "`%s(self, method, remainder, request)`." % (
+                    self.__class__.__module__,
+                    self.__class__.__name__,
+                    handler.__name__,
+                    handler.__name__
+                )
+            ),
+            DeprecationWarning
+        )
