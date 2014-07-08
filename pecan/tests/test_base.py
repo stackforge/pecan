@@ -44,6 +44,30 @@ class TestEmptyContent(PecanTestCase):
             def index(self):
                 pass
 
+            @expose()
+            def explicit_body(self):
+                response.body = b_('Hello, World!')
+
+            @expose()
+            def empty_body(self):
+                response.body = b_('')
+
+            @expose()
+            def explicit_text(self):
+                response.text = six.text_type('Hello, World!')
+
+            @expose()
+            def empty_text(self):
+                response.text = six.text_type('')
+
+            @expose()
+            def explicit_json(self):
+                response.json = {'foo': 'bar'}
+
+            @expose()
+            def explicit_json_body(self):
+                response.json_body = {'foo': 'bar'}
+
         return TestApp(Pecan(RootController()))
 
     def test_empty_index(self):
@@ -52,6 +76,65 @@ class TestEmptyContent(PecanTestCase):
         self.assertNotIn('Content-Type', r.headers)
         self.assertEqual(r.headers['Content-Length'], '0')
         self.assertEqual(len(r.body), 0)
+
+    def test_explicit_body(self):
+        r = self.app_.get('/explicit_body/')
+        self.assertEqual(r.status_int, 200)
+        self.assertEqual(r.body, b_('Hello, World!'))
+
+    def test_empty_body(self):
+        r = self.app_.get('/empty_body/')
+        self.assertEqual(r.status_int, 204)
+        self.assertEqual(r.body, b_(''))
+
+    def test_explicit_text(self):
+        r = self.app_.get('/explicit_text/')
+        self.assertEqual(r.status_int, 200)
+        self.assertEqual(r.body, b_('Hello, World!'))
+
+    def test_empty_text(self):
+        r = self.app_.get('/empty_text/')
+        self.assertEqual(r.status_int, 204)
+        self.assertEqual(r.body, b_(''))
+
+    def test_explicit_json(self):
+        r = self.app_.get('/explicit_json/')
+        self.assertEqual(r.status_int, 200)
+        json_resp = json.loads(r.body.decode())
+        assert json_resp == {'foo': 'bar'}
+
+    def test_explicit_json_body(self):
+        r = self.app_.get('/explicit_json_body/')
+        self.assertEqual(r.status_int, 200)
+        json_resp = json.loads(r.body.decode())
+        assert json_resp == {'foo': 'bar'}
+
+
+class TestAppIterFile(PecanTestCase):
+    @property
+    def app_(self):
+        class RootController(object):
+            @expose()
+            def index(self):
+                body = six.BytesIO(b_('Hello, World!'))
+                response.body_file = body
+
+            @expose()
+            def empty(self):
+                body = six.BytesIO(b_(''))
+                response.body_file = body
+
+        return TestApp(Pecan(RootController()))
+
+    def test_body_generator(self):
+        r = self.app_.get('/')
+        self.assertEqual(r.status_int, 200)
+        assert r.body == b_('Hello, World!')
+
+    def test_empty_body_generator(self):
+        r = self.app_.get('/empty')
+        self.assertEqual(r.status_int, 204)
+        assert len(r.body) == 0
 
 
 class TestIndexRouting(PecanTestCase):

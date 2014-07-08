@@ -2,11 +2,12 @@ try:
     from simplejson import dumps, loads
 except ImportError:  # pragma: no cover
     from json import dumps, loads  # noqa
-from itertools import chain
+from itertools import chain, tee
 from mimetypes import guess_type, add_type
 from os.path import splitext
 import logging
 import operator
+import types
 
 import six
 
@@ -566,7 +567,26 @@ class PecanBase(object):
         elif result:
             resp.body = result
         elif response.status_int == 200:
-            resp.status = 204
+            # If the response is a generator...
+            if isinstance(response.app_iter, types.GeneratorType):
+                # Split the generator into two so we can peek at one of them
+                # and determine if there is any response body content
+                a, b = tee(response.app_iter)
+                try:
+                    next(a)
+                except StopIteration:
+                    # If we hit StopIteration, the body is empty
+                    resp.status = 204
+                finally:
+                    resp.app_iter = b
+            else:
+                text = None
+                if response.charset:
+                    # `response.text` cannot be accessed without a charset
+                    # (because we don't know which encoding to use)
+                    text = response.text
+                if not any((response.body, text)):
+                    resp.status = 204
 
         if resp.status_int in (204, 304):
             resp.content_type = None
