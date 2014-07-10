@@ -1,3 +1,8 @@
+0.6.1
+=====
+* Fixed a bug which causes pecan to mistakenly return HTTP 204 for non-empty
+  response bodies.
+
 0.6.0
 =====
 * Added support for disabling the `pecan.request` and `pecan.response`
