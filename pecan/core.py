@@ -566,33 +566,37 @@ class PecanBase(object):
             resp.text = result
         elif result:
             resp.body = result
-        elif response.status_int == 200:
+
+        if pecan_state['content_type']:
+            # set the content type
+            resp.content_type = pecan_state['content_type']
+
+    def _handle_empty_response_body(self, state):
+        # Enforce HTTP 204 for responses which contain no body
+        if state.response.status_int == 200:
             # If the response is a generator...
-            if isinstance(response.app_iter, types.GeneratorType):
+            if isinstance(state.response.app_iter, types.GeneratorType):
                 # Split the generator into two so we can peek at one of them
                 # and determine if there is any response body content
-                a, b = tee(response.app_iter)
+                a, b = tee(state.response.app_iter)
                 try:
                     next(a)
                 except StopIteration:
                     # If we hit StopIteration, the body is empty
-                    resp.status = 204
+                    state.response.status = 204
                 finally:
-                    resp.app_iter = b
+                    state.response.app_iter = b
             else:
                 text = None
-                if response.charset:
+                if state.response.charset:
                     # `response.text` cannot be accessed without a charset
                     # (because we don't know which encoding to use)
-                    text = response.text
-                if not any((response.body, text)):
-                    resp.status = 204
+                    text = state.response.text
+                if not any((state.response.body, text)):
+                    state.response.status = 204
 
-        if resp.status_int in (204, 304):
-            resp.content_type = None
-        elif pecan_state['content_type']:
-            # set the content type
-            resp.content_type = pecan_state['content_type']
+        if state.response.status_int in (204, 304):
+            state.response.content_type = None
 
     def __call__(self, environ, start_response):
         '''
@@ -662,6 +666,8 @@ class PecanBase(object):
             self.handle_hooks(
                 self.determine_hooks(state.controller), 'after', state
             )
+
+        self._handle_empty_response_body(state)
 
         # get the response
         return state.response(environ, start_response)
