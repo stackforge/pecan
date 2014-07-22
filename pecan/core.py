@@ -2,6 +2,7 @@ try:
     from simplejson import dumps, loads
 except ImportError:  # pragma: no cover
     from json import dumps, loads  # noqa
+from inspect import Arguments
 from itertools import chain, tee
 from mimetypes import guess_type, add_type
 from os.path import splitext
@@ -31,12 +32,14 @@ logger = logging.getLogger(__name__)
 
 class RoutingState(object):
 
-    def __init__(self, request, response, app, hooks=[], controller=None):
+    def __init__(self, request, response, app, hooks=[], controller=None,
+                 arguments=None):
         self.request = request
         self.response = response
         self.app = app
         self.hooks = hooks
         self.controller = controller
+        self.arguments = arguments
 
 
 class Request(WebObRequest):
@@ -326,6 +329,7 @@ class PecanBase(object):
         passed the argument specification for the controller.
         '''
         args = []
+        varargs = []
         kwargs = dict()
         valid_args = argspec.args[1:]  # pop off `self`
         pecan_state = state.request.pecan
@@ -354,7 +358,7 @@ class PecanBase(object):
         if [i for i in remainder if i]:
             if not argspec[1]:
                 abort(404)
-            args.extend(remainder)
+            varargs.extend(remainder)
 
         # get the default positional arguments
         if argspec[3]:
@@ -377,7 +381,7 @@ class PecanBase(object):
                 if name not in argspec[0]:
                     kwargs[encode_if_needed(name)] = value
 
-        return args, kwargs
+        return args, varargs, kwargs
 
     def render(self, template, namespace):
         renderer = self.renderers.get(
@@ -492,9 +496,6 @@ class PecanBase(object):
             )
             raise exc.HTTPNotFound
 
-        # handle "before" hooks
-        self.handle_hooks(self.determine_hooks(controller), 'before', state)
-
         # fetch any parameters
         if req.method == 'GET':
             params = dict(req.GET)
@@ -502,15 +503,19 @@ class PecanBase(object):
             params = dict(req.params)
 
         # fetch the arguments for the controller
-        args, kwargs = self.get_args(
+        args, varargs, kwargs = self.get_args(
             state,
             params,
             remainder,
             cfg['argspec'],
             im_self
         )
+        state.arguments = Arguments(args, varargs, kwargs)
 
-        return controller, args, kwargs
+        # handle "before" hooks
+        self.handle_hooks(self.determine_hooks(controller), 'before', state)
+
+        return controller, args+varargs, kwargs
 
     def invoke_controller(self, controller, args, kwargs, state):
         '''
@@ -691,11 +696,11 @@ class ExplicitPecan(PecanBase):
         except IndexError:
             raise signature_error
 
-        args, kwargs = super(ExplicitPecan, self).get_args(
+        args, varargs, kwargs = super(ExplicitPecan, self).get_args(
             state, all_params, remainder, argspec, im_self
         )
         args = [state.request, state.response] + args
-        return args, kwargs
+        return args, varargs, kwargs
 
 
 class Pecan(PecanBase):
@@ -747,12 +752,14 @@ class Pecan(PecanBase):
             state.hooks = []
             state.app = self
             state.controller = None
+            state.arguments = None
             return super(Pecan, self).__call__(environ, start_response)
         finally:
             del state.hooks
             del state.request
             del state.response
             del state.controller
+            del state.arguments
             del state.app
 
     def init_context_local(self, local_factory):
@@ -766,6 +773,7 @@ class Pecan(PecanBase):
         state.response = _state.response
         controller, args, kw = super(Pecan, self).find_controller(_state)
         state.controller = controller
+        state.arguments = _state.arguments
         return controller, args, kw
 
     def handle_hooks(self, hooks, *args, **kw):

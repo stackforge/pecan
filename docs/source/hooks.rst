@@ -71,6 +71,10 @@ response objects, and which controller was selected by Pecan's routing::
                 # and used to generate the response body
                 #
                 assert state.controller.__func__ is RootController.index.__func__
+                assert isinstance(state.arguments, inspect.Arguments)
+                print state.arguments.args
+                print state.arguments.varargs
+                print state.arguments.keywords
             assert isinstance(state.request, webob.Request)
             assert isinstance(state.response, webob.Response)
             assert isinstance(state.hooks, list)

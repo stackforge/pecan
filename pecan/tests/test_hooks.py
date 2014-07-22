@@ -1,17 +1,22 @@
+import inspect
+import operator
+
 from webtest import TestApp
+from six import PY3
 from six import b as b_
 from six import u as u_
 from six.moves import cStringIO as StringIO
 
-from webob import Response
-
-from pecan import make_app, expose, redirect, abort
+from pecan import make_app, expose, redirect, abort, rest, Request, Response
 from pecan.hooks import (
     PecanHook, TransactionHook, HookController, RequestViewerHook
 )
 from pecan.configuration import Config
 from pecan.decorators import transactional, after_commit, after_rollback
 from pecan.tests import PecanTestCase
+
+# The `inspect.Arguments` namedtuple is different between PY2/3
+kwargs = operator.attrgetter('varkw' if PY3 else 'keywords')
 
 
 class TestHooks(PecanTestCase):
@@ -410,6 +415,364 @@ class TestHooks(PecanTestCase):
         # LastHook is invoked once again -
         # for each different instance of the Hook in the two Controllers
         assert run_hook[3] == 'last - before hook', run_hook[3]
+
+
+class TestStateAccess(PecanTestCase):
+
+    def setUp(self):
+        super(TestStateAccess, self).setUp()
+        self.args = None
+
+        class RootController(object):
+            @expose()
+            def index(self):
+                return 'Hello, World!'
+
+            @expose()
+            def greet(self, name):
+                return 'Hello, %s!' % name
+
+            @expose()
+            def greetmore(self, *args):
+                return 'Hello, %s!' % args[0]
+
+            @expose()
+            def kwargs(self, **kw):
+                return 'Hello, %s!' % kw['name']
+
+            @expose()
+            def mixed(self, first, second, *args):
+                return 'Mixed'
+
+        class SimpleHook(PecanHook):
+            def before(inself, state):
+                self.args = (state.controller, state.arguments)
+
+        self.root = RootController()
+        self.app = TestApp(make_app(self.root, hooks=[SimpleHook()]))
+
+    def test_no_args(self):
+        self.app.get('/')
+        assert self.args[0] == self.root.index
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == []
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {}
+
+    def test_single_arg(self):
+        self.app.get('/greet/joe')
+        assert self.args[0] == self.root.greet
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == ['joe']
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {}
+
+    def test_single_vararg(self):
+        self.app.get('/greetmore/joe')
+        assert self.args[0] == self.root.greetmore
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == []
+        assert self.args[1].varargs == ['joe']
+        assert kwargs(self.args[1]) == {}
+
+    def test_single_kw(self):
+        self.app.get('/kwargs/?name=joe')
+        assert self.args[0] == self.root.kwargs
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == []
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {'name': 'joe'}
+
+    def test_single_kw_post(self):
+        self.app.post('/kwargs/', params={'name': 'joe'})
+        assert self.args[0] == self.root.kwargs
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == []
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {'name': 'joe'}
+
+    def test_mixed_args(self):
+        self.app.get('/mixed/foo/bar/spam/eggs')
+        assert self.args[0] == self.root.mixed
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == ['foo', 'bar']
+        assert self.args[1].varargs == ['spam', 'eggs']
+
+
+class TestStateAccessWithoutThreadLocals(PecanTestCase):
+
+    def setUp(self):
+        super(TestStateAccessWithoutThreadLocals, self).setUp()
+        self.args = None
+
+        class RootController(object):
+            @expose()
+            def index(self, req, resp):
+                return 'Hello, World!'
+
+            @expose()
+            def greet(self, req, resp, name):
+                return 'Hello, %s!' % name
+
+            @expose()
+            def greetmore(self, req, resp, *args):
+                return 'Hello, %s!' % args[0]
+
+            @expose()
+            def kwargs(self, req, resp, **kw):
+                return 'Hello, %s!' % kw['name']
+
+            @expose()
+            def mixed(self, req, resp, first, second, *args):
+                return 'Mixed'
+
+        class SimpleHook(PecanHook):
+            def before(inself, state):
+                self.args = (state.controller, state.arguments)
+
+        self.root = RootController()
+        self.app = TestApp(make_app(
+            self.root,
+            hooks=[SimpleHook()],
+            use_context_locals=False
+        ))
+
+    def test_no_args(self):
+        self.app.get('/')
+        assert self.args[0] == self.root.index
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert len(self.args[1].args) == 2
+        assert isinstance(self.args[1].args[0], Request)
+        assert isinstance(self.args[1].args[1], Response)
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {}
+
+    def test_single_arg(self):
+        self.app.get('/greet/joe')
+        assert self.args[0] == self.root.greet
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert len(self.args[1].args) == 3
+        assert isinstance(self.args[1].args[0], Request)
+        assert isinstance(self.args[1].args[1], Response)
+        assert self.args[1].args[2] == 'joe'
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {}
+
+    def test_single_vararg(self):
+        self.app.get('/greetmore/joe')
+        assert self.args[0] == self.root.greetmore
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert len(self.args[1].args) == 2
+        assert isinstance(self.args[1].args[0], Request)
+        assert isinstance(self.args[1].args[1], Response)
+        assert self.args[1].varargs == ['joe']
+        assert kwargs(self.args[1]) == {}
+
+    def test_single_kw(self):
+        self.app.get('/kwargs/?name=joe')
+        assert self.args[0] == self.root.kwargs
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert len(self.args[1].args) == 2
+        assert isinstance(self.args[1].args[0], Request)
+        assert isinstance(self.args[1].args[1], Response)
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {'name': 'joe'}
+
+    def test_single_kw_post(self):
+        self.app.post('/kwargs/', params={'name': 'joe'})
+        assert self.args[0] == self.root.kwargs
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert len(self.args[1].args) == 2
+        assert isinstance(self.args[1].args[0], Request)
+        assert isinstance(self.args[1].args[1], Response)
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {'name': 'joe'}
+
+    def test_mixed_args(self):
+        self.app.get('/mixed/foo/bar/spam/eggs')
+        assert self.args[0] == self.root.mixed
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert len(self.args[1].args) == 4
+        assert isinstance(self.args[1].args[0], Request)
+        assert isinstance(self.args[1].args[1], Response)
+        assert self.args[1].args[2:] == ['foo', 'bar']
+        assert self.args[1].varargs == ['spam', 'eggs']
+
+
+class TestRestControllerStateAccess(PecanTestCase):
+
+    def setUp(self):
+        super(TestRestControllerStateAccess, self).setUp()
+        self.args = None
+
+        class RootController(rest.RestController):
+
+            @expose()
+            def _default(self, _id, *args, **kw):
+                return 'Default'
+
+            @expose()
+            def get_all(self, **kw):
+                return 'All'
+
+            @expose()
+            def get_one(self, _id, *args, **kw):
+                return 'One'
+
+            @expose()
+            def post(self, *args, **kw):
+                return 'POST'
+
+            @expose()
+            def put(self, _id, *args, **kw):
+                return 'PUT'
+
+            @expose()
+            def delete(self, _id, *args, **kw):
+                return 'DELETE'
+
+        class SimpleHook(PecanHook):
+            def before(inself, state):
+                self.args = (state.controller, state.arguments)
+
+        self.root = RootController()
+        self.app = TestApp(make_app(self.root, hooks=[SimpleHook()]))
+
+    def test_get_all(self):
+        self.app.get('/')
+        assert self.args[0] == self.root.get_all
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == []
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {}
+
+    def test_get_all_with_kwargs(self):
+        self.app.get('/?foo=bar')
+        assert self.args[0] == self.root.get_all
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == []
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {'foo': 'bar'}
+
+    def test_get_one(self):
+        self.app.get('/1')
+        assert self.args[0] == self.root.get_one
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == ['1']
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {}
+
+    def test_get_one_with_varargs(self):
+        self.app.get('/1/2/3')
+        assert self.args[0] == self.root.get_one
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == ['1']
+        assert self.args[1].varargs == ['2', '3']
+        assert kwargs(self.args[1]) == {}
+
+    def test_get_one_with_kwargs(self):
+        self.app.get('/1?foo=bar')
+        assert self.args[0] == self.root.get_one
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == ['1']
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {'foo': 'bar'}
+
+    def test_post(self):
+        self.app.post('/')
+        assert self.args[0] == self.root.post
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == []
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {}
+
+    def test_post_with_varargs(self):
+        self.app.post('/foo/bar')
+        assert self.args[0] == self.root.post
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == []
+        assert self.args[1].varargs == ['foo', 'bar']
+        assert kwargs(self.args[1]) == {}
+
+    def test_post_with_kwargs(self):
+        self.app.post('/', params={'foo': 'bar'})
+        assert self.args[0] == self.root.post
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == []
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {'foo': 'bar'}
+
+    def test_put(self):
+        self.app.put('/1')
+        assert self.args[0] == self.root.put
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == ['1']
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {}
+
+    def test_put_with_method_argument(self):
+        self.app.post('/1?_method=put')
+        assert self.args[0] == self.root.put
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == ['1']
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {'_method': 'put'}
+
+    def test_put_with_varargs(self):
+        self.app.put('/1/2/3')
+        assert self.args[0] == self.root.put
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == ['1']
+        assert self.args[1].varargs == ['2', '3']
+        assert kwargs(self.args[1]) == {}
+
+    def test_put_with_kwargs(self):
+        self.app.put('/1?foo=bar')
+        assert self.args[0] == self.root.put
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == ['1']
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {'foo': 'bar'}
+
+    def test_delete(self):
+        self.app.delete('/1')
+        assert self.args[0] == self.root.delete
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == ['1']
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {}
+
+    def test_delete_with_method_argument(self):
+        self.app.post('/1?_method=delete')
+        assert self.args[0] == self.root.delete
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == ['1']
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {'_method': 'delete'}
+
+    def test_delete_with_varargs(self):
+        self.app.delete('/1/2/3')
+        assert self.args[0] == self.root.delete
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == ['1']
+        assert self.args[1].varargs == ['2', '3']
+        assert kwargs(self.args[1]) == {}
+
+    def test_delete_with_kwargs(self):
+        self.app.delete('/1?foo=bar')
+        assert self.args[0] == self.root.delete
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == ['1']
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {'foo': 'bar'}
+
+    def test_post_with_invalid_method_kwarg(self):
+        self.app.post('/1?_method=invalid')
+        assert self.args[0] == self.root._default
+        assert isinstance(self.args[1], inspect.Arguments)
+        assert self.args[1].args == ['1']
+        assert self.args[1].varargs == []
+        assert kwargs(self.args[1]) == {'_method': 'invalid'}
 
 
 class TestTransactionHook(PecanTestCase):
