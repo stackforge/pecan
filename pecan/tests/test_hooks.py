@@ -1656,3 +1656,43 @@ class TestRequestViewerHook(PecanTestCase):
         viewer = RequestViewerHook(conf)
 
         assert viewer.items == ['url']
+
+
+class TestRestControllerWithHooks(PecanTestCase):
+
+    def test_restcontroller_with_hooks(self):
+
+        class SomeHook(PecanHook):
+
+            def before(self, state):
+                state.response.headers['X-Testing'] = 'XYZ'
+
+        class BaseController(rest.RestController):
+
+            @expose()
+            def delete(self, _id):
+                return 'Deleting %s' % _id
+
+        class RootController(BaseController, HookController):
+
+            __hooks__ = [SomeHook()]
+
+            @expose()
+            def get_all(self):
+                return 'Hello, World!'
+
+        app = TestApp(
+            make_app(
+                RootController()
+            )
+        )
+
+        response = app.get('/')
+        assert response.status_int == 200
+        assert response.body == b_('Hello, World!')
+        assert response.headers['X-Testing'] == 'XYZ'
+
+        response = app.delete('/100/')
+        assert response.status_int == 200
+        assert response.body == b_('Deleting 100')
+        assert response.headers['X-Testing'] == 'XYZ'

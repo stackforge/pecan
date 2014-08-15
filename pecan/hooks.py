@@ -1,3 +1,4 @@
+import types
 import sys
 from inspect import getmembers
 
@@ -27,7 +28,15 @@ def walk_controller(root_class, controller, hooks):
                 for hook in hooks:
                     value._pecan.setdefault('hooks', set()).add(hook)
             elif hasattr(value, '__class__'):
-                if name.startswith('__') and name.endswith('__'):
+                # Skip non-exposed methods that are defined in parent classes;
+                # they're internal implementation details of that class, and
+                # not actual routable controllers, so we shouldn't bother
+                # assigning hooks to them.
+                if (
+                    isinstance(value, types.MethodType) and
+                    any(filter(lambda c: value.__func__ in c.__dict__.values(),
+                               value.im_class.mro()[1:]))
+                ):
                     continue
                 walk_controller(root_class, value, hooks)
 
