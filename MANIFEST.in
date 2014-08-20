@@ -4,3 +4,4 @@ recursive-include pecan/scaffolds/rest-api *
 include pecan/scaffolds/rest-api/*
 include pecan/middleware/resources/*
 include LICENSE README.rst requirements.txt
+recursive-include pecan/tests *
