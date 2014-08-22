@@ -7,7 +7,7 @@ except:
 
 from six import b as b_
 
-from pecan import abort, expose, make_app, response
+from pecan import abort, expose, make_app, response, redirect
 from pecan.rest import RestController
 from pecan.tests import PecanTestCase
 
@@ -681,6 +681,117 @@ class TestRestController(PecanTestCase):
         assert r.status_int == 200
         assert len(loads(r.body.decode())['items']) == 1
 
+    def test_nested_get_all(self):
+
+        class BarsController(RestController):
+
+            @expose()
+            def get_one(self, foo_id, id):
+                return '4'
+
+            @expose()
+            def get_all(self, foo_id):
+                return '3'
+
+        class FoosController(RestController):
+
+            bars = BarsController()
+
+            @expose()
+            def get_one(self, id):
+                return '2'
+
+            @expose()
+            def get_all(self):
+                return '1'
+
+        class RootController(object):
+            foos = FoosController()
+
+        # create the app
+        app = TestApp(make_app(RootController()))
+
+        r = app.get('/foos/')
+        assert r.status_int == 200
+        assert r.body == b_('1')
+
+        r = app.get('/foos/1/')
+        assert r.status_int == 200
+        assert r.body == b_('2')
+
+        r = app.get('/foos/1/bars/')
+        assert r.status_int == 200
+        assert r.body == b_('3')
+
+        r = app.get('/foos/1/bars/2/')
+        assert r.status_int == 200
+        assert r.body == b_('4')
+
+        r = app.get('/foos/bars/', status=400)
+        assert r.status_int == 400
+
+        r = app.get('/foos/bars/1', status=400)
+        assert r.status_int == 400
+
+    def test_nested_get_all_with_lookup(self):
+
+        class BarsController(RestController):
+
+            @expose()
+            def get_one(self, foo_id, id):
+                return '4'
+
+            @expose()
+            def get_all(self, foo_id):
+                return '3'
+
+            @expose('json')
+            def _lookup(self, id, *remainder):
+                redirect('/lookup-hit/')
+
+        class FoosController(RestController):
+
+            bars = BarsController()
+
+            @expose()
+            def get_one(self, id):
+                return '2'
+
+            @expose()
+            def get_all(self):
+                return '1'
+
+        class RootController(object):
+            foos = FoosController()
+
+        # create the app
+        app = TestApp(make_app(RootController()))
+
+        r = app.get('/foos/')
+        assert r.status_int == 200
+        assert r.body == b_('1')
+
+        r = app.get('/foos/1/')
+        assert r.status_int == 200
+        assert r.body == b_('2')
+
+        r = app.get('/foos/1/bars/')
+        assert r.status_int == 200
+        assert r.body == b_('3')
+
+        r = app.get('/foos/1/bars/2/')
+        assert r.status_int == 200
+        assert r.body == b_('4')
+
+        r = app.get('/foos/bars/', status=400)
+        assert r.status_int == 400
+
+        r = app.get('/foos/bars/', status=400)
+
+        r = app.get('/foos/bars/1')
+        assert r.status_int == 302
+        assert r.headers['Location'].endswith('/lookup-hit/')
+
     def test_bad_rest(self):
 
         class ThingsController(RestController):
@@ -773,16 +884,16 @@ class TestRestController(PecanTestCase):
 
         # test get_all
         r = app.get('/foos')
-        assert r.status_int == 200
-        assert r.body == b_(dumps(dict(items=FoosController.data)))
+        self.assertEqual(r.status_int, 200)
+        self.assertEqual(r.body, b_(dumps(dict(items=FoosController.data))))
 
         # test nested get_all
         r = app.get('/foos/1/bars')
-        assert r.status_int == 200
-        assert r.body == b_(dumps(dict(items=BarsController.data[1])))
+        self.assertEqual(r.status_int, 200)
+        self.assertEqual(r.body, b_(dumps(dict(items=BarsController.data[1]))))
 
         r = app.get('/foos/bars', expect_errors=True)
-        assert r.status_int == 404
+        self.assertEqual(r.status_int, 400)
 
     def test_custom_with_trailing_slash(self):
 
