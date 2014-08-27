@@ -194,8 +194,8 @@ dictionaries.
 ::
 
     logging = {
+        'root': {'level': 'INFO', 'handlers': ['console']},
         'loggers': {
-            'root': {'level': 'INFO', 'handlers': ['console']},
             'sqlalchemy.engine': {'level': 'INFO', 'handlers': ['console']},
             '__force_dict__': True
         },
@@ -208,5 +208,4 @@ dictionaries.
 
     from myapp import conf
     assert isinstance(conf.logging.loggers, dict)
-    assert isinstance(conf.logging.loggers['root'], dict)
     assert isinstance(conf.logging.loggers['sqlalchemy.engine'], dict)
