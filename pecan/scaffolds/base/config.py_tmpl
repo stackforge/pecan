@@ -18,8 +18,8 @@ app = {
 }
 
 logging = {
+    'root': {'level': 'INFO', 'handlers': ['console']},
     'loggers': {
-        'root': {'level': 'INFO', 'handlers': ['console']},
         '${package}': {'level': 'DEBUG', 'handlers': ['console']},
         'pecan.commands.serve': {'level': 'DEBUG', 'handlers': ['console']},
         'py.warnings': {'handlers': ['console']},

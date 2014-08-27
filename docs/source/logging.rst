@@ -31,8 +31,8 @@ The default configuration defines one handler and two loggers.
     server = { ... }
 
     logging = {
+        'root' : {'level': 'INFO', 'handlers': ['console']},
         'loggers': {
-            'root' : {'level': 'INFO', 'handlers': ['console']},
             'myapp': {'level': 'DEBUG', 'handlers': ['console']}
         },
         'handlers': {
