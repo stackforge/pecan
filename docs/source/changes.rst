@@ -1,3 +1,16 @@
+0.7.0
+=====
+* Fixed an edge case in RestController routing which should have returned an
+  HTTP 400 but was instead raising an exception (and thus, HTTP 500).
+* Fixed an incorrect root logger configuration for quickstarted pecan projects.
+* Added `pecan.state.arguments`, a new feature for inspecting controller call
+  arguments.
+* Fixed an infinite recursion error in PecanHook application.  Subclassing both
+  `rest.RestController` and `hooks.HookController` resulted in an infinite
+  recursion error in hook application (which prevented applications from
+  starting).
+* Pecan's tests are now included in its source distribution.
+
 0.6.1
 =====
 * Fixed a bug which causes pecan to mistakenly return HTTP 204 for non-empty
