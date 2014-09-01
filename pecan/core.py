@@ -684,15 +684,23 @@ class ExplicitPecan(PecanBase):
         # When comparing the argspec of the method to GET/POST params,
         # ignore the implicit (req, resp) at the beginning of the function
         # signature
-        signature_error = TypeError(
-            'When `use_context_locals` is `False`, pecan passes an explicit '
-            'reference to the request and response as the first two arguments '
-            'to the controller.\nChange the `%s.%s.%s` signature to accept '
-            'exactly 2 initial arguments (req, resp)' % (
+        if hasattr(state.controller, '__self__'):
+            _repr = '.'.join((
                 state.controller.__self__.__class__.__module__,
                 state.controller.__self__.__class__.__name__,
                 state.controller.__name__
-            )
+            ))
+        else:
+            _repr = '.'.join((
+                state.controller.__module__,
+                state.controller.__name__
+            ))
+
+        signature_error = TypeError(
+            'When `use_context_locals` is `False`, pecan passes an explicit '
+            'reference to the request and response as the first two arguments '
+            'to the controller.\nChange the `%s` signature to accept exactly '
+            '2 initial arguments (req, resp)' % _repr
         )
         try:
             positional = argspec.args[:]
