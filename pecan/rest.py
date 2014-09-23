@@ -1,4 +1,4 @@
-from inspect import getargspec, ismethod
+from inspect import ismethod
 import warnings
 
 from webob import exc
@@ -7,7 +7,7 @@ import six
 from .core import abort
 from .decorators import expose
 from .routing import lookup_controller, handle_lookup_traversal
-from .util import iscontroller
+from .util import iscontroller, getargspec
 
 
 class RestController(object):
