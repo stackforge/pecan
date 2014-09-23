@@ -14,6 +14,7 @@ import six
 
 from webob import (Request as WebObRequest, Response as WebObResponse, exc,
                    acceptparse)
+from webob.multidict import NestedMultiDict
 
 from .compat import urlparse, unquote_plus, izip
 from .secure import handle_security
@@ -499,6 +500,14 @@ class PecanBase(object):
         # fetch any parameters
         if req.method == 'GET':
             params = dict(req.GET)
+        elif req.content_type in ('application/json',
+                                  'application/javascript'):
+            try:
+                if not isinstance(req.json, dict):
+                    raise TypeError('%s is not a dict' % req.json)
+                params = dict(NestedMultiDict(req.GET, req.json))
+            except (TypeError, ValueError):
+                params = dict(req.params)
         else:
             params = dict(req.params)
 
