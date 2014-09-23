@@ -68,6 +68,10 @@ class TestEmptyContent(PecanTestCase):
             def explicit_json_body(self):
                 response.json_body = {'foo': 'bar'}
 
+            @expose()
+            def non_unicode(self):
+                return chr(0xc0)
+
         return TestApp(Pecan(RootController()))
 
     def test_empty_index(self):
@@ -76,6 +80,10 @@ class TestEmptyContent(PecanTestCase):
         self.assertNotIn('Content-Type', r.headers)
         self.assertEqual(r.headers['Content-Length'], '0')
         self.assertEqual(len(r.body), 0)
+
+    def test_index_with_non_unicode(self):
+        r = self.app_.get('/non_unicode/')
+        self.assertEqual(r.status_int, 200)
 
     def test_explicit_body(self):
         r = self.app_.get('/explicit_body/')
