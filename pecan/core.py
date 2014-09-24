@@ -594,9 +594,15 @@ class PecanBase(object):
             else:
                 text = None
                 if state.response.charset:
-                    # `response.text` cannot be accessed without a charset
-                    # (because we don't know which encoding to use)
-                    text = state.response.text
+                    # `response.text` cannot be accessed without a valid
+                    # charset (because we don't know which encoding to use)
+                    try:
+                        text = state.response.text
+                    except UnicodeDecodeError:
+                        # If a valid charset is not specified, don't bother
+                        # trying to guess it (because there's obviously
+                        # content, so we know this shouldn't be a 204)
+                        pass
                 if not any((state.response.body, text)):
                     state.response.status = 204
 
