@@ -727,11 +727,11 @@ class TestRestController(PecanTestCase):
         assert r.status_int == 200
         assert r.body == b_('4')
 
-        r = app.get('/foos/bars/', status=400)
-        assert r.status_int == 400
+        r = app.get('/foos/bars/', status=404)
+        assert r.status_int == 404
 
-        r = app.get('/foos/bars/1', status=400)
-        assert r.status_int == 400
+        r = app.get('/foos/bars/1', status=404)
+        assert r.status_int == 404
 
     def test_nested_get_all_with_lookup(self):
 
@@ -783,10 +783,9 @@ class TestRestController(PecanTestCase):
         assert r.status_int == 200
         assert r.body == b_('4')
 
-        r = app.get('/foos/bars/', status=400)
-        assert r.status_int == 400
-
-        r = app.get('/foos/bars/', status=400)
+        r = app.get('/foos/bars/')
+        assert r.status_int == 302
+        assert r.headers['Location'].endswith('/lookup-hit/')
 
         r = app.get('/foos/bars/1')
         assert r.status_int == 302
@@ -893,7 +892,7 @@ class TestRestController(PecanTestCase):
         self.assertEqual(r.body, b_(dumps(dict(items=BarsController.data[1]))))
 
         r = app.get('/foos/bars', expect_errors=True)
-        self.assertEqual(r.status_int, 400)
+        self.assertEqual(r.status_int, 404)
 
     def test_custom_with_trailing_slash(self):
 

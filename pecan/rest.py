@@ -54,7 +54,10 @@ class RestController(object):
             request.pecan.get('routing_args', [])
         )
         if len(remainder) < fixed_args:
-            abort(400)
+            # For controllers that are missing intermediate IDs
+            # (e.g., /authors/books vs /authors/1/books), return a 404 for an
+            # invalid path.
+            abort(404)
 
     @expose()
     def _route(self, args, request=None):
