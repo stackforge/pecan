@@ -22,7 +22,7 @@ class ScaffoldManager(object):
             log.debug('%s loading scaffold %s', self.__class__.__name__, ep)
             try:
                 cmd = ep.load()
-                assert hasattr(cmd, 'copy_to')
+                cmd.copy_to  # ensure existance; catch AttributeError otherwise
             except Exception as e:  # pragma: nocover
                 warn(
                     "Unable to load scaffold %s: %s" % (ep, e), RuntimeWarning

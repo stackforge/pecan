@@ -254,7 +254,8 @@ class PecanBase(object):
             module = __import__(name, fromlist=fromlist)
             kallable = getattr(module, parts[-1])
             msg = "%s does not represent a callable class or function."
-            assert hasattr(kallable, '__call__'), msg % item
+            if not six.callable(kallable):
+                raise TypeError(msg % item)
             return kallable()
 
         raise ImportError('No item named %s' % item)

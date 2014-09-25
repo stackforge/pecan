@@ -269,9 +269,11 @@ class DebugMiddleware(object):
         self.debugger = debugger
 
     def __call__(self, environ, start_response):
-        assert not environ['wsgi.multiprocess'], (
-            "The DebugMiddleware middleware is not usable in a "
-            "multi-process environment")
+        if environ['wsgi.multiprocess']:
+            raise RuntimeError(
+                "The DebugMiddleware middleware is not usable in a "
+                "multi-process environment"
+            )
 
         if environ.get('paste.testing'):
             return self.app(environ, start_response)
