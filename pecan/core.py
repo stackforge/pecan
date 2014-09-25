@@ -19,7 +19,7 @@ from .compat import urlparse, unquote_plus, izip
 from .secure import handle_security
 from .templating import RendererFactory
 from .routing import lookup_controller, NonCanonicalPath
-from .util import _cfg, encode_if_needed
+from .util import _cfg, encode_if_needed, getargspec
 from .middleware.recursive import ForwardRequestException
 
 
@@ -526,6 +526,15 @@ class PecanBase(object):
         req = state.request
         resp = state.response
         pecan_state = req.pecan
+
+        # If a keyword is supplied via HTTP GET or POST arguments, but the
+        # function signature does not allow it, just drop it (rather than
+        # generating a TypeError).
+        argspec = getargspec(controller)
+        keys = kwargs.keys()
+        for key in keys:
+            if key not in argspec.args and not argspec.keywords:
+                kwargs.pop(key)
 
         # get the result from the controller
         result = controller(*args, **kwargs)

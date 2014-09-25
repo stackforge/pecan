@@ -1,8 +1,8 @@
-from inspect import getargspec, getmembers, isclass, ismethod, isfunction
+from inspect import getmembers, isclass, ismethod, isfunction
 
 import six
 
-from .util import _cfg
+from .util import _cfg, getargspec
 
 __all__ = [
     'expose', 'transactional', 'accept_noncanonical', 'after_commit',
