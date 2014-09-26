@@ -46,7 +46,7 @@ class CommandManager(object):
                 continue
             try:
                 cmd = ep.load()
-                assert hasattr(cmd, 'run')
+                cmd.run  # ensure existance; catch AttributeError otherwise
             except Exception as e:  # pragma: nocover
                 warn("Unable to load plugin %s: %s" % (ep, e), RuntimeWarning)
                 continue
