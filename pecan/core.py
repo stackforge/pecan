@@ -11,6 +11,10 @@ import operator
 import types
 
 import six
+if six.PY3:
+    from .compat import is_bound_method as ismethod
+else:
+    from inspect import ismethod
 
 from webob import (Request as WebObRequest, Response as WebObResponse, exc,
                    acceptparse)
@@ -737,7 +741,13 @@ class ExplicitPecan(PecanBase):
         args, varargs, kwargs = super(ExplicitPecan, self).get_args(
             state, all_params, remainder, argspec, im_self
         )
-        args = [state.request, state.response] + args
+
+        if ismethod(state.controller):
+            args = [state.request, state.response] + args
+        else:
+            # generic controllers have an explicit self *first*
+            # (because they're decorated functions, not instance methods)
+            args[1:1] = [state.request, state.response]
         return args, varargs, kwargs
 
 
