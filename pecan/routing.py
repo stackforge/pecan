@@ -3,7 +3,7 @@ import warnings
 from webob import exc
 
 from .secure import handle_security, cross_boundary
-from .util import iscontroller, getargspec
+from .util import iscontroller, getargspec, _cfg
 
 __all__ = ['lookup_controller', 'find_object']
 
@@ -148,6 +148,17 @@ def find_object(obj, remainder, notfound_handlers, request):
 
         if not remainder:
             raise PecanNotFound
+
+        prev_remainder = remainder
         prev_obj = obj
         remainder = rest
         obj = getattr(obj, next_obj, None)
+
+        # Last-ditch effort: if there's not a matching subcontroller, no
+        # `_default`, no `_lookup`, and no `_route`, look to see if there's
+        # an `index` that has a generic method defined for the current request
+        # method.
+        if not obj and not notfound_handlers and hasattr(prev_obj, 'index'):
+            if request.method in _cfg(prev_obj.index).get('generic_handlers',
+                                                          {}):
+                return prev_obj.index, prev_remainder
