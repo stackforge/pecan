@@ -1,3 +1,14 @@
+0.8.0
+=====
+ * For HTTP POSTs, map JSON request bodies to controller keyword arguments.
+ * Improve argspec detection and leniency for wrapped controllers.
+ * When path arguments are incorrect for RestController, return HTTP 404, not 400.
+ * When detecting non-content for HTTP 204, properly catch UnicodeDecodeError.
+ * Fix a routing bug for generic subcontrollers.
+ * Fix a bug in generic function handling when context locals are disabled.
+ * Fix a bug that mixes up argument order for generic functions.
+ * Remove `assert` for flow control; it can be optimized away with `python -O`.
+
 0.7.0
 =====
 * Fixed an edge case in RestController routing which should have returned an
