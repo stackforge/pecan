@@ -1,4 +1,5 @@
-from json import dumps
+import time
+from json import dumps, loads
 import warnings
 
 from webtest import TestApp
@@ -7,7 +8,7 @@ from six import u as u_
 import webob
 import mock
 
-from pecan import Pecan, expose, abort
+from pecan import Pecan, expose, abort, Request, Response
 from pecan.rest import RestController
 from pecan.hooks import PecanHook, HookController
 from pecan.tests import PecanTestCase
@@ -1355,3 +1356,85 @@ class TestHooks(PecanTestCase):
         assert run_hook[3] == 'inside_sub'
         assert run_hook[4] == 'after1'
         assert run_hook[5] == 'after2'
+
+
+class TestGeneric(PecanTestCase):
+
+    @property
+    def root(self):
+        class RootController(object):
+
+            def __init__(self, unique):
+                self.unique = unique
+
+            @expose(generic=True, template='json')
+            def index(self, req, resp):
+                assert self.__class__.__name__ == 'RootController'
+                assert isinstance(req, Request)
+                assert isinstance(resp, Response)
+                assert self.unique == req.headers.get('X-Unique')
+                return {'hello': 'world'}
+
+            @index.when(method='POST', template='json')
+            def index_post(self, req, resp):
+                assert self.__class__.__name__ == 'RootController'
+                assert isinstance(req, Request)
+                assert isinstance(resp, Response)
+                assert self.unique == req.headers.get('X-Unique')
+                return req.json
+
+            @expose(template='json')
+            def echo(self, req, resp):
+                assert self.__class__.__name__ == 'RootController'
+                assert isinstance(req, Request)
+                assert isinstance(resp, Response)
+                assert self.unique == req.headers.get('X-Unique')
+                return req.json
+
+            @expose(template='json')
+            def extra(self, req, resp, first, second):
+                assert self.__class__.__name__ == 'RootController'
+                assert isinstance(req, Request)
+                assert isinstance(resp, Response)
+                assert self.unique == req.headers.get('X-Unique')
+                return {'first': first, 'second': second}
+
+        return RootController
+
+    def test_generics_with_im_self_default(self):
+        uniq = str(time.time())
+        with mock.patch('threading.local', side_effect=AssertionError()):
+            app = TestApp(Pecan(self.root(uniq), use_context_locals=False))
+            r = app.get('/', headers={'X-Unique': uniq})
+            assert r.status_int == 200
+            json_resp = loads(r.body.decode())
+            assert json_resp['hello'] == 'world'
+
+    def test_generics_with_im_self_with_method(self):
+        uniq = str(time.time())
+        with mock.patch('threading.local', side_effect=AssertionError()):
+            app = TestApp(Pecan(self.root(uniq), use_context_locals=False))
+            r = app.post_json('/', {'foo': 'bar'}, headers={'X-Unique': uniq})
+            assert r.status_int == 200
+            json_resp = loads(r.body.decode())
+            assert json_resp['foo'] == 'bar'
+
+    def test_generics_with_im_self_with_path(self):
+        uniq = str(time.time())
+        with mock.patch('threading.local', side_effect=AssertionError()):
+            app = TestApp(Pecan(self.root(uniq), use_context_locals=False))
+            r = app.post_json('/echo/', {'foo': 'bar'},
+                              headers={'X-Unique': uniq})
+            assert r.status_int == 200
+            json_resp = loads(r.body.decode())
+            assert json_resp['foo'] == 'bar'
+
+    def test_generics_with_im_self_with_extra_args(self):
+        uniq = str(time.time())
+        with mock.patch('threading.local', side_effect=AssertionError()):
+            app = TestApp(Pecan(self.root(uniq), use_context_locals=False))
+            r = app.get('/extra/123/456',  headers={'X-Unique': uniq})
+            assert r.status_int == 200
+            json_resp = loads(r.body.decode())
+            assert json_resp['first'] == '123'
+            assert json_resp['second'] == '456'
