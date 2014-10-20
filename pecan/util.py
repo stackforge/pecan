@@ -23,6 +23,12 @@ def getargspec(method):
 
     func_closure = six.get_function_closure(method)
 
+    # NOTE(sileht): if the closure is None we cannot look deeper,
+    # so return actual argspec, this occurs when the method
+    # is static for example.
+    if func_closure is None:
+        return argspec
+
     closure = next(
         (
             c for c in func_closure if six.callable(c.cell_contents)
