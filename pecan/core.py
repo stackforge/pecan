@@ -344,7 +344,7 @@ class PecanBase(object):
             return unquote_plus(x) if isinstance(x, six.string_types) \
                 else x
 
-        remainder = [_decode(x) for x in remainder]
+        remainder = [_decode(x) for x in remainder if x]
 
         if im_self is not None:
             args.append(im_self)

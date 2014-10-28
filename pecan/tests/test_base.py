@@ -928,6 +928,11 @@ class TestControllerArguments(PecanTestCase):
         assert r.status_int == 200
         assert r.body == b_('eater: 9, None, day=12, month=1')
 
+    def test_post_empty_remainder_with_json_kwargs(self):
+        r = self.app_.post_json('/eater/9/', {'month': '1', 'day': '12'})
+        assert r.status_int == 200
+        assert r.body == b_('eater: 9, None, day=12, month=1')
+
     def test_post_remainder_with_json_kwargs(self):
         r = self.app_.post_json('/eater/9', {'month': '1', 'day': '12'})
         assert r.status_int == 200
