@@ -70,7 +70,7 @@ setup(
     name='pecan',
     version=version,
     description="A WSGI object-dispatching web framework, designed to be "
-                "lean and fast, with few dependancies.",
+                "lean and fast, with few dependencies.",
     long_description=None,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
