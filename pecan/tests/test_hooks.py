@@ -1681,6 +1681,19 @@ class TestRestControllerWithHooks(PecanTestCase):
             def get_all(self):
                 return 'Hello, World!'
 
+            @staticmethod
+            def static(cls):
+                return 'static'
+
+            @property
+            def foo(self):
+                return 'bar'
+
+            def testing123(self):
+                return 'bar'
+
+            unhashable = [1, 'two', 3]
+
         app = TestApp(
             make_app(
                 RootController()

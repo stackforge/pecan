@@ -2,6 +2,7 @@ import types
 import sys
 from inspect import getmembers
 
+import six
 from webob.exc import HTTPFound
 
 from .util import iscontroller, _cfg
@@ -12,8 +13,20 @@ __all__ = [
 ]
 
 
-def walk_controller(root_class, controller, hooks):
-    if not isinstance(controller, (int, dict)):
+def walk_controller(root_class, controller, hooks, seen=None):
+    seen = seen or set()
+    if type(controller) not in vars(six.moves.builtins).values():
+        # Avoid recursion loops
+        try:
+            if controller in seen:
+                return
+            seen.add(controller)
+        except TypeError:
+            # If we discover an unhashable item (like a list), it's not
+            # something that we want to traverse because it's not the sort of
+            # thing we would add a hook to
+            return
+
         for hook in getattr(controller, '__hooks__', []):
             # Append hooks from controller class definition
             hooks.add(hook)
@@ -38,7 +51,7 @@ def walk_controller(root_class, controller, hooks):
                                value.im_class.mro()[1:]))
                 ):
                     continue
-                walk_controller(root_class, value, hooks)
+                walk_controller(root_class, value, hooks, seen)
 
 
 class HookControllerMeta(type):
