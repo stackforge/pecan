@@ -1,13 +1,21 @@
+0.8.1
+=====
+* Improved detection of infinite recursion for PecanHook and pypy.  This fixes
+  a bug discovered in pecan + pypy that could result in infinite recursion when
+  using the PecanHook metaclass.
+* Fixed a bug that prevented @exposed controllers from using @staticmethod.
+* Fixed a minor bug in the controller argument calculation.
+
 0.8.0
 =====
  * For HTTP POSTs, map JSON request bodies to controller keyword arguments.
- * Improve argspec detection and leniency for wrapped controllers.
+ * Improved argspec detection and leniency for wrapped controllers.
  * When path arguments are incorrect for RestController, return HTTP 404, not 400.
  * When detecting non-content for HTTP 204, properly catch UnicodeDecodeError.
- * Fix a routing bug for generic subcontrollers.
- * Fix a bug in generic function handling when context locals are disabled.
- * Fix a bug that mixes up argument order for generic functions.
- * Remove `assert` for flow control; it can be optimized away with `python -O`.
+ * Fixed a routing bug for generic subcontrollers.
+ * Fixed a bug in generic function handling when context locals are disabled.
+ * Fixed a bug that mixes up argument order for generic functions.
+ * Removed `assert` for flow control; it can be optimized away with `python -O`.
 
 0.7.0
 =====
