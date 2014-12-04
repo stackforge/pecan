@@ -390,7 +390,7 @@ Blacklisting Certain Paths
 ..........................
 
 Sometimes it's annoying to get information about *every* single
-request. To limit the ouptput, pass the list of URL paths for which
+request. To limit the output, pass the list of URL paths for which
 you do not want data as the ``blacklist``.
 
 The matching is done at the start of the URL path, so be careful when using
