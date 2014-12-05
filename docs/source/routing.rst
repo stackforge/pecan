@@ -106,7 +106,7 @@ Let's look at an example using ``template`` and ``content_type``:
         def hello(self):
             return {'msg': 'Hello!'}
 
-You'll notice that we called :func:`~pecan.decoators.expose` three times, with
+You'll notice that we called :func:`~pecan.decorators.expose` three times, with
 different arguments.
 
 ::
@@ -136,6 +136,34 @@ use the ``text/html`` content type by default.
   * :ref:`pecan_decorators`
 
 
+Routing Based on Request Method
+-------------------------------
+
+The ``generic`` argument to :func:`~pecan.decorators.expose` provides support for overloading URLs
+based on the request method.  In the following example, the same URL can be
+serviced by two different methods (one for handling HTTP ``GET``, another for
+HTTP ``POST``) using `generic controllers`:
+
+::
+
+    from pecan import expose
+
+
+    class RootController(object):
+
+        # HTTP GET /
+        @expose(generic=True, template='json')
+        def index(self):
+            return dict()
+
+        # HTTP POST /
+        @index.when(method='POST', template='json')
+        def index_POST(self, **kw):
+            uuid = create_something()
+            return dict(uuid=uuid)
+
+
+
 
 Pecan's Routing Algorithm
 -------------------------
@@ -146,44 +174,6 @@ the object-dispatch system to process URLs with more control, including the
 special :func:`_lookup`, :func:`_default`, and :func:`_route` methods. Defining
 these methods on your controller objects provides additional flexibility for
 processing all or part of a URL.
-
-
-Setting a Return Status Code
-----------------------------
-
-Set a specific HTTP response code (such as ``201 Created``) by
-modifying the ``status`` attribute of the response object.
-
-::
-
-    from pecan import expose, response
-
-    class RootController(object):
-
-        @expose('json')
-        def hello(self):
-            response.status = 201
-            return {'foo': 'bar'}
-
-Use the utility function :func:`~pecan.core.abort` to raise HTTP errors.
-
-::
-
-    from pecan import expose, abort
-
-    class RootController(object):
-
-        @expose('json')
-        def hello(self):
-            abort(404)
-
-
-:func:`~pecan.core.abort` raises an instance of
-:class:`~webob.exc.WSGIHTTPException` which is used by Pecan to render
-:default response bodies for HTTP errors.  This exception is stored in
-:the WSGI request environ at ``pecan.original_exception``, where it
-:can be accessed later in the request cycle (by, for example, other
-:middleware or :ref:`errors`).
 
 
 Routing to Subcontrollers with ``_lookup``
@@ -268,7 +258,7 @@ a :func:`_route` method will enable you to have total control.
 
 
 Interacting with the Request and Response Object
-------------------------------------------------
+================================================
 
 For every HTTP request, Pecan maintains a :ref:`thread-local reference
 <contextlocals>` to the request and response object, ``pecan.request`` and
@@ -293,6 +283,58 @@ directly, there may be situations where you want to access them, such as:
   referer header
 * Setting specific response headers
 * Manually rendering a response body
+
+
+Specifying a Custom Response
+----------------------------
+
+Set a specific HTTP response code (such as ``203 Non-Authoritative Information``) by
+modifying the ``status`` attribute of the response object.
+
+::
+
+    from pecan import expose, response
+
+    class RootController(object):
+
+        @expose('json')
+        def hello(self):
+            response.status = 203
+            return {'foo': 'bar'}
+
+Use the utility function :func:`~pecan.core.abort` to raise HTTP errors.
+
+::
+
+    from pecan import expose, abort
+
+    class RootController(object):
+
+        @expose('json')
+        def hello(self):
+            abort(404)
+
+
+:func:`~pecan.core.abort` raises an instance of
+:class:`~webob.exc.WSGIHTTPException` which is used by Pecan to render
+default response bodies for HTTP errors.  This exception is stored in
+the WSGI request environ at ``pecan.original_exception``, where it
+can be accessed later in the request cycle (by, for example, other
+middleware or :ref:`errors`).
+
+If you'd like to return an explicit response, you can do so using
+:class:`~pecan.core.Response`:
+
+::
+
+    from pecan import expose, Response
+
+    class RootController(object):
+
+        @expose()
+        def hello(self):
+            return Response('Hello, World!', 202)
+
 
 
 Extending Pecan's Request and Response Object
