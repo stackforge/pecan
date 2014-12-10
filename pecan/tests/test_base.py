@@ -12,6 +12,7 @@ from webob.exc import HTTPNotFound
 from webtest import TestApp
 import six
 from six import b as b_
+from six import u as u_
 from six.moves import cStringIO as StringIO
 
 from pecan import (
@@ -871,6 +872,33 @@ class TestControllerArguments(PecanTestCase):
         )
         assert r.status_int == 200
         assert r.body == b_('variable_all: 7, day=12, id=seven, month=1')
+
+    def test_duplicate_query_parameters_GET(self):
+        r = self.app_.get('/variable_kwargs?list=1&list=2')
+        l = [u_('1'), u_('2')]
+        assert r.status_int == 200
+        assert r.body == b_('variable_kwargs: list=%s' % l)
+
+    def test_duplicate_query_parameters_POST(self):
+        r = self.app_.post('/variable_kwargs',
+                           {'list': ['1', '2']})
+        l = [u_('1'), u_('2')]
+        assert r.status_int == 200
+        assert r.body == b_('variable_kwargs: list=%s' % l)
+
+    def test_duplicate_query_parameters_POST_mixed(self):
+        r = self.app_.post('/variable_kwargs?list=1&list=2',
+                           {'list': ['3', '4']})
+        l = [u_('1'), u_('2'), u_('3'), u_('4')]
+        assert r.status_int == 200
+        assert r.body == b_('variable_kwargs: list=%s' % l)
+
+    def test_duplicate_query_parameters_POST_mixed_json(self):
+        r = self.app_.post('/variable_kwargs?list=1&list=2',
+                           {'list': 3})
+        l = [u_('1'), u_('2'), u_('3')]
+        assert r.status_int == 200
+        assert r.body == b_('variable_kwargs: list=%s' % l)
 
     def test_no_remainder(self):
         try:

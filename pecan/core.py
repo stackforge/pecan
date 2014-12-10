@@ -504,22 +504,22 @@ class PecanBase(object):
 
         # fetch any parameters
         if req.method == 'GET':
-            params = dict(req.GET)
+            params = req.GET
         elif req.content_type in ('application/json',
                                   'application/javascript'):
             try:
                 if not isinstance(req.json, dict):
                     raise TypeError('%s is not a dict' % req.json)
-                params = dict(NestedMultiDict(req.GET, req.json))
+                params = NestedMultiDict(req.GET, req.json)
             except (TypeError, ValueError):
-                params = dict(req.params)
+                params = req.params
         else:
-            params = dict(req.params)
+            params = req.params
 
         # fetch the arguments for the controller
         args, varargs, kwargs = self.get_args(
             state,
-            params,
+            params.mixed(),
             remainder,
             cfg['argspec'],
             im_self
