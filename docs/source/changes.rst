@@ -1,3 +1,8 @@
+0.8.2
+=====
+* Fixes a bug that breaks support for multi-value query string variables (e.g.,
+  `?check=a&check=b`).
+
 0.8.1
 =====
 * Improved detection of infinite recursion for PecanHook and pypy.  This fixes
