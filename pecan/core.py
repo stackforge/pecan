@@ -390,18 +390,19 @@ class PecanBase(object):
         return args, varargs, kwargs
 
     def render(self, template, namespace):
-        renderer = self.renderers.get(
-            self.default_renderer,
-            self.template_path
-        )
         if template == 'json':
             renderer = self.renderers.get('json', self.template_path)
-        if ':' in template:
+        elif ':' in template:
+            renderer_name, template = template.split(':', 1)
             renderer = self.renderers.get(
-                template.split(':')[0],
+                renderer_name,
                 self.template_path
             )
-            template = template.split(':')[1]
+        else:
+            renderer = self.renderers.get(
+                self.default_renderer,
+                self.template_path
+            )
         return renderer.render(template, namespace)
 
     def find_controller(self, state):
