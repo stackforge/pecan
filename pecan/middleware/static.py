@@ -115,7 +115,6 @@ class StaticFileMiddleware(object):
 
     def __init__(self, app, directory, fallback_mimetype='text/plain'):
         self.app = app
-        self.directory = directory
         self.loader = self.get_directory_loader(directory)
         self.fallback_mimetype = fallback_mimetype
 
