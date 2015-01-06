@@ -4,6 +4,11 @@ import os
 
 import six
 
+if six.PY3:
+    from importlib.machinery import SourceFileLoader
+else:
+    import imp
+
 
 IDENTIFIER = re.compile(r'[a-z_](\w)*$', re.IGNORECASE)
 
@@ -152,8 +157,24 @@ def conf_from_file(filepath):
     if not os.path.isfile(abspath):
         raise RuntimeError('`%s` is not a file.' % abspath)
 
+    # First, make sure the code will actually compile (and has no SyntaxErrors)
     with open(abspath, 'rb') as f:
-        exec(compile(f.read(), abspath, 'exec'), globals(), conf_dict)
+        compiled = compile(f.read(), abspath, 'exec')
+
+    # Next, attempt to actually import the file as a module.
+    # This provides more verbose import-related error reporting than exec()
+    absname, _ = os.path.splitext(abspath)
+    basepath, module_name = absname.rsplit(os.sep, 1)
+    if six.PY3:
+        SourceFileLoader(module_name, abspath).load_module(module_name)
+    else:
+        imp.load_module(
+            module_name,
+            *imp.find_module(module_name, [basepath])
+        )
+
+    # If we were able to import as a module, actually exec the compiled code
+    exec(compiled, globals(), conf_dict)
     conf_dict['__file__'] = abspath
 
     return conf_from_dict(conf_dict)

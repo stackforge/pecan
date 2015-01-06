@@ -144,6 +144,22 @@ class TestConf(PecanTestCase):
                 f.name
             )
 
+    def test_config_with_non_package_relative_import(self):
+        from pecan import configuration
+        with tempfile.NamedTemporaryFile('wb', suffix='.py') as f:
+            f.write(b_('\n'.join(['from . import variables'])))
+            f.flush()
+            configuration.Config({})
+
+            try:
+                configuration.conf_from_file(f.name)
+            except (ValueError, SystemError) as e:
+                assert 'relative import' in str(e)
+            else:
+                raise AssertionError(
+                    "A relative import-related error should have been raised"
+                )
+
     def test_config_with_bad_import(self):
         from pecan import configuration
         path = ('bad', 'importerror.py')
