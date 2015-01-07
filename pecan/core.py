@@ -48,7 +48,13 @@ class RoutingState(object):
 
 
 class Request(WebObRequest):
-    pass
+
+    def __getattribute__(self, name):
+        try:
+            return WebObRequest.__getattribute__(self, name)
+        except UnicodeDecodeError as e:
+            logger.exception(e)
+            abort(400)
 
 
 class Response(WebObResponse):

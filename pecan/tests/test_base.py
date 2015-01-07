@@ -146,6 +146,23 @@ class TestAppIterFile(PecanTestCase):
         assert len(r.body) == 0
 
 
+class TestInvalidURLEncoding(PecanTestCase):
+
+    @property
+    def app_(self):
+        class RootController(object):
+
+            @expose()
+            def _route(self, args, request):
+                assert request.path
+
+        return TestApp(Pecan(RootController()))
+
+    def test_rest_with_non_utf_8_body(self):
+        r = self.app_.get('/%aa/', expect_errors=True)
+        assert r.status_int == 400
+
+
 class TestIndexRouting(PecanTestCase):
 
     @property

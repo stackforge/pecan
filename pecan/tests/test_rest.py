@@ -1,11 +1,12 @@
-from webtest import TestApp
+import struct
 import warnings
 try:
     from simplejson import dumps, loads
 except:
     from json import dumps, loads  # noqa
 
-from six import b as b_
+from six import b as b_, PY3
+from webtest import TestApp
 
 from pecan import abort, expose, make_app, response, redirect
 from pecan.rest import RestController
@@ -1358,6 +1359,27 @@ class TestRestController(PecanTestCase):
         r = app.get('/foo/missing')
         assert r.status_int == 200
         assert r.body == b_("DEFAULT missing")
+
+    def test_rest_with_non_utf_8_body(self):
+        if PY3:
+            # webob+PY3 doesn't suffer from this bug; the POST parsing in PY3
+            # seems to more gracefully detect the bytestring
+            return
+
+        class FooController(RestController):
+
+            @expose()
+            def post(self):
+                return "POST"
+
+        class RootController(RestController):
+            foo = FooController()
+
+        app = TestApp(make_app(RootController()))
+
+        data = struct.pack('255h', *range(0, 255))
+        r = app.post('/foo/', data, expect_errors=True)
+        assert r.status_int == 400
 
     def test_dynamic_rest_lookup(self):
         class BarController(RestController):
