@@ -453,6 +453,25 @@ application's controller:
             assert isinstance(request.POST['file'], cgi.FieldStorage)
             data = request.POST['file'].file.read()
 
+Thread-Safe Per-Request Storage
+-------------------------------
+
+For convenience, Pecan provides a Python dictionary on every request which can
+be accessed and modified in a thread-safe manner throughout the life-cycle of
+an individual request::
+
+    pecan.request.context['current_user'] = some_user
+    print pecan.request.context.items()
+
+This is particularly useful in situations where you want to store
+metadata/context about a request (e.g., in middleware, or per-routing hooks)
+and access it later (e.g., in controller code).
+
+For more fine-grained control of the request, the underlying WSGI environ for
+a given Pecan request can be accessed and modified via
+``pecan.request.environ``.
+
+
 Helper Functions
 ----------------
 
