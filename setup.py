@@ -3,7 +3,7 @@ import platform
 
 from setuptools import setup, find_packages
 
-version = '0.8.2'
+version = '0.8.3'
 
 #
 # determine requirements
