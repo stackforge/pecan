@@ -5,7 +5,7 @@ import sys
 
 import six
 
-if sys.version_info > (3, 2):
+if sys.version_info >= (3, 3):
     from importlib.machinery import SourceFileLoader
 else:
     import imp
@@ -166,7 +166,7 @@ def conf_from_file(filepath):
     # This provides more verbose import-related error reporting than exec()
     absname, _ = os.path.splitext(abspath)
     basepath, module_name = absname.rsplit(os.sep, 1)
-    if sys.version_info > (3, 2):
+    if sys.version_info >= (3, 3):
         SourceFileLoader(module_name, abspath).load_module(module_name)
     else:
         imp.load_module(
