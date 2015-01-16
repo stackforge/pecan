@@ -1554,3 +1554,19 @@ class TestRestController(PecanTestCase):
         r = app.get('/foo/%F0%9F%8C%B0/')
         assert r.status_int == 200
         assert r.body == b'Hello, World!'
+
+
+class TestExplicitRoute(PecanTestCase):
+
+    def test_alternate_route(self):
+
+        class RootController(RestController):
+
+            @expose(route='some-path')
+            def get_all(self):
+                return "Hello, World!"
+
+        self.assertRaises(
+            ValueError,
+            RootController
+        )

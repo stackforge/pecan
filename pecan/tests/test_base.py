@@ -16,7 +16,7 @@ from six.moves import cStringIO as StringIO
 
 from pecan import (
     Pecan, Request, Response, expose, request, response, redirect,
-    abort, make_app, override_template, render
+    abort, make_app, override_template, render, route
 )
 from pecan.templating import (
     _builtin_renderers as builtin_renderers, error_formatters
@@ -1965,3 +1965,264 @@ class TestDeprecatedRouteMethod(PecanTestCase):
             r = self.app_.get('/foo/bar/')
             assert r.status_int == 200
             assert b_('foo, bar') in r.body
+
+
+class TestExplicitRoute(PecanTestCase):
+
+    def test_alternate_route(self):
+
+        class RootController(object):
+
+            @expose(route='some-path')
+            def some_path(self):
+                return 'Hello, World!'
+
+        app = TestApp(Pecan(RootController()))
+
+        r = app.get('/some-path/')
+        assert r.status_int == 200
+        assert r.body == b_('Hello, World!')
+
+        r = app.get('/some_path/', expect_errors=True)
+        assert r.status_int == 404
+
+    def test_manual_route(self):
+
+        class SubController(object):
+
+            @expose(route='some-path')
+            def some_path(self):
+                return 'Hello, World!'
+
+        class RootController(object):
+            pass
+
+        route(RootController, 'some-controller', SubController())
+
+        app = TestApp(Pecan(RootController()))
+
+        r = app.get('/some-controller/some-path/')
+        assert r.status_int == 200
+        assert r.body == b_('Hello, World!')
+
+        r = app.get('/some-controller/some_path/', expect_errors=True)
+        assert r.status_int == 404
+
+    def test_manual_route_conflict(self):
+
+        class SubController(object):
+            pass
+
+        class RootController(object):
+
+            @expose()
+            def hello(self):
+                return 'Hello, World!'
+
+        self.assertRaises(
+            RuntimeError,
+            route,
+            RootController,
+            'hello',
+            SubController()
+        )
+
+    def test_custom_route_on_index(self):
+
+        class RootController(object):
+
+            @expose(route='some-path')
+            def index(self):
+                return 'Hello, World!'
+
+        app = TestApp(Pecan(RootController()))
+
+        r = app.get('/some-path/')
+        assert r.status_int == 200
+        assert r.body == b_('Hello, World!')
+
+        r = app.get('/')
+        assert r.status_int == 200
+        assert r.body == b_('Hello, World!')
+
+        r = app.get('/index/', expect_errors=True)
+        assert r.status_int == 404
+
+    def test_custom_route_with_attribute_conflict(self):
+
+        class RootController(object):
+
+            @expose(route='mock')
+            def greet(self):
+                return 'Hello, World!'
+
+            @expose()
+            def mock(self):
+                return 'You are not worthy!'
+
+        app = TestApp(Pecan(RootController()))
+
+        self.assertRaises(
+            RuntimeError,
+            app.get,
+            '/mock/'
+        )
+
+    def test_conflicting_custom_routes(self):
+
+        class RootController(object):
+
+            @expose(route='testing')
+            def foo(self):
+                return 'Foo!'
+
+            @expose(route='testing')
+            def bar(self):
+                return 'Bar!'
+
+        app = TestApp(Pecan(RootController()))
+
+        self.assertRaises(
+            RuntimeError,
+            app.get,
+            '/testing/'
+        )
+
+    def test_conflicting_custom_routes_in_subclass(self):
+
+        class BaseController(object):
+
+            @expose(route='testing')
+            def foo(self):
+                return request.path
+
+        class ChildController(BaseController):
+            pass
+
+        class RootController(BaseController):
+            child = ChildController()
+
+        app = TestApp(Pecan(RootController()))
+
+        r = app.get('/testing/')
+        assert r.body == b_('/testing/')
+
+        r = app.get('/child/testing/')
+        assert r.body == b_('/child/testing/')
+
+    def test_custom_route_prohibited_on_lookup(self):
+        try:
+            class RootController(object):
+
+                @expose(route='some-path')
+                def _lookup(self):
+                    return 'Hello, World!'
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(
+                '_lookup cannot be used with a custom path segment'
+            )
+
+    def test_custom_route_prohibited_on_default(self):
+        try:
+            class RootController(object):
+
+                @expose(route='some-path')
+                def _default(self):
+                    return 'Hello, World!'
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(
+                '_default cannot be used with a custom path segment'
+            )
+
+    def test_custom_route_prohibited_on_route(self):
+        try:
+            class RootController(object):
+
+                @expose(route='some-path')
+                def _route(self):
+                    return 'Hello, World!'
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(
+                '_route cannot be used with a custom path segment'
+            )
+
+    def test_custom_route_with_generic_controllers(self):
+
+        class RootController(object):
+
+            @expose(route='some-path', generic=True)
+            def foo(self):
+                return 'Hello, World!'
+
+            @foo.when(method='POST')
+            def handle_post(self):
+                return 'POST!'
+
+        app = TestApp(Pecan(RootController()))
+
+        r = app.get('/some-path/')
+        assert r.status_int == 200
+        assert r.body == b_('Hello, World!')
+
+        r = app.get('/foo/', expect_errors=True)
+        assert r.status_int == 404
+
+        r = app.post('/some-path/')
+        assert r.status_int == 200
+        assert r.body == b_('POST!')
+
+        r = app.post('/foo/', expect_errors=True)
+        assert r.status_int == 404
+
+    def test_custom_route_prohibited_on_generic_controllers(self):
+        try:
+            class RootController(object):
+
+                @expose(generic=True)
+                def foo(self):
+                    return 'Hello, World!'
+
+                @foo.when(method='POST', route='some-path')
+                def handle_post(self):
+                    return 'POST!'
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(
+                'generic controllers cannot be used with a custom path segment'
+            )
+
+    def test_invalid_route_arguments(self):
+        class C(object):
+
+            def secret(self):
+                return {}
+
+        self.assertRaises(TypeError, route)
+        self.assertRaises(TypeError, route, 'some-path', lambda x: x)
+        self.assertRaises(TypeError, route, 'some-path', C.secret)
+        self.assertRaises(TypeError, route, C, {}, C())
+
+        for path in (
+            'VARIED-case-PATH',
+            'this,custom,path',
+            '123-path',
+            'path(with-parens)',
+            'path;with;semicolons',
+            'path:with:colons',
+        ):
+            handler = C()
+            route(C, path, handler)
+            assert getattr(C, path, handler)
+
+        self.assertRaises(ValueError, route, C, '/path/', C())
+        self.assertRaises(ValueError, route, C, '.', C())
+        self.assertRaises(ValueError, route, C, '..', C())
+        self.assertRaises(ValueError, route, C, 'path?', C())
+        self.assertRaises(ValueError, route, C, 'percent%20encoded', C())

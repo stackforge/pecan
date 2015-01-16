@@ -1,4 +1,4 @@
-from inspect import ismethod
+from inspect import ismethod, getmembers
 import warnings
 
 from webob import exc
@@ -26,6 +26,35 @@ class RestController(object):
     :ref:`rest`.
     '''
     _custom_actions = {}
+
+    def __new__(cls, *args, **kwargs):
+        """
+        RestController does not support the `route` argument to
+        :func:`~pecan.decorators.expose`
+
+        Implement this with __new__ rather than a metaclass, because it's very
+        common for pecan users to mixin RestController (with other bases that
+        have their own metaclasses).
+        """
+        for name, value in getmembers(cls):
+            if iscontroller(value) and getattr(value, 'custom_route', None):
+                raise ValueError(
+                    'Path segments cannot be used in combination with '
+                    'pecan.rest.RestController.  Remove the `route` argument '
+                    'to @pecan.expose on %s.%s.%s' % (
+                        cls.__module__, cls.__name__, value.__name__
+                    )
+                )
+
+        # object.__new__ will error if called with extra arguments, and either
+        # __new__ is overridden or __init__ is not overridden;
+        # https://hg.python.org/cpython/file/78d36d54391c/Objects/typeobject.c#l3034
+        # In PY3, this is actually a TypeError (in PY2, it just raises
+        # a DeprecationWarning)
+        new = super(RestController, cls).__new__
+        if new is object.__new__:
+            return new(cls)
+        return new(cls, *args, **kwargs)
 
     def _get_args_for_controller(self, controller):
         """
