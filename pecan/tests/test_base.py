@@ -395,6 +395,11 @@ class TestControllerArguments(PecanTestCase):
                     ', '.join(list(args) + data)
                 )
 
+            @staticmethod
+            @expose()
+            def static(id):
+                return "id is %s" % id
+
             @expose()
             def _route(self, args, request):
                 if hasattr(self, args[0]):
@@ -917,6 +922,11 @@ class TestControllerArguments(PecanTestCase):
         l = [u_('1'), u_('2'), u_('3')]
         assert r.status_int == 200
         assert r.body == b_('variable_kwargs: list=%s' % l)
+
+    def test_staticmethod(self):
+        r = self.app_.get('/static/foobar')
+        assert r.status_int == 200
+        assert r.body == b_('id is foobar')
 
     def test_no_remainder(self):
         try:

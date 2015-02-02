@@ -343,7 +343,9 @@ class PecanBase(object):
         args = []
         varargs = []
         kwargs = dict()
-        valid_args = argspec.args[1:]  # pop off `self`
+        valid_args = argspec.args[:]
+        if ismethod(state.controller) or im_self:
+            valid_args.pop(0)  # pop off `self`
         pecan_state = state.request.pecan
 
         def _decode(x):
