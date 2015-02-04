@@ -427,6 +427,60 @@ The same effect can be achieved with HTTP ``POST`` body variables:
     $ curl -X POST "http://localhost:8080/" -H "Content-Type: application/x-www-form-urlencoded" -d "arg=foo"
     foo
 
+Static File Serving
+-------------------
+
+Because Pecan gives you direct access to the underlying
+:class:`~webob.request.Request`, serving a static file download is as simple as
+setting the WSGI ``app_iter`` and specifying the content type::
+
+    import os
+    from random import choice
+
+    from webob.static import FileIter
+
+    from pecan import expose, response
+
+
+    class RootController(object):
+
+        @expose(content_type='image/gif')
+        def gifs(self):
+            filepath = choice((
+                "/path/to/funny/gifs/catdance.gif",
+                "/path/to/funny/gifs/babydance.gif",
+                "/path/to/funny/gifs/putindance.gif"
+            ))
+            f = open(filepath, 'rb')
+            response.app_iter = FileIter(f)
+            response.headers[
+                'Content-Disposition'
+            ] = 'attachment; filename="%s"' % os.path.basename(f.name)
+
+If you don't know the content type ahead of time (for example, if you're
+retrieving files and their content types from a data store), you can specify
+it via ``response.headers`` rather than in the :func:`~pecan.decorators.expose`
+decorator::
+
+    import os
+    from mimetypes import guess_type
+
+    from webob.static import FileIter
+
+    from pecan import expose, response
+
+
+    class RootController(object):
+
+        @expose()
+        def download(self):
+            f = open('/path/to/some/file', 'rb')
+            response.app_iter = FileIter(f)
+            response.headers['Content-Type'] = guess_type(f.name)
+            response.headers[
+                'Content-Disposition'
+            ] = 'attachment; filename="%s"' % os.path.basename(f.name)
+
 Handling File Uploads
 ---------------------
 
