@@ -4,15 +4,15 @@ from webob import exc
 
 import six
 
-if six.PY3:
-    from .compat import is_bound_method as ismethod
-else:
-    from inspect import ismethod
-
 from .decorators import expose
 from .util import _cfg, iscontroller
 
 __all__ = ['unlocked', 'secure', 'SecureController']
+
+if six.PY3:
+    from .compat import is_bound_method as ismethod
+else:
+    from inspect import ismethod
 
 
 class _SecureState(object):

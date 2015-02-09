@@ -3,16 +3,15 @@ import sys
 import subprocess
 import time
 
+from six import b as b_
+
+from pecan.compat import urlopen, URLError
+from pecan.tests import PecanTestCase
 
 if sys.version_info < (2, 7):
     import unittest2 as unittest
 else:
     import unittest  # noqa
-
-from six import b as b_
-
-from pecan.compat import urlopen, URLError
-from pecan.tests import PecanTestCase
 
 
 if __name__ == '__main__':

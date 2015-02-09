@@ -11,10 +11,6 @@ import operator
 import types
 
 import six
-if six.PY3:
-    from .compat import is_bound_method as ismethod
-else:
-    from inspect import ismethod
 
 from webob import (Request as WebObRequest, Response as WebObResponse, exc,
                    acceptparse)
@@ -27,6 +23,10 @@ from .routing import lookup_controller, NonCanonicalPath
 from .util import _cfg, encode_if_needed, getargspec
 from .middleware.recursive import ForwardRequestException
 
+if six.PY3:
+    from .compat import is_bound_method as ismethod
+else:
+    from inspect import ismethod
 
 # make sure that json is defined in mimetypes
 add_type('application/json', '.json', True)

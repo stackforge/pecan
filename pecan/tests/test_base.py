@@ -2,10 +2,6 @@ import sys
 import os
 import json
 import warnings
-if sys.version_info < (2, 7):
-    import unittest2 as unittest  # pragma: nocover
-else:
-    import unittest  # pragma: nocover
 
 import webob
 from webob.exc import HTTPNotFound
@@ -24,6 +20,11 @@ from pecan.templating import (
 )
 from pecan.decorators import accept_noncanonical
 from pecan.tests import PecanTestCase
+
+if sys.version_info < (2, 7):
+    import unittest2 as unittest  # pragma: nocover
+else:
+    import unittest  # pragma: nocover
 
 
 class SampleRootController(object):
