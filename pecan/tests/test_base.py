@@ -462,6 +462,16 @@ class TestControllerArguments(PecanTestCase):
         assert r.status_int == 200
         assert r.body == b_('index: This is a test!')
 
+    def test_single_argument_with_plus(self):
+        r = self.app_.get('/foo+bar')
+        assert r.status_int == 200
+        assert r.body == b_('index: foo+bar')
+
+    def test_single_argument_with_encoded_plus(self):
+        r = self.app_.get('/foo%2Bbar')
+        assert r.status_int == 200
+        assert r.body == b_('index: foo+bar')
+
     def test_two_arguments(self):
         r = self.app_.get('/1/dummy', status=404)
         assert r.status_int == 404
@@ -475,6 +485,16 @@ class TestControllerArguments(PecanTestCase):
         r = self.app_.get('/?id=This%20is%20a%20test%21')
         assert r.status_int == 200
         assert r.body == b_('index: This is a test!')
+
+    def test_keyword_argument_with_plus(self):
+        r = self.app_.get('/?id=foo+bar')
+        assert r.status_int == 200
+        assert r.body == b_('index: foo bar')
+
+    def test_keyword_argument_with_encoded_plus(self):
+        r = self.app_.get('/?id=foo%2Bbar')
+        assert r.status_int == 200
+        assert r.body == b_('index: foo+bar')
 
     def test_argument_and_keyword_argument(self):
         r = self.app_.get('/3?id=three')

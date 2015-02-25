@@ -16,7 +16,7 @@ from webob import (Request as WebObRequest, Response as WebObResponse, exc,
                    acceptparse)
 from webob.multidict import NestedMultiDict
 
-from .compat import urlparse, unquote_plus, izip
+from .compat import urlparse, izip
 from .secure import handle_security
 from .templating import RendererFactory
 from .routing import lookup_controller, NonCanonicalPath
@@ -348,11 +348,7 @@ class PecanBase(object):
             valid_args.pop(0)  # pop off `self`
         pecan_state = state.request.pecan
 
-        def _decode(x):
-            return unquote_plus(x) if isinstance(x, six.string_types) \
-                else x
-
-        remainder = [_decode(x) for x in remainder if x]
+        remainder = [x for x in remainder if x]
 
         if im_self is not None:
             args.append(im_self)
