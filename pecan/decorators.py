@@ -55,6 +55,11 @@ def expose(template=None,
 
         # handle generic controllers
         if generic:
+            if f.__name__ in ('_default', '_lookup', '_route'):
+                raise ValueError(
+                    'The special method %s cannot be used as a generic '
+                    'controller' % f.__name__
+                )
             cfg['generic'] = True
             cfg['generic_handlers'] = dict(DEFAULT=f)
             cfg['allowed_methods'] = []
