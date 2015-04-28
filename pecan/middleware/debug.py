@@ -253,7 +253,10 @@ class DebugMiddleware(object):
 
     To further aid in debugging, the middleware includes the ability to repeat
     the offending request, automatically inserting a breakpoint, and dropping
-    your console into the Python debugger, ``pdb``.
+    your console into the Python debugger, ``pdb.post_mortem``.
+
+    You can also use any debugger with a suitable ``post_mortem`` entry point
+    such as the `PuDB Debugger <http://pypi.python.org/pypi/pudb>`_,
 
     For more information, refer to the  `documentation for pdb
     <http://docs.python.org/library/pdb.html>`_ available on the Python
@@ -261,7 +264,7 @@ class DebugMiddleware(object):
 
     :param app: the application to wrap.
     :param debugger: a callable to start debugging, defaulting to the Python
-                     debugger, ``pdb``.
+                     debugger entry point ``pdb.post_mortem``.
     """
 
     def __init__(self, app, debugger=pdb.post_mortem):
