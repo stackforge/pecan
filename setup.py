@@ -43,6 +43,7 @@ except:
 
 tests_require = requirements + [
     'virtualenv',
+    'Jinja2',
     'gunicorn',
     'mock',
     'sqlalchemy'
@@ -59,9 +60,6 @@ if sys.version_info < (3, 0):
 else:
     # Genshi added Python3 support in 0.7
     tests_require += ['Genshi>=0.7']
-
-if sys.version_info < (3, 0) or sys.version_info >= (3, 3):
-    tests_require += ['Jinja2']
 
 #
 # call setup
@@ -87,7 +85,6 @@ setup(
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: Implementation :: PyPy',
