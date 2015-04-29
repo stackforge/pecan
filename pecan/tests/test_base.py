@@ -5,6 +5,7 @@ import warnings
 
 import webob
 from webob.exc import HTTPNotFound
+import mock
 from webtest import TestApp
 import six
 from six import b as b_
@@ -1614,6 +1615,41 @@ class TestNonCanonical(PecanTestCase):
 
         make_app(RootController(), wrap_app=wrap, debug=True)
         assert len(wrapped_apps) == 1
+
+
+class TestDebugging(PecanTestCase):
+    def test_debugger_setup(self):
+        class RootController(object):
+            pass
+
+        def debugger():
+            pass
+
+        app_conf = dict(
+            debug=True,
+            debugger=debugger
+        )
+        with mock.patch('pecan.middleware.debug.DebugMiddleware') \
+                as patched_debug_middleware:
+            app = make_app(RootController(), **app_conf)
+            args, kwargs = patched_debug_middleware.call_args
+            assert kwargs.get('debugger') == debugger
+
+    def test_invalid_debugger_setup(self):
+        class RootController(object):
+            pass
+
+        debugger = 'not_a_valid_entry_point'
+
+        app_conf = dict(
+            debug=True,
+            debugger=debugger
+        )
+        with mock.patch('pecan.middleware.debug.DebugMiddleware') \
+                as patched_debug_middleware:
+            app = make_app(RootController(), **app_conf)
+            args, kwargs = patched_debug_middleware.call_args
+            assert kwargs.get('debugger') is None
 
 
 class TestLogging(PecanTestCase):

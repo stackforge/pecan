@@ -4,19 +4,16 @@ from .core import (
 )
 from .decorators import expose
 from .hooks import RequestViewerHook
-from .middleware.debug import DebugMiddleware
-from .middleware.errordocument import ErrorDocumentMiddleware
-from .middleware.recursive import RecursiveMiddleware
-from .middleware.static import StaticFileMiddleware
-
 from .configuration import set_config, Config
 from .configuration import _runtime_conf as conf
+from . import middleware
 
 try:
     from logging.config import dictConfig as load_logging_config
 except ImportError:
     from logutils.dictconfig import dictConfig as load_logging_config  # noqa
 
+import six
 import warnings
 
 
@@ -40,6 +37,8 @@ def make_app(root, **kw):
                         debug mode is set.
     :param debug: A flag to enable debug mode.  This enables the debug
                   middleware and serving static files.
+    :param debugger: A callable to start debugging, defaulting to the Python
+                     debugger entry point ``pdb.post_mortem``.
     :param wrap_app: A function or middleware class to wrap the Pecan app.
                      This must either be a wsgi middleware class or a
                      function that returns a wsgi application. This wrapper
@@ -90,19 +89,28 @@ def make_app(root, **kw):
     # Configuration for serving custom error messages
     errors = kw.get('errors', getattr(conf.app, 'errors', {}))
     if errors:
-        app = ErrorDocumentMiddleware(app, errors)
+        app = middleware.errordocument.ErrorDocumentMiddleware(app, errors)
 
     # Included for internal redirect support
-    app = RecursiveMiddleware(app)
+    app = middleware.recursive.RecursiveMiddleware(app)
 
     # When in debug mode, load our exception dumping middleware
     static_root = kw.get('static_root', None)
     if debug:
-        app = DebugMiddleware(app)
+        debugger = kw.get('debugger', None)
+        debugger_kwargs = {}
+        if six.callable(debugger):
+            debugger_kwargs['debugger'] = debugger
+        elif debugger:
+            warnings.warn(
+                "`app.debugger` is not callable, ignoring",
+                RuntimeWarning
+            )
+        app = middleware.debug.DebugMiddleware(app, **debugger_kwargs)
 
         # Support for serving static files (for development convenience)
         if static_root:
-            app = StaticFileMiddleware(app, static_root)
+            app = middleware.static.StaticFileMiddleware(app, static_root)
 
     elif static_root:
         warnings.warn(

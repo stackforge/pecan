@@ -29,10 +29,23 @@ browser for easy debugging:
 
 To further aid in debugging, the middleware includes the ability to repeat the
 offending request, automatically inserting a breakpoint, and dropping your
-console into the Python debugger, ``pdb``:
+console into the Python debugger, ``pdb.post_mortem``:
 
 .. figure:: debug-middleware-2.png
    :alt: Pecan debug middleware request debugger. 
+
+You can also use any debugger with a suitable ``post_mortem`` entry point.
+For example, to use the `PuDB Debugger <http://pypi.python.org/pypi/pudb>`_,
+set ``debugger`` like so::
+
+    import pudb
+
+    app = {
+        ...
+        'debug': True,
+        'debugger': pudb.post_mortem,
+        ...
+    }
 
 .. seealso::
 
