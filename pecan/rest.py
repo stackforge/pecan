@@ -59,6 +59,17 @@ class RestController(object):
             # invalid path.
             abort(404)
 
+    def _lookup_child(self, remainder):
+        """
+        Lookup a child controller with a named path (handling Unicode paths
+        properly for Python 2).
+        """
+        try:
+            controller = getattr(self, remainder, None)
+        except UnicodeEncodeError:
+            return None
+        return controller
+
     @expose()
     def _route(self, args, request=None):
         '''
@@ -138,7 +149,7 @@ class RestController(object):
         Returns the appropriate controller for routing a custom action.
         '''
         for name in args:
-            obj = getattr(self, name, None)
+            obj = self._lookup_child(name)
             if obj and iscontroller(obj):
                 return obj
         return None
@@ -167,7 +178,7 @@ class RestController(object):
         # attempt to locate a sub-controller
         if var_args:
             for i, item in enumerate(remainder):
-                controller = getattr(self, item, None)
+                controller = self._lookup_child(item)
                 if controller and not ismethod(controller):
                     self._set_routing_args(request, remainder[:i])
                     return lookup_controller(controller, remainder[i + 1:],
@@ -175,7 +186,7 @@ class RestController(object):
         elif fixed_args < len(remainder) and hasattr(
             self, remainder[fixed_args]
         ):
-            controller = getattr(self, remainder[fixed_args])
+            controller = self._lookup_child(remainder[fixed_args])
             if not ismethod(controller):
                 self._set_routing_args(request, remainder[:fixed_args])
                 return lookup_controller(
@@ -201,7 +212,7 @@ class RestController(object):
         if remainder:
             if self._find_controller(remainder[0]):
                 abort(405)
-            sub_controller = getattr(self, remainder[0], None)
+            sub_controller = self._lookup_child(remainder[0])
             if sub_controller:
                 return lookup_controller(sub_controller, remainder[1:],
                                          request)
@@ -237,7 +248,7 @@ class RestController(object):
         if match:
             return match
 
-        controller = getattr(self, remainder[0], None)
+        controller = self._lookup_child(remainder[0])
         if controller and not ismethod(controller):
             return lookup_controller(controller, remainder[1:], request)
 
@@ -261,7 +272,7 @@ class RestController(object):
             if match:
                 return match
 
-            controller = getattr(self, remainder[0], None)
+            controller = self._lookup_child(remainder[0])
             if controller and not ismethod(controller):
                 return lookup_controller(controller, remainder[1:], request)
 
@@ -275,7 +286,7 @@ class RestController(object):
         if remainder:
             if self._find_controller(remainder[0]):
                 abort(405)
-            sub_controller = getattr(self, remainder[0], None)
+            sub_controller = self._lookup_child(remainder[0])
             if sub_controller:
                 return lookup_controller(sub_controller, remainder[1:],
                                          request)
@@ -295,7 +306,7 @@ class RestController(object):
             if match:
                 return match
 
-            controller = getattr(self, remainder[0], None)
+            controller = self._lookup_child(remainder[0])
             if controller and not ismethod(controller):
                 return lookup_controller(controller, remainder[1:], request)
 

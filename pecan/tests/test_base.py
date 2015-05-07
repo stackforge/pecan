@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sys
 import os
 import json
@@ -257,6 +259,35 @@ class TestObjectDispatch(PecanTestCase):
         r = self.app_.get('/sub/sub/deeper')
         assert r.status_int == 200
         assert r.body == b_('/sub/sub/deeper')
+
+
+@unittest.skipIf(not six.PY3, "tests are Python3 specific")
+class TestUnicodePathSegments(PecanTestCase):
+
+    def test_unicode_methods(self):
+        class RootController(object):
+            pass
+        setattr(RootController, '🌰', expose()(lambda self: 'Hello, World!'))
+        app = TestApp(Pecan(RootController()))
+
+        resp = app.get('/%F0%9F%8C%B0/')
+        assert resp.status_int == 200
+        assert resp.body == b_('Hello, World!')
+
+    def test_unicode_child(self):
+        class ChildController(object):
+            @expose()
+            def index(self):
+                return 'Hello, World!'
+
+        class RootController(object):
+            pass
+        setattr(RootController, '🌰', ChildController())
+        app = TestApp(Pecan(RootController()))
+
+        resp = app.get('/%F0%9F%8C%B0/')
+        assert resp.status_int == 200
+        assert resp.body == b_('Hello, World!')
 
 
 class TestLookups(PecanTestCase):

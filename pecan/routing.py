@@ -152,7 +152,10 @@ def find_object(obj, remainder, notfound_handlers, request):
         prev_remainder = remainder
         prev_obj = obj
         remainder = rest
-        obj = getattr(obj, next_obj, None)
+        try:
+            obj = getattr(obj, next_obj, None)
+        except UnicodeEncodeError:
+            obj = None
 
         # Last-ditch effort: if there's not a matching subcontroller, no
         # `_default`, no `_lookup`, and no `_route`, look to see if there's

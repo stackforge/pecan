@@ -1,5 +1,14 @@
+# -*- coding: utf-8 -*-
+
 import struct
+import sys
 import warnings
+
+if sys.version_info < (2, 7):
+    import unittest2 as unittest  # pragma: nocover
+else:
+    import unittest  # pragma: nocover
+
 try:
     from simplejson import dumps, loads
 except:
@@ -1480,3 +1489,68 @@ class TestRestController(PecanTestCase):
         r = app.delete('/foos/foo/bars/bar')
         assert r.status_int == 200
         assert r.body == b_('DELETE_BAR')
+
+    def test_rest_with_utf8_uri(self):
+
+        class FooController(RestController):
+            key = chr(0x1F330) if PY3 else unichr(0x1F330)
+            data = {key: 'Success!'}
+
+            @expose()
+            def get_one(self, id_):
+                return self.data[id_]
+
+            @expose()
+            def get_all(self):
+                return "Hello, World!"
+
+            @expose()
+            def put(self, id_, value):
+                return self.data[id_]
+
+            @expose()
+            def delete(self, id_):
+                return self.data[id_]
+
+        class RootController(RestController):
+            foo = FooController()
+
+        app = TestApp(make_app(RootController()))
+
+        r = app.get('/foo/%F0%9F%8C%B0')
+        assert r.status_int == 200
+        assert r.body == b'Success!'
+
+        r = app.put('/foo/%F0%9F%8C%B0', {'value': 'pecans'})
+        assert r.status_int == 200
+        assert r.body == b'Success!'
+
+        r = app.delete('/foo/%F0%9F%8C%B0')
+        assert r.status_int == 200
+        assert r.body == b'Success!'
+
+        r = app.get('/foo/')
+        assert r.status_int == 200
+        assert r.body == b'Hello, World!'
+
+    @unittest.skipIf(not PY3, "test is Python3 specific")
+    def test_rest_with_utf8_endpoint(self):
+        class ChildController(object):
+            @expose()
+            def index(self):
+                return 'Hello, World!'
+
+        class FooController(RestController):
+            pass
+
+        # okay, so it's technically a chestnut, but close enough...
+        setattr(FooController, '🌰', ChildController())
+
+        class RootController(RestController):
+            foo = FooController()
+
+        app = TestApp(make_app(RootController()))
+
+        r = app.get('/foo/%F0%9F%8C%B0/')
+        assert r.status_int == 200
+        assert r.body == b'Hello, World!'

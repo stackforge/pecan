@@ -423,7 +423,7 @@ class PecanBase(object):
 
         # store the routing path for the current application to allow hooks to
         # modify it
-        pecan_state['routing_path'] = path = req.encget('PATH_INFO')
+        pecan_state['routing_path'] = path = req.path_info
 
         # handle "on_route" hooks
         self.handle_hooks(self.hooks, 'on_route', state)
@@ -538,7 +538,7 @@ class PecanBase(object):
         # handle "before" hooks
         self.handle_hooks(self.determine_hooks(controller), 'before', state)
 
-        return controller, args+varargs, kwargs
+        return controller, args + varargs, kwargs
 
     def invoke_controller(self, controller, args, kwargs, state):
         '''
