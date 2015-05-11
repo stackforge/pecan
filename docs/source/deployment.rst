@@ -42,19 +42,21 @@ environments:
 Disabling Debug Mode
 --------------------
 
-One of the most important steps to take before deploying a Pecan app
-into production is to disable **Debug Mode**, which is responsible for
-serving static files locally and providing a development-oriented
-debugging environment for tracebacks.  In your production
-configuration file, ensure that ``debug`` is set to ``False``.
+.. warning::
+    One of the most important steps to take before deploying a Pecan app
+    into production is to ensure that you have disabled **Debug Mode**, which
+    provides a development-oriented debugging environment for tracebacks
+    encountered at runtime.  Failure to disable this development tool in your
+    production environment *will* result in serious security issues.  In your
+    production configuration file, ensure that ``debug`` is set to ``False``.
 
-::
+    ::
 
-    # myapp/production_config.py
-    app = {
-        ...
-        'debug': False
-    }
+        # myapp/production_config.py
+        app = {
+            ...
+            'debug': False
+        }
 
 Pecan and WSGI
 --------------
