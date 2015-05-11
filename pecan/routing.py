@@ -49,7 +49,10 @@ def lookup_controller(obj, remainder, request=None):
                                          request)
             handle_security(obj)
             return obj, remainder
-        except (exc.HTTPNotFound, PecanNotFound):
+        except (exc.HTTPNotFound, exc.HTTPMethodNotAllowed,
+                PecanNotFound) as e:
+            if isinstance(e, PecanNotFound):
+                e = exc.HTTPNotFound()
             while notfound_handlers:
                 name, obj, remainder = notfound_handlers.pop()
                 if name == '_default':
@@ -67,11 +70,11 @@ def lookup_controller(obj, remainder, request=None):
                             remainder == [''] and
                             len(obj._pecan['argspec'].args) > 1
                         ):
-                            raise exc.HTTPNotFound
+                            raise e
                         obj_, remainder_ = result
                         return lookup_controller(obj_, remainder_, request)
             else:
-                raise exc.HTTPNotFound
+                raise e
 
 
 def handle_lookup_traversal(obj, args):
