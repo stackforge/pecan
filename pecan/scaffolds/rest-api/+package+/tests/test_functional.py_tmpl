@@ -22,11 +22,11 @@ class TestRootController(FunctionalTest):
         assert response.status_int == 201
 
     def test_put(self):
-        response = self.app.put('/people/1')
+        response = self.app.put('/people/1/')
         assert response.status_int == 204
 
     def test_delete(self):
-        response = self.app.delete('/people/1')
+        response = self.app.delete('/people/1/')
         assert response.status_int == 204
 
     def test_not_found(self):
