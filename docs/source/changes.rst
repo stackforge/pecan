@@ -116,7 +116,7 @@
 0.4.1
 =====
 * Moved the project to `StackForge infrastructure
-  <http://ci.openstack.org/stackforge.html>`_, including Gerrit code review,
+  <http://docs.openstack.org/infra/system-config/stackforge.html>`_, including Gerrit code review,
   Jenkins continuous integration, and GitHub mirroring.
 * Added a pecan plugin for the popular `uwsgi server
   <http://uwsgi-docs.readthedocs.org>`_.
