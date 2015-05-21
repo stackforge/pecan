@@ -4,6 +4,13 @@ from .core import (
 )
 from .decorators import expose
 from .hooks import RequestViewerHook
+
+from .middleware.debug import DebugMiddleware
+from .middleware.errordocument import ErrorDocumentMiddleware
+from .middleware.recursive import RecursiveMiddleware
+from .middleware.static import StaticFileMiddleware
+from .routing import route
+
 from .configuration import set_config, Config
 from .configuration import _runtime_conf as conf
 from . import middleware
@@ -20,7 +27,7 @@ import warnings
 __all__ = [
     'make_app', 'load_app', 'Pecan', 'Request', 'Response', 'request',
     'response', 'override_template', 'expose', 'conf', 'set_config', 'render',
-    'abort', 'redirect'
+    'abort', 'redirect', 'route'
 ]
 
 

@@ -136,6 +136,64 @@ use the ``text/html`` content type by default.
   * :ref:`pecan_decorators`
 
 
+Specifying Explicit Path Segments
+---------------------------------
+
+Occasionally, you may want to use a path segment in your routing that doesn't
+work with Pecan's declarative approach to routing because of restrictions in
+Python's syntax.  For example, if you wanted to route for a path that includes
+dashes, such as ``/some-path/``, the following is *not* valid Python::
+
+
+    class RootController(object):
+
+        @pecan.expose()
+        def some-path(self):
+            return dict()
+
+To work around this, pecan allows you to specify an explicit path segment in
+the :func:`~pecan.decorators.expose` decorator::
+
+    class RootController(object):
+
+        @pecan.expose(route='some-path')
+        def some_path(self):
+            return dict()
+
+In this example, the pecan application will reply with an ``HTTP 200`` for
+requests made to ``/some-path/``, but requests made to ``/some_path/`` will
+yield an ``HTTP 404``.
+
+:func:`~pecan.routing.route` can also be used explicitly as an alternative to
+the ``route`` argument in :func:`~pecan.decorators.expose`::
+
+    class RootController(object):
+
+        @pecan.expose()
+        def some_path(self):
+            return dict()
+
+    pecan.route('some-path', RootController.some_path)
+
+Routing to child controllers can be handled simliarly by utilizing
+:func:`~pecan.routing.route`::
+
+
+    class ChildController(object):
+
+        @pecan.expose()
+        def child(self):
+            return dict()
+
+    class RootController(object):
+        pass
+
+    pecan.route(RootController, 'child-path', ChildController())
+
+In this example, the pecan application will reply with an ``HTTP 200`` for
+requests made to ``/child-path/child/``.
+
+
 Routing Based on Request Method
 -------------------------------
 

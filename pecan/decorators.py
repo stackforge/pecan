@@ -13,10 +13,10 @@ __all__ = [
 def when_for(controller):
     def when(method=None, **kw):
         def decorate(f):
-            expose(**kw)(f)
             _cfg(f)['generic_handler'] = True
             controller._pecan['generic_handlers'][method.upper()] = f
             controller._pecan['allowed_methods'].append(method.upper())
+            expose(**kw)(f)
             return f
         return decorate
     return when
@@ -24,7 +24,8 @@ def when_for(controller):
 
 def expose(template=None,
            content_type='text/html',
-           generic=False):
+           generic=False,
+           route=None):
 
     '''
     Decorator used to flag controller methods as being "exposed" for
@@ -38,6 +39,11 @@ def expose(template=None,
                     ``functools.singledispatch`` generic functions.  Allows you
                     to split a single controller into multiple paths based upon
                     HTTP method.
+    :param route: The name of the path segment to match (excluding
+                  separator characters, like `/`).  Defaults to the name of
+                  the function itself, but this can be used to resolve paths
+                  which are not valid Python function names, e.g., if you
+                  wanted to route a function to `some-special-path'.
     '''
 
     if template == 'json':
@@ -47,8 +53,19 @@ def expose(template=None,
         # flag the method as exposed
         f.exposed = True
 
-        # set a "pecan" attribute, where we will store details
         cfg = _cfg(f)
+
+        if route:
+            # This import is here to avoid a circular import issue
+            from pecan import routing
+            if cfg.get('generic_handler'):
+                raise ValueError(
+                    'Path segments cannot be overridden for generic '
+                    'controllers.'
+                )
+            routing.route(route, f)
+
+        # set a "pecan" attribute, where we will store details
         cfg['content_type'] = content_type
         cfg.setdefault('template', []).append(template)
         cfg.setdefault('content_types', {})[content_type] = template
