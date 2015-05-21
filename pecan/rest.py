@@ -116,14 +116,33 @@ class RestController(object):
                 _lookup_result = self._handle_lookup(args, request)
                 if _lookup_result:
                     return _lookup_result
-        except (exc.HTTPClientError, exc.HTTPNotFound):
+        except (exc.HTTPClientError, exc.HTTPNotFound,
+                exc.HTTPMethodNotAllowed) as e:
             #
-            # If the matching handler results in a 400 or 404, attempt to
+            # If the matching handler results in a 400, 404, or 405, attempt to
             # handle a _lookup method (if it exists)
             #
             _lookup_result = self._handle_lookup(args, request)
             if _lookup_result:
                 return _lookup_result
+
+            # Build a correct Allow: header
+            if isinstance(e, exc.HTTPMethodNotAllowed):
+
+                def method_iter():
+                    for func in ('get', 'get_one', 'get_all', 'new', 'edit',
+                                 'get_delete'):
+                        if self._find_controller(func):
+                            yield 'GET'
+                            break
+                    for method in ('HEAD', 'POST', 'PUT', 'DELETE', 'TRACE',
+                                   'PATCH'):
+                        func = method.lower()
+                        if self._find_controller(func):
+                            yield method
+
+                e.allow = sorted(method_iter())
+
             raise
 
         # return the result
@@ -217,7 +236,7 @@ class RestController(object):
                 return lookup_controller(sub_controller, remainder[1:],
                                          request)
 
-        abort(404)
+        abort(405)
 
     def _handle_get(self, method, remainder, request=None):
         '''
@@ -233,7 +252,7 @@ class RestController(object):
             if controller:
                 self._handle_bad_rest_arguments(controller, remainder, request)
                 return controller, []
-            abort(404)
+            abort(405)
 
         method_name = remainder[-1]
         # check for new/edit/delete GET requests
@@ -258,7 +277,7 @@ class RestController(object):
             self._handle_bad_rest_arguments(controller, remainder, request)
             return controller, remainder
 
-        abort(404)
+        abort(405)
 
     def _handle_delete(self, method, remainder, request=None):
         '''
@@ -291,7 +310,7 @@ class RestController(object):
                 return lookup_controller(sub_controller, remainder[1:],
                                          request)
 
-        abort(404)
+        abort(405)
 
     def _handle_post(self, method, remainder, request=None):
         '''
@@ -315,7 +334,7 @@ class RestController(object):
         if controller:
             return controller, remainder
 
-        abort(404)
+        abort(405)
 
     def _handle_put(self, method, remainder, request=None):
         return self._handle_post(method, remainder, request)

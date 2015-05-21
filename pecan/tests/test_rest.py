@@ -250,8 +250,8 @@ class TestRestController(PecanTestCase):
         assert r.body == b_('OTHERS')
 
         # test an invalid custom action
-        r = app.get('/things?_method=BAD', status=404)
-        assert r.status_int == 404
+        r = app.get('/things?_method=BAD', status=405)
+        assert r.status_int == 405
 
         # test custom "GET" request "count"
         r = app.get('/things/count')
@@ -299,7 +299,7 @@ class TestRestController(PecanTestCase):
         assert r.status_int == 200
         assert r.body == b_(dumps(dict(items=ThingsController.data)))
 
-    def test_404_with_lookup(self):
+    def test_405_with_lookup(self):
 
         class LookupController(RestController):
 
@@ -322,10 +322,10 @@ class TestRestController(PecanTestCase):
         # create the app
         app = TestApp(make_app(RootController()))
 
-        # these should 404
+        # these should 405
         for path in ('/things', '/things/'):
             r = app.get(path, expect_errors=True)
-            assert r.status_int == 404
+            assert r.status_int == 405
 
         r = app.get('/things/foo')
         assert r.status_int == 200
@@ -813,53 +813,53 @@ class TestRestController(PecanTestCase):
         app = TestApp(make_app(RootController()))
 
         # test get_all
-        r = app.get('/things', status=404)
-        assert r.status_int == 404
+        r = app.get('/things', status=405)
+        assert r.status_int == 405
 
         # test get_one
-        r = app.get('/things/1', status=404)
-        assert r.status_int == 404
+        r = app.get('/things/1', status=405)
+        assert r.status_int == 405
 
         # test post
-        r = app.post('/things', {'value': 'one'}, status=404)
-        assert r.status_int == 404
+        r = app.post('/things', {'value': 'one'}, status=405)
+        assert r.status_int == 405
 
         # test edit
-        r = app.get('/things/1/edit', status=404)
-        assert r.status_int == 404
+        r = app.get('/things/1/edit', status=405)
+        assert r.status_int == 405
 
         # test put
-        r = app.put('/things/1', {'value': 'ONE'}, status=404)
+        r = app.put('/things/1', {'value': 'ONE'}, status=405)
 
         # test put with _method parameter and GET
         r = app.get('/things/1?_method=put', {'value': 'ONE!'}, status=405)
         assert r.status_int == 405
 
         # test put with _method parameter and POST
-        r = app.post('/things/1?_method=put', {'value': 'ONE!'}, status=404)
-        assert r.status_int == 404
+        r = app.post('/things/1?_method=put', {'value': 'ONE!'}, status=405)
+        assert r.status_int == 405
 
         # test get delete
-        r = app.get('/things/1/delete', status=404)
-        assert r.status_int == 404
+        r = app.get('/things/1/delete', status=405)
+        assert r.status_int == 405
 
         # test delete
-        r = app.delete('/things/1', status=404)
-        assert r.status_int == 404
+        r = app.delete('/things/1', status=405)
+        assert r.status_int == 405
 
         # test delete with _method parameter and GET
         r = app.get('/things/1?_method=DELETE', status=405)
         assert r.status_int == 405
 
         # test delete with _method parameter and POST
-        r = app.post('/things/1?_method=DELETE', status=404)
-        assert r.status_int == 404
+        r = app.post('/things/1?_method=DELETE', status=405)
+        assert r.status_int == 405
 
         # test "RESET" custom action
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            r = app.request('/things', method='RESET', status=404)
-            assert r.status_int == 404
+            r = app.request('/things', method='RESET', status=405)
+            assert r.status_int == 405
 
     def test_nested_rest_with_missing_intermediate_id(self):
 
@@ -1489,6 +1489,74 @@ class TestRestController(PecanTestCase):
         r = app.delete('/foos/foo/bars/bar')
         assert r.status_int == 200
         assert r.body == b_('DELETE_BAR')
+
+    def test_method_not_allowed_get(self):
+        class ThingsController(RestController):
+
+            @expose()
+            def put(self, id_, value):
+                response.status = 200
+
+            @expose()
+            def delete(self, id_):
+                response.status = 200
+
+        app = TestApp(make_app(ThingsController()))
+        r = app.get('/', status=405)
+        assert r.status_int == 405
+        assert r.headers['Allow'] == 'DELETE, PUT'
+
+    def test_method_not_allowed_post(self):
+        class ThingsController(RestController):
+
+            @expose()
+            def get_one(self):
+                return dict()
+
+        app = TestApp(make_app(ThingsController()))
+        r = app.post('/', {'foo': 'bar'}, status=405)
+        assert r.status_int == 405
+        assert r.headers['Allow'] == 'GET'
+
+    def test_method_not_allowed_put(self):
+        class ThingsController(RestController):
+
+            @expose()
+            def get_one(self):
+                return dict()
+
+        app = TestApp(make_app(ThingsController()))
+        r = app.put('/123', status=405)
+        assert r.status_int == 405
+        assert r.headers['Allow'] == 'GET'
+
+    def test_method_not_allowed_delete(self):
+        class ThingsController(RestController):
+
+            @expose()
+            def get_one(self):
+                return dict()
+
+        app = TestApp(make_app(ThingsController()))
+        r = app.delete('/123', status=405)
+        assert r.status_int == 405
+        assert r.headers['Allow'] == 'GET'
+
+    def test_proper_allow_header_multiple_gets(self):
+        class ThingsController(RestController):
+
+            @expose()
+            def get_all(self):
+                return dict()
+
+            @expose()
+            def get(self):
+                return dict()
+
+        app = TestApp(make_app(ThingsController()))
+        r = app.put('/123', status=405)
+        assert r.status_int == 405
+        assert r.headers['Allow'] == 'GET'
 
     def test_rest_with_utf8_uri(self):
 

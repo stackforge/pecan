@@ -1002,8 +1002,8 @@ class TestRestController(PecanTestCase):
             assert r.status_int == 302
 
     def test_invalid_custom_action(self):
-        r = self.app_.get('/things?_method=BAD', status=404)
-        assert r.status_int == 404
+        r = self.app_.get('/things?_method=BAD', status=405)
+        assert r.status_int == 405
 
     def test_named_action(self):
         # test custom "GET" request "length"
