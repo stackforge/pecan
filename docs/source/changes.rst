@@ -1,3 +1,29 @@
+0.9.0
+=====
+* Support for Python 3.2 has been dropped.
+* Added a new feature which allows users to specify custom path segments for
+  controllers.  This is especially useful for path segments that are not
+  valid Python identifiers (such as path segments that include certain
+  punctuation characters, like `/some/~path~/`).
+* Added a new configuration option, `app.debugger`, which allows developers to
+  specify an alternative debugger to `pdb` (e.g., `ipdb`) when performing
+  interactive debugging with pecan's `DebugMiddleware`.
+* Changed new quickstart pecan projects to default the `pecan` log level to
+  `DEBUG` for development.
+* Fixed a bug that prevented `staticmethods` from being used as controllers.
+* Fixed a decoding bug in the way pecan handles certain quoted URL path
+  segments and query strings.
+* Fixed several bugs in the way pecan handles Unicode path segments (for
+  example, now you can define pecan routes that contain emoji characters).
+* Fixed several bugs in RestController that caused it to return `HTTP 404 Not
+  Found` rather than `HTTP 405 Method Not Allowed`.  Additionally,
+  RestController now returns valid `Allow` headers when `HTTP 405 Method Not
+  Allowed` is returned.
+* Fixed a bug which allowed special pecan methods (`_route`, `_lookup`,
+  `_default`) to be marked as generic REST methods.
+* Added more emphasis in pecan's documentation to the need for `debug=False` in
+  production deployments.
+
 0.8.3
 =====
 * Changed pecan to more gracefully handle a few odd request encoding edge
