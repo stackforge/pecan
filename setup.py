@@ -39,6 +39,10 @@ except:
     # a backported replacement for 2.6 through 3.4
     #
     requirements.append('singledispatch')
+    try:
+        from collections import OrderedDict
+    except:
+        requirements.append('ordereddict')
 
 
 tests_require = requirements + [
