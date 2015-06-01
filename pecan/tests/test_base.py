@@ -3,6 +3,7 @@
 import sys
 import os
 import json
+import traceback
 import warnings
 
 import webob
@@ -1120,6 +1121,20 @@ class TestAbort(PecanTestCase):
         app = TestApp(Pecan(RootController()))
         r = app.get('/', status=401)
         assert r.status_int == 401
+
+    def test_abort_keeps_traceback(self):
+        last_exc, last_traceback = None, None
+
+        try:
+            try:
+                raise Exception('Bottom Exception')
+            except:
+                abort(404)
+        except Exception:
+            last_exc, _, last_traceback = sys.exc_info()
+
+        assert last_exc is HTTPNotFound
+        assert 'Bottom Exception' in traceback.format_tb(last_traceback)[-1]
 
 
 class TestScriptName(PecanTestCase):

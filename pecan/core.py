@@ -8,6 +8,7 @@ from mimetypes import guess_type, add_type
 from os.path import splitext
 import logging
 import operator
+import sys
 import types
 
 import six
@@ -123,12 +124,24 @@ def abort(status_code=None, detail='', headers=None, comment=None, **kw):
     :param comment: A comment to include in the response.
     '''
 
-    raise exc.status_map[status_code](
-        detail=detail,
-        headers=headers,
-        comment=comment,
-        **kw
-    )
+    # If there is a traceback, we need to catch it for a re-raise
+    try:
+        _, _, traceback = sys.exc_info()
+        webob_exception = exc.status_map[status_code](
+            detail=detail,
+            headers=headers,
+            comment=comment,
+            **kw
+        )
+
+        if six.PY3:
+            raise webob_exception.with_traceback(traceback)
+        else:
+            # Using exec to avoid python 3 parsers from crashing
+            exec('raise webob_exception, None, traceback')
+    finally:
+        # Per the suggestion of the Python docs, delete the traceback object
+        del traceback
 
 
 def redirect(location=None, internal=False, code=None, headers={},
