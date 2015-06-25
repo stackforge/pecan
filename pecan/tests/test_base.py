@@ -2231,6 +2231,13 @@ class TestExplicitRoute(PecanTestCase):
             'path(with-parens)',
             'path;with;semicolons',
             'path:with:colons',
+            'v2.0',
+            '~username',
+            'somepath!',
+            'four*four',
+            'one+two',
+            '@twitterhandle',
+            'package=pecan'
         ):
             handler = C()
             route(C, path, handler)
