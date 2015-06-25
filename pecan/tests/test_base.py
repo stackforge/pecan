@@ -1957,6 +1957,18 @@ class TestEngines(PecanTestCase):
         result = dict(json.loads(r.body.decode()))
         assert result == {'name': 'Bill'}
 
+    def test_default_json_renderer_with_explicit_content_type(self):
+
+        class RootController(object):
+            @expose(content_type='text/plain')
+            def index(self, name='Bill'):
+                return name
+
+        app = TestApp(Pecan(RootController(), default_renderer='json'))
+        r = app.get('/')
+        assert r.status_int == 200
+        assert r.body == b_("Bill")
+
 
 class TestDeprecatedRouteMethod(PecanTestCase):
 

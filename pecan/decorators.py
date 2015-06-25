@@ -23,9 +23,9 @@ def when_for(controller):
 
 
 def expose(template=None,
-           content_type='text/html',
            generic=False,
-           route=None):
+           route=None,
+           **kw):
 
     '''
     Decorator used to flag controller methods as being "exposed" for
@@ -46,6 +46,8 @@ def expose(template=None,
                   wanted to route a function to `some-special-path'.
     '''
 
+    content_type = kw.get('content_type', 'text/html')
+
     if template == 'json':
         content_type = 'application/json'
 
@@ -54,6 +56,7 @@ def expose(template=None,
         f.exposed = True
 
         cfg = _cfg(f)
+        cfg['explicit_content_type'] = 'content_type' in kw
 
         if route:
             # This import is here to avoid a circular import issue

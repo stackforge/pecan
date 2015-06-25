@@ -585,9 +585,11 @@ class PecanBase(object):
         template = content_types.get(pecan_state['content_type'])
 
         # check if for controller override of template
-        template = pecan_state.get('override_template', template) or (
-            'json' if self.default_renderer == 'json' else None
-        )
+        template = pecan_state.get('override_template', template)
+        if template is None and cfg['explicit_content_type'] is False:
+            if self.default_renderer == 'json':
+                template = 'json'
+
         pecan_state['content_type'] = pecan_state.get(
             'override_content_type',
             pecan_state['content_type']
