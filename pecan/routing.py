@@ -42,7 +42,9 @@ def route(*args):
         if not isinstance(route, six.string_types):
             raise TypeError('%s must be a string' % route)
 
-        if not re.match('^[0-9a-zA-Z-_$\(\),;:]+$', route):
+        if route in ('.', '..') or not re.match(
+            '^[0-9a-zA-Z-_$\(\)\.~!,;:*+@=]+$', route
+        ):
             raise ValueError(
                 '%s must be a valid path segment.  Keep in mind '
                 'that path segments should not contain path separators '
