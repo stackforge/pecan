@@ -20,7 +20,6 @@ try:
 except ImportError:
     from logutils.dictconfig import dictConfig as load_logging_config  # noqa
 
-import six
 import warnings
 
 
@@ -44,8 +43,6 @@ def make_app(root, **kw):
                         debug mode is set.
     :param debug: A flag to enable debug mode.  This enables the debug
                   middleware and serving static files.
-    :param debugger: A callable to start debugging, defaulting to the Python
-                     debugger entry point ``pdb.post_mortem``.
     :param wrap_app: A function or middleware class to wrap the Pecan app.
                      This must either be a wsgi middleware class or a
                      function that returns a wsgi application. This wrapper
@@ -101,19 +98,19 @@ def make_app(root, **kw):
     # Included for internal redirect support
     app = middleware.recursive.RecursiveMiddleware(app)
 
-    # When in debug mode, load our exception dumping middleware
+    # When in debug mode, load exception debugging middleware
     static_root = kw.get('static_root', None)
     if debug:
-        debugger = kw.get('debugger', None)
-        debugger_kwargs = {}
-        if six.callable(debugger):
-            debugger_kwargs['debugger'] = debugger
-        elif debugger:
-            warnings.warn(
-                "`app.debugger` is not callable, ignoring",
-                RuntimeWarning
-            )
-        app = middleware.debug.DebugMiddleware(app, **debugger_kwargs)
+        debug_kwargs = getattr(conf, 'debug', {})
+        debug_kwargs.setdefault('context_injectors', []).append(
+            lambda environ: {
+                'request': environ.get('pecan.locals', {}).get('request')
+            }
+        )
+        app = DebugMiddleware(
+            app,
+            **debug_kwargs
+        )
 
         # Support for serving static files (for development convenience)
         if static_root:

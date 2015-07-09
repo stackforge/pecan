@@ -662,6 +662,10 @@ class PecanBase(object):
         req = self.request_cls(environ)
         resp = self.response_cls()
         state = RoutingState(req, resp, self)
+        environ['pecan.locals'] = {
+            'request': req,
+            'response': resp
+        }
         controller = None
 
         # handle the request

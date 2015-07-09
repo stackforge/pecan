@@ -21,37 +21,18 @@ in your applications. To enable the debugging middleware, simply set the
 
 Once enabled, the middleware will automatically catch exceptions raised by your
 application and display the Python stack trace and WSGI environment in your 
-browser for easy debugging:
+browser when runtime exceptions are raised.
 
-.. figure:: debug-middleware-1.png
-   :alt: Pecan debug middleware sample output.
-   :width: 90%
+To improve debugging, including support for an interactive browser-based
+console, Pecan makes use of the Python `backlash
+<https://pypi.python.org/pypi/backlash>` library.  You’ll need to install it
+for development use before continuing::
 
-To further aid in debugging, the middleware includes the ability to repeat the
-offending request, automatically inserting a breakpoint, and dropping your
-console into the Python debugger, ``pdb.post_mortem``:
+    $ pip install backlash
+    Downloading/unpacking backlash
+    ...
+    Successfully installed backlash
 
-.. figure:: debug-middleware-2.png
-   :alt: Pecan debug middleware request debugger. 
-
-You can also use any debugger with a suitable ``post_mortem`` entry point.
-For example, to use the `PuDB Debugger <http://pypi.python.org/pypi/pudb>`_,
-set ``debugger`` like so::
-
-    import pudb
-
-    app = {
-        ...
-        'debug': True,
-        'debugger': pudb.post_mortem,
-        ...
-    }
-
-.. seealso::
-
-  Refer to the `pdb documentation
-  <http://docs.python.org/library/pdb.html>`_ for more information on
-  using the Python debugger.
 
 Serving Static Files
 --------------------
